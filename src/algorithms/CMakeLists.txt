@@ -7,6 +7,7 @@ add_subdirectory(covreach)
 add_subdirectory(ndfs)
 add_subdirectory(path)
 add_subdirectory(reach)
+add_subdirectory(compare)
 
 set(ALGORITHMS_SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/search_order.cc
@@ -17,4 +18,5 @@ set(ALGORITHMS_SRC
     ${COVREACH_SRC}
     ${NDFS_SRC}
     ${REACH_SRC}
+    ${COMPARE_SRC}
     PARENT_SCOPE)
