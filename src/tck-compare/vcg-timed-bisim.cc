@@ -29,7 +29,6 @@ tchecker::tck_compare::vcg_timed_bisim::run(std::shared_ptr<tchecker::parsing::s
   check_for_init(system_first, "the first system");
   check_for_init(system_second, "the second system");
 
-  std::cout << "RUN!" << std::endl;
   auto result = new tchecker::algorithms::compare::stats_t();
   return *result;
 }
