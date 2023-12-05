@@ -18,9 +18,7 @@
 
 namespace tchecker {
 
-namespace algorithms {
-
-namespace compare {
+namespace strong_timed_bisim {
 
 /*!
  \class stats_t
@@ -72,9 +70,7 @@ private:
   bool _relationship_fulfilled;  /*< Whether the relationship is fulfilled */
 };
 
-} // end of namespace compare
-
-} // end of namespace algorithms
+} // end of namespace strong_timed_bisim
 
 } // end of namespace tchecker
 

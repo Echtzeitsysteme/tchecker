@@ -51,6 +51,7 @@ add_subdirectory(graph)
 add_subdirectory(parsing)
 add_subdirectory(refzg)
 add_subdirectory(statement)
+add_subdirectory(strong-timed-bisim)
 add_subdirectory(syncprod)
 add_subdirectory(system)
 add_subdirectory(ta)
@@ -77,6 +78,7 @@ set(LIBTCHECKER_SRC
   ${PARSING_SRC}
   ${REFZG_SRC}
   ${STATEMENT_SRC}
+  ${STRONG_TIMED_BISIM_SRC}
   ${SYNCPROD_SRC}
   ${SYSTEM_SRC}
   ${TA_SRC}

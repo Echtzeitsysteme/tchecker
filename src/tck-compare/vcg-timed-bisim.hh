@@ -11,7 +11,7 @@
 #include <memory>
 
 #include "tchecker/parsing/parsing.hh"
-#include "tchecker/algorithms/compare/stats.hh"
+#include "tchecker/strong-timed-bisim/stats.hh"
 
 namespace tchecker {
 
@@ -29,7 +29,7 @@ namespace vcg_timed_bisim {
  \post 
  \return statistics on the run and the reachability graph
  */
-tchecker::algorithms::compare::stats_t
+tchecker::strong_timed_bisim::stats_t
 run(std::shared_ptr<tchecker::parsing::system_declaration_t> const & sysdecl_first, std::shared_ptr<tchecker::parsing::system_declaration_t> const & sysdecl_second,
     std::ostream * os, std::size_t block_size, std::size_t table_size);
 
