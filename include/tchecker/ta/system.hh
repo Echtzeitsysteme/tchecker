@@ -103,6 +103,7 @@ public:
   using tchecker::syncprod::system_t::clock_variables;
   using tchecker::syncprod::system_t::clocks_count;
   using tchecker::syncprod::system_t::is_clock;
+  using tchecker::system::system_t::add_clock;
 
   // Edges
   using tchecker::syncprod::system_t::asynchronous_incoming_edges;

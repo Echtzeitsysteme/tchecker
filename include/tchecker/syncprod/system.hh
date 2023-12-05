@@ -94,6 +94,7 @@ public:
   using tchecker::system::system_t::clock_variables;
   using tchecker::system::system_t::clocks_count;
   using tchecker::system::system_t::is_clock;
+  using tchecker::system::system_t::add_clock;
 
   // Edges
   using tchecker::system::system_t::edge;
@@ -233,7 +234,6 @@ public:
 private:
   // Hidden modifiers
   using tchecker::syncprod::labels_t::add_label;
-  using tchecker::system::system_t::add_clock;
   using tchecker::system::system_t::add_edge;
   using tchecker::system::system_t::add_event;
   using tchecker::system::system_t::add_intvar;
