@@ -90,13 +90,13 @@ run(std::shared_ptr<tchecker::parsing::system_declaration_t> const & sysdecl_fir
   for(size_t i = 0; i < 2; ++i) {
     // for optimization reasons, we do not extend the product but the original system
     std::shared_ptr<tchecker::strong_timed_bisim::system_virtual_clocks_t const> extended_system{new tchecker::strong_timed_bisim::system_virtual_clocks_t{*(systems[i]), no_of_virt_clocks, i == 0}};
-    std::cout << "blub: jiha" << std::endl;
     std::shared_ptr<tchecker::zg::zg_t> vcg{tchecker::zg::factory(extended_system, tchecker::ts::SHARING, tchecker::zg::ELAPSED_SEMANTICS,
                                                                tchecker::zg::EXTRA_LU_GLOBAL, block_size, table_size)};
     vcgs.push_back(vcg);
   }
 
   auto algorithm = new tchecker::strong_timed_bisim::Lieb_et_al();
+
   return algorithm->run(vcgs[0], vcgs[1]);
 
 

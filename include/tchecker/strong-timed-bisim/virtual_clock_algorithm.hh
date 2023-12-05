@@ -22,7 +22,13 @@ namespace strong_timed_bisim {
 class Lieb_et_al {
 
   public:
-    tchecker::strong_timed_bisim::stats_t run(std::shared_ptr<tchecker::zg::zg_t const> input_first, std::shared_ptr<tchecker::zg::zg_t const> input_second);
+
+  /*!
+   \brief running the algorithm of Lieb et al. (TODO: add paper ref here)
+   \param input_first : the first vcg
+   \param input_second : the second vcg
+   */
+  tchecker::strong_timed_bisim::stats_t run(std::shared_ptr<tchecker::zg::zg_t const> input_first, std::shared_ptr<tchecker::zg::zg_t const> input_second);
 
 };
 

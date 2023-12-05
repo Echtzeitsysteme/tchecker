@@ -25,8 +25,22 @@ global_lu_extrapolation_t::global_lu_extrapolation_t(
     : _clock_bounds(clock_bounds)
 {
 }
-
 } // end of namespace details
+
+/* k_norm */
+
+k_norm::k_norm(
+    std::shared_ptr<tchecker::clockbounds::global_lu_map_t const> const & clock_bounds)
+    :tchecker::zg::global_extra_lu_t(clock_bounds)
+{
+  // k-norm is equivalent to global_extra_lu_t, if we always choose the maximum value of U(i) and L(i) for all checks.
+  tchecker::clockbounds::map_t *U = const_cast<tchecker::clockbounds::map_t*>(&(_clock_bounds->U()));
+  tchecker::clockbounds::map_t *L = const_cast<tchecker::clockbounds::map_t*>(& (_clock_bounds->L()));
+  
+
+  tchecker::clockbounds::update(*U, *L);
+  tchecker::clockbounds::update(*L, *U);
+}
 
 /* global_extra_lu_t */
 
@@ -254,6 +268,8 @@ tchecker::zg::extrapolation_t * extrapolation_factory(enum extrapolation_type_t 
     return new tchecker::zg::global_extra_m_plus_t{clock_bounds.global_m_map()};
   case tchecker::zg::EXTRA_M_PLUS_LOCAL:
     return new tchecker::zg::local_extra_m_plus_t{clock_bounds.local_m_map()};
+  case tchecker::zg::EXTRA_K_NORM:
+    return new tchecker::zg::k_norm{clock_bounds.global_lu_map()};
   default:
     throw std::invalid_argument("Unknown zone extrapolation");
   }
