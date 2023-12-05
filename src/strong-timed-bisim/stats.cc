@@ -7,13 +7,11 @@
 
 #include <sstream>
 
-#include "tchecker/algorithms/compare/stats.hh"
+#include "tchecker/strong-timed-bisim/stats.hh"
 
 namespace tchecker {
 
-namespace algorithms {
-
-namespace compare {
+namespace strong_timed_bisim {
 
 stats_t::stats_t() : _visited_pair_of_states(0), _visited_transitions(0), _deepest_path(0), _relationship_fulfilled(true) {}
 
@@ -45,8 +43,6 @@ void stats_t::attributes(std::map<std::string, std::string> & m) const {
   sstream << std::boolalpha << _relationship_fulfilled;
   m["RELATIONSHIP_FULFILLED"] = sstream.str();
 }
-
-} // end of namespace compare
 
 } // end of namespace algorithms
 
