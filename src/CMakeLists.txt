@@ -46,6 +46,7 @@ add_subdirectory(algorithms)
 add_subdirectory(clockbounds)
 add_subdirectory(dbm)
 add_subdirectory(expression)
+add_subdirectory(extrapolation)
 add_subdirectory(fsm)
 add_subdirectory(graph)
 add_subdirectory(parsing)
@@ -58,6 +59,7 @@ add_subdirectory(ta)
 add_subdirectory(ts)
 add_subdirectory(utils)
 add_subdirectory(variables)
+add_subdirectory(vcg)
 add_subdirectory(vm)
 add_subdirectory(waiting)
 add_subdirectory(zg)
@@ -72,6 +74,7 @@ set(LIBTCHECKER_SRC
   ${CLOCKBOUNDS_SRC}
   ${DBM_SRC}
   ${EXPRESSION_SRC}
+  ${EXTRAPOLATION_SRC}
   ${FSM_SRC}
   ${GRAPH_SRC}
   ${OTHER_SRC}
@@ -86,6 +89,7 @@ set(LIBTCHECKER_SRC
   ${UTILS_SRC}
   ${VARIABLES_SRC}
   ${WAITING_SRC}
+  ${VCG_SRC}
   ${VM_SRC}
   ${ZG_SRC})
 

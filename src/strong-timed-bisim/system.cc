@@ -14,8 +14,8 @@ namespace tchecker {
 
 namespace strong_timed_bisim {
 
-system_virtual_clocks_t::system_virtual_clocks_t(tchecker::ta::system_t const & product, std::size_t no_of_virtual_clocks, bool first_not_second)
-: tchecker::ta::system_t(product),
+system_virtual_clocks_t::system_virtual_clocks_t(tchecker::ta::system_t const & system, std::size_t no_of_virtual_clocks, bool first_not_second)
+: tchecker::ta::system_t(system),
 _first_not_second(first_not_second), 
 _no_of_virtual_clocks(no_of_virtual_clocks) {
 

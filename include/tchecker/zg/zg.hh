@@ -25,7 +25,8 @@
 #include "tchecker/variables/clocks.hh"
 #include "tchecker/variables/intvars.hh"
 #include "tchecker/zg/allocators.hh"
-#include "tchecker/zg/extrapolation.hh"
+#include "tchecker/extrapolation/extrapolation.hh"
+#include "tchecker/extrapolation/extrapolation_factory.hh"
 #include "tchecker/zg/semantics.hh"
 #include "tchecker/zg/state.hh"
 #include "tchecker/zg/transition.hh"
@@ -586,7 +587,7 @@ inline tchecker::state_status_t initialize(tchecker::ta::system_t const & system
  state and transition allocation
  \note all returned states and transitions are deallocated automatically
  */
-class zg_t final : public tchecker::ts::fwd_t<tchecker::zg::state_sptr_t, tchecker::zg::const_state_sptr_t,
+class zg_t : public tchecker::ts::fwd_t<tchecker::zg::state_sptr_t, tchecker::zg::const_state_sptr_t,
                                               tchecker::zg::transition_sptr_t, tchecker::zg::const_transition_sptr_t>,
                    public tchecker::ts::bwd_t<tchecker::zg::state_sptr_t, tchecker::zg::const_state_sptr_t,
                                               tchecker::zg::transition_sptr_t, tchecker::zg::const_transition_sptr_t>,
