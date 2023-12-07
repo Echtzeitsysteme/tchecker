@@ -18,7 +18,10 @@ class system_virtual_clocks_t : public tchecker::ta::system_t {
 
 public:
 
-  system_virtual_clocks_t(tchecker::ta::system_t const & product, std::size_t no_of_virtual_clocks, bool first_not_second);
+  /*!
+  \brief Constructor
+  */
+  system_virtual_clocks_t(tchecker::ta::system_t const & system, std::size_t no_of_virtual_clocks, bool first_not_second);
 
 private:
   // we disallow the standard constructor

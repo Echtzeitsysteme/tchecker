@@ -9,7 +9,7 @@
 #define TCHECKER_ALGORITHMS_REACH_ALGORITHM_HH
 
 #include "tchecker/strong-timed-bisim/stats.hh"
-#include "tchecker/zg/zg.hh"
+#include "tchecker/vcg/vcg.hh"
 
 namespace tchecker {
 
@@ -28,7 +28,7 @@ class Lieb_et_al {
    \param input_first : the first vcg
    \param input_second : the second vcg
    */
-  tchecker::strong_timed_bisim::stats_t run(std::shared_ptr<tchecker::zg::zg_t const> input_first, std::shared_ptr<tchecker::zg::zg_t const> input_second);
+  tchecker::strong_timed_bisim::stats_t run(std::shared_ptr<tchecker::vcg::vcg_t> input_first, std::shared_ptr<tchecker::vcg::vcg_t> input_second);
 
 };
 

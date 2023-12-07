@@ -50,7 +50,7 @@ void check_for_init(std::shared_ptr<tchecker::system::system_t> const system){
   }
 }
 
-std::size_t clocks_check(std::shared_ptr<tchecker::system::system_t> const system) {
+tchecker::clock_id_t clocks_check(std::shared_ptr<tchecker::ta::system_t> const system) {
   std::size_t result = 0;
   auto p_c = system->clock_variables().identifiers();
   auto begin_p_c = p_c.begin(), end_p_c = p_c.end();
@@ -64,36 +64,37 @@ std::size_t clocks_check(std::shared_ptr<tchecker::system::system_t> const syste
     }
     ++result;
   }
-  return result;
+  return system->clocks_count(VK_FLATTENED);
 }
 
 tchecker::strong_timed_bisim::stats_t
 run(std::shared_ptr<tchecker::parsing::system_declaration_t> const & sysdecl_first, std::shared_ptr<tchecker::parsing::system_declaration_t> const & sysdecl_second,
     std::ostream * os, std::size_t block_size, std::size_t table_size) {
 
-  std::vector<std::shared_ptr<tchecker::ta::system_t const>> systems;
-  std::vector<std::shared_ptr<tchecker::system::system_t>> products;
+  std::vector<std::shared_ptr<tchecker::ta::system_t>> systems;
+
+  std::cout << "vcg-timed-bisim.cc : run" << std::endl;
 
   for(size_t i = 0; i < 2; ++i) {
-    std::shared_ptr<tchecker::ta::system_t const> cur_system{new tchecker::ta::system_t{ (i == 0) ? *sysdecl_first : *sysdecl_second}};
+    std::shared_ptr<tchecker::ta::system_t> cur_system{new tchecker::ta::system_t{ (i == 0) ? *sysdecl_first : *sysdecl_second}};
     std::shared_ptr<tchecker::syncprod::system_t const> system_syncprod = std::make_shared<tchecker::syncprod::system_t const>(cur_system->as_syncprod_system());
     std::shared_ptr<tchecker::system::system_t> product = std::make_shared<tchecker::system::system_t>(tchecker::syncprod::synchronized_product(system_syncprod, (i == 0) ? FIRST_PRODUCT_NAME : SECOND_PRODUCT_NAME, LOC_DELIMITER));
     check_for_init(product);
     systems.push_back(cur_system);
-    products.push_back(product);
   }
 
-  std::size_t no_of_virt_clocks = clocks_check(products[0]) + clocks_check(products[1]);
+  tchecker::clock_id_t no_of_virt_clocks = clocks_check(systems[0]) + clocks_check(systems[1]);
 
-  std::vector<std::shared_ptr<tchecker::zg::zg_t>> vcgs;
+  std::vector<std::shared_ptr<tchecker::vcg::vcg_t>> vcgs;
 
   for(size_t i = 0; i < 2; ++i) {
-    // for optimization reasons, we do not extend the product but the original system
-    std::shared_ptr<tchecker::strong_timed_bisim::system_virtual_clocks_t const> extended_system{new tchecker::strong_timed_bisim::system_virtual_clocks_t{*(systems[i]), no_of_virt_clocks, i == 0}};
-    std::shared_ptr<tchecker::zg::zg_t> vcg{tchecker::zg::factory(extended_system, tchecker::ts::SHARING, tchecker::zg::ELAPSED_SEMANTICS,
-                                                               tchecker::zg::EXTRA_LU_GLOBAL, block_size, table_size)};
+    std::shared_ptr<tchecker::strong_timed_bisim::system_virtual_clocks_t const> extended_system{new tchecker::strong_timed_bisim::system_virtual_clocks_t{*(systems[i]), no_of_virt_clocks, 0 == i}};
+    std::shared_ptr<tchecker::vcg::vcg_t> vcg{tchecker::vcg::factory(extended_system, 0 == i, systems[0], systems[1], tchecker::ts::SHARING, tchecker::zg::DISTINGUISHED_SEMANTICS,
+                                                               tchecker::zg::EXTRA_K_NORM, block_size, table_size)};
     vcgs.push_back(vcg);
   }
+
+  std::cout << "vcg-timed-bisim.cc : created vcgs" << std::endl;
 
   auto algorithm = new tchecker::strong_timed_bisim::Lieb_et_al();
 
