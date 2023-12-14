@@ -946,7 +946,7 @@ public:
   */
   inline enum tchecker::ts::sharing_type_t sharing_type() const { return _sharing_type; }
 
-private:
+protected:
   /*!
    \brief Clone and constrain a state
    \param s : a state
@@ -955,6 +955,15 @@ private:
    */
   tchecker::zg::state_sptr_t clone_and_constrain(tchecker::zg::const_state_sptr_t const & s,
                                                  tchecker::clock_constraint_t const & c);
+
+  /*!
+   \brief Clone and constrain a state
+   \param s : a state
+   \param c : a vector of clock constraints
+   \return a clone of s with its zone intersected with c
+   */
+  tchecker::zg::state_sptr_t clone_and_constrain(tchecker::zg::const_state_sptr_t const & s,
+                                                 clock_constraint_container_t const & c);
 
   std::shared_ptr<tchecker::ta::system_t const> _system;           /*!< System of timed processes */
   enum tchecker::ts::sharing_type_t _sharing_type;                 /*!< Sharing of state/transition components */

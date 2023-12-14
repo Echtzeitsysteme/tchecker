@@ -6,9 +6,7 @@
  */
 
 #include "tchecker/strong-timed-bisim/virtual_clock_algorithm.hh"
-
-// DELETE ME
-#include <typeinfo>
+#include "tchecker/vcg/virtual_constraint.hh"
 
 namespace tchecker {
 
@@ -23,7 +21,6 @@ tchecker::strong_timed_bisim::stats_t Lieb_et_al::run(std::shared_ptr<tchecker::
 
   // sst is a tuple (tchecker::state_status_t, state_t, transition_t)
   // state_status_t : see basictypes.hh
-  // tchecker::zg::state_sptr_t (= tchecker::intrusive_shared_ptr_t<tchecker::zg::shared_state_t>;)
 
   std::vector<tchecker::zg::zg_t::sst_t> sst_first;
   std::vector<tchecker::zg::zg_t::sst_t> sst_second;
@@ -45,7 +42,23 @@ tchecker::strong_timed_bisim::stats_t Lieb_et_al::run(std::shared_ptr<tchecker::
       std::cout << std::endl;
   }
 
-  
+  tchecker::vcg::virtual_constraint_t *vc = tchecker::vcg::factory(&(std::get<1>(sst_first[0])->zone()), input_first->get_no_of_virtual_clocks());
+
+  const clock_constraint_container_t & virt_cons = vc->get_vc();
+
+  for(auto iter = virt_cons.begin(); iter < virt_cons.end(); iter++) {
+    std::cout << *iter << std::endl;
+  }
+/*
+  for(std::size_t i = 0; i <= input_first->get_no_of_virtual_clocks(); ++i) {
+      for(std::size_t j = 0; j < input_first->get_no_of_virtual_clocks(); ++j) {
+        std::size_t index = i*input_first->get_no_of_virtual_clocks() + i + j;
+        std::cout << "(" << (vc->get_dbm())[index].cmp << ", " << (vc->get_dbm())[index].value << ") ";
+      }
+      std::cout << std::endl;
+  }
+*/
+  delete vc;
 
   stats.set_end_time();
 

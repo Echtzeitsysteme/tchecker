@@ -101,7 +101,6 @@ tchecker::zg::extrapolation_t * extrapolation_factory(
 
     tchecker::clockbounds::update(*U, *L);
 
-    // ugly hack... TODO: make it nicer
     for(tchecker::clock_id_t j = 0; j < clock_bounds->clock_number(); ++j) {
       bounds[i].push_back(U[0][j]);
     }

@@ -13,6 +13,7 @@
 #include "tchecker/extrapolation/extrapolation.hh"
 #include "tchecker/ta/system.hh"
 #include "tchecker/strong-timed-bisim/system.hh"
+#include "tchecker/vcg/virtual_constraint.hh"
 
 /*!
  \file vcg.hh
@@ -37,14 +38,57 @@ public:
    \param system : a system of timed processes
    \param sharing_type : type of state/transition sharing
    \param semantics : a zone semantics
+   \param no_of_virtual_clocks : number of virtual clocks
    \param extrapolation : a zone extrapolation 
    \param block_size : number of objects allocated in a block
    \param table_size : size of hash tables
    \note all states and transitions are pool allocated and deallocated automatically
    */
   vcg_t(std::shared_ptr<tchecker::ta::system_t const> const & system, enum tchecker::ts::sharing_type_t sharing_type,
-       std::shared_ptr<tchecker::zg::semantics_t> const & semantics,
+       std::shared_ptr<tchecker::zg::semantics_t> const & semantics, tchecker::clock_id_t no_of_virtual_clocks,
        std::shared_ptr<tchecker::zg::extrapolation_t> const & extrapolation, std::size_t block_size, std::size_t table_size);
+
+  /*!
+  \brief Accessor
+  \return the number of virtual clocks
+  */
+  tchecker::clock_id_t get_no_of_virtual_clocks() const;
+
+  /*!
+  \brief revert-action-trans function (see the TR of Lieb et al.)
+  \param zone : the original zone
+  \param dim : dimension of zone
+  \param guard : of the transition to revert
+  \param reset : the reset set of the transition to revert
+  \param tgt_invariant : the invariant of the target state of the transition to revert
+  \param phi_split : the sub vc of the target
+  \return a shared pointer to the resulting virtual constraint
+  */
+  std::shared_ptr<virtual_constraint_t> revert_action_trans(const tchecker::dbm::db_t * zone, tchecker::clock_id_t dim, const tchecker::clock_constraint_container_t & guard,
+                                                const tchecker::clock_reset_container_t & reset, const tchecker::clock_constraint_container_t & tgt_invariant,
+                                                const virtual_constraint_t & phi_split);
+
+  /*!
+  \brief revert-epsilon-trans function (see the TR of Lieb et al.)
+  \param zone : the original zone
+  \param phi_split : the sub vc of the target
+  \return a shared pointer to the resulting virtual constraint
+  */
+  //std::shared_ptr<virtual_constraint_t> revert_epsilon_trans(const tchecker::dbm::db_t * zone, const virtual_constraint_t & phi_split);
+
+private:
+
+ /*!
+  \brief revert-multiple-reset function (see the TR of Lieb et al.)
+  \param orig_zone : the original zone
+  \oaram dim : dimension of orig_zone
+  \param zone_split : the split of reset(orig_zone)
+  \param reset : the used reset set
+  \return the zone with reverted resets (same dim as orig_zone)
+  */
+tchecker::dbm::db_t * revert_multiple_reset(tchecker::dbm::db_t * orig_zone, tchecker::clock_id_t dim, tchecker::dbm::db_t * zone_split, tchecker::clock_reset_container_t reset);
+
+  tchecker::clock_id_t _no_of_virtual_clocks;
 };
 
 /*!
