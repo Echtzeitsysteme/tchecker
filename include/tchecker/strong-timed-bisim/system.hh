@@ -23,12 +23,18 @@ public:
   */
   system_virtual_clocks_t(tchecker::ta::system_t const & system, std::size_t no_of_virtual_clocks, bool first_not_second);
 
+  /*!
+  \brief Accessor
+  \return the number of virtual clocks
+  */
+  tchecker::clock_id_t get_no_of_virtual_clocks() const;
+
 private:
   // we disallow the standard constructor
   system_virtual_clocks_t();
 
   bool _first_not_second;
-  std::size_t _no_of_virtual_clocks;
+  tchecker::clock_id_t _no_of_virtual_clocks;
 
   using tchecker::ta::system_t::add_clock;
 

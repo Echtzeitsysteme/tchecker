@@ -399,6 +399,18 @@ tchecker::zg::state_sptr_t zg_t::clone_and_constrain(tchecker::zg::const_state_s
   return clone_s;
 }
 
+tchecker::zg::state_sptr_t zg_t::clone_and_constrain(tchecker::zg::const_state_sptr_t const & s,
+                                                     clock_constraint_container_t const & c)
+{
+  tchecker::zg::state_sptr_t clone_s = _state_allocator.clone(*s);
+
+  tchecker::dbm::constrain(clone_s->zone_ptr()->dbm(), clone_s->zone_ptr()->dim(), c);
+
+  if (!clone_s->zone().is_empty() && _sharing_type == tchecker::ts::SHARING)
+    share(clone_s);
+  return clone_s;
+}
+
 /* tools */
 
 tchecker::zg::state_sptr_t initial(tchecker::zg::zg_t & zg, tchecker::vloc_t const & vloc, tchecker::state_status_t mask)

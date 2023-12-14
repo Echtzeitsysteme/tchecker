@@ -25,6 +25,12 @@ _no_of_virtual_clocks(no_of_virtual_clocks) {
   }
 }
 
+tchecker::clock_id_t system_virtual_clocks_t::get_no_of_virtual_clocks() const
+{
+  return _no_of_virtual_clocks;
+}
+
+
 } // end of namespace strong_timed_bisim
 
 } // end of namespace tchecker
