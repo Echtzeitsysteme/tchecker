@@ -123,7 +123,8 @@ std::shared_ptr<vcg::virtual_constraint_t> zone_t::revert_action_trans(const tch
   tchecker::dbm::reset(inter_zone, _dim, reset);
   tchecker::dbm::constrain(inter_zone, _dim, phi_split.get_vc());
 
-  tchecker::vcg::virtual_constraint_t *virt_mult_reset = vcg::factory(revert_multiple_reset(inter_clone, _dim, inter_zone, reset_copy), _dim, phi_split.get_no_of_virt_clocks());
+  tchecker::vcg::virtual_constraint_t *virt_mult_reset 
+      = vcg::factory(tchecker::dbm::revert_multiple_reset(inter_clone, _dim, inter_zone, reset_copy), _dim, phi_split.get_no_of_virt_clocks());
 
   tchecker::dbm::constrain(zone_clone, _dim, virt_mult_reset->get_vc());
 
@@ -158,30 +159,6 @@ zone_t::zone_t(tchecker::zg::zone_t const & zone) : _dim(zone._dim)
 }
 
 zone_t::~zone_t() = default;
-
-tchecker::dbm::db_t * zone_t::revert_multiple_reset(tchecker::dbm::db_t * orig_zone, tchecker::clock_id_t dim, tchecker::dbm::db_t * zone_split, tchecker::clock_reset_container_t reset)
-{
-  if(reset.empty()) {
-    return zone_split;
-  }
-
-  tchecker::dbm::db_t zone_clone[dim*dim];
-  tchecker::dbm::copy(zone_clone, orig_zone, dim);
-
-  tchecker::clock_reset_t cur = reset.back();
-  reset.pop_back();
-
-  tchecker::dbm::reset(zone_clone, dim, reset);
-
-  tchecker::dbm::free_clock(zone_split, dim, cur);
-
-  tchecker::dbm::db_t new_split[dim*dim];
-
-  intersection(new_split, zone_clone, zone_split, dim);
-
-  return revert_multiple_reset(orig_zone, dim, new_split, reset);
-
-}
 
 // Allocation and deallocation
 

@@ -14,6 +14,7 @@
 #include "tchecker/basictypes.hh"
 #include "tchecker/dbm/db.hh"
 #include "tchecker/variables/clocks.hh"
+#include "tchecker/vcg/virtual_constraint.hh"
 
 /*!
  \file dbm.hh
@@ -572,11 +573,25 @@ enum tchecker::dbm::status_t intersection(tchecker::dbm::db_t * dbm, tchecker::d
                                           tchecker::dbm::db_t const * dbm2, tchecker::clock_id_t dim);
 
 /*!
+ \brief revert-multiple-reset function (see the TR of Lieb et al.)
+ \param orig_zone the previous zone
+ \param zone_split : the split of reset(orig_zone)
+ \param reset : the used reset set
+ \return the dbm with reverted resets (same dim as orig_zone)
+ */
+tchecker::dbm::db_t * revert_multiple_reset(const tchecker::dbm::db_t * orig_zone,
+                                            tchecker::clock_id_t dim, tchecker::dbm::db_t * zone_split,
+                                            tchecker::clock_reset_container_t reset);
+
+/*!
  \brief sync function (see the TR of Lieb et al.)
  \param dbm1 : a dbm
  \param dbm2 : a dbm
- \param dim : dimension of dbm1, dbm1 and dbm2
- \param no_of_virt_clks : number of virtual clocks
+ \param dim : dimension of dbm1 and dbm2
+ \param lowest_virt_clk_id : the clk id of chi_0
+ \param  no_of_orig_clocks_1 : the number of orig clocks in the first TA
+ \param orig_reset1 : the resets of the transition of the first TA
+ \param orig_reset2 : the resets of the transition of the second TA
  \pre dbm1 and dbm2 are not nullptr (checked by assertion)
  dbm, dbm1 and dbm2 are dim*dim arrays of difference bounds
  dbm1 and dbm2 are consistent (checked by assertion)
@@ -585,7 +600,32 @@ enum tchecker::dbm::status_t intersection(tchecker::dbm::db_t * dbm, tchecker::d
  \post dbm1 and dbm2 are synced, consistent and tight
  \note the change happens inplace
  */
-//void sync(tchecker::dbm::db_t *dbm1, tchecker::dbm::db_t dbm2, tchecker::clock_id_t dim, tchecker::clock_id_t no_of_virt_clks);
+
+void sync(tchecker::dbm::db_t *dbm1, tchecker::dbm::db_t *dbm2, tchecker::clock_id_t dim, 
+          tchecker::clock_id_t lowest_virt_clk_id, tchecker::clock_id_t no_of_orig_clocks_1,
+          tchecker::clock_reset_container_t const & orig_reset1,
+          tchecker::clock_reset_container_t const & orig_reset2);
+
+/*!
+ \brief revert-sync function (see the TR of Lieb et al.)
+ \param dbm1 : a dbm
+ \param dbm2 : a dbm
+ \param dim : dimension of dbm1 and dbm2
+ \param lowest_virt_clk_id : the clk id of chi_0
+ \param  no_of_orig_clocks_1 : the number of orig clocks in the first TA
+ \pre dbm1 and dbm2 are not nullptr (checked by assertion)
+ dbm, dbm1 and dbm2 are dim*dim arrays of difference bounds
+ dbm1 and dbm2 are consistent (checked by assertion)
+ dbm1 and dbm2 are tight (checked by assertion)
+ dim >= 1 (checked by assertion).
+ \post dbm1 and dbm2 are synced, consistent and tight
+ \note the change happens inplace. this function works if and only if only
+ resets to zero are allowed!
+ */
+std::tuple<std::shared_ptr<tchecker::vcg::virtual_constraint_t>, std::shared_ptr<tchecker::vcg::virtual_constraint_t>>
+revert_sync(const tchecker::dbm::db_t *dbm1, const tchecker::dbm::db_t *dbm2, tchecker::clock_id_t dim, 
+            const tchecker::vcg::virtual_constraint_t & phi_e, tchecker::clock_id_t lowest_virt_clk_id,
+            tchecker::clock_id_t no_of_orig_clocks_1);
 
 /*!
  \brief ExtraM extrapolation

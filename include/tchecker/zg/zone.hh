@@ -259,15 +259,6 @@ protected:
    */
   constexpr tchecker::dbm::db_t dbm(tchecker::clock_id_t i, tchecker::clock_id_t j) const { return dbm_ptr()[i * _dim + j]; }
 
- /*!
-  \brief revert-multiple-reset function (see the TR of Lieb et al.)
-  \param orig_zone the previous zone
-  \param zone_split : the split of reset(orig_zone)
-  \param reset : the used reset set
-  \return the dbm with reverted resets (same dim as orig_zone)
-  */
-  tchecker::dbm::db_t * revert_multiple_reset(tchecker::dbm::db_t * orig_zone, tchecker::clock_id_t dim, tchecker::dbm::db_t * zone_split, tchecker::clock_reset_container_t reset);
-
   tchecker::clock_id_t _dim; /*!< Dimension of DBM */
 };
 
