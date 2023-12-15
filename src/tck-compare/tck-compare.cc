@@ -151,6 +151,8 @@ void strong_timed_bisim(std::shared_ptr<tchecker::parsing::system_declaration_t>
 
   auto stats = tchecker::tck_compare::vcg_timed_bisim::run(sysdecl_first, sysdecl_second, os, block_size, table_size);
 
+  std::cerr << "tck-compare.cc : print stats" << std::endl;
+
   // stats
   std::map<std::string, std::string> m;
   stats.attributes(m);

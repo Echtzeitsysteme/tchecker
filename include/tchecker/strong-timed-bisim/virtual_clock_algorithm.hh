@@ -21,7 +21,7 @@ namespace strong_timed_bisim {
  */
 class Lieb_et_al {
 
-  public:
+public:
 
   /*!
    \brief running the algorithm of Lieb et al. (TODO: add paper ref here)

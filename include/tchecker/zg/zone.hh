@@ -8,6 +8,14 @@
 #ifndef TCHECKER_ZG_ZONE_HH
 #define TCHECKER_ZG_ZONE_HH
 
+// forward declaration
+namespace tchecker {
+namespace vcg {
+class virtual_constraint_t;
+}
+}
+
+
 #include <string>
 
 #include "tchecker/basictypes.hh"
@@ -16,6 +24,7 @@
 #include "tchecker/utils/allocation_size.hh"
 #include "tchecker/utils/cache.hh"
 #include "tchecker/variables/clocks.hh"
+#include "tchecker/vcg/virtual_constraint.hh"
 
 /*!
  \file zone.hh
@@ -164,6 +173,27 @@ public:
   */
   bool belongs(tchecker::clockval_t const & clockval) const;
 
+ /*!
+  \brief revert-action-trans function (see the TR of Lieb et al.)
+  \param guard : of the transition to revert
+  \param reset : the reset set of the transition to revert
+  \param tgt_invariant : the invariant of the target state of the transition to revert
+  \param phi_split : the sub vc of the target
+  \return a shared pointer to the resulting virtual constraint
+  */
+  std::shared_ptr<vcg::virtual_constraint_t> revert_action_trans(const tchecker::clock_constraint_container_t & guard,
+                                                                 const tchecker::clock_reset_container_t & reset,
+                                                                 const tchecker::clock_constraint_container_t & tgt_invariant,
+                                                                 const vcg::virtual_constraint_t & phi_split);
+
+  /*!
+  \brief revert-epsilon-trans function (see the TR of Lieb et al.)
+  \param zone : the original zone
+  \param phi_split : the sub vc of the target
+  \return a shared pointer to the resulting virtual constraint
+  */
+  std::shared_ptr<vcg::virtual_constraint_t> revert_epsilon_trans(const vcg::virtual_constraint_t & phi_split);
+
   /*!
    \brief Construction
    \tparam ARGS : type of arguments to a constructor of tchecker::zg::zone_t
@@ -228,6 +258,15 @@ protected:
    \return constraint on xi-xj in this DBM
    */
   constexpr tchecker::dbm::db_t dbm(tchecker::clock_id_t i, tchecker::clock_id_t j) const { return dbm_ptr()[i * _dim + j]; }
+
+ /*!
+  \brief revert-multiple-reset function (see the TR of Lieb et al.)
+  \param orig_zone the previous zone
+  \param zone_split : the split of reset(orig_zone)
+  \param reset : the used reset set
+  \return the dbm with reverted resets (same dim as orig_zone)
+  */
+  tchecker::dbm::db_t * revert_multiple_reset(tchecker::dbm::db_t * orig_zone, tchecker::clock_id_t dim, tchecker::dbm::db_t * zone_split, tchecker::clock_reset_container_t reset);
 
   tchecker::clock_id_t _dim; /*!< Dimension of DBM */
 };
