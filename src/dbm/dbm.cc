@@ -341,7 +341,7 @@ void reset(tchecker::dbm::db_t * dbm, tchecker::clock_id_t dim, tchecker::clock_
 void reset(tchecker::dbm::db_t * dbm, tchecker::clock_id_t dim, tchecker::clock_reset_container_t const & resets)
 {
   for (tchecker::clock_reset_t const & r : resets) {
-    tchecker::clock_id_t lid = (r.left_id() == tchecker::REFCLOCK_ID ? 0 : r.left_id() + 1);
+    tchecker::clock_id_t lid = (r.left_id() == tchecker::REFCLOCK_ID ? 0 : r.left_id() + 1); // It would be quite surprising if the lid would be reflock, right?
     tchecker::clock_id_t rid = (r.right_id() == tchecker::REFCLOCK_ID ? 0 : r.right_id() + 1);
     tchecker::dbm::reset(dbm, dim, lid, rid, r.value());
   }
@@ -512,17 +512,118 @@ enum tchecker::dbm::status_t intersection(tchecker::dbm::db_t * dbm, tchecker::d
   return tchecker::dbm::tighten(dbm, dim);
 }
 
-void sync_helper_create_reset_set(tchecker::dbm::db_t *dbm, tchecker::clock_id_t dim, tchecker::clock_id_t no_of_virt_clks)
+tchecker::dbm::db_t * revert_multiple_reset(const tchecker::dbm::db_t * orig_zone,
+                                            tchecker::clock_id_t dim, tchecker::dbm::db_t * zone_split,
+                                            tchecker::clock_reset_container_t reset)
 {
-  for(tchecker::clock_id_t i = 1; i < dim - no_of_virt_clks; ++i) {
-    
+
+  // TODO: add assertions
+
+  if(reset.empty()) {
+    return zone_split;
+  }
+
+  tchecker::dbm::db_t zone_clone[dim*dim];
+  tchecker::dbm::copy(zone_clone, orig_zone, dim);
+
+  tchecker::clock_reset_t cur = reset.back();
+  reset.pop_back();
+
+  if(cur.right_id() != tchecker::REFCLOCK_ID || cur.value() != 0) {
+    throw std::runtime_error("when checking for timed bisim, only resets to value zero are allowed");
+  }
+
+  tchecker::dbm::reset(zone_clone, dim, reset);
+
+  tchecker::dbm::free_clock(zone_split, dim, cur);
+
+  tchecker::dbm::db_t new_split[dim*dim];
+
+  intersection(new_split, zone_clone, zone_split, dim);
+
+  return revert_multiple_reset(orig_zone, dim, new_split, reset);
+
+}
+
+void sync(tchecker::dbm::db_t *dbm1, tchecker::dbm::db_t *dbm2, tchecker::clock_id_t dim, 
+          tchecker::clock_id_t lowest_virt_clk_id, tchecker::clock_id_t no_of_orig_clocks_1,
+          tchecker::clock_reset_container_t const & orig_reset1,
+          tchecker::clock_reset_container_t const & orig_reset2)
+{
+
+  // TODO: add assertions
+
+  tchecker::clock_reset_container_t virt_resets;
+
+  for(const tchecker::clock_reset_t & r : orig_reset1) {
+
+    if(r.right_id() != tchecker::REFCLOCK_ID || r.value() != 0) {
+      throw std::runtime_error("when checking for timed bisim, only resets to value zero are allowed");
+    }
+
+    reset_to_value(dbm1, dim, r.left_id() + 1 + lowest_virt_clk_id, 0);
+    reset_to_value(dbm2, dim, r.left_id() + 1 + lowest_virt_clk_id, 0);
+  }
+
+  tchecker::clock_id_t border = lowest_virt_clk_id + no_of_orig_clocks_1;
+
+  for(const tchecker::clock_reset_t & r : orig_reset2) {
+
+    if(r.right_id() != tchecker::REFCLOCK_ID || r.value() != 0) {
+      throw std::runtime_error("when checking for timed bisim, only resets to value zero are allowed");
+    }
+
+    reset_to_value(dbm1, dim, r.left_id() + 1 + border, 0);
+    reset_to_value(dbm2, dim, r.left_id() + 1 + border, 0);
   }
 }
 
-//void tchecker::dbm::sync(tchecker::dbm::db_t *dbm1, tchecker::dbm::db_t dbm2, tchecker::clock_id_t dim, tchecker::clock_id_t no_of_virt_clks)
-//{
-//  
-//}
+std::tuple<std::shared_ptr<tchecker::vcg::virtual_constraint_t>, std::shared_ptr<tchecker::vcg::virtual_constraint_t>>
+revert_sync(const tchecker::dbm::db_t *dbm1, const tchecker::dbm::db_t *dbm2, tchecker::clock_id_t dim, 
+            const tchecker::vcg::virtual_constraint_t & phi_e, tchecker::clock_id_t lowest_virt_clk_id,
+            tchecker::clock_id_t no_of_orig_clocks_1)
+{
+
+  // TODO add assertions
+
+  db_t zero_value = db(tchecker::LT, 0);
+  tchecker::clock_reset_container_t reset_set;
+
+  for(tchecker::clock_id_t i = 1; i < (dim - lowest_virt_clk_id); ++i) {
+    if(DBM1(i, 0) == zero_value && DBM1(0, i) == zero_value) {
+        tchecker::clock_reset_t tmp{i + lowest_virt_clk_id - 1, tchecker::REFCLOCK_ID, 0};
+        reset_set.emplace_back(tmp);
+    }
+  }
+
+  for(tchecker::clock_id_t i = 1; i < (dim - lowest_virt_clk_id); ++i) {
+    if(DBM2(i, 0) == zero_value && DBM2(0, i) == zero_value) {
+        tchecker::clock_reset_t tmp{i + lowest_virt_clk_id + no_of_orig_clocks_1 - 1, tchecker::REFCLOCK_ID, 0};
+        reset_set.emplace_back(tmp);
+    }
+  }
+
+  tchecker::dbm::db_t dbm1_clone[dim*dim];
+  tchecker::dbm::copy(dbm1_clone, dbm1, dim);
+
+  tchecker::dbm::constrain(dbm1_clone, dim, phi_e.get_vc());
+
+  tchecker::dbm::db_t dbm2_clone[dim*dim];
+  tchecker::dbm::copy(dbm2_clone, dbm2, dim);
+
+  tchecker::dbm::constrain(dbm2_clone, dim, phi_e.get_vc());
+
+  tchecker::vcg::virtual_constraint_t * first
+    = tchecker::vcg::factory(revert_multiple_reset(dbm1, dim, dbm1_clone, reset_set), dim, dim - lowest_virt_clk_id);
+
+  tchecker::vcg::virtual_constraint_t * second
+    = tchecker::vcg::factory(revert_multiple_reset(dbm2, dim, dbm2_clone, reset_set), dim, dim - lowest_virt_clk_id);
+
+  return std::make_tuple(
+            std::shared_ptr<tchecker::vcg::virtual_constraint_t>(first),
+            std::shared_ptr<tchecker::vcg::virtual_constraint_t>(second));
+
+}
 
 void extra_m(tchecker::dbm::db_t * dbm, tchecker::clock_id_t dim, tchecker::integer_t const * m)
 {
