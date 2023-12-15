@@ -96,6 +96,60 @@ bool zone_t::belongs(tchecker::clockval_t const & clockval) const
   return tchecker::dbm::satisfies(dbm_ptr(), _dim, clockval);
 }
 
+std::shared_ptr<vcg::virtual_constraint_t> zone_t::revert_action_trans(const tchecker::clock_constraint_container_t & guard,
+                                                                       const tchecker::clock_reset_container_t & reset,
+                                                                       const tchecker::clock_constraint_container_t & tgt_invariant,
+                                                                       const vcg::virtual_constraint_t & phi_split)
+{
+
+  tchecker::clock_reset_container_t reset_copy;
+
+  reset_copy.reserve(reset.size());
+
+  std::copy(reset.begin(), reset.end(), reset_copy.begin());
+
+  tchecker::dbm::db_t zone_clone[_dim*_dim];
+  this->to_dbm(zone_clone);
+
+
+  tchecker::dbm::db_t inter_zone[_dim*_dim];
+  this->to_dbm(inter_zone);
+
+  tchecker::dbm::constrain(inter_zone, _dim, guard);
+
+  tchecker::dbm::db_t inter_clone[_dim*_dim];
+  tchecker::dbm::copy(inter_clone, inter_zone, _dim);
+
+  tchecker::dbm::reset(inter_zone, _dim, reset);
+  tchecker::dbm::constrain(inter_zone, _dim, phi_split.get_vc());
+
+  tchecker::vcg::virtual_constraint_t *virt_mult_reset = vcg::factory(revert_multiple_reset(inter_clone, _dim, inter_zone, reset_copy), _dim, phi_split.get_no_of_virt_clocks());
+
+  tchecker::dbm::constrain(zone_clone, _dim, virt_mult_reset->get_vc());
+
+  std::shared_ptr<tchecker::vcg::virtual_constraint_t> result = std::shared_ptr<vcg::virtual_constraint_t>(vcg::factory(zone_clone, _dim, phi_split.get_no_of_virt_clocks()));
+
+  delete virt_mult_reset;
+
+  return result;
+}
+
+std::shared_ptr<vcg::virtual_constraint_t> zone_t::revert_epsilon_trans(const tchecker::vcg::virtual_constraint_t & phi_split)
+{
+
+  tchecker::dbm::db_t *D_split = phi_split.to_dbm();
+  tchecker::dbm::open_down(D_split, _dim);
+
+  tchecker::dbm::intersection(D_split, this->dbm(), D_split, _dim);
+
+  std::shared_ptr<vcg::virtual_constraint_t> result = 
+    std::shared_ptr<tchecker::vcg::virtual_constraint_t>(vcg::factory(D_split, _dim, phi_split.get_no_of_virt_clocks()));
+
+  free(D_split);
+
+  return result;
+}
+
 zone_t::zone_t(tchecker::clock_id_t dim) : _dim(dim) { tchecker::dbm::universal_positive(dbm_ptr(), _dim); }
 
 zone_t::zone_t(tchecker::zg::zone_t const & zone) : _dim(zone._dim)
@@ -104,6 +158,30 @@ zone_t::zone_t(tchecker::zg::zone_t const & zone) : _dim(zone._dim)
 }
 
 zone_t::~zone_t() = default;
+
+tchecker::dbm::db_t * zone_t::revert_multiple_reset(tchecker::dbm::db_t * orig_zone, tchecker::clock_id_t dim, tchecker::dbm::db_t * zone_split, tchecker::clock_reset_container_t reset)
+{
+  if(reset.empty()) {
+    return zone_split;
+  }
+
+  tchecker::dbm::db_t zone_clone[dim*dim];
+  tchecker::dbm::copy(zone_clone, orig_zone, dim);
+
+  tchecker::clock_reset_t cur = reset.back();
+  reset.pop_back();
+
+  tchecker::dbm::reset(zone_clone, dim, reset);
+
+  tchecker::dbm::free_clock(zone_split, dim, cur);
+
+  tchecker::dbm::db_t new_split[dim*dim];
+
+  intersection(new_split, zone_clone, zone_split, dim);
+
+  return revert_multiple_reset(orig_zone, dim, new_split, reset);
+
+}
 
 // Allocation and deallocation
 

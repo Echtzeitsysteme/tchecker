@@ -512,6 +512,18 @@ enum tchecker::dbm::status_t intersection(tchecker::dbm::db_t * dbm, tchecker::d
   return tchecker::dbm::tighten(dbm, dim);
 }
 
+void sync_helper_create_reset_set(tchecker::dbm::db_t *dbm, tchecker::clock_id_t dim, tchecker::clock_id_t no_of_virt_clks)
+{
+  for(tchecker::clock_id_t i = 1; i < dim - no_of_virt_clks; ++i) {
+    
+  }
+}
+
+//void tchecker::dbm::sync(tchecker::dbm::db_t *dbm1, tchecker::dbm::db_t dbm2, tchecker::clock_id_t dim, tchecker::clock_id_t no_of_virt_clks)
+//{
+//  
+//}
+
 void extra_m(tchecker::dbm::db_t * dbm, tchecker::clock_id_t dim, tchecker::integer_t const * m)
 {
   assert(dbm != nullptr);

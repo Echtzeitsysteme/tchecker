@@ -12,12 +12,28 @@ namespace tchecker {
 namespace vcg {
 
 virtual_constraint_t::virtual_constraint_t(const clock_constraint_container_t & vcs, tchecker::clock_id_t dim, tchecker::clock_id_t no_of_virtual_clocks)
- : _dim(no_of_virtual_clocks + 1), _lowest_virtual_clk_index(dim - no_of_virtual_clocks), _vcs(vcs)
+ : _dim(dim), _no_of_virtual_clocks(no_of_virtual_clocks), _vcs(vcs)
 {
 }
 
 const clock_constraint_container_t & virtual_constraint_t::get_vc() const {
   return _vcs;
+}
+
+tchecker::dbm::db_t * virtual_constraint_t::to_dbm() const
+{
+  tchecker::dbm::db_t *result = (tchecker::dbm::db_t *)malloc(_dim*_dim*sizeof(tchecker::dbm::db_t));
+
+  tchecker::dbm::universal(result, _dim);
+
+  tchecker::dbm::constrain(result, _dim, this->get_vc());
+
+  return result;
+
+}
+
+const tchecker::clock_id_t virtual_constraint_t::get_no_of_virt_clocks() const {
+  return this->_no_of_virtual_clocks;
 }
 
 virtual_constraint_t * factory(const tchecker::zg::zone_t * zone, tchecker::clock_id_t no_of_virtual_clocks)
