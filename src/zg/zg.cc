@@ -387,6 +387,13 @@ void zg_t::share(tchecker::zg::state_sptr_t & s) { _state_allocator.share(s); }
 
 void zg_t::share(tchecker::zg::transition_sptr_t & t) { _transition_allocator.share(t); }
 
+// clocks count
+
+std::size_t zg_t::clocks_count()
+{
+  return _system->clocks_count(tchecker::VK_FLATTENED);
+}
+
 // Private
 
 tchecker::zg::state_sptr_t zg_t::clone_and_constrain(tchecker::zg::const_state_sptr_t const & s,
