@@ -946,6 +946,12 @@ public:
   */
   inline enum tchecker::ts::sharing_type_t sharing_type() const { return _sharing_type; }
 
+  /*!
+   \brief Accessor
+   \return number of clocks
+   */
+  std::size_t clocks_count();
+
 protected:
   /*!
    \brief Clone and constrain a state

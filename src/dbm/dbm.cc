@@ -576,6 +576,9 @@ void sync(tchecker::dbm::db_t *dbm1, tchecker::dbm::db_t *dbm2, tchecker::clock_
     reset_to_value(dbm1, dim, r.left_id() + 1 + border, 0);
     reset_to_value(dbm2, dim, r.left_id() + 1 + border, 0);
   }
+
+  virt_resets.clear();
+
 }
 
 std::tuple<std::shared_ptr<tchecker::vcg::virtual_constraint_t>, std::shared_ptr<tchecker::vcg::virtual_constraint_t>>
@@ -618,6 +621,8 @@ revert_sync(const tchecker::dbm::db_t *dbm1, const tchecker::dbm::db_t *dbm2, tc
 
   tchecker::vcg::virtual_constraint_t * second
     = tchecker::vcg::factory(revert_multiple_reset(dbm2, dim, dbm2_clone, reset_set), dim, dim - lowest_virt_clk_id);
+
+  reset_set.clear();
 
   return std::make_tuple(
             std::shared_ptr<tchecker::vcg::virtual_constraint_t>(first),

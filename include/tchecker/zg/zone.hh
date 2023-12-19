@@ -8,14 +8,6 @@
 #ifndef TCHECKER_ZG_ZONE_HH
 #define TCHECKER_ZG_ZONE_HH
 
-// forward declaration
-namespace tchecker {
-namespace vcg {
-class virtual_constraint_t;
-}
-}
-
-
 #include <string>
 
 #include "tchecker/basictypes.hh"
@@ -24,7 +16,6 @@ class virtual_constraint_t;
 #include "tchecker/utils/allocation_size.hh"
 #include "tchecker/utils/cache.hh"
 #include "tchecker/variables/clocks.hh"
-#include "tchecker/vcg/virtual_constraint.hh"
 
 /*!
  \file zone.hh
@@ -172,27 +163,6 @@ public:
    \return true if clockval belongs to this zone, false otherwise
   */
   bool belongs(tchecker::clockval_t const & clockval) const;
-
- /*!
-  \brief revert-action-trans function (see the TR of Lieb et al.)
-  \param guard : of the transition to revert
-  \param reset : the reset set of the transition to revert
-  \param tgt_invariant : the invariant of the target state of the transition to revert
-  \param phi_split : the sub vc of the target
-  \return a shared pointer to the resulting virtual constraint
-  */
-  std::shared_ptr<vcg::virtual_constraint_t> revert_action_trans(const tchecker::clock_constraint_container_t & guard,
-                                                                 const tchecker::clock_reset_container_t & reset,
-                                                                 const tchecker::clock_constraint_container_t & tgt_invariant,
-                                                                 const vcg::virtual_constraint_t & phi_split);
-
-  /*!
-  \brief revert-epsilon-trans function (see the TR of Lieb et al.)
-  \param zone : the original zone
-  \param phi_split : the sub vc of the target
-  \return a shared pointer to the resulting virtual constraint
-  */
-  std::shared_ptr<vcg::virtual_constraint_t> revert_epsilon_trans(const vcg::virtual_constraint_t & phi_split);
 
   /*!
    \brief Construction
