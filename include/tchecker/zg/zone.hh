@@ -32,6 +32,9 @@ namespace zg {
  */
 class zone_t : public tchecker::cached_object_t {
 public:
+
+  
+
   /*!
    \brief Assignment operator
    \param zone : a DBM zone
@@ -119,7 +122,7 @@ public:
    \brief Accessor
    \return dimension of the zone
    */
-  inline std::size_t dim() const { return _dim; }
+  inline tchecker::clock_id_t dim() const { return _dim; }
 
   /*!
    \brief Output
@@ -310,6 +313,20 @@ template <class... ARGS> tchecker::zg::zone_t * zone_allocate_and_construct(tche
  \post the destructor of zone has been called, and zone has been deleted
  */
 void zone_destruct_and_deallocate(tchecker::zg::zone_t * zone);
+
+/*!
+ \brief factory of zones of a vcg
+ \param dim : the dimension
+ */
+zone_t * factory(tchecker::clock_id_t dim);
+
+/*!
+ \brief factory of zones of a vcg
+ \param zone : the zone to copy
+ */
+
+zone_t * factory(zone_t const & zone);
+
 
 } // end of namespace zg
 

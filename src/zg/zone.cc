@@ -113,6 +113,16 @@ void zone_destruct_and_deallocate(tchecker::zg::zone_t * zone)
   delete[] reinterpret_cast<char *>(zone);
 }
 
+zone_t * factory(tchecker::clock_id_t dim)
+{
+  return tchecker::zg::zone_allocate_and_construct(dim, dim);
+}
+
+zone_t * factory(zone_t const & zone)
+{
+  return tchecker::zg::zone_allocate_and_construct(zone.dim(), zone);
+}
+
 } // end of namespace zg
 
 std::string to_string(tchecker::zg::zone_t const & zone, tchecker::clock_index_t const & index)

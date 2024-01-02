@@ -14,7 +14,6 @@
 #include "tchecker/basictypes.hh"
 #include "tchecker/dbm/db.hh"
 #include "tchecker/variables/clocks.hh"
-#include "tchecker/vcg/virtual_constraint.hh"
 
 /*!
  \file dbm.hh
@@ -47,6 +46,19 @@ enum status_t {
   NON_EMPTY,
   MAY_BE_EMPTY,
 };
+
+/*!
+ \brief get dbm[i, j]
+ \return a pointer to dbm[i, j]
+ */
+const tchecker::dbm::db_t * access(const tchecker::dbm::db_t * dbm, tchecker::clock_id_t dim, tchecker::clock_id_t i, tchecker::clock_id_t j);
+
+/*!
+ \brief non const version of access
+ \return a pointer to dbm[i, j]
+ \note Watch Out what you are doing! There is no guarantee on anything!
+ */
+tchecker::dbm::db_t * access(tchecker::dbm::db_t * dbm, tchecker::clock_id_t dim, tchecker::clock_id_t i, tchecker::clock_id_t j);
 
 /*!
  \brief Copy a DBM into another DBM
@@ -578,6 +590,7 @@ enum tchecker::dbm::status_t intersection(tchecker::dbm::db_t * dbm, tchecker::d
  \param zone_split : the split of reset(orig_zone)
  \param reset : the used reset set
  \return the dbm with reverted resets (same dim as orig_zone)
+ \note the returned dbm is allocated on the heap. You have to free it!
  */
 tchecker::dbm::db_t * revert_multiple_reset(const tchecker::dbm::db_t * orig_zone,
                                             tchecker::clock_id_t dim, tchecker::dbm::db_t * zone_split,
@@ -757,7 +770,7 @@ std::ostream & output(std::ostream & os, tchecker::dbm::db_t const * dbm, tcheck
  \param dim1 : dimension of dbm1
  \param dbm2 : second dbm
  \param dim2 : dimension of dbm2
- \pre dbm1 and dbm2 are ot nullptr (checked by assertion)
+ \pre dbm1 and dbm2 are not nullptr (checked by assertion)
  dbm1 is a dim1*dim1 array of difference bounds
  dbm2 is a dim2*dim2 array of difference bounds
  dim1 >= 1 and dim2 >= 1 (checked by assertion)

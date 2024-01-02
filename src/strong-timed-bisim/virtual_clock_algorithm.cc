@@ -42,9 +42,9 @@ tchecker::strong_timed_bisim::stats_t Lieb_et_al::run(std::shared_ptr<tchecker::
       std::cout << std::endl;
   }
 
-  tchecker::vcg::virtual_constraint_t *vc = tchecker::vcg::factory(&(std::get<1>(sst_first[0])->zone()), input_first->get_no_of_virtual_clocks());
+  tchecker::virtual_constraint::virtual_constraint_t *vc = tchecker::virtual_constraint::factory(&(std::get<1>(sst_first[0])->zone()), input_first->get_no_of_virtual_clocks());
 
-  const clock_constraint_container_t & virt_cons = vc->get_vc();
+  const clock_constraint_container_t & virt_cons = vc->get_vc(input_first->clocks_count() - input_first->get_no_of_virtual_clocks());
 
   for(auto iter = virt_cons.begin(); iter < virt_cons.end(); iter++) {
     std::cout << *iter << std::endl;

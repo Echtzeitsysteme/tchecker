@@ -53,9 +53,9 @@ void sync(tchecker::dbm::db_t *dbm1, tchecker::dbm::db_t *dbm2, tchecker::clock_
  \note the change happens inplace. this function works if and only if only
  resets to zero are allowed!
  */
-std::tuple<std::shared_ptr<tchecker::vcg::virtual_constraint_t>, std::shared_ptr<tchecker::vcg::virtual_constraint_t>>
-revert_sync(const tchecker::dbm::db_t *dbm1, const tchecker::dbm::db_t *dbm2, tchecker::clock_id_t dim, 
-            const tchecker::vcg::virtual_constraint_t & phi_e, tchecker::clock_id_t lowest_virt_clk_id,
+std::tuple<std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t>, std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t>>
+revert_sync(const tchecker::dbm::db_t *dbm1, const tchecker::dbm::db_t *dbm2, tchecker::clock_id_t dim,
+            const tchecker::virtual_constraint::virtual_constraint_t & phi_e, tchecker::clock_id_t lowest_virt_clk_id,
             tchecker::clock_id_t no_of_orig_clocks_1);
 
 
