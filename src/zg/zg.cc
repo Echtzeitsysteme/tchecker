@@ -389,7 +389,7 @@ void zg_t::share(tchecker::zg::transition_sptr_t & t) { _transition_allocator.sh
 
 // clocks count
 
-std::size_t zg_t::clocks_count()
+tchecker::clock_id_t zg_t::clocks_count()
 {
   return _system->clocks_count(tchecker::VK_FLATTENED);
 }

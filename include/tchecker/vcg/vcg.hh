@@ -15,7 +15,7 @@
 #include "tchecker/ta/system.hh"
 #include "tchecker/strong-timed-bisim/system.hh"
 #include "tchecker/vcg/virtual_constraint.hh"
-#include "tchecker/vcg/zone_container.hh"
+#include "tchecker/utils/zone_container.hh"
 
 /*!
  \file vcg.hh
@@ -84,14 +84,6 @@ tchecker::vcg::vcg_t * factory(std::shared_ptr<tchecker::strong_timed_bisim::sys
                                enum tchecker::ts::sharing_type_t sharing_type, enum tchecker::zg::semantics_type_t semantics_type,
                                enum tchecker::zg::extrapolation_type_t extrapolation_type, std::size_t block_size,
                                std::size_t table_size) ;
-
-
-/*!
- \brief contained-in-all function (see the TR of Lieb et al.)
- \param a vector of of vector of zones
- \return a vector of zones
- */
-zone_container_t contained_in_all(std::vector<zone_container_t> & zones, tchecker::clock_id_t dim);
 
 } // end of namespace vcg
 

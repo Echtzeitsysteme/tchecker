@@ -8,15 +8,9 @@
 #ifndef TCHECKER_VCG_VIRTUAL_CONSTRAINT_HH
 #define TCHECKER_VCG_VIRTUAL_CONSTRAINT_HH
 
-// forward declaration
-namespace tchecker {
-namespace zg {
-class zone_t;
-}
-}
-
 #include "tchecker/zg/zone.hh"
 #include "tchecker/dbm/dbm.hh"
+#include "tchecker/utils/zone_container.hh"
 
 /*
  \file virtual_constraint.hh
@@ -25,7 +19,11 @@ class zone_t;
 
 namespace tchecker {
 
-namespace vcg {
+// forward declaration
+template <typename T>
+class zone_container_t;
+
+namespace virtual_constraint {
 
 /*!
  \class virtual_constraint_t
@@ -36,33 +34,19 @@ namespace vcg {
  * clock constraint
  */
 
-class virtual_constraint_t {
+class virtual_constraint_t : public tchecker::zg::zone_t {
 
 public:
 
   /*!
-   \brief constructor
-   \param zone : The zone from which we extract the virtual constraint
-   \param no_of_virtual_clocks : The number of virtual clocks
+   \brief delete all constructors, instantiate this class using a factory function
    */
-  virtual_constraint_t(const clock_constraint_container_t & vcs, tchecker::clock_id_t dim, tchecker::clock_id_t no_of_virtual_clocks);
+  virtual_constraint_t() = delete;
 
   /*!
-   \brief Copy constructor
+   \brief Destructor
    */
-  virtual_constraint_t(tchecker::vcg::virtual_constraint_t const &) = default;
-
-  /*
-   * accessor
-   \return a reference to the clock constraints
-   */
-  const clock_constraint_container_t & get_vc() const;
-
-  /*
-   * transforms the virtual constraints into a dbm.
-   \return a tight DBM which contains the virtual clocks as a DBM. The DBM is allocated at the heap and needs to be freed.
-   */
-  tchecker::dbm::db_t * to_dbm() const;
+  ~virtual_constraint_t() = default;
 
   /*!
    \brief Accessor
@@ -70,23 +54,57 @@ public:
    */
   const tchecker::clock_id_t get_no_of_virt_clocks() const;
 
-private:
-  // dimension of the zones used at the vcg
-  const tchecker::clock_id_t _dim;
+  /*!
+   \brief return the virtual constraint as list of clock constraints
+   \param sum_of_orig_clocks : the sum of the original clocks of both TA
+   */
+  clock_constraint_container_t get_vc(tchecker::clock_id_t orig_clocks_offset) const;
 
-  // the number of virtual clocks
-  const tchecker::clock_id_t _no_of_virtual_clocks;
-
-  // the actual constrains
-  const clock_constraint_container_t _vcs;
+  /*!
+   \brief returns the negated version of this clock constraint
+   \return let result be the return value.
+   *  forall u with u model this and for all vc in result u does not model vc
+   *  forall u with u does not model this exists a vc in result such that u models vc
+   *  (for u in ({\chi_0, ..., \chi_{|C_A| + | C_B| - 1}} \rightarrow T))
+   */
+  tchecker::zone_container_t<virtual_constraint_t> neg() const;
 
 };
 
+// factories
+virtual_constraint_t * factory(tchecker::clock_id_t dim);
+
+virtual_constraint_t * factory(tchecker::virtual_constraint::virtual_constraint_t const & virtual_constraint);
+
+/*!
+ \brief extract the virtual constraint from a zone
+ \param zone : the zone from which the virtual constraint should be extracted
+ \param virtual_clocks : the number of virtual clocks
+ \return the virtual constraint of zone
+ */
 virtual_constraint_t * factory(const tchecker::zg::zone_t *zone, tchecker::clock_id_t no_of_virtual_clocks);
 
+/*!
+ \brief extract the virtual constraint from a dbm
+ \param dbm : the dbm from which the virtual constraint should be extracted
+ \param dim : dimension of the dbm
+ \param virtual_clocks : the number of virtual clocks
+ \return the virtual constraint of zone
+ */
 virtual_constraint_t * factory(const tchecker::dbm::db_t * dbm, tchecker::clock_id_t dim, tchecker::clock_id_t no_of_virtual_clocks);
 
-} // end of namespace vcg
+// destruction
+
+void destruct(virtual_constraint_t *to_destruct);
+
+/*!
+ \brief combine operator (see the TR of Lieb et al.)
+ \param a vector of vector of virtual constraints
+ \return a vector of virtual constraints
+ */
+tchecker::zone_container_t<virtual_constraint_t> combine(std::vector<tchecker::zone_container_t<virtual_constraint_t>> & lo_lo_vc, tchecker::clock_id_t dim);
+
+} // end of namespace virtual_constraint
 
 } // end of namespace tchecker
 

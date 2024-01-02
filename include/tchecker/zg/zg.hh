@@ -950,7 +950,7 @@ public:
    \brief Accessor
    \return number of clocks
    */
-  std::size_t clocks_count();
+  tchecker::clock_id_t clocks_count();
 
 protected:
   /*!
