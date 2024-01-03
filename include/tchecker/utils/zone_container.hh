@@ -35,7 +35,23 @@ public:
    \brief Constructor
    \param dim : dimension
    */
-  zone_container_t(tchecker::clock_id_t dim) : _dim(dim){ };
+  zone_container_t(tchecker::clock_id_t dim) : _dim(dim){ }
+
+  /*!
+   \brief Copy Constructor
+   \param container : the container to copy
+   */
+  zone_container_t(zone_container_t &t) : _dim(t.dim())
+  {
+    for(auto iter = t.begin(); iter < t.end(); iter++) {
+      this->append_zone(*(*iter));
+    }
+  }
+
+  /*!
+   \brief Accessor
+   */
+  tchecker::clock_id_t dim() {return this->_dim;}
 
   /*!
    \brief factory functions to be used by the append functions
@@ -155,7 +171,7 @@ public:
   }
 
 private:
-  tchecker::clock_id_t _dim;
+  const tchecker::clock_id_t _dim;
   std::vector<T *> _storage;
 
 };
