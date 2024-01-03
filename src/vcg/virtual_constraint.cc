@@ -45,7 +45,7 @@ void add_neg(tchecker::zone_container_t<virtual_constraint_t> *result, const vir
   result->append_zone(below);
 }
 
-tchecker::zone_container_t<virtual_constraint_t> virtual_constraint_t::neg() const
+tchecker::zone_container_t<virtual_constraint_t> * virtual_constraint_t::neg() const
 {
   tchecker::zone_container_t<virtual_constraint_t> inter{this->dim()};
 
@@ -63,11 +63,11 @@ tchecker::zone_container_t<virtual_constraint_t> virtual_constraint_t::neg() con
     }
   }
 
-  tchecker::zone_container_t<virtual_constraint_t> result{this->dim()};
+  tchecker::zone_container_t<virtual_constraint_t> * result = new tchecker::zone_container_t<virtual_constraint_t>(this->dim());
 
   for(auto iter = inter.begin(); iter < inter.end(); iter++) {
     if(tchecker::dbm::NON_EMPTY == tchecker::dbm::tighten((*iter)->dbm(), (*iter)->dim())) {
-      result.append_zone(*iter);
+      result->append_zone(*iter);
     } else {
       tchecker::virtual_constraint::destruct(*iter);
     }
@@ -93,6 +93,20 @@ clock_constraint_container_t virtual_constraint_t::get_vc(tchecker::clock_id_t o
   }
   return result;
 
+}
+
+tchecker::zone_container_t<virtual_constraint_t> virtual_constraint_t::logic_and(tchecker::zone_container_t<virtual_constraint_t> *container)
+{
+  tchecker::zone_container_t<virtual_constraint_t> result{this->dim()};
+  for(auto iter = container->begin(); iter < container->end(); iter++ ) {
+
+    virtual_constraint_t *to_append = factory(this->dim());
+    if(tchecker::dbm::EMPTY != tchecker::dbm::intersection(to_append->dbm(), (*iter)->dbm(), this->dbm(), this->dim())) {
+      result.append_zone(to_append);
+    }
+  }
+
+  return result;
 }
 
 virtual_constraint_t * factory(tchecker::clock_id_t dim)
@@ -146,42 +160,61 @@ void destruct(virtual_constraint_t *to_destruct)
   tchecker::zg::zone_destruct_and_deallocate(to_destruct);
 }
 
-tchecker::zone_container_t<virtual_constraint_t> combine(std::vector<tchecker::zone_container_t<virtual_constraint_t>> & lo_lo_vc, tchecker::clock_id_t dim)
+tchecker::zone_container_t<virtual_constraint_t> * combine_lhs_land_not_rhs(virtual_constraint_t *lhs, virtual_constraint_t *rhs, tchecker::clock_id_t dim)
+{
+  tchecker::zone_container_t<virtual_constraint_t> *result = new tchecker::zone_container_t<virtual_constraint_t>(dim);
+
+  tchecker::zone_container_t<virtual_constraint_t> *neg = rhs->neg();
+
+  for(auto iter = neg->begin(); iter < neg->end(); iter++) {
+    virtual_constraint_t *to_append = factory(dim);
+    if(tchecker::dbm::EMPTY != tchecker::dbm::intersection(to_append->dbm(), (*iter)->dbm(), lhs->dbm(), dim)) {
+      result->append_zone(*to_append); // to_append is copied here
+    }
+    destruct(to_append);
+  }
+
+  return result;
+}
+
+tchecker::zone_container_t<virtual_constraint_t> * combine_helper(virtual_constraint_t *lhs, tchecker::zone_container_t<virtual_constraint_t> *lo_vc, tchecker::clock_id_t dim)
+{
+  tchecker::zone_container_t<virtual_constraint_t> *result = new tchecker::zone_container_t<virtual_constraint_t>(dim);
+  result->append_zone(*lhs);
+  for(auto iter = lo_vc->begin(); iter < lo_vc->end(); iter++) {
+    tchecker::zone_container_t<virtual_constraint_t> *inter = result;
+    result = new tchecker::zone_container_t<virtual_constraint_t>(dim);
+
+    for(auto inter_iter = inter->begin(); inter_iter < inter->end(); inter_iter++) {
+      tchecker::zone_container_t<virtual_constraint_t> *lhs_land_not_rhs = combine_lhs_land_not_rhs(*inter_iter, *iter, dim);
+      for(auto land_iter = lhs_land_not_rhs->begin(); land_iter < lhs_land_not_rhs->end(); land_iter++) {
+        result->append_zone(*land_iter);
+      }
+    }
+    delete inter;
+  }
+
+  return result;
+
+}
+
+tchecker::zone_container_t<virtual_constraint_t> * combine(std::vector<tchecker::zone_container_t<virtual_constraint_t>> & lo_lo_vc, tchecker::clock_id_t dim)
 {
   if(lo_lo_vc.empty()) {
-    return tchecker::zone_container_t<virtual_constraint_t>(dim);
+    return new tchecker::zone_container_t<virtual_constraint_t>(dim);
   }
 
   tchecker::zone_container_t<virtual_constraint_t> cur = lo_lo_vc.back();
   lo_lo_vc.pop_back();
 
-  tchecker::zone_container_t<virtual_constraint_t> result = combine(lo_lo_vc, dim);
-
-  bool empty = false;
+  tchecker::zone_container_t<virtual_constraint_t> *result = combine(lo_lo_vc, dim);
 
   for(auto cur_iter = cur.begin(); cur_iter < cur.end(); cur_iter++) {
-
-    for(auto res_iter = result.begin(); res_iter < result.end(); res_iter++ ) {
-      tchecker::zone_container_t<virtual_constraint_t> neg = (*res_iter)->neg();
-      for(auto neg_iter = neg.begin(); neg_iter < neg.end(); neg_iter++) {
-        if(tchecker::dbm::EMPTY == tchecker::dbm::intersection((*cur_iter)->dbm(), (*cur_iter)->dbm(), (*neg_iter)->dbm(), dim)) {
-          empty = true;
-          break;
-        }
-      }
-      if(empty)
-        break;
-    }
-
-    if(empty) {
-      empty = false;
-    } else {
-      result.append_zone(*cur_iter);
-    }
+    tchecker::zone_container_t<virtual_constraint_t> *inter = combine_helper(*cur_iter, result, dim);
+    delete result;
+    result = inter;
   }
-
   return result;
-
 }
 
 } // end of namespace virtual_constraint
