@@ -47,6 +47,11 @@ tchecker::vcg::vcg_t * factory(std::shared_ptr<tchecker::strong_timed_bisim::sys
 
 }
 
+std::shared_ptr<const tchecker::ta::system_t> vcg_t::get_system() const
+{
+  return _system;
+}
+
 } // end of namespace vcg
 
 } // end of namespace tchecker

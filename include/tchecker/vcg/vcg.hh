@@ -51,10 +51,16 @@ public:
        std::shared_ptr<tchecker::zg::extrapolation_t> const & extrapolation, std::size_t block_size, std::size_t table_size);
 
   /*!
-  \brief Accessor
-  \return the number of virtual clocks
-  */
+   \brief Accessor
+   \return the number of virtual clocks
+   */
   tchecker::clock_id_t get_no_of_virtual_clocks() const;
+
+  /*!
+  \brief Accessor
+  \return the system
+   */
+  std::shared_ptr<const tchecker::ta::system_t> get_system() const;
 
 private:
 

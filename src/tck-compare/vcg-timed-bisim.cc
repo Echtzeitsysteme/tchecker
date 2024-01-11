@@ -96,9 +96,9 @@ run(std::shared_ptr<tchecker::parsing::system_declaration_t> const & sysdecl_fir
 
   std::cout << "vcg-timed-bisim.cc : created vcgs" << std::endl;
 
-  auto algorithm = new tchecker::strong_timed_bisim::Lieb_et_al();
+  auto algorithm = new tchecker::strong_timed_bisim::Lieb_et_al(vcgs[0], vcgs[1]);
 
-  return algorithm->run(vcgs[0], vcgs[1]);
+  return algorithm->run();
 
 
   /* DELETE ME!
