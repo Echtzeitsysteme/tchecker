@@ -308,11 +308,6 @@ class distinguished_semantics_t final : public tchecker::zg::semantics_t {
 public:
 
   /*!
-  \brief Constructor
-  */
-  distinguished_semantics_t();
-
-  /*!
   \brief Destructor
   */
   virtual ~distinguished_semantics_t() = default;
@@ -412,9 +407,6 @@ public:
                                         tchecker::clock_constraint_container_t const & guard,
                                         tchecker::clock_reset_container_t const & clkreset, bool tgt_delay_allowed,
                                         tchecker::clock_constraint_container_t const & tgt_invariant);
-
-  private:
-    std::unique_ptr<semantics_t> encapsulated;
 
 };
 

@@ -175,7 +175,7 @@ run(std::shared_ptr<tchecker::parsing::system_declaration_t> const & sysdecl, st
   if (!tchecker::system::every_process_has_initial_location(system->as_system_system()))
     std::cerr << tchecker::log_warning << "system has no initial state" << std::endl;
 
-  std::shared_ptr<tchecker::zg::zg_t> zg{tchecker::zg::factory(system, tchecker::ts::SHARING, tchecker::zg::ELAPSED_SEMANTICS,
+  std::shared_ptr<tchecker::zg::zg_t> zg{tchecker::zg::factory<tchecker::zg::zg_t>(system, tchecker::ts::SHARING, tchecker::zg::ELAPSED_SEMANTICS,
                                                                tchecker::zg::EXTRA_LU_PLUS_LOCAL, block_size, table_size)};
 
   std::shared_ptr<tchecker::tck_reach::zg_covreach::graph_t> graph{
