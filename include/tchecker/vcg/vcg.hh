@@ -9,14 +9,9 @@
 #ifndef TCHECKER_VCG_HH
 #define TCHECKER_VCG_HH
 
-#include "tchecker/zg/zone.hh"
-#include "tchecker/zg/zg.hh"
-#include "tchecker/extrapolation/extrapolation.hh"
-#include "tchecker/ta/system.hh"
 #include "tchecker/strong-timed-bisim/system.hh"
-#include "tchecker/vcg/virtual_constraint.hh"
-#include "tchecker/utils/zone_container.hh"
-
+#include "tchecker/zg/zg.hh"
+#include "tchecker/zg/zone.hh"
 /*!
  \file vcg.hh
  \brief Virtual Clock Graphs
@@ -55,12 +50,6 @@ public:
    \return the number of virtual clocks
    */
   tchecker::clock_id_t get_no_of_virtual_clocks() const;
-
-  /*!
-  \brief Accessor
-  \return the system
-   */
-  std::shared_ptr<const tchecker::ta::system_t> get_system() const;
 
 private:
 

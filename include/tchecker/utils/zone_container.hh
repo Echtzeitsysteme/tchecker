@@ -11,7 +11,6 @@
 #include <iterator>
 
 #include "tchecker/zg/zone.hh"
-#include "tchecker/vcg/zone.hh"
 #include "tchecker/vcg/virtual_constraint.hh"
 
 namespace tchecker {
@@ -57,18 +56,18 @@ public:
    \brief factory functions to be used by the append functions
    \note need for specialisation here!
   */
-  T * create_element() {};
+  std::shared_ptr<T> create_element() {};
 
-  T * create_element(T const &zone) {};
+  std::shared_ptr<T> create_element(T const &zone) {};
 
   /*!
    \brief destructor of zone. Calling the destructor of tchecker::zg::zone_t
    \note If T extends tchecker::zg::zone_t by a datastructure, there is a need for 
    specialisation here!
   */
-  void destruct_element(T *zone)
+  void destruct_element(std::shared_ptr<T> zone)
   {
-    tchecker::zg::zone_destruct_and_deallocate(zone);
+    tchecker::zg::zone_destruct_and_deallocate(&(*zone));
   }
 
   /*
@@ -102,7 +101,7 @@ public:
    \pre *zone must be initialised
    \post zone is part of the container
    */
-  void append_zone(T *zone)
+  void append_zone(std::shared_ptr<T> zone)
   {
     _storage.emplace_back(zone);
   }
@@ -120,7 +119,7 @@ public:
    \brief gets the the last zone
    \return the pointer to that zone
    */
-  T * back()
+  std::shared_ptr<T> back()
   {
     return _storage.back();
   }
@@ -130,7 +129,7 @@ public:
    \param i : the index to access
    \return a ptr to the ith element
    */
-  T * operator[](typename std::vector<T *>::size_type i)
+  std::shared_ptr<T> operator[](typename std::vector<std::shared_ptr<T>>::size_type i)
   {
     return _storage[i];
   }
@@ -139,7 +138,7 @@ public:
    \brief Accessor
    \return the number of elements stored in this container
    */
-  typename std::vector<T *>::size_type size()
+  typename std::vector<std::shared_ptr<T>>::size_type size()
   {
     return _storage.size();
   }
@@ -147,7 +146,7 @@ public:
   /*!
    \brief returns an iterator, starting the begining, iterating over ptrs of zone_t
    */
-  typename std::vector<T *>::iterator begin()
+  typename std::vector<std::shared_ptr<T>>::iterator begin()
   {
     return _storage.begin();
   }
@@ -155,7 +154,7 @@ public:
   /*!
    \brief returns an iterator, starting after the end, iterating over ptrs of zone_t
    */
-  typename std::vector<T *>::iterator end()
+  typename std::vector<std::shared_ptr<T>>::iterator end()
   {
     return _storage.end();
   }
@@ -172,35 +171,29 @@ public:
 
 private:
   const tchecker::clock_id_t _dim;
-  std::vector<T *> _storage;
+  std::vector<std::shared_ptr<T>> _storage;
 
 };
 
 // specializations
 template<>
-tchecker::zg::zone_t * zone_container_t<tchecker::zg::zone_t>::create_element();
+std::shared_ptr<tchecker::zg::zone_t> zone_container_t<tchecker::zg::zone_t>::create_element();
 
 template<>
-tchecker::zg::zone_t * zone_container_t<tchecker::zg::zone_t>::create_element(tchecker::zg::zone_t const & zone);
+std::shared_ptr<tchecker::zg::zone_t> zone_container_t<tchecker::zg::zone_t>::create_element(tchecker::zg::zone_t const & zone);
 
 template<>
-tchecker::vcg::zone_t * zone_container_t<tchecker::vcg::zone_t>::create_element();
+std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>::create_element();
 
 template<>
-tchecker::vcg::zone_t * zone_container_t<tchecker::vcg::zone_t>::create_element(tchecker::vcg::zone_t const & zone);
-
-template<>
-tchecker::virtual_constraint::virtual_constraint_t * zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>::create_element();
-
-template<>
-tchecker::virtual_constraint::virtual_constraint_t * zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>::create_element(tchecker::virtual_constraint::virtual_constraint_t const & zone);
+std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>::create_element(tchecker::virtual_constraint::virtual_constraint_t const & zone);
 
 /*!
  \brief contained-in-all function (see the TR of Lieb et al.)
  \param a vector of vector of zones
  \return a vector of zones
  */
-zone_container_t<tchecker::vcg::zone_t> contained_in_all(std::vector<zone_container_t<tchecker::vcg::zone_t>> & zones, tchecker::clock_id_t dim);
+zone_container_t<tchecker::zg::zone_t> contained_in_all(std::vector<zone_container_t<tchecker::zg::zone_t>> & zones, tchecker::clock_id_t dim);
 
 
 } // end of namespace tchecker

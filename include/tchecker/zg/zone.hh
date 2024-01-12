@@ -318,14 +318,13 @@ void zone_destruct_and_deallocate(tchecker::zg::zone_t * zone);
  \brief factory of zones of a vcg
  \param dim : the dimension
  */
-zone_t * factory(tchecker::clock_id_t dim);
+std::shared_ptr<zone_t> factory(tchecker::clock_id_t dim);
 
 /*!
  \brief factory of zones of a vcg
  \param zone : the zone to copy
  */
-
-zone_t * factory(zone_t const & zone);
+std::shared_ptr<zone_t> factory(zone_t const & zone);
 
 
 } // end of namespace zg

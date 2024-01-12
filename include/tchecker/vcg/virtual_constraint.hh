@@ -79,9 +79,9 @@ public:
 };
 
 // factories
-virtual_constraint_t * factory(tchecker::clock_id_t dim);
+std::shared_ptr<virtual_constraint_t> factory(tchecker::clock_id_t dim);
 
-virtual_constraint_t * factory(tchecker::virtual_constraint::virtual_constraint_t const & virtual_constraint);
+std::shared_ptr<virtual_constraint_t> factory(tchecker::virtual_constraint::virtual_constraint_t const & virtual_constraint);
 
 /*!
  \brief extract the virtual constraint from a zone
@@ -89,7 +89,7 @@ virtual_constraint_t * factory(tchecker::virtual_constraint::virtual_constraint_
  \param virtual_clocks : the number of virtual clocks
  \return the virtual constraint of zone
  */
-virtual_constraint_t * factory(const tchecker::zg::zone_t *zone, tchecker::clock_id_t no_of_virtual_clocks);
+std::shared_ptr<virtual_constraint_t> factory(std::shared_ptr<tchecker::zg::zone_t const> zone, tchecker::clock_id_t no_of_virtual_clocks);
 
 /*!
  \brief extract the virtual constraint from a dbm
@@ -98,7 +98,7 @@ virtual_constraint_t * factory(const tchecker::zg::zone_t *zone, tchecker::clock
  \param virtual_clocks : the number of virtual clocks
  \return the virtual constraint of zone
  */
-virtual_constraint_t * factory(const tchecker::dbm::db_t * dbm, tchecker::clock_id_t dim, tchecker::clock_id_t no_of_virtual_clocks);
+std::shared_ptr<virtual_constraint_t> factory(const tchecker::dbm::db_t * dbm, tchecker::clock_id_t dim, tchecker::clock_id_t no_of_virtual_clocks);
 
 // destruction
 
@@ -109,7 +109,7 @@ void destruct(virtual_constraint_t *to_destruct);
  \param a vector of vector of virtual constraints
  \return a vector of virtual constraints
  */
-tchecker::zone_container_t<virtual_constraint_t> * combine(std::vector<tchecker::zone_container_t<virtual_constraint_t>> & lo_lo_vc, tchecker::clock_id_t dim);
+tchecker::zone_container_t<virtual_constraint_t> *combine(std::vector<tchecker::zone_container_t<virtual_constraint_t>> & lo_lo_vc, tchecker::clock_id_t dim);
 
 } // end of namespace virtual_constraint
 

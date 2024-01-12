@@ -70,41 +70,38 @@ tchecker::strong_timed_bisim::stats_t Lieb_et_al::run() {
 }
 
 std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>
-Lieb_et_al::check_for_outgoing_transitions( std::shared_ptr<tchecker::vcg::state_t const> symb_state_A,
-                                            std::shared_ptr<tchecker::vcg::state_t const> symb_state_B,
-                                            bool A_notB,
+Lieb_et_al::check_for_outgoing_transitions( tchecker::zg::const_state_sptr_t symb_state_first,
+                                            std::shared_ptr<tchecker::vcg::vcg_t> vcg_first,
+                                            tchecker::zg::const_state_sptr_t symb_state_second,
+                                            std::shared_ptr<tchecker::vcg::vcg_t> vcg_second,
                                             std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>
-                                                  (*func)(std::shared_ptr<tchecker::vcg::state_t>, std::shared_ptr<tchecker::vcg::state_t>))
+                                              (*func)(tchecker::zg::state_sptr_t, tchecker::zg::state_sptr_t))
 {
-#if 0
-  std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> result = std::make_shared<zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(this->_A->get_no_of_virtual_clocks());
 
-  std::shared_ptr<tchecker::vcg::vcg_t> vcg_to_check;
-  std::shared_ptr<tchecker::vcg::vcg_t> vcg_checker;
+  std::vector<tchecker::vcg::vcg_t::sst_t> v_first;
+  vcg_first->next(symb_state_first, v_first);
 
-  tchecker::intrusive_shared_ptr_t<tchecker::vcg::state_t const> state_to_check;
-  std::shared_ptr<tchecker::vcg::state_t const> state_checker;
+  std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> result
+     = std::make_shared<zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(vcg_first->get_no_of_virtual_clocks());
 
-  if(A_notB) {
-    vcg_to_check = _A;
-    vcg_checker = _B;
-    state_to_check = symb_state_A;
-    state_checker = symb_state_B;
-  } else {
-    vcg_to_check = _B;
-    vcg_checker = _A;
-    state_to_check = symb_state_B;
-    state_checker = symb_state_A;
+  for (auto && [status_first, s_first, t_first] : v_first) {
+
+    std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> lo_result;
+
+    std::vector<tchecker::vcg::vcg_t::sst_t> v_second;
+    vcg_second->next(symb_state_second, v_second);
+
+    for (auto && [status_second, s_second, t_second] : v_first) {
+
+      if(t_first->vedge().event_equal(vcg_first->system(), t_second->vedge(), vcg_second->system())) {
+        std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> inter = func(s_first, s_second);
+        for(auto iter = inter->begin(); iter < inter->end(); iter++) {
+          // TODO
+        }
+      }
+
+    }
   }
-
-  std::vector<tchecker::zg::zg_t::sst_t> transitions_to_check;
-
-  tchecker::zg::outgoing_edges_range_t edges_to_check = tchecker::zg::outgoing_edges(*(vcg_to_check->get_system()), state_to_check->vloc_ptr());
-
-  for(tchecker::zg::outgoing_edges_value_t && out_edges : edges_to_check) {
-      vcg_to_check->next(state_to_check, transitions_to_check, tchecker::STATE_OK);
-  }
-#endif
 }
 
 } // end of namespace strong_timed_bisim

@@ -137,8 +137,8 @@ tchecker::zg::path::symbolic::finite_path_t * compute_finite_path(std::shared_pt
   tchecker::zg::path::symbolic::finite_path_t * path = new tchecker::zg::path::symbolic::finite_path_t{zg};
 
   tchecker::zg::const_state_sptr_t s{
-    tchecker::zg::initial<tchecker::zg::state_sptr_t, tchecker::zg::const_state_sptr_t,
-                          tchecker::zg::transition_sptr_t, tchecker::zg::const_transition_sptr_t>(*zg, initial_vloc)};
+    tchecker::zg::initial(*zg, initial_vloc)};
+
   if (s.ptr() == nullptr) {
     delete path;
     throw std::invalid_argument("*** compute_finite_path(symbolic): no initial state with given tuple of locations");
@@ -203,8 +203,8 @@ compute_lasso_path(std::shared_ptr<tchecker::zg::zg_t> const & zg, tchecker::vlo
 
   // add initial node
   tchecker::zg::const_state_sptr_t s{
-    tchecker::zg::initial<tchecker::zg::state_sptr_t, tchecker::zg::const_state_sptr_t,
-                          tchecker::zg::transition_sptr_t, tchecker::zg::const_transition_sptr_t>(*zg, initial_vloc)};
+    tchecker::zg::initial(*zg, initial_vloc)};
+
   if (s.ptr() == nullptr) {
     delete path;
     throw std::invalid_argument("*** compute_lasso_path: no initial state with given tuple of locations");
