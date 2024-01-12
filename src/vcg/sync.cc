@@ -82,23 +82,20 @@ revert_sync(const tchecker::dbm::db_t *dbm1, const tchecker::dbm::db_t *dbm2, tc
 
   tchecker::dbm::db_t * multiple_reset = revert_multiple_reset(dbm1, dim, dbm1_clone, reset_set);
 
-  tchecker::virtual_constraint::virtual_constraint_t * first
+  std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> first
     = tchecker::virtual_constraint::factory(multiple_reset, dim, dim - lowest_virt_clk_id);
 
   free(multiple_reset);
 
   multiple_reset = revert_multiple_reset(dbm2, dim, dbm2_clone, reset_set);
 
-  tchecker::virtual_constraint::virtual_constraint_t * second
+  std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> second
     = tchecker::virtual_constraint::factory(multiple_reset, dim, dim - lowest_virt_clk_id);
 
   free(multiple_reset);
 
   reset_set.clear();
 
-  return std::make_tuple(
-            std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t>(first),
-            std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t>(second));
-
+  return std::make_tuple(first, second);
 }
 

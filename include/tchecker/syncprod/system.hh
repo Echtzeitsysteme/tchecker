@@ -32,7 +32,7 @@ namespace syncprod {
  \class system_t
  \brief System of processes
  */
-class system_t : private tchecker::system::system_t, private tchecker::syncprod::labels_t {
+class system_t : public tchecker::system::system_t, private tchecker::syncprod::labels_t {
   /*!
    \brief Type of collection of asynchronous edges
    */

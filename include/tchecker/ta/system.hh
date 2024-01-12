@@ -37,7 +37,7 @@ namespace ta {
  \class system_t
  \brief System of processes for timed automata
  */
-class system_t : private tchecker::syncprod::system_t {
+class system_t : public tchecker::syncprod::system_t {
 public:
   /*!
    \brief Constructor

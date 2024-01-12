@@ -9,7 +9,7 @@
 #define TCHECKER_VCG_REVERT_TRANSITIONS_HH
 
 #include "tchecker/vcg/virtual_constraint.hh"
-#include "tchecker/vcg/zone.hh"
+#include "tchecker/zg/zone.hh"
 
 /*!
  \brief revert-action-trans function (see the TR of Lieb et al.)
@@ -21,7 +21,7 @@
  \return a shared pointer to the resulting virtual constraint
  */
 std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t>
-revert_action_trans(const tchecker::vcg::zone_t & zone,
+revert_action_trans(const tchecker::zg::zone_t & zone,
                     const tchecker::clock_constraint_container_t & guard,
                     const tchecker::clock_reset_container_t & reset,
                     const tchecker::clock_constraint_container_t & tgt_invariant,
@@ -34,6 +34,6 @@ revert_action_trans(const tchecker::vcg::zone_t & zone,
  \return a shared pointer to the resulting virtual constraint
  */
 std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t>
-revert_epsilon_trans(const tchecker::vcg::zone_t & zone, const tchecker::virtual_constraint::virtual_constraint_t & phi_split);
+revert_epsilon_trans(const tchecker::zg::zone_t & zone, const tchecker::virtual_constraint::virtual_constraint_t & phi_split);
 
 #endif
