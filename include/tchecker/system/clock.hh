@@ -49,7 +49,13 @@ public:
    \return number of declared clock variables if kind = tchecker::VK_DECLARED,
    number of flattened clock variables if kind = tchecker::VK_FLATTENED
    */
-  inline std::size_t clocks_count(enum tchecker::variable_kind_t kind) const { return _clock_variables.size(kind); }
+  inline tchecker::clock_id_t clocks_count(enum tchecker::variable_kind_t kind) const {
+    std::size_t tmp = _clock_variables.size(kind);
+    if( tmp > std::numeric_limits<tchecker::clock_id_t>::max() ) {
+       throw std::runtime_error("you are using more clocks than allowed");
+    }
+    return static_cast<tchecker::clock_id_t>( tmp );
+  }
 
   /*!
    \brief Accessor
