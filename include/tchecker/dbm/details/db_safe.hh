@@ -95,6 +95,10 @@ static_assert(tchecker::dbm::LE_ZERO != tchecker::dbm::LT_INFINITY, "");
  */
 inline tchecker::dbm::db_t db(enum tchecker::ineq_cmp_t cmp, tchecker::integer_t value)
 {
+  if (value == INF_VALUE && cmp == tchecker::LT)
+  {
+    return tchecker::dbm::LT_INFINITY;
+  }
   if ((value < tchecker::dbm::MIN_VALUE) || (value > tchecker::dbm::MAX_VALUE))
     throw std::invalid_argument("value out of bounds");
   return db_t{cmp, value};

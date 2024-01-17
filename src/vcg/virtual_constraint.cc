@@ -142,9 +142,9 @@ std::shared_ptr<virtual_constraint_t> factory(const tchecker::dbm::db_t * dbm, t
     indices.emplace_back(i);
   }
 
-  for(std::size_t i = 0; i < indices.size(); ++i)
+  for(tchecker::clock_id_t i = 0; i < indices.size(); ++i)
   {
-    for(std::size_t j = 0; j < indices.size(); ++j)
+    for(tchecker::clock_id_t j = 0; j < indices.size(); ++j)
     {
       tchecker::dbm::constrain(
           result->dbm(), result->dim(), i, j, dbm[indices[i]*dim + indices[j]].cmp, dbm[indices[i]*dim + indices[j]].value
