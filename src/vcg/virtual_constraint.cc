@@ -11,7 +11,7 @@ namespace tchecker {
 
 namespace virtual_constraint {
 
-const tchecker::clock_id_t virtual_constraint_t::get_no_of_virt_clocks() const
+tchecker::clock_id_t virtual_constraint_t::get_no_of_virt_clocks() const
 {
   return this->dim() - 1;
 }
@@ -153,11 +153,6 @@ std::shared_ptr<virtual_constraint_t> factory(const tchecker::dbm::db_t * dbm, t
   }
 
   return result;
-}
-
-void destruct(virtual_constraint_t *to_destruct)
-{
-  tchecker::zg::zone_destruct_and_deallocate(to_destruct);
 }
 
 std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> combine_lhs_land_not_rhs(std::shared_ptr<virtual_constraint_t> lhs, std::shared_ptr<virtual_constraint_t> rhs, tchecker::clock_id_t dim)
