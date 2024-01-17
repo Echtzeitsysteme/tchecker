@@ -18,7 +18,7 @@ project(tchecker LANGUAGES CXX)
 
 if (USE_CPPCHECK)
     find_program(CMAKE_CXX_CPPCHECK NAMES cppcheck)
-    if(CMAKE_CXX_CPPCHECK)
+    if(NOT ${CMAKE_CXX_CPPCHECK} STREQUAL "NOTFOUND")
         message(STATUS "using CPPCHECK")
         set(CPPCHECK_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}/cppcheck-build-dir")
         file(MAKE_DIRECTORY ${CPPCHECK_BUILD_DIR})
@@ -33,7 +33,7 @@ if (USE_CPPCHECK)
                 "--suppressions-list=${CMAKE_SOURCE_DIR}/CppCheckSuppressions.txt"
         )
     else()
-
+      message(STATUS "wanted to use CPPCHECK, but not installed")
     endif()
 else()
     message(STATUS "CPP_CHECK is not actived. If you want to activate it, use -DUSE_CPPCHECK=1")
