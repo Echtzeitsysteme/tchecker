@@ -33,7 +33,7 @@ if (USE_CPPCHECK)
                 "--suppressions-list=${CMAKE_SOURCE_DIR}/CppCheckSuppressions.txt"
         )
     else()
-      message(STATUS "wanted to use CPPCHECK, but not installed")
+      message(FATAL_ERROR "wanted to use CPPCHECK, but not installed")
     endif()
 else()
     message(STATUS "CPP_CHECK is not actived. If you want to activate it, use -DUSE_CPPCHECK=1")
