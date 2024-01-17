@@ -46,17 +46,20 @@ add_subdirectory(algorithms)
 add_subdirectory(clockbounds)
 add_subdirectory(dbm)
 add_subdirectory(expression)
+add_subdirectory(extrapolation)
 add_subdirectory(fsm)
 add_subdirectory(graph)
 add_subdirectory(parsing)
 add_subdirectory(refzg)
 add_subdirectory(statement)
+add_subdirectory(strong-timed-bisim)
 add_subdirectory(syncprod)
 add_subdirectory(system)
 add_subdirectory(ta)
 add_subdirectory(ts)
 add_subdirectory(utils)
 add_subdirectory(variables)
+add_subdirectory(vcg)
 add_subdirectory(vm)
 add_subdirectory(waiting)
 add_subdirectory(zg)
@@ -71,12 +74,14 @@ set(LIBTCHECKER_SRC
   ${CLOCKBOUNDS_SRC}
   ${DBM_SRC}
   ${EXPRESSION_SRC}
+  ${EXTRAPOLATION_SRC}
   ${FSM_SRC}
   ${GRAPH_SRC}
   ${OTHER_SRC}
   ${PARSING_SRC}
   ${REFZG_SRC}
   ${STATEMENT_SRC}
+  ${STRONG_TIMED_BISIM_SRC}
   ${SYNCPROD_SRC}
   ${SYSTEM_SRC}
   ${TA_SRC}
@@ -84,6 +89,7 @@ set(LIBTCHECKER_SRC
   ${UTILS_SRC}
   ${VARIABLES_SRC}
   ${WAITING_SRC}
+  ${VCG_SRC}
   ${VM_SRC}
   ${ZG_SRC})
 
@@ -159,6 +165,16 @@ target_link_libraries(tck-simulate libtchecker_static ${Boost_LIBRARIES})
 set_property(TARGET tck-simulate PROPERTY CXX_STANDARD 17)
 set_property(TARGET tck-simulate PROPERTY CXX_STANDARD_REQUIRED ON)
 
+# Build tck-compare executable
+add_executable(tck-compare
+  ${CMAKE_CURRENT_SOURCE_DIR}/tck-compare/tck-compare.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/tck-compare/vcg-timed-bisim.hh
+  ${CMAKE_CURRENT_SOURCE_DIR}/tck-compare/vcg-timed-bisim.cc)
+target_link_libraries(tck-compare libtchecker_static ${Boost_LIBRARIES})
+set_property(TARGET tck-compare PROPERTY CXX_STANDARD 17)
+set_property(TARGET tck-compare PROPERTY CXX_STANDARD_REQUIRED ON)
+
+
 # Project view in IDEs (Xcode, etc)
 foreach(FILE ${LIBTCHECKER_SRC})
   # Get the directory of the source file
@@ -179,7 +195,7 @@ foreach(FILE ${LIBTCHECKER_SRC})
 endforeach()
 
 # Install rule for binaries, lib and header files
-install(TARGETS tck-liveness tck-reach tck-simulate tck-syntax libtchecker_static
+install(TARGETS tck-liveness tck-reach tck-simulate tck-syntax tck-compare libtchecker_static
   RUNTIME DESTINATION bin
   ARCHIVE DESTINATION lib)
 

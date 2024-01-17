@@ -6,6 +6,7 @@
  */
 
 #include <sstream>
+#include <set>
 
 #include "tchecker/syncprod/vedge.hh"
 #include "tchecker/utils/ordering.hh"
@@ -45,6 +46,30 @@ tchecker::vedge_t::array_iterator_t vedge_t::end_array() { return tchecker::edge
 tchecker::vedge_t::const_array_iterator_t vedge_t::begin_array() const { return tchecker::edge_array_t::begin(); }
 
 tchecker::vedge_t::const_array_iterator_t vedge_t::end_array() const { return tchecker::edge_array_t::end(); }
+
+bool vedge_t::contains_events(const tchecker::system::system_t & my_system, const vedge_t & other, const tchecker::system::system_t & other_system) const
+{
+  std::set<std::string> to_check;
+
+  for(auto it = other.begin(); it != other.end(); it++) {
+    std::string cur = other_system.event_name(other_system.edge(*it)->event_id());
+    to_check.insert(cur);
+  }
+
+  std::set<std::string> contained;
+
+  for(auto it = this->begin(); it != this->end(); it++) {
+    std::string cur = my_system.event_name(my_system.edge(*it)->event_id());
+    contained.insert(cur);
+  }
+
+  for(auto it = to_check.begin(); it != to_check.end(); it++) {
+    if(contained.end() == contained.find(*it)) {
+      return false;
+    }
+  }
+  return true;
+}
 
 void vedge_destruct_and_deallocate(tchecker::vedge_t * vedge)
 {

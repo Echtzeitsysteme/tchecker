@@ -53,7 +53,13 @@ public:
    \note 0..clocks_count(tchecker::VK_DECLARED)-1 is NOT the range of declared clock identifiers: use
    clocks_identifiers(tchecker::VK_DECLARED) for that purpose
    */
-  inline std::size_t clocks_count(enum tchecker::variable_kind_t kind) const { return _clock_variables.size(kind); }
+  inline tchecker::clock_id_t clocks_count(enum tchecker::variable_kind_t kind) const {
+    std::size_t tmp = _clock_variables.size(kind);
+    if( tmp > std::numeric_limits<tchecker::clock_id_t>::max() ) {
+       throw std::runtime_error("you are using more clocks than allowed");
+    }
+    return static_cast<tchecker::clock_id_t>( tmp );
+  }
 
   /*!
    \brief Accessor
