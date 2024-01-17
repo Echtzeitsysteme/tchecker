@@ -45,7 +45,7 @@ void add_neg(tchecker::zone_container_t<virtual_constraint_t> *result, const vir
   result->append_zone(below);
 }
 
-tchecker::zone_container_t<virtual_constraint_t> * virtual_constraint_t::neg() const
+std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> virtual_constraint_t::neg() const
 {
   tchecker::zone_container_t<virtual_constraint_t> inter{this->dim()};
 
@@ -63,7 +63,7 @@ tchecker::zone_container_t<virtual_constraint_t> * virtual_constraint_t::neg() c
     }
   }
 
-  tchecker::zone_container_t<virtual_constraint_t> * result = new tchecker::zone_container_t<virtual_constraint_t>(this->dim());
+  std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> result = std::make_shared<tchecker::zone_container_t<virtual_constraint_t>>(this->dim());
 
   for(auto iter = inter.begin(); iter < inter.end(); iter++) {
     if(tchecker::dbm::NON_EMPTY == tchecker::dbm::tighten((*iter)->dbm(), (*iter)->dim())) {
@@ -160,59 +160,55 @@ void destruct(virtual_constraint_t *to_destruct)
   tchecker::zg::zone_destruct_and_deallocate(to_destruct);
 }
 
-tchecker::zone_container_t<virtual_constraint_t> * combine_lhs_land_not_rhs(std::shared_ptr<virtual_constraint_t> lhs, std::shared_ptr<virtual_constraint_t> rhs, tchecker::clock_id_t dim)
+std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> combine_lhs_land_not_rhs(std::shared_ptr<virtual_constraint_t> lhs, std::shared_ptr<virtual_constraint_t> rhs, tchecker::clock_id_t dim)
 {
-  tchecker::zone_container_t<virtual_constraint_t> *result = new tchecker::zone_container_t<virtual_constraint_t>(dim);
+  std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> result = std::make_shared<tchecker::zone_container_t<virtual_constraint_t>>(dim);
 
-  tchecker::zone_container_t<virtual_constraint_t> *neg = rhs->neg();
+  std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> neg = rhs->neg();
 
   for(auto iter = neg->begin(); iter < neg->end(); iter++) {
     std::shared_ptr<virtual_constraint_t> to_append = factory(dim);
     if(tchecker::dbm::EMPTY != tchecker::dbm::intersection(to_append->dbm(), (*iter)->dbm(), lhs->dbm(), dim)) {
-      result->append_zone(*to_append); // to_append is copied here
+      result->append_zone(to_append);
     }
-    destruct(&(*to_append));
   }
 
   return result;
 }
 
-tchecker::zone_container_t<virtual_constraint_t> * combine_helper(std::shared_ptr<virtual_constraint_t> lhs, tchecker::zone_container_t<virtual_constraint_t> * lo_vc, tchecker::clock_id_t dim)
+std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> combine_helper(std::shared_ptr<virtual_constraint_t> lhs, std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> lo_vc, tchecker::clock_id_t dim)
 {
-  tchecker::zone_container_t<virtual_constraint_t> *result = new tchecker::zone_container_t<virtual_constraint_t>(dim);
+  std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> result = std::make_shared<tchecker::zone_container_t<virtual_constraint_t>>(dim);
   result->append_zone(*lhs);
-  for(auto iter = lo_vc->begin(); iter < lo_vc->end(); iter++) {
-    tchecker::zone_container_t<virtual_constraint_t> *inter = result;
-    result = new tchecker::zone_container_t<virtual_constraint_t>(dim);
+  for(auto iter = lo_vc->begin(); iter < lo_vc->end(); iter++) { // cppcheck-suppress nullPointer
+    std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> inter = result;
+    result = std::make_shared<tchecker::zone_container_t<virtual_constraint_t>>(dim);
 
     for(auto inter_iter = inter->begin(); inter_iter < inter->end(); inter_iter++) {
-      tchecker::zone_container_t<virtual_constraint_t> *lhs_land_not_rhs = combine_lhs_land_not_rhs(*inter_iter, *iter, dim);
+      std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> lhs_land_not_rhs = combine_lhs_land_not_rhs(*inter_iter, *iter, dim);
       for(auto land_iter = lhs_land_not_rhs->begin(); land_iter < lhs_land_not_rhs->end(); land_iter++) {
         result->append_zone(*land_iter);
       }
     }
-    delete inter;
   }
 
   return result;
 
 }
 
-tchecker::zone_container_t<virtual_constraint_t> * combine(std::vector<tchecker::zone_container_t<virtual_constraint_t>> & lo_lo_vc, tchecker::clock_id_t dim)
+std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> combine(std::vector<tchecker::zone_container_t<virtual_constraint_t>> & lo_lo_vc, tchecker::clock_id_t dim)
 {
   if(lo_lo_vc.empty()) {
-    return new tchecker::zone_container_t<virtual_constraint_t>(dim);
+    return std::make_shared<tchecker::zone_container_t<virtual_constraint_t>>(dim);
   }
 
   tchecker::zone_container_t<virtual_constraint_t> cur = lo_lo_vc.back();
   lo_lo_vc.pop_back();
 
-  tchecker::zone_container_t<virtual_constraint_t> *result = combine(lo_lo_vc, dim);
+  std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> result = combine(lo_lo_vc, dim);
 
   for(auto cur_iter = cur.begin(); cur_iter < cur.end(); cur_iter++) {
-    tchecker::zone_container_t<virtual_constraint_t> *inter = combine_helper(*cur_iter, result, dim);
-    delete result;
-    result = inter;
+    std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> result = combine_helper(*cur_iter, result, dim);
   }
   return result;
 }

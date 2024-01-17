@@ -9,6 +9,7 @@
 #define TCHECKER_ZG_ZONE_CONTAINER_HH
 
 #include <iterator>
+#include <memory>
 
 #include "tchecker/zg/zone.hh"
 #include "tchecker/vcg/virtual_constraint.hh"
@@ -34,13 +35,13 @@ public:
    \brief Constructor
    \param dim : dimension
    */
-  zone_container_t(tchecker::clock_id_t dim) : _dim(dim){ }
+  zone_container_t<T>(tchecker::clock_id_t dim) : _dim(dim){ }
 
   /*!
    \brief Copy Constructor
    \param container : the container to copy
    */
-  zone_container_t(zone_container_t &t) : _dim(t.dim()), _storage(0)
+  zone_container_t<T>(zone_container_t<T> &t) : _dim(t.dim()), _storage(0)
   {
     for(auto iter = t.begin(); iter < t.end(); iter++) {
       this->append_zone(*(*iter));
@@ -162,7 +163,7 @@ public:
   /*!
    \brief Destructor
    */
-  ~zone_container_t()
+  ~zone_container_t<T>()
   {
     for(auto iter = begin(); iter < end(); ++iter) {
       destruct_element(*iter);
@@ -193,7 +194,7 @@ std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> zone_contain
  \param a vector of vector of zones
  \return a vector of zones
  */
-zone_container_t<tchecker::zg::zone_t> contained_in_all(std::vector<zone_container_t<tchecker::zg::zone_t>> & zones, tchecker::clock_id_t dim);
+std::shared_ptr<zone_container_t<tchecker::zg::zone_t>> contained_in_all(std::vector<zone_container_t<tchecker::zg::zone_t>> & zones, tchecker::clock_id_t dim);
 
 
 } // end of namespace tchecker

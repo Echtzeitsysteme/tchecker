@@ -9,33 +9,29 @@
 
 namespace tchecker {
 
-zone_container_t<tchecker::zg::zone_t> contained_in_all(std::vector<zone_container_t<tchecker::zg::zone_t>> & zones, tchecker::clock_id_t dim)
+std::shared_ptr<zone_container_t<tchecker::zg::zone_t>> contained_in_all(std::vector<zone_container_t<tchecker::zg::zone_t>> & zones, tchecker::clock_id_t dim)
 {
 
   if (zones.empty()) {
-    zone_container_t<tchecker::zg::zone_t> result(dim);
-    return result;
+    return std::make_shared<zone_container_t<tchecker::zg::zone_t>>(dim);
   }
 
   if (1 == zones.size()) {
-    return zones[0];
+    return std::make_shared<zone_container_t<tchecker::zg::zone_t>>(zones[0]);
   }
 
   zone_container_t<tchecker::zg::zone_t> cur = zones.back();
   zones.pop_back();
 
-  zone_container_t<tchecker::zg::zone_t> inter = contained_in_all(zones, dim);
+  std::shared_ptr<zone_container_t<tchecker::zg::zone_t>> inter = std::make_shared<zone_container_t<tchecker::zg::zone_t>>(*contained_in_all(zones, dim));
 
-  zone_container_t<tchecker::zg::zone_t> result{dim};
+  std::shared_ptr<zone_container_t<tchecker::zg::zone_t>> result = std::make_shared<zone_container_t<tchecker::zg::zone_t>>(dim);
 
   for(auto iter_cur = cur.begin(); iter_cur < cur.end(); iter_cur++) {
-    for(auto iter_inter = inter.begin(); iter_inter < inter.end(); iter_inter++) {
+    for(auto iter_inter = inter->begin(); iter_inter < inter->end(); iter_inter++) {
       std::shared_ptr<tchecker::zg::zone_t> tmp = tchecker::zg::factory(dim);
       if(tchecker::dbm::NON_EMPTY == tchecker::dbm::intersection(tmp->dbm(), (**iter_cur).dbm(), (**iter_inter).dbm(), (**iter_cur).dim())) {
-        result.append_zone(tmp);
-      }
-      else {
-        tchecker::zg::zone_t::destruct(&(*tmp));
+        result->append_zone(tmp);
       }
     }
   }

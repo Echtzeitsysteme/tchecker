@@ -67,7 +67,7 @@ public:
    *  forall u with u does not model this exists a vc in result such that u models vc
    *  (for u in ({\chi_0, ..., \chi_{|C_A| + | C_B| - 1}} \rightarrow T))
    */
-  tchecker::zone_container_t<virtual_constraint_t> * neg() const;
+  std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> neg() const;
 
  /*
   \brief iterates through the container and logically ands each element with this
@@ -109,7 +109,7 @@ void destruct(virtual_constraint_t *to_destruct);
  \param a vector of vector of virtual constraints
  \return a vector of virtual constraints
  */
-tchecker::zone_container_t<virtual_constraint_t> *combine(std::vector<tchecker::zone_container_t<virtual_constraint_t>> & lo_lo_vc, tchecker::clock_id_t dim);
+std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> combine(std::vector<tchecker::zone_container_t<virtual_constraint_t>> & lo_lo_vc, tchecker::clock_id_t dim);
 
 } // end of namespace virtual_constraint
 
