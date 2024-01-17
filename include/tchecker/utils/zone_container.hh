@@ -40,7 +40,7 @@ public:
    \brief Copy Constructor
    \param container : the container to copy
    */
-  zone_container_t(zone_container_t &t) : _dim(t.dim())
+  zone_container_t(zone_container_t &t) : _dim(t.dim()), _storage(0)
   {
     for(auto iter = t.begin(); iter < t.end(); iter++) {
       this->append_zone(*(*iter));
@@ -56,9 +56,9 @@ public:
    \brief factory functions to be used by the append functions
    \note need for specialisation here!
   */
-  std::shared_ptr<T> create_element() {};
+  std::shared_ptr<T> create_element();
 
-  std::shared_ptr<T> create_element(T const &zone) {};
+  std::shared_ptr<T> create_element(T const &zone);
 
   /*!
    \brief destructor of zone. Calling the destructor of tchecker::zg::zone_t

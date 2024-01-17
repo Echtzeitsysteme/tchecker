@@ -55,6 +55,7 @@ cd build
 cmake -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} \
       -DCMAKE_CXX_COMPILER=${CXX} \
       -DCMAKE_BUILD_TYPE=${TCHECKER_BUILD_TYPE} \
+      -DUSE_CPPCHECK=1 \
       ${TEST_CONF} \
       ..
 
