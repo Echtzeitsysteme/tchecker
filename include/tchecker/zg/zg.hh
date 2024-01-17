@@ -8,28 +8,13 @@
 #ifndef TCHECKER_ZG_HH
 #define TCHECKER_ZG_HH
 
-#include <cstdlib>
-
-#include "tchecker/basictypes.hh"
-#include "tchecker/clockbounds/clockbounds.hh"
-#include "tchecker/syncprod/vedge.hh"
-#include "tchecker/syncprod/vloc.hh"
-#include "tchecker/ta/system.hh"
+#include "tchecker/extrapolation/extrapolation.hh"
+#include "tchecker/extrapolation/extrapolation_factory.hh"
 #include "tchecker/ta/ta.hh"
-#include "tchecker/ts/builder.hh"
-#include "tchecker/ts/bwd.hh"
 #include "tchecker/ts/fwd.hh"
-#include "tchecker/ts/inspector.hh"
-#include "tchecker/ts/sharing.hh"
-#include "tchecker/utils/shared_objects.hh"
-#include "tchecker/variables/clocks.hh"
-#include "tchecker/variables/intvars.hh"
+#include "tchecker/ts/bwd.hh"
 #include "tchecker/zg/allocators.hh"
-#include "tchecker/zg/extrapolation.hh"
 #include "tchecker/zg/semantics.hh"
-#include "tchecker/zg/state.hh"
-#include "tchecker/zg/transition.hh"
-#include "tchecker/zg/zone.hh"
 
 /*!
  \file zg.hh
@@ -53,77 +38,10 @@ using initial_iterator_t = tchecker::ta::initial_iterator_t;
 using initial_range_t = tchecker::ta::initial_range_t;
 
 /*!
- \brief Accessor to initial edges
- \param system : a system
- \return initial edges
- */
-inline tchecker::zg::initial_range_t initial_edges(tchecker::ta::system_t const & system)
-{
-  return tchecker::ta::initial_edges(system);
-}
-
-/*!
  \brief Dereference type for iterator over initial states
  */
 using initial_value_t = tchecker::ta::initial_value_t;
 
-// Initial states
-
-/*!
- \brief Compute initial state
- \param system : a system
- \param vloc : tuple of locations
- \param intval : valuation of bounded integer variables
- \param zone : a DBM zone
- \param vedge : tuple of edges
- \param invariant : clock constraint container for initial state invariant
- \param semantics : a zone semantics
- \param extrapolation : an extrapolation
- \param initial_range : range of initial state valuations
- \pre the size of vloc and vedge is equal to the size of initial_range.
- initial_range has been obtained from system.
- initial_range yields the initial locations of all the processes ordered by increasing process identifier
- \post vloc has been initialized to the tuple of initial locations in initial_range,
- intval has been initialized to the initial valuation of bounded integer variables,
- vedge has been initialized to an empty tuple of edges.
- clock constraints from initial_range invariant have been aded to invariant
- zone has been initialized to the initial set of clock valuations according to
- semantics and extrapolation.
- \return tchecker::STATE_OK if initialization succeeded,
- tchecker::STATE_INTVARS_SRC_INVARIANT_VIOLATED if the initial valuation of integer
- variables does not satisfy invariant
- tchecker::STATE_CLOCKS_SRC_INVARIANT_VIOLATED if the initial zone is empty
- \throw std::runtime_error : if evaluation of invariant throws an exception
- */
-tchecker::state_status_t initial(tchecker::ta::system_t const & system,
-                                 tchecker::intrusive_shared_ptr_t<tchecker::shared_vloc_t> const & vloc,
-                                 tchecker::intrusive_shared_ptr_t<tchecker::shared_intval_t> const & intval,
-                                 tchecker::intrusive_shared_ptr_t<tchecker::zg::shared_zone_t> const & zone,
-                                 tchecker::intrusive_shared_ptr_t<tchecker::shared_vedge_t> const & vedge,
-                                 tchecker::clock_constraint_container_t & invariant, tchecker::zg::semantics_t & semantics,
-                                 tchecker::zg::extrapolation_t & extrapolation,
-                                 tchecker::zg::initial_value_t const & initial_range);
-
-/*!
- \brief Compute initial state and transition
- \param system : a system
- \param s : state
- \param t : transition
- \param semantics : a zone semantics
- \param extrapolation : an extrapolation
- \param v : initial iterator value
- \post s has been initialized from v, and t is an empty transition
- \return tchecker::STATE_OK if initialization of s and t succeeded, see
- tchecker::zg::initial for returned values when initialization fails
- \throw std::invalid_argument : if s and v have incompatible sizes
-*/
-inline tchecker::state_status_t initial(tchecker::ta::system_t const & system, tchecker::zg::state_t & s,
-                                        tchecker::zg::transition_t & t, tchecker::zg::semantics_t & semantics,
-                                        tchecker::zg::extrapolation_t & extrapolation, tchecker::zg::initial_value_t const & v)
-{
-  return tchecker::zg::initial(system, s.vloc_ptr(), s.intval_ptr(), s.zone_ptr(), t.vedge_ptr(), t.src_invariant_container(),
-                               semantics, extrapolation, v);
-}
 
 // Final edges
 
@@ -141,77 +59,9 @@ using final_iterator_t = tchecker::ta::final_iterator_t;
 using final_range_t = tchecker::ta::final_range_t;
 
 /*!
- \brief Accessor to final edges
- \param system : a system
- \param labels : a set of labels
- \return range of final edges, i.e. edges to tuple of locations that match labels
- */
-inline tchecker::zg::final_range_t final_edges(tchecker::ta::system_t const & system, boost::dynamic_bitset<> const & labels)
-{
-  return tchecker::ta::final_edges(system, labels);
-}
-
-/*!
  \brief Dereference type for iterator over final edges
  */
 using final_value_t = tchecker::ta::final_value_t;
-
-// Final states
-
-/*!
- \brief Compute final state
- \param system : a system
- \param vloc : tuple of locations
- \param intval : valuation of bounded integer variables
- \param zone : a DBM zone
- \param vedge : tuple of edges
- \param invariant : clock constraint container for initial state invariant
- \param semantics : a zone semantics
- \param extrapolation : an extrapolation
- \param final_range : range of final edges value
- \pre the size of vloc and vedge is equal to the size of final_range.
- final_range has been obtained from system.
- final_range yields a final location to all the processes ordered by increasing process identifier
- \post vloc has been initialized to the tuple locations in final_range,
- intval has been initialized to the valuation of bounded integer variables in final_range.
- vedge has been initialized to an empty tuple of edges.
- clock constraints from final_range invariant have been aded to invariant
- zone has been initialized to the final set of clock valuations according to
- semantics and extrapolation.
- \return tchecker::STATE_OK if computation succeeded,
- tchecker::STATE_INTVARS_TGT_INVARIANT_VIOLATED if the valuation of integer variables
- does not satisfy invariant
- tchecker::STATE_CLOCKS_TGT_INVARIANT_VIOLATED if the final zone is empty
- \throw std::runtime_error : if evaluation of invariant throws an exception
- */
-tchecker::state_status_t final(tchecker::ta::system_t const & system,
-                               tchecker::intrusive_shared_ptr_t<tchecker::shared_vloc_t> const & vloc,
-                               tchecker::intrusive_shared_ptr_t<tchecker::shared_intval_t> const & intval,
-                               tchecker::intrusive_shared_ptr_t<tchecker::zg::shared_zone_t> const & zone,
-                               tchecker::intrusive_shared_ptr_t<tchecker::shared_vedge_t> const & vedge,
-                               tchecker::clock_constraint_container_t & invariant, tchecker::zg::semantics_t & semantics,
-                               tchecker::zg::extrapolation_t & extrapolation, tchecker::zg::final_value_t const & final_range);
-
-/*!
- \brief Compute final state and transition
- \param system : a system
- \param s : state
- \param t : transition
- \param semantics : a zone semantics
- \param extrapolation : an extrapolation
- \param v : final iterator value
- \post s has been initialized from v, and t is an empty transition
- \return tchecker::STATE_OK if initialization of s and t succeeded, see
- tchecker::zg::final for returned values when computation fails
- \throw std::invalid_argument : if s and v have incompatible sizes
-*/
-inline tchecker::state_status_t final(tchecker::ta::system_t const & system, tchecker::zg::state_t & s,
-                                      tchecker::zg::transition_t & t, tchecker::zg::semantics_t & semantics,
-                                      tchecker::zg::extrapolation_t & extrapolation, tchecker::zg::final_value_t const & v)
-{
-  return tchecker::zg::final(system, s.vloc_ptr(), s.intval_ptr(), s.zone_ptr(), t.vedge_ptr(), t.src_invariant_container(),
-                             semantics, extrapolation, v);
-}
 
 // Outgoing edges
 
@@ -226,114 +76,10 @@ using outgoing_edges_iterator_t = tchecker::ta::outgoing_edges_iterator_t;
 using outgoing_edges_range_t = tchecker::ta::outgoing_edges_range_t;
 
 /*!
- \brief Accessor to outgoing edges
- \param system : a system
- \param vloc : tuple of locations
- \return range of outgoing synchronized and asynchronous edges from vloc in system
- */
-inline tchecker::zg::outgoing_edges_range_t
-outgoing_edges(tchecker::ta::system_t const & system,
-               tchecker::intrusive_shared_ptr_t<tchecker::shared_vloc_t const> const & vloc)
-{
-  return tchecker::ta::outgoing_edges(system, vloc);
-}
-
-/*!
  \brief Type of outgoing vedge (range of synchronized/asynchronous edges)
  */
 using outgoing_edges_value_t = tchecker::ta::outgoing_edges_value_t;
 
-// Next states
-
-/*!
- \brief Compute next state
- \param system : a system
- \param vloc : tuple of locations
- \param intval : valuation of bounded integer variables
- \param zone : a DBM zone
- \param vedge : tuple of edges
- \param src_invariant : clock constraint container for invariant of vloc before
- it is updated
- \param guard : clock constraint container for guard of vedge
- \param reset : clock resets container for clock resets of vedge
- \param tgt_invariant : clock constaint container for invariant of vloc after it
- is updated
- \param semantics : a zone semantics
- \param extrapolation : an extrapolation
- \param edges : tuple of edge from vloc (range of synchronized/asynchronous edges)
- \pre the source location in edges match the locations in vloc.
- No process has more than one edge in edges.
- The pid of every process in edges is less than the size of vloc
- \post the locations in vloc have been updated to target locations of the
- processes involved in edges, and they have been left unchanged for the other
- processes.
- The values of variables in intval have been updated according to the statements
- in edges.
- Clock constraints from the invariants of vloc before it is updated have been
- pushed to src_invariant.
- Clock constraints from the guards in edges have been pushed into guard.
- Clock resets from the statements in edges have been pushed into reset.
- Clock constraints from the invariants in the updated vloc have been pushed
- into tgt_invariant.
- The zone has been updated according to semantics and extrapolation from
- src_invariant, guard, reset, tgt_invariant (and delay)
- \return tchecker::STATE_OK if state computation succeeded,
- tchecker::STATE_INCOMPATIBLE_EDGE if the source locations in edges do not match
- vloc,
- tchecker::STATE_INTVARS_SRC_INVARIANT_VIOLATED if the valuation intval does not
- satisfy the invariant in vloc,
- tchecker::STATE_CLOCKS_SRC_INVARIANT_VIOLATED if the zone does not satisfy the
- invariant in vloc
- tchecker::STATE_INTVARS_GUARD_VIOLATED if the values in intval do not satisfy
- the guard of edges,
- tchecker::STATE_CLOCKS_GUARD_VIOLATED if the zone updated w.r.t. src_invariant
- does not satisfy the guard of the edges
- tchecker::STATE_INTVARS_STATEMENT_FAILED if statements in edges cannot be
- applied to intval
- tchecker::STATE_INTVARS_TGT_INVARIANT_VIOLATED if the updated intval does not
- satisfy the invariant of updated vloc.
- tchecker::STATE_CLOCKS_TGT_INVARIANT_VIOLATED if the updated zone does not
- satisfy the invariant of updated vloc
- \throw std::invalid_argument : if a pid in edges is greater or equal to the
- size of vloc
- \throw std::runtime_error : if the guard in edges generates clock resets, or if
- the statements in edges generate clock constraints, or if the invariant in
- updated vloc generates clock resets
- \throw std::runtime_error : if evaluation of invariants, guards or statements
- throws an exception
- */
-tchecker::state_status_t next(tchecker::ta::system_t const & system,
-                              tchecker::intrusive_shared_ptr_t<tchecker::shared_vloc_t> const & vloc,
-                              tchecker::intrusive_shared_ptr_t<tchecker::shared_intval_t> const & intval,
-                              tchecker::intrusive_shared_ptr_t<tchecker::zg::shared_zone_t> const & zone,
-                              tchecker::intrusive_shared_ptr_t<tchecker::shared_vedge_t> const & vedge,
-                              tchecker::clock_constraint_container_t & src_invariant,
-                              tchecker::clock_constraint_container_t & guard, tchecker::clock_reset_container_t & reset,
-                              tchecker::clock_constraint_container_t & tgt_invariant, tchecker::zg::semantics_t & semantics,
-                              tchecker::zg::extrapolation_t & extrapolation,
-                              tchecker::zg::outgoing_edges_value_t const & edges);
-
-/*!
- \brief Compute next state and transition
- \param system : a system
- \param s : state
- \param t : transition
- \param semantics : a zone semantics
- \param extrapolation : an extrapolation
- \param v : outgoing edge value
- \post s have been updated from v according to semantics and extrapolation, and
- t is the set of edges in v
- \return status of state s after update (see tchecker::zg::next)
- \throw std::invalid_argument : if s and v have incompatible size
-*/
-inline tchecker::state_status_t next(tchecker::ta::system_t const & system, tchecker::zg::state_t & s,
-                                     tchecker::zg::transition_t & t, tchecker::zg::semantics_t & semantics,
-                                     tchecker::zg::extrapolation_t & extrapolation,
-                                     tchecker::zg::outgoing_edges_value_t const & v)
-{
-  return tchecker::zg::next(system, s.vloc_ptr(), s.intval_ptr(), s.zone_ptr(), t.vedge_ptr(), t.src_invariant_container(),
-                            t.guard_container(), t.reset_container(), t.tgt_invariant_container(), semantics, extrapolation, v);
-}
 
 // Incoming edges
 
@@ -351,242 +97,17 @@ using incoming_edges_iterator_t = tchecker::ta::incoming_edges_iterator_t;
 using incoming_edges_range_t = tchecker::ta::incoming_edges_range_t;
 
 /*!
- \brief Accessor to incoming edges
- \param system : a system
- \param vloc : tuple of locations
- \return range of incoming synchronized and asynchronous edges to vloc in system
- */
-inline tchecker::zg::incoming_edges_range_t
-incoming_edges(tchecker::ta::system_t const & system,
-               tchecker::intrusive_shared_ptr_t<tchecker::shared_vloc_t const> const & vloc)
-{
-  return tchecker::ta::incoming_edges(system, vloc);
-}
-
-/*!
  \brief Type of incoming tuple of edges (range of synchronized/asynchronous edges)
  */
 using incoming_edges_value_t = tchecker::ta::incoming_edges_value_t;
 
-// Previous states
-
 /*!
- \brief Compute previous state
- \param system : a system
- \param vloc : tuple of locations
- \param intval : valuation of bounded integer variables
- \param zone : a DBM zone
- \param vedge : tuple of edges
- \param src_invariant : clock constraint container for source invariant
- \param guard : clock constraint container for guard of vedge
- \param reset : clock resets container for clock resets of vedge
- \param tgt_invariant : clock constaint container for target invariant
- \param semantics : a zone semantics
- \param extrapolation : an extrapolation
- \param edges : tuple of incoming edges to vloc (range of synchronized/asynchronous edges)
- \pre the target locations in edges match the locations in vloc.
- No process has more than one edge in edges.
- The pid of every process in edges is less than the size of vloc
- \post the locations in vloc have been updated to source locations of the
- processes involved in edges, and they have been left unchanged for the other
- processes.
- The values of variables in intval have been updated according to the statements
- in edges.
- Clock constraints from the source invariant have been pushed to src_invariant.
- Clock constraints from the guards in edges have been pushed into guard.
- Clock resets from the statements in edges have been pushed into reset.
- Clock constraints from the target invariants have been pushed into tgt_invariant.
- The zone has been updated according to semantics and extrapolation from
- src_invariant, guard, reset, tgt_invariant (and delay)
- \return tchecker::STATE_OK if state computation succeeded,
- tchecker::STATE_INCOMPATIBLE_EDGE if the target locations in edges do not match
- vloc or if the bounded integer variables valuation in edges does not transform into
- intval going through edges,
- tchecker::STATE_INTVARS_SRC_INVARIANT_VIOLATED if the updated intval does not satisfy
- the source invariant
- tchecker::STATE_CLOCKS_SRC_INVARIANT_VIOLATED if the updated zone does not satisfy the
- source invariant,
- tchecker::STATE_INTVARS_GUARD_VIOLATED if the updated intval do not satisfy the guard
- of edges,
- tchecker::STATE_CLOCKS_GUARD_VIOLATED if the updated zone does not satisfy the guard
- of the edges
- tchecker::STATE_INTVARS_STATEMENT_FAILED if statements in edges cannot be
- applied to intval
- tchecker::STATE_INTVARS_TGT_INVARIANT_VIOLATED if intval does not satisfy the target
- invariant
- tchecker::STATE_CLOCKS_TGT_INVARIANT_VIOLATED if the zone does not satisfy the target
- invariant
- \throw std::invalid_argument : if a pid in edges is greater or equal to the
- size of vloc
- \throw std::runtime_error : if the guard in edges generates clock resets, or if
- the statements in edges generate clock constraints, or if the invariant in
- updated vloc generates clock resets
- \throw std::runtime_error : if evaluation of invariants, guards or statements
- throws an exception
- */
-tchecker::state_status_t prev(tchecker::ta::system_t const & system,
-                              tchecker::intrusive_shared_ptr_t<tchecker::shared_vloc_t> const & vloc,
-                              tchecker::intrusive_shared_ptr_t<tchecker::shared_intval_t> const & intval,
-                              tchecker::intrusive_shared_ptr_t<tchecker::zg::shared_zone_t> const & zone,
-                              tchecker::intrusive_shared_ptr_t<tchecker::shared_vedge_t> const & vedge,
-                              tchecker::clock_constraint_container_t & src_invariant,
-                              tchecker::clock_constraint_container_t & guard, tchecker::clock_reset_container_t & reset,
-                              tchecker::clock_constraint_container_t & tgt_invariant, tchecker::zg::semantics_t & semantics,
-                              tchecker::zg::extrapolation_t & extrapolation,
-                              tchecker::zg::incoming_edges_value_t const & edges);
-
-/*!
- \brief Compute previous state and transition
- \param system : a system
- \param s : state
- \param t : transition
- \param semantics : a zone semantics
- \param extrapolation : an extrapolation
- \param v : incoming edge value
- \post s have been updated from v according to semantics and extrapolation, and
- t is the set of edges in v
- \return status of state s after update (see tchecker::zg::prev)
- \throw std::invalid_argument : if s and v have incompatible size
-*/
-inline tchecker::state_status_t prev(tchecker::ta::system_t const & system, tchecker::zg::state_t & s,
-                                     tchecker::zg::transition_t & t, tchecker::zg::semantics_t & semantics,
-                                     tchecker::zg::extrapolation_t & extrapolation,
-                                     tchecker::zg::incoming_edges_value_t const & v)
-{
-  return tchecker::zg::prev(system, s.vloc_ptr(), s.intval_ptr(), s.zone_ptr(), t.vedge_ptr(), t.src_invariant_container(),
-                            t.guard_container(), t.reset_container(), t.tgt_invariant_container(), semantics, extrapolation, v);
-}
-
-// Inspector
-
-/*!
- \brief Computes the set of labels of a state
- \param system : a system
- \param s : a state
- \return the set of labels on state s
-*/
-boost::dynamic_bitset<> labels(tchecker::ta::system_t const & system, tchecker::zg::state_t const & s);
-
-/*!
- \brief Checks is a state is a valid final state
- \param system : a system
- \param s : a state
- \return true if s has a non-empty zone, false otherwise
-*/
-bool is_valid_final(tchecker::ta::system_t const & system, tchecker::zg::state_t const & s);
-
-/*!
- \brief Checks if a zone contains an initial valuation
- \param system : a system
- \param zone : a DBM zone
- \pre the dimension of zone corresponds to the number of flattened clock variables
- in system plus one (checked by assertion)
- \return true if zone contains the initial valuation where all clocks are equal to zero,
- false otherwise
-*/
-bool is_initial(tchecker::ta::system_t const & system, tchecker::zg::zone_t const & zone);
-
-/*!
- \brief Checks if a state is initial
- \param system : a system
- \param s : a state
- \pre s is a state computed from system
- \return true if s is an initial state in system, false otherwise
-*/
-bool is_initial(tchecker::ta::system_t const & system, tchecker::zg::state_t const & s);
-
-// Attributes
-
-/*!
- \brief Accessor to state attributes as strings
- \param system : a system
- \param s : a state
- \param m : a map of string pairs (key, value)
- \post the tuple of locations, the integer variables valuation and the zone in
- s have been added to map m
- */
-void attributes(tchecker::ta::system_t const & system, tchecker::zg::state_t const & s, std::map<std::string, std::string> & m);
-
-/*!
- \brief Accessor to transition attributes as strings
- \param system : a system
- \param t : a transition
- \param m : a map of string pairs (key, value)
- \post the tuple of edges in t has been added to map m
- */
-void attributes(tchecker::ta::system_t const & system, tchecker::zg::transition_t const & t,
-                std::map<std::string, std::string> & m);
-
-// Initialize
-
-/*!
- \brief Initialization from attributes
- \param system : a system
- \param vloc : a vector of locations
- \param intval : valuation of bounded integer variables
- \param zone : a DBM zone
- \param vedge : a vector of edges
- \param invariant : clock constraint container for state invariant
- \param attributes : map of attributes
- \pre attributes["vloc"] is defined and follows the syntax required by function
- tchecker::from_string(tchecker::vloc_t &, tchecker::system::system_t const &, std::string const &);
- attributes["inval"] is defined and follows the syntax required by function
- tchecker::from_string(tchecker::intval_t &, tchecker::system::system_t const &, std::string const &);
- attributes["zone"] is defined and follows the syntax required by function
- tchecker::from_string(tchecker::clock_constraint_container_t &, tchecker::clock_variables_t const &,
- std::string const &);
- \post vloc has been initialized from attributes["vloc"]
- intval has been initialized from attributes["intval"]
- zone has been initialized from attributes["zone"] and invariant
- vedge has been initialized to the empty vector of edges
- and invariant contains the invariant in vloc
- \return tchecker::STATE_OK if initialization succeeded
- tchecker::STATE_BAD if initialization failed
- tchecker::STATE_INTVARS_SRC_INVARIANT_VIOLATED if attributes["intval"] does not satisfy the invariant in
- vloc
- tchecker::STATE_CLOCKS_SRC_INVARIANT_VIOLATED if attributes["zone"] intersected with the invariant in
- vloc is empty
- */
-tchecker::state_status_t initialize(tchecker::ta::system_t const & system,
-                                    tchecker::intrusive_shared_ptr_t<tchecker::shared_vloc_t> const & vloc,
-                                    tchecker::intrusive_shared_ptr_t<tchecker::shared_intval_t> const & intval,
-                                    tchecker::intrusive_shared_ptr_t<tchecker::zg::shared_zone_t> const & zone,
-                                    tchecker::intrusive_shared_ptr_t<tchecker::shared_vedge_t> const & vedge,
-                                    tchecker::clock_constraint_container_t & invariant,
-                                    std::map<std::string, std::string> const & attributes);
-
-/*!
- \brief Initialization from attributes
- \param system : a system
- \param s : state
- \param t : transition
- \param attributes : map of attributes
- \post s and t have been initialized from attributes["vloc"], attributes["intval"] and attributes["zone"]
- the src invariant container in t contains the invariant of state s
- \return tchecker::STATE_OK if initialization succeeded
- tchecker::STATE_BAD otherwise
- tchecker::STATE_INTVARS_SRC_INVARIANT_VIOLATED if attributes["intval"] does not satisfy the invariant in
- attributes["vloc"]
- tchecker::STATE_CLOCKS_SRC_INVARIANT_VIOLATED if attributes["zone"] intersected with the invariant in
- vloc is empty
-*/
-inline tchecker::state_status_t initialize(tchecker::ta::system_t const & system, tchecker::zg::state_t & s,
-                                           tchecker::zg::transition_t & t,
-                                           std::map<std::string, std::string> const & attributes)
-{
-  return tchecker::zg::initialize(system, s.vloc_ptr(), s.intval_ptr(), s.zone_ptr(), t.vedge_ptr(),
-                                  t.src_invariant_container(), attributes);
-}
-
-// zg_t
-
-/*!
- \class zg_t
+ \class zg_helper_t
  \brief Transition system of the zone graph over system of timed processes with
  state and transition allocation
  \note all returned states and transitions are deallocated automatically
  */
-class zg_t final : public tchecker::ts::fwd_t<tchecker::zg::state_sptr_t, tchecker::zg::const_state_sptr_t,
+class zg_t : public tchecker::ts::fwd_t<tchecker::zg::state_sptr_t, tchecker::zg::const_state_sptr_t,
                                               tchecker::zg::transition_sptr_t, tchecker::zg::const_transition_sptr_t>,
                    public tchecker::ts::bwd_t<tchecker::zg::state_sptr_t, tchecker::zg::const_state_sptr_t,
                                               tchecker::zg::transition_sptr_t, tchecker::zg::const_transition_sptr_t>,
@@ -620,6 +141,7 @@ public:
   using inspector_t = tchecker::ts::inspector_t<tchecker::zg::const_state_sptr_t, tchecker::zg::const_transition_sptr_t>;
   using sharing_t = tchecker::ts::sharing_t<tchecker::zg::state_sptr_t, tchecker::zg::transition_sptr_t>;
 
+
   using sst_t = fwd_t::sst_t;
   using state_t = fwd_t::state_t;
   using const_state_t = fwd_t::const_state_t;
@@ -634,6 +156,7 @@ public:
   using incoming_edges_range_t = bwd_impl_t::incoming_edges_range_t;
   using incoming_edges_value_t = bwd_impl_t::incoming_edges_value_t;
 
+
   /*!
    \brief Constructor
    \param system : a system of timed processes
@@ -646,17 +169,24 @@ public:
    */
   zg_t(std::shared_ptr<tchecker::ta::system_t const> const & system, enum tchecker::ts::sharing_type_t sharing_type,
        std::shared_ptr<tchecker::zg::semantics_t> const & semantics,
-       std::shared_ptr<tchecker::zg::extrapolation_t> const & extrapolation, std::size_t block_size, std::size_t table_size);
+       std::shared_ptr<tchecker::zg::extrapolation_t> const & extrapolation, std::size_t block_size, std::size_t table_size)
+    : _system(system), _sharing_type(sharing_type), _semantics(semantics), _extrapolation(extrapolation),
+      _state_allocator(block_size, block_size, _system->processes_count(), block_size,
+                       _system->intvars_count(tchecker::VK_FLATTENED), block_size,
+                       _system->clocks_count(tchecker::VK_FLATTENED) + 1, table_size),
+      _transition_allocator(block_size, block_size, _system->processes_count(), table_size)
+  {
+  }
 
   /*!
    \brief Copy constructor (deleted)
    */
-  zg_t(tchecker::zg::zg_t const &) = delete;
+  zg_t(zg_t const &) = delete;
 
   /*!
    \brief Move constructor (deleted)
    */
-  zg_t(tchecker::zg::zg_t &&) = delete;
+  zg_t(zg_t &&) = delete;
 
   /*!
    \brief Destructor
@@ -666,12 +196,12 @@ public:
   /*!
    \brief Assignment operator (deleted)
    */
-  tchecker::zg::zg_t & operator=(tchecker::zg::zg_t const &) = delete;
+  zg_t & operator=(zg_t const &) = delete;
 
   /*!
    \brief Move-assignment operator (deleted)
    */
-  tchecker::zg::zg_t & operator=(tchecker::zg::zg_t &&) = delete;
+  zg_t & operator=(zg_t &&) = delete;
 
   using fwd_t::state;
   using fwd_t::status;
@@ -730,6 +260,7 @@ public:
    */
   virtual void next(tchecker::zg::const_state_sptr_t const & s, outgoing_edges_value_t const & out_edge, std::vector<sst_t> & v,
                     tchecker::state_status_t mask = tchecker::STATE_OK);
+
 
   /*!
   \brief Next states and transitions with selected status
@@ -859,6 +390,7 @@ public:
   void split(tchecker::zg::const_state_sptr_t const & s, tchecker::clock_constraint_t const & c,
              std::vector<tchecker::zg::state_sptr_t> & v);
 
+
   /*!
    \brief Split a state according to a list of clock constraints
    \param s : state
@@ -869,6 +401,7 @@ public:
    */
   void split(tchecker::zg::const_state_sptr_t const & s, tchecker::clock_constraint_container_t const & constraints,
              std::vector<tchecker::zg::state_sptr_t> & v);
+
 
   // Inspector
 
@@ -945,7 +478,41 @@ public:
   */
   inline enum tchecker::ts::sharing_type_t sharing_type() const { return _sharing_type; }
 
+  /*!
+   \brief Accessor
+   \return number of clocks
+   */
+  inline tchecker::clock_id_t clocks_count()  { return _system->clocks_count(tchecker::VK_FLATTENED);  }
+
 private:
+
+  /*!
+   \brief High-Order function to shorten the handling of states and transitions
+   \param edge : the parameter for the ta function
+   \param v : container
+   \param mask : mask on states
+   \param ta_func : the function regarding the TA
+   \param se_func : the function regarding the semantics
+   \param to_clone : the state to clone (if clone is false, this can be nullptr. otherwise it cant)
+   \param clone : whether to_clone should be cloned or a new state shall be used
+   \post the new sst was added to v
+   */
+  template<typename edge_t, typename helping_hand_t>
+  void sst_handler( edge_t edge, std::vector<sst_t> & v, tchecker::state_status_t mask,
+                    tchecker::state_status_t (*ta_func)(tchecker::ta::system_t const &,
+                                                        tchecker::zg::state_sptr_t &,
+                                                        tchecker::zg::transition_sptr_t &,
+                                                        edge_t &,
+                                                        helping_hand_t *),
+                   tchecker::state_status_t (*se_func)(  tchecker::ta::system_t const &,
+                                                         tchecker::zg::semantics_t &,
+                                                         tchecker::dbm::db_t *,
+                                                         tchecker::clock_id_t,
+                                                         tchecker::zg::state_sptr_t &,
+                                                        tchecker::zg::transition_sptr_t &,
+                                                         helping_hand_t *),
+                  tchecker::zg::const_state_sptr_t const & to_clone, bool clone
+                  );
   /*!
    \brief Clone and constrain a state
    \param s : a state
@@ -955,6 +522,15 @@ private:
   tchecker::zg::state_sptr_t clone_and_constrain(tchecker::zg::const_state_sptr_t const & s,
                                                  tchecker::clock_constraint_t const & c);
 
+  /*!
+   \brief Clone and constrain a state
+   \param s : a state
+   \param c : a vector of clock constraints
+   \return a clone of s with its zone intersected with c
+   */
+  tchecker::zg::state_sptr_t clone_and_constrain(tchecker::zg::const_state_sptr_t const & s,
+                                                 clock_constraint_container_t const & c);
+
   std::shared_ptr<tchecker::ta::system_t const> _system;           /*!< System of timed processes */
   enum tchecker::ts::sharing_type_t _sharing_type;                 /*!< Sharing of state/transition components */
   std::shared_ptr<tchecker::zg::semantics_t> _semantics;           /*!< Zone semantics */
@@ -962,6 +538,8 @@ private:
   tchecker::zg::state_pool_allocator_t _state_allocator;           /*!< Pool allocator of states */
   tchecker::zg::transition_pool_allocator_t _transition_allocator; /*! Pool allocator of transitions */
 };
+
+/* tools */
 
 /*!
  \brief Compute initial state of a zone graph from a tuple of locations
@@ -971,8 +549,9 @@ private:
  \return the initial state of zg with tuple of locations vloc and status
  compatible with mask if any, nullptr otherwise
  */
-tchecker::zg::state_sptr_t initial(tchecker::zg::zg_t & zg, tchecker::vloc_t const & vloc,
-                                   tchecker::state_status_t mask = tchecker::STATE_OK);
+tchecker::zg::state_sptr_t
+initial(tchecker::zg::zg_t& zg,
+        tchecker::vloc_t const & vloc, tchecker::state_status_t mask = tchecker::STATE_OK);
 
 /*!
  \brief Compute next state and transition from a tuple of edges
@@ -984,42 +563,17 @@ tchecker::zg::state_sptr_t initial(tchecker::zg::zg_t & zg, tchecker::vloc_t con
  along tuple of edges vedge if any, (nullptr, nullptr) otherwise
  */
 std::tuple<tchecker::zg::state_sptr_t, tchecker::zg::transition_sptr_t>
-next(tchecker::zg::zg_t & zg, tchecker::zg::const_state_sptr_t const & s, tchecker::vedge_t const & vedge,
-     tchecker::state_status_t mask = tchecker::STATE_OK);
+next(tchecker::zg::zg_t &zg,
+     tchecker::zg::const_state_sptr_t const & s, tchecker::vedge_t const & vedge, tchecker::state_status_t mask = tchecker::STATE_OK);
 
-/*!
- \brief Factory of zone graphs with clock bounds computed from system
- \param system : system of timed processes
- \param sharing_type : type of sharing
- \param semantics_type : type of zone semantics
- \param extrapolation_type : type of zone extrapolation
- \param block_size : number of objects allocated in a block
- \param table_size : size of hash tables
- \return a zone graph over system with zone semantics and zone extrapolation
- defined from semantics_type and extrapolation_type, and allocation of
- block_size objects at a time, nullptr if clock bounds cannot be inferred from
- system
- */
-tchecker::zg::zg_t * factory(std::shared_ptr<tchecker::ta::system_t const> const & system,
+/* factory */
+
+std::shared_ptr<zg_t> factory(std::shared_ptr<tchecker::ta::system_t const> const & system,
                              enum tchecker::ts::sharing_type_t sharing_type, enum tchecker::zg::semantics_type_t semantics_type,
                              enum tchecker::zg::extrapolation_type_t extrapolation_type, std::size_t block_size,
                              std::size_t table_size);
 
-/*!
- \brief Factory of zone graphs with given clock bounds
- \param system : system of timed processes
- \param sharing_type : type of sharing
- \param semantics_type : type of zone semantics
- \param extrapolation_type : type of zone extrapolation
- \param clock_bounds : clock bounds
- \param block_size : number of objects allocated in a block
- \param table_size : size of hash tables
- \return a zone graph over system with zone semantics and zone extrapolation
- defined from semantics_type, extrapolation_type and clock_bounds, and allocation
- of block_size objects at a time, nullptr if clock bounds cannot be inferred from
- system
- */
-tchecker::zg::zg_t * factory(std::shared_ptr<tchecker::ta::system_t const> const & system,
+std::shared_ptr<zg_t> factory(std::shared_ptr<tchecker::ta::system_t const> const & system,
                              enum tchecker::ts::sharing_type_t sharing_type, enum tchecker::zg::semantics_type_t semantics_type,
                              enum tchecker::zg::extrapolation_type_t extrapolation_type,
                              tchecker::clockbounds::clockbounds_t const & clock_bounds, std::size_t block_size,

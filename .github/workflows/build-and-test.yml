@@ -2,7 +2,7 @@ name: Build and test TChecker
 on:
   push:
     branches:
-      - '*'
+      - '**'
 
 jobs:
   build-and-test-linux:

@@ -162,7 +162,24 @@ public:
    */
   const_array_iterator_t end_array() const;
 
+  /*!
+   \brief This function checks whether all events of this are also
+          contained by other and vice versa.
+   \param my_system : the system this belongs to
+   \param other : the other transition
+   \param other_system: the system other belongs to
+   */
+  bool event_equal(tchecker::system::system_t const & my_system, const vedge_t & other, tchecker::system::system_t const & other_system) const
+    { return this->contains_events(my_system, other, other_system) && other.contains_events(other_system, *this, my_system); }
+
 protected:
+
+  /*!
+   \brief checks, whether this contains transitions with all events of other
+   \param other : the other transition
+   */
+  bool contains_events(const tchecker::system::system_t & my_system, const vedge_t & other, const tchecker::system::system_t & other_system) const;
+
   /*!
    \brief Constructor
    \param size : size of vector of edges

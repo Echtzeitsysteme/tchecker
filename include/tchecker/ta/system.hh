@@ -37,7 +37,7 @@ namespace ta {
  \class system_t
  \brief System of processes for timed automata
  */
-class system_t : private tchecker::syncprod::system_t {
+class system_t : public tchecker::syncprod::system_t {
 public:
   /*!
    \brief Constructor
@@ -103,6 +103,7 @@ public:
   using tchecker::syncprod::system_t::clock_variables;
   using tchecker::syncprod::system_t::clocks_count;
   using tchecker::syncprod::system_t::is_clock;
+  using tchecker::system::system_t::add_clock;
 
   // Edges
   using tchecker::syncprod::system_t::asynchronous_incoming_edges;

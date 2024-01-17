@@ -107,10 +107,23 @@ zone_t::~zone_t() = default;
 
 // Allocation and deallocation
 
+
 void zone_destruct_and_deallocate(tchecker::zg::zone_t * zone)
 {
   tchecker::zg::zone_t::destruct(zone);
   delete[] reinterpret_cast<char *>(zone);
+}
+
+std::shared_ptr<zone_t> factory(tchecker::clock_id_t dim)
+{
+  std::shared_ptr<zone_t> result(tchecker::zg::zone_allocate_and_construct(dim, dim), zone_destruct_and_deallocate);
+  return result;
+}
+
+std::shared_ptr<zone_t> factory(zone_t const & zone)
+{
+  std::shared_ptr<zone_t> result(tchecker::zg::zone_allocate_and_construct(zone.dim(), zone), zone_destruct_and_deallocate);
+  return result;
 }
 
 } // end of namespace zg

@@ -15,6 +15,8 @@
 
 #include <boost/rational.hpp>
 
+#define VIRTUAL_CLOCK_PREFIX "chi"
+
 /*!
  \file basictypes.hh
  \brief Definition of basic types for models
