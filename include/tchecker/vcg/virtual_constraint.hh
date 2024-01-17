@@ -52,7 +52,7 @@ public:
    \brief Accessor
    \return no of virtual clocks
    */
-  const tchecker::clock_id_t get_no_of_virt_clocks() const;
+  tchecker::clock_id_t get_no_of_virt_clocks() const;
 
   /*!
    \brief return the virtual constraint as list of clock constraints
