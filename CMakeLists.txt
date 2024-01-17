@@ -5,6 +5,7 @@
 cmake_minimum_required(VERSION 3.13)
 
 set(LOCAL_CONFIG "${CMAKE_SOURCE_DIR}/localconfig-${CMAKE_BUILD_TYPE}.cmake")
+
 if(EXISTS ${LOCAL_CONFIG})
     cmake_policy(SET CMP0077 NEW)
     message(STATUS "Loading ${LOCAL_CONFIG} file.")
@@ -14,6 +15,29 @@ else()
 endif()
 
 project(tchecker LANGUAGES CXX)
+
+if (USE_CPPCHECK)
+    find_program(CMAKE_CXX_CPPCHECK NAMES cppcheck)
+    if(CMAKE_CXX_CPPCHECK)
+        message(STATUS "using CPPCHECK")
+        set(CPPCHECK_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}/cppcheck-build-dir")
+        file(MAKE_DIRECTORY ${CPPCHECK_BUILD_DIR})
+        list(
+            APPEND CMAKE_CXX_CPPCHECK 
+                "--enable=warning"
+                "--inconclusive"
+                "--force" 
+                "--inline-suppr"
+                "--cppcheck-build-dir=${CPPCHECK_BUILD_DIR}"
+                "--error-exitcode=1"
+                "--suppressions-list=${CMAKE_SOURCE_DIR}/CppCheckSuppressions.txt"
+        )
+    else()
+
+    endif()
+else()
+    message(STATUS "CPP_CHECK is not actived. If you want to activate it, use -DUSE_CPPCHECK=1")
+endif()
 
 set(TCK_CMAKE_SCRIPT_DIR "${CMAKE_SOURCE_DIR}/cmake")
 list(APPEND CMAKE_MODULE_PATH "${TCK_CMAKE_SCRIPT_DIR}")
