@@ -1,6 +1,5 @@
 # TChecker
 
-[![Build and test TChecker](https://github.com/ticktac-project/tchecker/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/ticktac-project/tchecker/actions/workflows/build-and-test.yml)
 [![License](https://img.shields.io/badge/license-MIT-informational.svg)](https://github.com/ticktac-project/tchecker/blob/master/LICENSE)
 
 
@@ -23,6 +22,8 @@ community.
 **NEW:** [try TChecker online](https://tchecker.labri.fr/)
 
 ## Installation
+
+Please note that this fork is only tested for Ubuntu.
 
 Please, refer to [Installation of TChecker](https://github.com/ticktac-project/tchecker/wiki/Installation-of-TChecker) or to file INSTALL.md in the repository.
 

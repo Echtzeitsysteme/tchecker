@@ -28,6 +28,18 @@ namespace dbm {
 #define L(i)       (i == 0 ? 0 : l[i - 1])
 #define U(i)       (i == 0 ? 0 : u[i - 1])
 
+const tchecker::dbm::db_t * access(const tchecker::dbm::db_t * dbm, tchecker::clock_id_t dim, tchecker::clock_id_t i, tchecker::clock_id_t j)
+{
+  const tchecker::dbm::db_t * element = &(dbm[i*dim + j]);
+  return element;
+}
+
+tchecker::dbm::db_t * access(tchecker::dbm::db_t * dbm, tchecker::clock_id_t dim, tchecker::clock_id_t i, tchecker::clock_id_t j)
+{
+  tchecker::dbm::db_t * element = &(dbm[i*dim + j]);
+  return element;
+}
+
 void copy(tchecker::dbm::db_t * dbm1, tchecker::dbm::db_t const * dbm2, tchecker::clock_id_t dim)
 {
   std::memcpy(dbm1, dbm2, dim * dim * sizeof(*dbm2));
@@ -341,7 +353,7 @@ void reset(tchecker::dbm::db_t * dbm, tchecker::clock_id_t dim, tchecker::clock_
 void reset(tchecker::dbm::db_t * dbm, tchecker::clock_id_t dim, tchecker::clock_reset_container_t const & resets)
 {
   for (tchecker::clock_reset_t const & r : resets) {
-    tchecker::clock_id_t lid = (r.left_id() == tchecker::REFCLOCK_ID ? 0 : r.left_id() + 1);
+    tchecker::clock_id_t lid = (r.left_id() == tchecker::REFCLOCK_ID ? 0 : r.left_id() + 1); // It would be quite surprising if the lid would be reflock, right?
     tchecker::clock_id_t rid = (r.right_id() == tchecker::REFCLOCK_ID ? 0 : r.right_id() + 1);
     tchecker::dbm::reset(dbm, dim, lid, rid, r.value());
   }
@@ -510,6 +522,42 @@ enum tchecker::dbm::status_t intersection(tchecker::dbm::db_t * dbm, tchecker::d
       DBM(i, j) = tchecker::dbm::min(DBM1(i, j), DBM2(i, j));
 
   return tchecker::dbm::tighten(dbm, dim);
+}
+
+tchecker::dbm::db_t * revert_multiple_reset(const tchecker::dbm::db_t * orig_zone,
+                                            tchecker::clock_id_t dim, tchecker::dbm::db_t * zone_split,
+                                            tchecker::clock_reset_container_t reset)
+{
+
+  // TODO: add assertions
+
+  if(reset.empty()) {
+    // place the dbm to return at the heap s.t. it is not destroyed during the returns
+    tchecker::dbm::db_t * result = (tchecker::dbm::db_t *)malloc(dim*dim*sizeof(tchecker::dbm::db_t));
+    tchecker::dbm::copy(result, zone_split, dim);
+    return result;
+  }
+
+  tchecker::dbm::db_t zone_clone[dim*dim];
+  tchecker::dbm::copy(zone_clone, orig_zone, dim);
+
+  tchecker::clock_reset_t cur = reset.back();
+  reset.pop_back();
+
+  if(cur.right_id() != tchecker::REFCLOCK_ID || cur.value() != 0) {
+    throw std::runtime_error("when checking for timed bisim, only resets to value zero are allowed");
+  }
+
+  tchecker::dbm::reset(zone_clone, dim, reset);
+
+  tchecker::dbm::free_clock(zone_split, dim, cur);
+
+  tchecker::dbm::db_t new_split[dim*dim];
+
+  intersection(new_split, zone_clone, zone_split, dim);
+
+  return revert_multiple_reset(orig_zone, dim, new_split, reset);
+
 }
 
 void extra_m(tchecker::dbm::db_t * dbm, tchecker::clock_id_t dim, tchecker::integer_t const * m)

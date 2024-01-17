@@ -32,7 +32,7 @@ namespace syncprod {
  \class system_t
  \brief System of processes
  */
-class system_t : private tchecker::system::system_t, private tchecker::syncprod::labels_t {
+class system_t : public tchecker::system::system_t, private tchecker::syncprod::labels_t {
   /*!
    \brief Type of collection of asynchronous edges
    */
@@ -95,6 +95,7 @@ public:
   using tchecker::system::system_t::clocks_count;
   using tchecker::system::system_t::clocks_identifiers;
   using tchecker::system::system_t::is_clock;
+  using tchecker::system::system_t::add_clock;
 
   // Edges
   using tchecker::system::system_t::edge;
@@ -241,7 +242,6 @@ public:
 private:
   // Hidden modifiers
   using tchecker::syncprod::labels_t::add_label;
-  using tchecker::system::system_t::add_clock;
   using tchecker::system::system_t::add_edge;
   using tchecker::system::system_t::add_event;
   using tchecker::system::system_t::add_intvar;
