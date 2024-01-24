@@ -68,8 +68,6 @@ std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> virtual_constr
   for(auto iter = inter.begin(); iter < inter.end(); iter++) {
     if(tchecker::dbm::NON_EMPTY == tchecker::dbm::tighten((*iter)->dbm(), (*iter)->dim())) {
       result->append_zone(*iter);
-    } else {
-      tchecker::virtual_constraint::destruct(&(**iter));
     }
   }
 
@@ -80,12 +78,12 @@ clock_constraint_container_t virtual_constraint_t::get_vc(tchecker::clock_id_t o
 {
   clock_constraint_container_t result;
 
-  for(tchecker::clock_id_t i = 1; i < get_no_of_virt_clocks(); ++i) {
+  for(tchecker::clock_id_t i = 1; i <= get_no_of_virt_clocks(); ++i) {
     tchecker::clock_id_t cur = i + orig_clocks_offset;
     result.emplace_back(0, cur, tchecker::dbm::access(this->dbm(), this->dim(), 0, i)->cmp, tchecker::dbm::access(this->dbm(), this->dim(), 0, i)->value);
     result.emplace_back(cur, 0, tchecker::dbm::access(this->dbm(), this->dim(), i, 0)->cmp, tchecker::dbm::access(this->dbm(), this->dim(), i, 0)->value);
 
-    for(tchecker::clock_id_t j = i+1; j < get_no_of_virt_clocks(); ++j) {
+    for(tchecker::clock_id_t j = i+1; j <= get_no_of_virt_clocks(); ++j) {
       tchecker::clock_id_t second_cur = j + orig_clocks_offset;
       result.emplace_back(second_cur, cur, tchecker::dbm::access(this->dbm(), this->dim(), j, i)->cmp, tchecker::dbm::access(this->dbm(), this->dim(), j, i)->value);
       result.emplace_back(cur, second_cur, tchecker::dbm::access(this->dbm(), this->dim(), i, j)->cmp, tchecker::dbm::access(this->dbm(), this->dim(), i, j)->value);
@@ -95,14 +93,31 @@ clock_constraint_container_t virtual_constraint_t::get_vc(tchecker::clock_id_t o
 
 }
 
-tchecker::zone_container_t<virtual_constraint_t> virtual_constraint_t::logic_and(tchecker::zone_container_t<virtual_constraint_t> *container)
+enum tchecker::dbm::status_t virtual_constraint_t::logic_and(std::shared_ptr<virtual_constraint_t> result, const virtual_constraint_t & other) const
 {
-  tchecker::zone_container_t<virtual_constraint_t> result{this->dim()};
+  result = tchecker::virtual_constraint::factory(this->get_no_of_virt_clocks());
+  return tchecker::dbm::intersection(result->dbm(), other.dbm(), this->dbm(), this->get_no_of_virt_clocks() + 1);
+}
+
+enum tchecker::dbm::status_t virtual_constraint_t::logic_and(tchecker::zg::zone_t & zone) const
+{
+  return tchecker::dbm::constrain(zone.dbm(), zone.dim(), this->get_vc(zone.dim() - this->get_no_of_virt_clocks()));
+}
+
+enum tchecker::dbm::status_t virtual_constraint_t::logic_and(std::shared_ptr<tchecker::zg::zone_t> result, const tchecker::zg::zone_t & zone) const
+{
+  result = tchecker::zg::factory(zone);
+  return tchecker::dbm::constrain(result->dbm(), result->dim(), this->get_vc(result->dim() - this->get_no_of_virt_clocks()));
+}
+
+std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> virtual_constraint_t::logic_and(std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> const container) const
+{
+  std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> result = std::make_shared<tchecker::zone_container_t<virtual_constraint_t>>(this->dim());
   for(auto iter = container->begin(); iter < container->end(); iter++ ) {
 
     std::shared_ptr<virtual_constraint_t> to_append = factory(this->dim());
     if(tchecker::dbm::EMPTY != tchecker::dbm::intersection(to_append->dbm(), (*iter)->dbm(), this->dbm(), this->dim())) {
-      result.append_zone(to_append);
+      result->append_zone(to_append);
     }
   }
 
@@ -127,6 +142,11 @@ std::shared_ptr<virtual_constraint_t> factory(tchecker::virtual_constraint::virt
 std::shared_ptr<virtual_constraint_t> factory(std::shared_ptr<tchecker::zg::zone_t const> zone, tchecker::clock_id_t no_of_virtual_clocks)
 {
   return factory(zone->dbm(), zone->dim(), no_of_virtual_clocks);
+}
+
+std::shared_ptr<virtual_constraint_t> factory(tchecker::zg::zone_t const & zone, tchecker::clock_id_t no_of_virtual_clocks)
+{
+  return factory(zone.dbm(), zone.dim(), no_of_virtual_clocks);
 }
 
 std::shared_ptr<virtual_constraint_t> factory(const tchecker::dbm::db_t * dbm, tchecker::clock_id_t dim, tchecker::clock_id_t no_of_virtual_clocks)
@@ -155,58 +175,65 @@ std::shared_ptr<virtual_constraint_t> factory(const tchecker::dbm::db_t * dbm, t
   return result;
 }
 
-std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> combine_lhs_land_not_rhs(std::shared_ptr<virtual_constraint_t> lhs, std::shared_ptr<virtual_constraint_t> rhs, tchecker::clock_id_t dim)
+std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> combine(tchecker::zone_container_t<virtual_constraint_t> & lo_vc, tchecker::clock_id_t no_of_virtual_clocks)
 {
-  std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> result = std::make_shared<tchecker::zone_container_t<virtual_constraint_t>>(dim);
 
-  std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> neg = rhs->neg();
+  std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> result = std::make_shared<tchecker::zone_container_t<virtual_constraint_t>>(no_of_virtual_clocks + 1);
 
-  for(auto iter = neg->begin(); iter < neg->end(); iter++) {
-    std::shared_ptr<virtual_constraint_t> to_append = factory(dim);
-    if(tchecker::dbm::EMPTY != tchecker::dbm::intersection(to_append->dbm(), (*iter)->dbm(), lhs->dbm(), dim)) {
-      result->append_zone(to_append);
+  for(auto iter = lo_vc.begin(); iter < lo_vc.end(); iter++) {
+
+    std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> inter = std::make_shared<tchecker::zone_container_t<virtual_constraint_t>>(no_of_virtual_clocks + 1);
+    std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> helper;
+    inter->append_zone(*iter);
+
+    for(auto phi_r = result->begin(); phi_r < result->end(); phi_r++) {
+      helper = std::make_shared<tchecker::zone_container_t<virtual_constraint_t>>(no_of_virtual_clocks + 1);
+      for(auto phi_inter = inter->begin(); phi_inter < inter->end(); phi_inter++) {
+        helper->append_container((*phi_inter)->logic_and((*phi_r)->neg()));
+      }
+      inter = helper;
     }
+
+    for(auto phi = inter->begin(); phi < inter->end(); phi++) {
+      if(!(*phi)->is_empty()) {
+        result->append_zone(**phi);
+      }
+    }
+
   }
 
   return result;
 }
 
-std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> combine_helper(std::shared_ptr<virtual_constraint_t> lhs, std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> lo_vc, tchecker::clock_id_t dim)
+std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> contained_in_all(std::vector<std::shared_ptr<zone_container_t<virtual_constraint_t>>> & zones, tchecker::clock_id_t no_of_virtual_clocks)
 {
-  std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> result = std::make_shared<tchecker::zone_container_t<virtual_constraint_t>>(dim);
-  result->append_zone(*lhs);
-  for(auto iter = lo_vc->begin(); iter < lo_vc->end(); iter++) { // cppcheck-suppress nullPointer
-    std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> inter = result;
-    result = std::make_shared<tchecker::zone_container_t<virtual_constraint_t>>(dim);
 
-    for(auto inter_iter = inter->begin(); inter_iter < inter->end(); inter_iter++) {
-      std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> lhs_land_not_rhs = combine_lhs_land_not_rhs(*inter_iter, *iter, dim);
-      for(auto land_iter = lhs_land_not_rhs->begin(); land_iter < lhs_land_not_rhs->end(); land_iter++) {
-        result->append_zone(*land_iter);
+  if (zones.empty()) {
+    return std::make_shared<tchecker::zone_container_t<virtual_constraint_t>>(no_of_virtual_clocks);
+  }
+
+  if (1 == zones.size()) {
+    return std::make_shared<tchecker::zone_container_t<virtual_constraint_t>>(*(zones[0]));
+  }
+
+  std::shared_ptr<zone_container_t<virtual_constraint_t>> cur = zones.back();
+  zones.pop_back();
+
+  std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> inter = contained_in_all(zones, no_of_virtual_clocks);
+
+  std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> result = std::make_shared<zone_container_t<virtual_constraint_t>>(no_of_virtual_clocks);
+
+  for(auto iter_cur = cur->begin(); iter_cur < cur->end(); iter_cur++) {
+    for(auto iter_inter = inter->begin(); iter_inter < inter->end(); iter_inter++) {
+      std::shared_ptr<virtual_constraint_t> tmp = factory(no_of_virtual_clocks);
+      if(tchecker::dbm::NON_EMPTY == tchecker::dbm::intersection(tmp->dbm(), (**iter_cur).dbm(), (**iter_inter).dbm(), (**iter_cur).dim())) {
+        result->append_zone(tmp);
       }
     }
   }
-
-  return result;
-
-}
-
-std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> combine(std::vector<tchecker::zone_container_t<virtual_constraint_t>> & lo_lo_vc, tchecker::clock_id_t dim)
-{
-  if(lo_lo_vc.empty()) {
-    return std::make_shared<tchecker::zone_container_t<virtual_constraint_t>>(dim);
-  }
-
-  tchecker::zone_container_t<virtual_constraint_t> cur = lo_lo_vc.back();
-  lo_lo_vc.pop_back();
-
-  std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> result = combine(lo_lo_vc, dim);
-
-  for(auto cur_iter = cur.begin(); cur_iter < cur.end(); cur_iter++) {
-    std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> result = combine_helper(*cur_iter, result, dim);
-  }
   return result;
 }
+
 
 } // end of namespace virtual_constraint
 

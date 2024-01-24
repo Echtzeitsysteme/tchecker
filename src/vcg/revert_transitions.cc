@@ -7,6 +7,11 @@
 
 #include "tchecker/vcg/revert_transitions.hh"
 
+
+namespace tchecker {
+
+namespace vcg {
+
 std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t>
 revert_action_trans(const tchecker::zg::zone_t & zone,
                     const tchecker::clock_constraint_container_t & guard,
@@ -70,4 +75,8 @@ revert_epsilon_trans(const tchecker::zg::zone_t & zone, const tchecker::virtual_
 
   return result;
 }
+
+} // end of namespace vcg
+
+} // end of namespace tchecker
 
