@@ -51,6 +51,8 @@ public:
    */
   tchecker::clock_id_t get_no_of_virtual_clocks() const;
 
+  inline tchecker::clock_id_t get_no_of_original_clocks() const { return _system->clocks_count(tchecker::variable_kind_t::VK_FLATTENED) - 1 - _no_of_virtual_clocks;}
+
 private:
 
   tchecker::clock_id_t _no_of_virtual_clocks;

@@ -63,7 +63,7 @@ void zg_t::next(tchecker::zg::const_state_sptr_t const & s, outgoing_edges_value
                                             t->reset_container(), tgt_delay, t->tgt_invariant_container());
                     };
 
-  sst_handler<outgoing_edges_value_t const, bool>(out_edge, v, mask, ta_func, se_func, s, true);
+  sst_handler<outgoing_edges_value_t const, bool>(out_edge, v, mask, ta_func, se_func, s, true, _enable_extrapolation);
 }
 
 void zg_t::next(tchecker::zg::const_state_sptr_t const & s, std::vector<sst_t> & v,
@@ -248,11 +248,11 @@ void zg_t::sst_handler( edge_t edge, std::vector<sst_t> & v, tchecker::state_sta
                                                          tchecker::zg::state_sptr_t &,
                                                         tchecker::zg::transition_sptr_t &,
                                                          helping_hand_t *),
-                  tchecker::zg::const_state_sptr_t const & to_clone, bool clone
+                  tchecker::zg::const_state_sptr_t const & to_clone, bool clone, bool enable_extrapolation
                   )
 {
   tchecker::zg::state_sptr_t s;
-  if(clone) { // for some crazy reason, I cannot check for null here and, therefore, we need clone
+  if(clone) { // for some crazy reasons, I cannot check for null here and, therefore, we need clone
     s = _state_allocator.clone(*to_clone);
   }
   else {
@@ -271,7 +271,7 @@ void zg_t::sst_handler( edge_t edge, std::vector<sst_t> & v, tchecker::state_sta
 
     status = se_func(*_system, *_semantics, dbm, dim, s, t, &helper);
 
-    if(tchecker::STATE_OK == status) {
+    if(tchecker::STATE_OK == status && enable_extrapolation) {
       _extrapolation->extrapolate(dbm, dim, *(s->vloc_ptr()));
     }
   }
@@ -344,28 +344,28 @@ next(tchecker::zg::zg_t &zg,
 std::shared_ptr<zg_t> factory(std::shared_ptr<tchecker::ta::system_t const> const & system,
                              enum tchecker::ts::sharing_type_t sharing_type, enum tchecker::zg::semantics_type_t semantics_type,
                              enum tchecker::zg::extrapolation_type_t extrapolation_type, std::size_t block_size,
-                             std::size_t table_size)
+                             std::size_t table_size, bool enable_extrapolation)
 {
   std::shared_ptr<tchecker::zg::extrapolation_t> extrapolation{
       tchecker::zg::extrapolation_factory(extrapolation_type, *system)};
   if (extrapolation.get() == nullptr)
     return nullptr;
   std::shared_ptr<tchecker::zg::semantics_t> semantics{tchecker::zg::semantics_factory(semantics_type)};
-  return std::make_shared<zg_t>(system, sharing_type, semantics, extrapolation, block_size, table_size);
+  return std::make_shared<zg_t>(system, sharing_type, semantics, extrapolation, block_size, table_size, enable_extrapolation);
 }
 
 std::shared_ptr<zg_t> factory(std::shared_ptr<tchecker::ta::system_t const> const & system,
                              enum tchecker::ts::sharing_type_t sharing_type, enum tchecker::zg::semantics_type_t semantics_type,
                              enum tchecker::zg::extrapolation_type_t extrapolation_type,
                              tchecker::clockbounds::clockbounds_t const & clock_bounds, std::size_t block_size,
-                             std::size_t table_size)
+                             std::size_t table_size, bool enable_extrapolation)
 {
   std::shared_ptr<tchecker::zg::extrapolation_t> extrapolation{
       tchecker::zg::extrapolation_factory(extrapolation_type, clock_bounds)};
   if (extrapolation.get() == nullptr)
     return nullptr;
   std::shared_ptr<tchecker::zg::semantics_t> semantics{tchecker::zg::semantics_factory(semantics_type)};
-  return std::make_shared<zg_t>(system, sharing_type, semantics, extrapolation, block_size, table_size);
+  return std::make_shared<zg_t>(system, sharing_type, semantics, extrapolation, block_size, table_size, enable_extrapolation);
 }
 
 } // end of namespace zg

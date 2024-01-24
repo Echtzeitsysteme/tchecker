@@ -98,6 +98,23 @@ tchecker::state_status_t prev_helper(tchecker::dbm::db_t * dbm, tchecker::clock_
   return tchecker::STATE_OK;
 }
 
+/* semantics_t */
+
+tchecker::state_status_t semantics_t::delay( tchecker::dbm::db_t * dbm, tchecker::clock_id_t dim,
+                                                            tchecker::clock_constraint_container_t const & invariant)
+{
+  if (tchecker::dbm::constrain(dbm, dim, invariant) == tchecker::dbm::EMPTY)
+    return tchecker::STATE_CLOCKS_SRC_INVARIANT_VIOLATED;
+
+  tchecker::dbm::open_up(dbm, dim);
+
+  if (tchecker::dbm::constrain(dbm, dim, invariant) == tchecker::dbm::EMPTY)
+    return tchecker::STATE_CLOCKS_SRC_INVARIANT_VIOLATED; // should never occur
+
+  return tchecker::STATE_OK;
+}
+
+
 /* standard_semantics_t */
 
 tchecker::state_status_t standard_semantics_t::initial(tchecker::dbm::db_t * dbm, tchecker::clock_id_t dim, bool delay_allowed,
@@ -232,20 +249,6 @@ tchecker::state_status_t distinguished_semantics_t::final( tchecker::dbm::db_t *
                                                            tchecker::clock_constraint_container_t const & invariant)
 {
   return final_helper(dbm, dim, delay_allowed, invariant);
-}
-
-tchecker::state_status_t distinguished_semantics_t::delay( tchecker::dbm::db_t * dbm, tchecker::clock_id_t dim,
-                                                            tchecker::clock_constraint_container_t const & invariant)
-{
-  if (tchecker::dbm::constrain(dbm, dim, invariant) == tchecker::dbm::EMPTY)
-    return tchecker::STATE_CLOCKS_SRC_INVARIANT_VIOLATED;
-
-  tchecker::dbm::open_up(dbm, dim);
-
-  if (tchecker::dbm::constrain(dbm, dim, invariant) == tchecker::dbm::EMPTY)
-    return tchecker::STATE_CLOCKS_SRC_INVARIANT_VIOLATED; // should never occur
-
-  return tchecker::STATE_OK;
 }
 
 tchecker::state_status_t distinguished_semantics_t::next( tchecker::dbm::db_t * dbm, tchecker::clock_id_t dim, bool src_delay_allowed,

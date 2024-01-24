@@ -18,7 +18,8 @@ namespace vcg {
  \brief sync function (see the TR of Lieb et al.)
  \param dbm1 : a dbm
  \param dbm2 : a dbm
- \param dim : dimension of dbm1 and dbm2
+ \param dim1 : dimension of dbm1
+ \param dim2 : dimension of dbm2
  \param lowest_virt_clk_id : the clk id of chi_0
  \param  no_of_orig_clocks_1 : the number of orig clocks in the first TA
  \param orig_reset1 : the resets of the transition of the first TA
@@ -32,8 +33,9 @@ namespace vcg {
  \note the change happens inplace
  */
 
-void sync(tchecker::dbm::db_t *dbm1, tchecker::dbm::db_t *dbm2, tchecker::clock_id_t dim, 
-          tchecker::clock_id_t lowest_virt_clk_id, tchecker::clock_id_t no_of_orig_clocks_1,
+void sync(tchecker::dbm::db_t *dbm1, tchecker::dbm::db_t *dbm2,
+          tchecker::clock_id_t dim1, tchecker::clock_id_t dim2,
+          tchecker::clock_id_t no_of_orig_clocks_1, tchecker::clock_id_t no_of_orig_clocks_2,
           tchecker::clock_reset_container_t const & orig_reset1,
           tchecker::clock_reset_container_t const & orig_reset2);
 
@@ -53,10 +55,11 @@ void sync(tchecker::dbm::db_t *dbm1, tchecker::dbm::db_t *dbm2, tchecker::clock_
  \note the change happens inplace. this function works if and only if only
  resets to zero are allowed!
  */
-std::tuple<std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t>, std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t>>
-revert_sync(const tchecker::dbm::db_t *dbm1, const tchecker::dbm::db_t *dbm2, tchecker::clock_id_t dim,
-            const tchecker::virtual_constraint::virtual_constraint_t & phi_e, tchecker::clock_id_t lowest_virt_clk_id,
-            tchecker::clock_id_t no_of_orig_clocks_1);
+std::pair<std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t>, std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t>>
+revert_sync(const tchecker::dbm::db_t *dbm1, const tchecker::dbm::db_t *dbm2,
+            tchecker::clock_id_t dim1, tchecker::clock_id_t dim2,
+            tchecker::clock_id_t no_of_orig_clocks_1, tchecker::clock_id_t no_of_orig_clocks_2,
+            const tchecker::virtual_constraint::virtual_constraint_t & phi_e);
 
 
 } // end of namespace vcg

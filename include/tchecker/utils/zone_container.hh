@@ -93,6 +93,11 @@ public:
    */
   void append_zone(T const & zone)
   {
+    if(zone.dim() != _dim) {
+      std::ostringstream msg;
+      msg << "appending a zone with wrong dimension. Is " << zone.dim() << " should be " << _dim;
+      throw std::runtime_error(msg.str());
+    }
     _storage.emplace_back(create_element(zone));
   }
 
@@ -104,16 +109,45 @@ public:
    */
   void append_zone(std::shared_ptr<T> zone)
   {
+    if(zone->dim() != _dim) {
+      std::ostringstream msg;
+      msg << "appending a zone with wrong dimension. Is " << zone->dim() << " should be " << _dim;
+      throw std::runtime_error(msg.str());
+    }
     _storage.emplace_back(zone);
+  }
+
+  /*!
+   \brief adds the elements of other to this
+   \param other: the container to append
+   \post other is appended to the container
+   */
+  void append_container(std::shared_ptr<zone_container_t<T>> other)
+  {
+    for(auto iter = other->begin(); iter < other->end(); iter++) {
+      this->append_zone(*iter);
+    }
   }
 
   /*!
    \brief removes the last zone and deletes the content
    */
-  void remove_back()
+  void remove_first()
   {
     destruct_element(*(_storage.begin()));
     _storage.erase(_storage.begin());
+  }
+
+  /*!
+   \brief removes all empty zones
+   */
+  void remove_empty()
+  {
+    for(auto iter = this->begin(); iter < this->end(); iter++) {
+      if(iter->empty()) {
+        _storage.erase(iter);
+      }
+    }
   }
 
   /*!
@@ -188,13 +222,6 @@ std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> zone_contain
 
 template<>
 std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>::create_element(tchecker::virtual_constraint::virtual_constraint_t const & zone);
-
-/*!
- \brief contained-in-all function (see the TR of Lieb et al.)
- \param a vector of vector of zones
- \return a vector of zones
- */
-std::shared_ptr<zone_container_t<tchecker::zg::zone_t>> contained_in_all(std::vector<zone_container_t<tchecker::zg::zone_t>> & zones, tchecker::clock_id_t dim);
 
 
 } // end of namespace tchecker
