@@ -8,7 +8,10 @@
 #ifndef TCHECKER_ALGORITHMS_COMPARE_STATS_HH
 #define TCHECKER_ALGORITHMS_COMPARE_STATS_HH
 
+#include <unordered_set>
+
 #include "tchecker/algorithms/stats.hh"
+#include "tchecker/zg/state.hh"
 
 /*!
  \file stats.hh
@@ -35,26 +38,25 @@ public:
    \brief Accessor
    \return A reference to the number of visited pair of states
   */
-  unsigned long visited_pair_of_states() const;
+  std::unordered_set<std::pair<tchecker::zg::state_sptr_t, tchecker::zg::state_sptr_t>>::size_type visited_pair_of_states() const;
 
   /*!
-  \brief Accessor
-  \return Number of visited transitions
-  */
-  unsigned long visited_transitions() const;
-
-  /*!
-  \brief Accessor
-  \return The deepest path checked
-  */
-
-  unsigned long deepest_path() const;
+   \brief setter for the number of visited pair of states
+   \post visited_pair_of_states is set to the given value
+   */
+  void set_visited_pair_of_states(std::unordered_set<std::pair<tchecker::zg::state_sptr_t, tchecker::zg::state_sptr_t>>::size_type visited_pair_of_states);
 
   /*!
   \brief Accessor
   \return Reference to the answer whether the relationship is fulfilled
   */
   bool relationship_fulfilled() const;
+
+  /*!
+   \brief setter for relationship_fulfilled
+   \post relationship_fulfilled is set to the given value
+   */
+  void set_relationship_fulfilled(bool relationship_fulfilled);
 
   /*!
    \brief Extract statistics as attributes (key, value)
@@ -64,9 +66,7 @@ public:
   void attributes(std::map<std::string, std::string> & m) const;
 
 private:
-  unsigned long _visited_pair_of_states;      /*!< Number of visited pairs of states */
-  unsigned long _visited_transitions; /*!< Number of visited transitions */
-  unsigned long _deepest_path; /*!< Number of visited transitions */
+  std::unordered_set<std::pair<tchecker::zg::state_sptr_t, tchecker::zg::state_sptr_t>>::size_type _visited_pair_of_states;      /*!< Number of visited pairs of states */
   bool _relationship_fulfilled;  /*< Whether the relationship is fulfilled */
 };
 
