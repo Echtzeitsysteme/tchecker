@@ -106,7 +106,14 @@ private:
       return h;
     }
   };
-  std::unordered_set<std::pair<tchecker::zg::state_sptr_t, tchecker::zg::state_sptr_t>, custom_hash> _visited;
+
+  struct custom_equal {
+    bool operator() (const std::pair<tchecker::zg::state_sptr_t, tchecker::zg::state_sptr_t> &p1, const std::pair<tchecker::zg::state_sptr_t, tchecker::zg::state_sptr_t> &p2) const {
+      return (*(p1.first) == *(p2.first)) && (*(p1.second) == *(p2.second));
+    }
+  };
+
+  std::unordered_set<std::pair<tchecker::zg::state_sptr_t, tchecker::zg::state_sptr_t>, custom_hash, custom_equal> _visited;
 
 };
 

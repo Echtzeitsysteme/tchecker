@@ -16,18 +16,13 @@ namespace tchecker {
 namespace strong_timed_bisim {
 
 Lieb_et_al::Lieb_et_al(std::shared_ptr<tchecker::vcg::vcg_t> input_first, std::shared_ptr<tchecker::vcg::vcg_t> input_second)
-  : _A(input_first), _B(input_first) {}
+  : _A(input_first), _B(input_second) {}
 
 tchecker::strong_timed_bisim::stats_t Lieb_et_al::run() {
 
-  std::cout << "run algorithm" << std::endl;
+  tchecker::strong_timed_bisim::stats_t stats;
 
-  stats_t stats;
-#if 0
   stats.set_start_time();
-
-  // sst is a tuple (tchecker::state_status_t, state_t, transition_t)
-  // state_status_t : see basictypes.hh
 
   std::vector<tchecker::zg::zg_t::sst_t> sst_first;
   std::vector<tchecker::zg::zg_t::sst_t> sst_second;
@@ -38,37 +33,17 @@ tchecker::strong_timed_bisim::stats_t Lieb_et_al::run() {
   if(STATE_OK != std::get<0>(sst_first[0]) || STATE_OK != std::get<0>(sst_second[0])) 
     throw std::runtime_error("problems with initial state");
 
-  std::size_t dim = std::get<1>(sst_first[0])->zone().dim();
-  auto dbm = std::get<1>(sst_first[0])->zone().dbm();
+  tchecker::zg::const_state_sptr_t const_first{std::get<1>(sst_first[0])};
+  tchecker::zg::const_state_sptr_t const_second{std::get<1>(sst_second[0])};
 
-  for(std::size_t i = 0; i < dim; ++i) {
-      for(std::size_t j = 0; j < dim; ++j) {
-        std::size_t index = i*dim + j;
-        std::cout << "(" << dbm[index].cmp << ", " << dbm[index].value << ") ";
-      }
-      std::cout << std::endl;
-  }
-
-  tchecker::virtual_constraint::virtual_constraint_t *vc = tchecker::virtual_constraint::factory(&(std::get<1>(sst_first[0])->zone()), this->_A->get_no_of_virtual_clocks());
-
-  const clock_constraint_container_t & virt_cons = vc->get_vc(this->_A->clocks_count() - this->_A->get_no_of_virtual_clocks());
-
-  for(auto iter = virt_cons.begin(); iter < virt_cons.end(); iter++) {
-    std::cout << *iter << std::endl;
-  }
-/*
-  for(std::size_t i = 0; i <= input_first->get_no_of_virtual_clocks(); ++i) {
-      for(std::size_t j = 0; j < input_first->get_no_of_virtual_clocks(); ++j) {
-        std::size_t index = i*input_first->get_no_of_virtual_clocks() + i + j;
-        std::cout << "(" << (vc->get_dbm())[index].cmp << ", " << (vc->get_dbm())[index].value << ") ";
-      }
-      std::cout << std::endl;
-  }
-*/
-  delete vc;
+  std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> result 
+    = this->check_for_virt_bisim(const_first, std::get<2>(sst_first[0]), const_second, std::get<2>(sst_second[0]));
 
   stats.set_end_time();
-#endif
+
+  stats.set_visited_pair_of_states(_visited.size());
+  stats.set_relationship_fulfilled(result->is_empty());
+
   return stats;
 
 }
