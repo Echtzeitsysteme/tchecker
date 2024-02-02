@@ -8,6 +8,7 @@
 #ifndef TCHECKER_VCG_SYNC_HH
 #define TCHECKER_VCG_SYNC_HH
 
+#include "tchecker/dbm/dbm.hh"
 #include "virtual_constraint.hh"
 
 namespace tchecker {
@@ -38,6 +39,20 @@ void sync(tchecker::dbm::db_t *dbm1, tchecker::dbm::db_t *dbm2,
           tchecker::clock_id_t no_of_orig_clocks_1, tchecker::clock_id_t no_of_orig_clocks_2,
           tchecker::clock_reset_container_t const & orig_reset1,
           tchecker::clock_reset_container_t const & orig_reset2);
+
+/*!
+ \brief checks whether the following dbm are synced
+ \param dbm1 : the DBM of A
+ \param dbm2 : the DBM of B
+ \param dim1 : the dim of dbm1
+ \param dim2 : the dim of dbm2
+ \param no_of_original_clocks_1 : the number of non virt (and non ref) clocks of A
+ \param no_of_original_clocks_2 : the number of non virt (and non ref) clocks of B
+ */
+
+bool are_dbm_synced(tchecker::dbm::db_t *dbm1, tchecker::dbm::db_t *dbm2,
+                    tchecker::clock_id_t dim1, tchecker::clock_id_t dim2,
+                    tchecker::clock_id_t no_of_orig_clocks_1, tchecker::clock_id_t no_of_orig_clocks_2);
 
 /*!
  \brief revert-sync function (see the TR of Lieb et al.)

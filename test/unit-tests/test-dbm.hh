@@ -453,6 +453,76 @@ TEST_CASE("tighten (full)", "[dbm]")
     REQUIRE(DBM(2, 2) == tchecker::dbm::LE_ZERO);
   }
 
+  SECTION("tighten another non-empty, dim>1")
+  {
+    // Build DBM
+    tchecker::clock_id_t dim = 5;
+    tchecker::dbm::db_t dbm[dim * dim];
+
+    DBM(0, 0) = tchecker::dbm::LE_ZERO;
+    DBM(1, 0) = tchecker::dbm::LT_INFINITY; // x1<inf
+    DBM(2, 0) = tchecker::dbm::LT_INFINITY; // x2<inf
+    DBM(3, 0) = tchecker::dbm::LT_INFINITY; // x3<inf
+    DBM(4, 0) = tchecker::dbm::LT_INFINITY; // x4<inf
+
+    DBM(0, 1) = tchecker::dbm::db(tchecker::LE, tchecker::dbm::MAX_VALUE); // x1>=-MAX_VALUE
+    DBM(1, 1) = tchecker::dbm::LE_ZERO;
+    DBM(2, 1) = tchecker::dbm::LE_ZERO;
+    DBM(3, 1) = tchecker::dbm::LE_ZERO;
+    DBM(4, 1) = tchecker::dbm::LE_ZERO;
+
+    DBM(0, 2) = tchecker::dbm::LE_ZERO;
+    DBM(1, 2) = tchecker::dbm::LE_ZERO;
+    DBM(2, 2) = tchecker::dbm::LE_ZERO;
+    DBM(3, 2) = tchecker::dbm::LE_ZERO;
+    DBM(4, 2) = tchecker::dbm::LE_ZERO;
+
+    DBM(0, 3) = tchecker::dbm::LE_ZERO;
+    DBM(1, 3) = tchecker::dbm::LE_ZERO;
+    DBM(2, 3) = tchecker::dbm::LE_ZERO;
+    DBM(3, 3) = tchecker::dbm::LE_ZERO;
+    DBM(4, 3) = tchecker::dbm::LE_ZERO;
+
+    DBM(0, 4) = tchecker::dbm::LE_ZERO;
+    DBM(1, 4) = tchecker::dbm::LE_ZERO;
+    DBM(2, 4) = tchecker::dbm::LE_ZERO;
+    DBM(3, 4) = tchecker::dbm::LE_ZERO;
+    DBM(4, 4) = tchecker::dbm::LE_ZERO;
+
+    REQUIRE(tchecker::dbm::tighten(dbm, dim) == tchecker::dbm::NON_EMPTY);
+    REQUIRE(tchecker::dbm::is_tight(dbm, dim));
+
+    REQUIRE(DBM(0, 0) == tchecker::dbm::LE_ZERO);
+    REQUIRE(DBM(1, 0) == tchecker::dbm::LT_INFINITY);
+    REQUIRE(DBM(2, 0) == tchecker::dbm::LT_INFINITY);
+    REQUIRE(DBM(3, 0) == tchecker::dbm::LT_INFINITY);
+    REQUIRE(DBM(4, 0) == tchecker::dbm::LT_INFINITY);
+
+    REQUIRE(DBM(0, 1) == tchecker::dbm::LE_ZERO);
+    REQUIRE(DBM(1, 1) == tchecker::dbm::LE_ZERO);
+    REQUIRE(DBM(2, 1) == tchecker::dbm::LE_ZERO);
+    REQUIRE(DBM(3, 1) == tchecker::dbm::LE_ZERO);
+    REQUIRE(DBM(4, 1) == tchecker::dbm::LE_ZERO);
+
+    REQUIRE(DBM(0, 2) == tchecker::dbm::LE_ZERO);
+    REQUIRE(DBM(1, 2) == tchecker::dbm::LE_ZERO);
+    REQUIRE(DBM(2, 2) == tchecker::dbm::LE_ZERO);
+    REQUIRE(DBM(3, 2) == tchecker::dbm::LE_ZERO);
+    REQUIRE(DBM(4, 2) == tchecker::dbm::LE_ZERO);
+
+    REQUIRE(DBM(0, 3) == tchecker::dbm::LE_ZERO);
+    REQUIRE(DBM(1, 3) == tchecker::dbm::LE_ZERO);
+    REQUIRE(DBM(2, 3) == tchecker::dbm::LE_ZERO);
+    REQUIRE(DBM(3, 3) == tchecker::dbm::LE_ZERO);
+    REQUIRE(DBM(4, 3) == tchecker::dbm::LE_ZERO);
+
+    REQUIRE(DBM(0, 4) == tchecker::dbm::LE_ZERO);
+    REQUIRE(DBM(1, 4) == tchecker::dbm::LE_ZERO);
+    REQUIRE(DBM(2, 4) == tchecker::dbm::LE_ZERO);
+    REQUIRE(DBM(3, 4) == tchecker::dbm::LE_ZERO);
+    REQUIRE(DBM(4, 4) == tchecker::dbm::LE_ZERO);
+  }
+
   SECTION("tighten empty, dim>1")
   {
     // Build DBM

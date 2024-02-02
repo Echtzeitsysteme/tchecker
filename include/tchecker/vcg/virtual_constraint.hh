@@ -56,9 +56,9 @@ public:
 
   /*!
    \brief return the virtual constraint as list of clock constraints
-   \param sum_of_orig_clocks : the sum of the original clocks of both TA
+   \param no_of_orig_clocks : the number of orig clocks, used as offset
    */
-  clock_constraint_container_t get_vc(tchecker::clock_id_t orig_clocks_offset) const;
+  clock_constraint_container_t get_vc(tchecker::clock_id_t no_of_orig_clocks, bool system_clocks) const;
 
   /*!
    \brief returns the negated version of this clock constraint
@@ -66,12 +66,20 @@ public:
    *  forall u with u model this and for all vc in result u does not model vc
    *  forall u with u does not model this exists a vc in result such that u models vc
    *  (for u in ({\chi_0, ..., \chi_{|C_A| + | C_B| - 1}} \rightarrow T))
+   \note the result can easily become very large. Try to avoid this method and use neg_logic_and instead.
    */
   std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> neg() const;
 
+  /*
+   \brief returns the (not this and other)
+   \param result : the pointer in which the result will be stored. Has to be allocated!
+   \param other : the other vc not this shall be anded with
+   */
+  void neg_logic_and(std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> result, const virtual_constraint_t & other) const;
+
  /*
   \brief returns (this and zone)
-  \param result : the pointer in which the result will be stored
+  \param result : the pointer in which the result will be stored. Has to be allocated!
   \param zone : the zone this shall be anded with
   \return EMPTY if the resulting DBM is empty, NON_EMPTY otherwise
   */
@@ -79,26 +87,33 @@ public:
 
  /*
   \brief returns (this and zone)
-  \param zone : the zone this shall be anded with
-  \return EMPTY if the resulting DBM is empty, NON_EMPTY otherwise
-  \post zone = zone and this
-  */
-  enum tchecker::dbm::status_t logic_and(tchecker::zg::zone_t & zone) const;
-
- /*
-  \brief returns (this and zone)
-  \param result : the pointer in which the result will be stored
+  \param result : the pointer in which the result will be stored. Has to be allocated!
   \param zone : the zone this shall be anded with
   \return EMPTY if the resulting DBM is empty, NON_EMPTY otherwise
   */
   enum tchecker::dbm::status_t logic_and(std::shared_ptr<tchecker::zg::zone_t> result, const tchecker::zg::zone_t & zone) const;
 
  /*
+  \brief returns (this and zone)
+  \param result : the ref in which the result will be stored.
+  \param zone : the zone this shall be anded with
+  \return EMPTY if the resulting DBM is empty, NON_EMPTY otherwise
+  */
+  enum tchecker::dbm::status_t logic_and(tchecker::zg::zone_t & result, const tchecker::zg::zone_t & zone) const;
+
+ /*
   \brief iterates through the container and logically ands each element with this
+  \param result : the pointer in which the result will be stored. Has to be allocated!
   \param container : the container to and with
   \return a container with each element of container being logically anded with this.
   */
-  std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> logic_and(std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> const container) const;
+  void logic_and(std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> result,
+                 std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> const container) const;
+
+private:
+
+  std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> neg_helper(tchecker::dbm::db_t *upper_bounds) const;
+
 };
 
 // factories
@@ -144,6 +159,7 @@ std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> combine(tcheck
  \return a container of zones
  */
 std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> contained_in_all(std::vector<std::shared_ptr<zone_container_t<virtual_constraint_t>>> & zones, tchecker::clock_id_t no_of_virtual_clocks);
+
 
 } // end of namespace virtual_constraint
 

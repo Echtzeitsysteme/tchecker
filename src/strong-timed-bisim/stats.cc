@@ -15,12 +15,12 @@ namespace strong_timed_bisim {
 
 stats_t::stats_t() : _visited_pair_of_states(0), _relationship_fulfilled(true) {}
 
-std::unordered_set<std::pair<tchecker::zg::state_sptr_t, tchecker::zg::state_sptr_t>>::size_type stats_t::visited_pair_of_states() const
+long stats_t::visited_pair_of_states() const
 {
   return _visited_pair_of_states;
 }
 
-void stats_t::set_visited_pair_of_states(std::unordered_set<std::pair<tchecker::zg::state_sptr_t, tchecker::zg::state_sptr_t>>::size_type visited_pair_of_states)
+void stats_t::set_visited_pair_of_states(long visited_pair_of_states)
 {
   _visited_pair_of_states = visited_pair_of_states;
 }
@@ -40,7 +40,7 @@ void stats_t::attributes(std::map<std::string, std::string> & m) const {
   std::stringstream sstream;
 
   sstream << _visited_pair_of_states;
-  m["VISITED_PAIR_OF_STATES_STATES"] = sstream.str();
+  m["VISITED_PAIR_OF_STATES"] = sstream.str();
 
   sstream.str("");
   sstream << (_relationship_fulfilled ? "true" : "false");

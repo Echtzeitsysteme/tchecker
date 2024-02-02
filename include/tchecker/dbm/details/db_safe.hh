@@ -99,8 +99,9 @@ inline tchecker::dbm::db_t db(enum tchecker::ineq_cmp_t cmp, tchecker::integer_t
   {
     return tchecker::dbm::LT_INFINITY;
   }
-  if ((value < tchecker::dbm::MIN_VALUE) || (value > tchecker::dbm::MAX_VALUE))
+  if ((value < tchecker::dbm::MIN_VALUE) || (value > tchecker::dbm::MAX_VALUE)) {
     throw std::invalid_argument("value out of bounds");
+  }
   return db_t{cmp, value};
 }
 
@@ -154,6 +155,12 @@ inline int db_cmp(tchecker::dbm::db_t const & db1, tchecker::dbm::db_t const & d
     return (db1.value < db2.value) ? -1 : 1;
   return db1.cmp - db2.cmp;
 }
+
+inline tchecker::dbm::db_t invert(tchecker::dbm::db_t const & to_invert)
+{
+  return tchecker::dbm::db(to_invert.cmp==tchecker::LE ? tchecker::LT : tchecker::LE, (-1)*to_invert.value);
+}
+
 
 /*!
  \brief Less-than operator on difference bounds

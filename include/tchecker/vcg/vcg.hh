@@ -36,10 +36,11 @@ public:
    \param sharing_type : type of state/transition sharing
    \param semantics : a zone semantics
    \param no_of_virtual_clocks : number of virtual clocks
-   \param extrapolation : a zone extrapolation 
+   \param extrapolation : a zone extrapolation
    \param block_size : number of objects allocated in a block
    \param table_size : size of hash tables
-   \note all states and transitions are pool allocated and deallocated automatically
+   \note all states and transitions are pool allocated and deallocated automatically.
+         enable_extrapolation is set to false, since the current bisimulation algorithm does the extrapolation by itself
    */
   vcg_t(std::shared_ptr<tchecker::ta::system_t const> const & system, enum tchecker::ts::sharing_type_t sharing_type,
        std::shared_ptr<tchecker::zg::semantics_t> const & semantics, tchecker::clock_id_t no_of_virtual_clocks,

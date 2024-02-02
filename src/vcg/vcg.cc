@@ -14,7 +14,7 @@ namespace vcg {
 vcg_t::vcg_t(std::shared_ptr<tchecker::ta::system_t const> const & system, enum tchecker::ts::sharing_type_t sharing_type,
               std::shared_ptr<tchecker::zg::semantics_t> const & semantics, tchecker::clock_id_t no_of_virtual_clocks,
               std::shared_ptr<tchecker::zg::extrapolation_t> const & extrapolation, std::size_t block_size, std::size_t table_size)
-  : tchecker::zg::zg_t(system, sharing_type, semantics, extrapolation, block_size, table_size),
+  : tchecker::zg::zg_t(system, sharing_type, semantics, extrapolation, block_size, table_size, false),
     _no_of_virtual_clocks(no_of_virtual_clocks)
 {
 }

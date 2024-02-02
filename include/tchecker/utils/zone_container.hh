@@ -35,13 +35,13 @@ public:
    \brief Constructor
    \param dim : dimension
    */
-  zone_container_t<T>(tchecker::clock_id_t dim) : _dim(dim){ }
+  zone_container_t<T>(tchecker::clock_id_t dim) : _dim(dim), _storage(std::make_shared<std::vector<std::shared_ptr<T>>>(0)) { }
 
   /*!
    \brief Copy Constructor
    \param container : the container to copy
    */
-  zone_container_t<T>(zone_container_t<T> &t) : _dim(t.dim()), _storage(0)
+  zone_container_t<T>(zone_container_t<T> &t) : _dim(t.dim()), _storage(std::make_shared<std::vector<std::shared_ptr<T>>>(0))
   {
     for(auto iter = t.begin(); iter < t.end(); iter++) {
       this->append_zone(*(*iter));
@@ -67,7 +67,7 @@ public:
    */
   bool is_empty()
   {
-    return 0 == _storage.size();
+    return 0 == _storage->size();
   }
 
   /*!
@@ -75,7 +75,7 @@ public:
    */
   void append_zone()
   {
-    _storage.emplace_back(create_element());
+    _storage->emplace_back(create_element());
   }
 
   /*!
@@ -83,12 +83,8 @@ public:
    */
   void append_zone(T const & zone)
   {
-    if(zone.dim() != _dim) {
-      std::ostringstream msg;
-      msg << "appending a zone with wrong dimension. Is " << zone.dim() << " should be " << _dim;
-      throw std::runtime_error(msg.str());
-    }
-    _storage.emplace_back(create_element(zone));
+    assert(_dim == zone.dim());
+    _storage->emplace_back(create_element(zone));
   }
 
 
@@ -99,12 +95,8 @@ public:
    */
   void append_zone(std::shared_ptr<T> zone)
   {
-    if(zone->dim() != _dim) {
-      std::ostringstream msg;
-      msg << "appending a zone with wrong dimension. Is " << zone->dim() << " should be " << _dim;
-      throw std::runtime_error(msg.str());
-    }
-    _storage.emplace_back(zone);
+    assert(_dim == zone->dim());
+    _storage->emplace_back(zone);
   }
 
   /*!
@@ -114,7 +106,21 @@ public:
    */
   void append_container(std::shared_ptr<zone_container_t<T>> other)
   {
+    assert(other->_dim == this->_dim);
     for(auto iter = other->begin(); iter < other->end(); iter++) {
+      this->append_zone(*iter);
+    }
+  }
+
+  /*!
+   \brief adds the elements of other to this. The elements that can be accessed are the same!
+   \param other: the container to append
+   \post other is appended to the container
+   */
+  void append_container(zone_container_t<T> &other)
+  {
+    assert(other._dim == this->_dim);
+    for(auto iter = other.begin(); iter < other.end(); iter++) {
       this->append_zone(*iter);
     }
   }
@@ -125,7 +131,7 @@ public:
   void remove_first()
   {
     destruct_element(*(_storage.begin()));
-    _storage.erase(_storage.begin());
+    _storage->erase(_storage.begin());
   }
 
   /*!
@@ -135,7 +141,7 @@ public:
   {
     for(auto iter = this->begin(); iter < this->end(); iter++) {
       if(iter->empty()) {
-        _storage.erase(iter);
+        _storage->erase(iter);
       }
     }
   }
@@ -146,7 +152,7 @@ public:
    */
   std::shared_ptr<T> back()
   {
-    return _storage.back();
+    return _storage->back();
   }
 
   /*!
@@ -156,7 +162,7 @@ public:
    */
   std::shared_ptr<T> operator[](typename std::vector<std::shared_ptr<T>>::size_type i)
   {
-    return _storage[i];
+    return (*_storage)[i];
   }
 
   /*!
@@ -165,7 +171,7 @@ public:
    */
   typename std::vector<std::shared_ptr<T>>::size_type size()
   {
-    return _storage.size();
+    return _storage->size();
   }
 
   /*!
@@ -173,7 +179,7 @@ public:
    */
   typename std::vector<std::shared_ptr<T>>::iterator begin()
   {
-    return _storage.begin();
+    return _storage->begin();
   }
 
   /*!
@@ -181,13 +187,63 @@ public:
    */
   typename std::vector<std::shared_ptr<T>>::iterator end()
   {
-    return _storage.end();
+    return _storage->end();
   }
 
+  /*!
+   \brief compresses the zone container if possible
+   \post let zc_prev be the zone container before the call and zc_after the zone container after. The following conditions hold:
+           - zc_prev._dim = zc_after._dim
+           - for all zone_prev in zc_prev : for all u in zone_prev : exists zone_after in zc_after : u in zone_after
+           - for all zone_after in zc_after : for all u in zone_after : exists zone_prev in zc_prev : u in zone_prev
+   */
+
+  void compress()
+  {
+
+    std::shared_ptr<std::vector<std::shared_ptr<T>>> result = _storage;
+
+    bool reduced;
+
+    do {
+      auto prev = result->size();
+      result = find_union_partner(*result);
+      reduced = (result->size() < prev);
+    } while (reduced);
+
+    assert(result->size() <= _storage->size());
+
+    _storage = result;
+
+  }
 
 private:
+
+  std::shared_ptr<std::vector<std::shared_ptr<T>>> find_union_partner(std::vector<std::shared_ptr<T>> const cur)
+  {
+    std::shared_ptr<std::vector<std::shared_ptr<T>>> result = std::make_shared<std::vector<std::shared_ptr<T>>>();
+
+    for(auto to_add = cur.begin(); to_add < cur.end(); ++to_add) {
+      bool found = false;
+      for(auto in_result = result->begin(); in_result < result->end(); ++in_result) {
+        tchecker::dbm::db_t cur_union[this->dim() * this->dim()];
+        if(tchecker::dbm::union_convex_t::UNION_IS_CONVEX == tchecker::dbm::convex_union(cur_union, (*to_add)->dbm(), (*in_result)->dbm(), this->dim())) {
+          found = true;
+          tchecker::dbm::copy((*in_result)->dbm(), cur_union, this->dim());
+          break;
+        }
+      }
+
+      if(!found) {
+        result->emplace_back(*to_add);
+      }
+    }
+
+    return result;
+  }
+
   const tchecker::clock_id_t _dim;
-  std::vector<std::shared_ptr<T>> _storage;
+  std::shared_ptr<std::vector<std::shared_ptr<T>>> _storage;
 
 };
 

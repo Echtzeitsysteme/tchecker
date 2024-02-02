@@ -38,13 +38,13 @@ public:
    \brief Accessor
    \return A reference to the number of visited pair of states
   */
-  std::unordered_set<std::pair<tchecker::zg::state_sptr_t, tchecker::zg::state_sptr_t>>::size_type visited_pair_of_states() const;
+  long visited_pair_of_states() const;
 
   /*!
    \brief setter for the number of visited pair of states
    \post visited_pair_of_states is set to the given value
    */
-  void set_visited_pair_of_states(std::unordered_set<std::pair<tchecker::zg::state_sptr_t, tchecker::zg::state_sptr_t>>::size_type visited_pair_of_states);
+  void set_visited_pair_of_states(long visited_pair_of_states);
 
   /*!
   \brief Accessor
@@ -66,7 +66,7 @@ public:
   void attributes(std::map<std::string, std::string> & m) const;
 
 private:
-  std::unordered_set<std::pair<tchecker::zg::state_sptr_t, tchecker::zg::state_sptr_t>>::size_type _visited_pair_of_states;      /*!< Number of visited pairs of states */
+  long _visited_pair_of_states;  /*!< Number of visited pairs of states */
   bool _relationship_fulfilled;  /*< Whether the relationship is fulfilled */
 };
 
