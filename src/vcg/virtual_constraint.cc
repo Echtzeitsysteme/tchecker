@@ -95,12 +95,13 @@ clock_constraint_container_t virtual_constraint_t::get_vc(tchecker::clock_id_t o
   clock_constraint_container_t result;
 
   for(tchecker::clock_id_t i = 1; i <= get_no_of_virt_clocks(); ++i) {
-    tchecker::clock_id_t cur = i + orig_clocks_offset - 1;
-    result.emplace_back(tchecker::REFCLOCK_ID, cur, tchecker::dbm::access(this->dbm(), this->dim(), 0, i)->cmp, tchecker::dbm::access(this->dbm(), this->dim(), 0, i)->value);
-    result.emplace_back(cur, tchecker::REFCLOCK_ID, tchecker::dbm::access(this->dbm(), this->dim(), i, 0)->cmp, tchecker::dbm::access(this->dbm(), this->dim(), i, 0)->value);
+
+    tchecker::clock_id_t cur = i + orig_clocks_offset;
+    result.emplace_back(0, cur, tchecker::dbm::access(this->dbm(), this->dim(), 0, i)->cmp, tchecker::dbm::access(this->dbm(), this->dim(), 0, i)->value);
+    result.emplace_back(cur, 0, tchecker::dbm::access(this->dbm(), this->dim(), i, 0)->cmp, tchecker::dbm::access(this->dbm(), this->dim(), i, 0)->value);
 
     for(tchecker::clock_id_t j = i+1; j <= get_no_of_virt_clocks(); ++j) {
-      tchecker::clock_id_t second_cur = j + orig_clocks_offset - 1;
+      tchecker::clock_id_t second_cur = j + orig_clocks_offset;
       result.emplace_back(second_cur, cur, tchecker::dbm::access(this->dbm(), this->dim(), j, i)->cmp, tchecker::dbm::access(this->dbm(), this->dim(), j, i)->value);
       result.emplace_back(cur, second_cur, tchecker::dbm::access(this->dbm(), this->dim(), i, j)->cmp, tchecker::dbm::access(this->dbm(), this->dim(), i, j)->value);
     }
