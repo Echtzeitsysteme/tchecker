@@ -5,10 +5,6 @@ uninitdata:*/include/tchecker/utils/shared_objects.hh
 nullPointer:*/src/refzg/refzg.cc
 
 // TODO: fix the following
-rethrowNoCurrentException:*/include/tchecker/variables/variables.hh
-assertWithSideEffect:*/include/tchecker/variables/variables.hh
-funcArgOrderDifferent:*/src/clockbounds/solver.cc
-assertWithSideEffect:*/include/tchecker/waiting/waiting.hh
 uninitMemberVar:*/src/algorithms/covreach/stats.cc
 
 // TODO: decide whether to fix the following

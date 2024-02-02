@@ -61,16 +61,6 @@ public:
 
   std::shared_ptr<T> create_element(T const &zone);
 
-  /*!
-   \brief destructor of zone. Calling the destructor of tchecker::zg::zone_t
-   \note If T extends tchecker::zg::zone_t by a datastructure, there is a need for 
-   specialisation here!
-  */
-  void destruct_element(std::shared_ptr<T> zone)
-  {
-    tchecker::zg::zone_destruct_and_deallocate(&(*zone));
-  }
-
   /*
    \brief check for emptiness of the container
    \return true if and only if the container is empty
@@ -194,15 +184,6 @@ public:
     return _storage.end();
   }
 
-  /*!
-   \brief Destructor
-   */
-  ~zone_container_t<T>()
-  {
-    for(auto iter = begin(); iter < end(); ++iter) {
-      destruct_element(*iter);
-    }
-  }
 
 private:
   const tchecker::clock_id_t _dim;

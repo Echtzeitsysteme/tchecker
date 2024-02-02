@@ -92,7 +92,7 @@ run(std::shared_ptr<tchecker::parsing::system_declaration_t> const & sysdecl_fir
     vcgs.push_back(vcg);
   }
 
-  std::cout << "vcg-timed-bisim.cc : created vcgs" << std::endl;
+  std::cout << __FILE__ << ": " << __LINE__ << ": created vcgs" << std::endl;
 
   auto algorithm = new tchecker::strong_timed_bisim::Lieb_et_al(vcgs[0], vcgs[1]);
 

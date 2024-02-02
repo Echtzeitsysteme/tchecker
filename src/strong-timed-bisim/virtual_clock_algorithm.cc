@@ -16,9 +16,17 @@ namespace tchecker {
 namespace strong_timed_bisim {
 
 Lieb_et_al::Lieb_et_al(std::shared_ptr<tchecker::vcg::vcg_t> input_first, std::shared_ptr<tchecker::vcg::vcg_t> input_second)
-  : _A(input_first), _B(input_second) {}
+  : _A(input_first), _B(input_second)
+{
+  assert(_A->get_no_of_virtual_clocks() == _B->get_no_of_virtual_clocks());
+}
 
 tchecker::strong_timed_bisim::stats_t Lieb_et_al::run() {
+
+  std::cout << __FILE__ << ": " << __LINE__ << ": no of virt clocks is " << _A->get_no_of_virtual_clocks() << " and " << _B->get_no_of_virtual_clocks() << std::endl;
+
+    std::cout << __FILE__ << ": " << __LINE__ << ": no of orig clocks is " << _A->get_no_of_original_clocks() << " and " << _B->get_no_of_original_clocks() << std::endl;
+
 
   tchecker::strong_timed_bisim::stats_t stats;
 
@@ -35,6 +43,8 @@ tchecker::strong_timed_bisim::stats_t Lieb_et_al::run() {
 
   tchecker::zg::const_state_sptr_t const_first{std::get<1>(sst_first[0])};
   tchecker::zg::const_state_sptr_t const_second{std::get<1>(sst_second[0])};
+
+  std::cout << __FILE__ << ": " << __LINE__ << ": start algorithm" << std::endl;
 
   std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> result 
     = this->check_for_virt_bisim(const_first, std::get<2>(sst_first[0]), const_second, std::get<2>(sst_second[0]));
@@ -53,15 +63,22 @@ Lieb_et_al::check_for_virt_bisim(tchecker::zg::const_state_sptr_t symb_state_fir
   tchecker::zg::const_state_sptr_t symb_state_second, tchecker::zg::transition_sptr_t symbolic_trans_second)
 {
 
+  std::cout << __FILE__ << ": " << __LINE__ << ": check-for-virt-bisim" << std::endl;
+  std::cout << __FILE__ << ": " << __LINE__ << ": no of clocks, first: " << symb_state_first->zone().dim() - 1 << std::endl;
+  std::cout << __FILE__ << ": " << __LINE__ << ": no of clocks, first: " << symb_state_second->zone().dim() - 1 << std::endl;
+
+
   std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> result
     = std::make_shared<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(_A->get_no_of_virtual_clocks() + 1);
 
-  // we start with calculating D_A \land extract-virtual-constraint(D_B) (and the other way)
+  // we start with calculating D_A and extract-virtual-constraint(D_B) (and the other way)
   std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> phi_A = tchecker::virtual_constraint::factory(symb_state_first->zone(), _A->get_no_of_virtual_clocks());
   std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> phi_B = tchecker::virtual_constraint::factory(symb_state_second->zone(), _A->get_no_of_virtual_clocks());
 
   tchecker::zg::state_sptr_t A_synced = _A->clone_state(symb_state_first);
   tchecker::zg::state_sptr_t B_synced = _B->clone_state(symb_state_second);
+
+  std::cout << __FILE__ << ": " << __LINE__ << ": before the if" << std::endl;
 
   // Before we sync them, we have to ensure virtual equivalence
   if(
@@ -69,14 +86,19 @@ Lieb_et_al::check_for_virt_bisim(tchecker::zg::const_state_sptr_t symb_state_fir
     tchecker::dbm::status_t::EMPTY == phi_A->logic_and(B_synced->zone())
     )
   {
+    std::cout << __FILE__ << ": " << __LINE__ << ": inside the if" << std::endl;
     // this is a difference to the original function, done for efficiency reasons.
     result->append_zone(phi_A);
     result->append_zone(phi_B);
     return result;
   }
 
+  std::cout << __FILE__ << ": " << __LINE__ << ": after the if" << std::endl;
+
   result->append_container(phi_A->logic_and(phi_B->neg()));
   result->append_container(phi_B->logic_and(phi_A->neg()));
+
+  std::cout << __FILE__ << ": " << __LINE__ << ": appended to container" << std::endl;
 
   // now we can sync them
 
@@ -85,18 +107,27 @@ Lieb_et_al::check_for_virt_bisim(tchecker::zg::const_state_sptr_t symb_state_fir
                        _A->get_no_of_original_clocks(), _B->get_no_of_original_clocks(),
                        symbolic_trans_first->reset_container(), symbolic_trans_second->reset_container());
 
+  std::cout << __FILE__ << ": " << __LINE__ << ": after the sync" << std::endl;
+
   // normalizing, checking whether we have already seen this pair.
   tchecker::zg::state_sptr_t A_normed = _A->clone_state(A_synced);
   tchecker::zg::state_sptr_t B_normed = _B->clone_state(B_synced);
 
+  std::cout << __FILE__ << ": " << __LINE__ << ": after the clone" << std::endl;
+
   _A->run_extrapolation(A_normed->zone().dbm(), A_normed->zone().dim(), *(A_normed->vloc_ptr()));
   _B->run_extrapolation(B_normed->zone().dbm(), B_normed->zone().dim(), *(B_normed->vloc_ptr()));
+
+  std::cout << __FILE__ << ": " << __LINE__ << ": after the extrapolation" << std::endl;
 
   std::pair<tchecker::zg::state_sptr_t, tchecker::zg::state_sptr_t> normalized_pair{A_normed, B_normed};
 
   if(_visited.count(normalized_pair)) {
     return result;
   }
+
+  std::cout << __FILE__ << ": " << __LINE__ << ": after the check" << std::endl;
+
   // If we haven't seen this pair, yet, add it to _visited
   _visited.insert(normalized_pair);
 
@@ -106,6 +137,8 @@ Lieb_et_al::check_for_virt_bisim(tchecker::zg::const_state_sptr_t symb_state_fir
 
   _A->semantics()->delay(A_epsilon->zone_ptr()->dbm(), A_epsilon->zone_ptr()->dim(), symbolic_trans_first->tgt_invariant_container());
   _B->semantics()->delay(B_epsilon->zone_ptr()->dbm(), B_epsilon->zone_ptr()->dim(), symbolic_trans_second->tgt_invariant_container());
+
+  std::cout << __FILE__ << ": " << __LINE__ << ": after the delay" << std::endl;
 
   tchecker::zg::const_state_sptr_t const_A_epsilon{A_epsilon};
   tchecker::zg::const_state_sptr_t const_B_epsilon{B_epsilon};
@@ -117,9 +150,13 @@ Lieb_et_al::check_for_virt_bisim(tchecker::zg::const_state_sptr_t symb_state_fir
   std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> lo_not_simulatable
     = std::make_shared<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(_A->get_no_of_virtual_clocks() + 1);
 
+  std::cout << __FILE__ << ": " << __LINE__ << ": after the new zone container" << std::endl;
+
   for(auto iter = result_epsilon->begin(); iter < result_epsilon->end(); iter++) {
     lo_not_simulatable->append_zone(tchecker::vcg::revert_epsilon_trans(A_synced->zone(), **iter));
   }
+
+  std::cout << __FILE__ << ": " << __LINE__ << ": reverted epsilon transition" << std::endl;
 
   tchecker::zg::const_state_sptr_t const_A_synced{A_synced};
   tchecker::zg::const_state_sptr_t const_B_synced{B_synced};
@@ -127,6 +164,8 @@ Lieb_et_al::check_for_virt_bisim(tchecker::zg::const_state_sptr_t symb_state_fir
   // now that we have checked the epsilon transition, we check the outgoing action transitions
   lo_not_simulatable->append_container(check_for_outgoing_transitions_of_A(const_A_synced, const_B_synced));
   lo_not_simulatable->append_container(check_for_outgoing_transitions_of_B(const_A_synced, const_B_synced));
+
+  std::cout << __FILE__ << ": " << __LINE__ << ": checked for outgoing transitions" << std::endl;
 
   // finally, we revert the sync
 
@@ -151,7 +190,11 @@ Lieb_et_al::check_for_virt_bisim(tchecker::zg::const_state_sptr_t symb_state_fir
     inter.append_zone(sync_reverted.second);
   }
 
+  std::cout << __FILE__ << ": " << __LINE__ << ": reverted the sync" << std::endl;
+
   result->append_container(tchecker::virtual_constraint::combine(inter, _A->get_no_of_virtual_clocks()));
+
+  std::cout << __FILE__ << ": " << __LINE__ << ": return" << std::endl;
 
   return result;
 

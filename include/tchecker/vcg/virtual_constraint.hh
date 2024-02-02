@@ -102,7 +102,7 @@ public:
 };
 
 // factories
-std::shared_ptr<virtual_constraint_t> factory(tchecker::clock_id_t dim);
+std::shared_ptr<virtual_constraint_t> factory(tchecker::clock_id_t no_of_virtual_clocks);
 
 std::shared_ptr<virtual_constraint_t> factory(tchecker::virtual_constraint::virtual_constraint_t const & virtual_constraint);
 
