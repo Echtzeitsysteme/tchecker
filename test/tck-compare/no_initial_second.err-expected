@@ -1,1 +1,2 @@
-WARNING: the second system has no initial state
+ERROR: Currently, strong timed bisim is supported with exactly a single initial location per process, only
+a process of missing_initial has no initial location

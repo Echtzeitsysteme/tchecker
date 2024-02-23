@@ -999,6 +999,29 @@ enum clock_position_t {
 enum tchecker::dbm::clock_position_t clock_position(tchecker::dbm::db_t const * dbm, tchecker::clock_id_t dim,
                                                     tchecker::clock_id_t x1, tchecker::clock_id_t x2);
 
+/*
+ \brief Return value of convex-union
+*/
+enum union_convex_t {
+  UNION_IS_CONVEX,      /*!< the union of two dbm can be represented as a dbm */
+  UNION_IS_NOT_CONVEX   /*!< the union of two dbm cannot be represented as a dbm */
+};
+
+/*!
+ \brief tries to union two dbms
+ \param result : where the result will be stored (must be allocated!)
+ \param dbm1 : a dbm
+ \param dbm2 : a dbm to be unioned with dbm1
+ \param dim : the dimension (must be the same for all dbm!)
+ \pre none of the dbm is nullptr (checked by assertion)
+ dbm1 and dbm1 are consistent and tight (checked by assertion)
+ dim >= 1 (checked by assertion)
+ \return UNION_IS_CONVEX if the union of dbm1 and dbm2 can be represented by a dbm. UNION_IS_NOT_CONVEX otherwise
+ \post if UNION_IS_CONVEX is returned, result contains the union.
+ \note This function implements the convex-union algorithm from the dissertation "Rokicki, Tomas Gerhard: Representing and modeling digital circuits, Stanford University, 1994"
+ */
+enum tchecker::dbm::union_convex_t convex_union(tchecker::dbm::db_t *result, tchecker::dbm::db_t const * dbm1, tchecker::dbm::db_t const * dbm2, tchecker::clock_id_t dim);
+
 } // end of namespace dbm
 
 } // end of namespace tchecker

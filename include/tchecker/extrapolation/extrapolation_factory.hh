@@ -34,7 +34,6 @@ enum extrapolation_type_t {
   EXTRA_M_LOCAL,        /*!< see tchecker::zg::local_extra_m_t */
   EXTRA_M_PLUS_GLOBAL,  /*!< see tchecker::zg::global_extra_m_plus_t */
   EXTRA_M_PLUS_LOCAL,   /*!< see tchecker::zg::local_extra_m_plus_t */
-  EXTRA_K_NORM          /* see tchecker::zg::k_norm */
 };
 
 /*!
@@ -69,8 +68,8 @@ namespace vcg {
 /*!
  \brief Zone extrapolation factory
  \param extrapolation_type : type of extrapolation
- \param orig_system_first : first system of timed processes
- \param orig_system_secpmd : second system of timed processes
+ \param system_first : first system of timed processes
+ \param system_second : second system of timed processes
  \param first_not_second : true iff this vcg is the left hand side of the comparison
  \return a zone extrapolation of type extrapolation_type using clock bounds
  inferred from the systems, nullptr if clock bounds cannot be inferred from system (see
@@ -80,8 +79,8 @@ namespace vcg {
  */
 tchecker::zg::extrapolation_t * extrapolation_factory(
                   enum tchecker::zg::extrapolation_type_t type,
-                  std::shared_ptr<tchecker::ta::system_t const> const & orig_system_first,
-                  std::shared_ptr<tchecker::ta::system_t const> const & orig_system_second,
+                  std::shared_ptr<const tchecker::ta::system_t> system_first,
+                  std::shared_ptr<const tchecker::ta::system_t> system_second,
                   bool first_not_second);
 
 } // end of namespace vcg

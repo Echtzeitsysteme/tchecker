@@ -12,7 +12,7 @@ jobs:
         intsize: ["all:int16:memcheck", "all:int32:memcheck", "all:int64:memcheck"]
         compiler: ["gcc", "clang"]
     runs-on: ubuntu-latest
-    container: alzeha/echtzeitsysteme-tchecker-${{ matrix.compiler }}:v0.1
+    container: alzeha/echtzeitsysteme-tchecker-${{ matrix.compiler }}:latest
     env:
       CONFNAME: ${{ matrix.intsize }}
       INSTALL_DIR: "install"
