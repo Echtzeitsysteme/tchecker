@@ -101,6 +101,20 @@ public:
                                         tchecker::clock_constraint_container_t const & guard,
                                         tchecker::clock_reset_container_t const & clkreset, bool tgt_delay_allowed,
                                         tchecker::clock_constraint_container_t const & tgt_invariant) = 0;
+
+  /*!
+  \brief Compute next zone when epsilon transition is used
+  \param dbm : a DBM
+  \param dim : dimension of dbm
+  \param invariant : invariant of current state
+  \post dbm has been delayed (if allowed), then intersected with src_invariant,
+  \return tchecker::STATE_OK if the resulting DBM is not empty. Otherwise,
+  tchecker::STATE_CLOCKS_SRC_INVARIANT_VIOLATED if intersection with src_invariant
+  result in an empty zone
+  */
+  tchecker::state_status_t delay( tchecker::dbm::db_t * dbm, tchecker::clock_id_t dim,
+                                  tchecker::clock_constraint_container_t const & invariant);
+
 };
 
 /*!
@@ -339,19 +353,6 @@ public:
   */
   virtual tchecker::state_status_t final(tchecker::dbm::db_t * dbm, tchecker::clock_id_t dim, bool delay_allowed,
                                          tchecker::clock_constraint_container_t const & invariant);
-
-  /*!
-  \brief Compute next zone when epsilon transition is used
-  \param dbm : a DBM
-  \param dim : dimension of dbm
-  \param invariant : invariant of current state
-  \post dbm has been delayed (if allowed), then intersected with src_invariant,
-  \return tchecker::STATE_OK if the resulting DBM is not empty. Otherwise,
-  tchecker::STATE_CLOCKS_SRC_INVARIANT_VIOLATED if intersection with src_invariant
-  result in an empty zone
-  */
-  tchecker::state_status_t delay( tchecker::dbm::db_t * dbm, tchecker::clock_id_t dim,
-                                  tchecker::clock_constraint_container_t const & invariant);
 
   /*!
   \brief Compute next zone when action transition is used

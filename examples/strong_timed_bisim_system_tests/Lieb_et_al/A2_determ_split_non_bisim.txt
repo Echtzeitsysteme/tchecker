@@ -1,0 +1,24 @@
+# This file is a part of the TChecker project.
+#
+# See files AUTHORS and LICENSE for copyright details.
+
+system:Lieb_et_al_A2_determ_split_non_bisim
+
+clock:1:x
+
+event:a
+event:b
+event:c
+
+process:P
+location:P:A{initial:}
+location:P:B{invariant: x<2}
+location:P:BPrime{invariant: x<2}
+location:P:C{}
+location:P:CPrime{}
+edge:P:A:B:a{provided: x<2 : do: x=0}
+edge:P:A:BPrime:a{provided: x>2 : do: x=0}
+edge:P:B:C:b{}
+edge:P:BPrime:CPrime:b{}
+edge:P:C:A:c{provided: x>3 : do: x=0}
+edge:P:CPrime:A:c{provided: x>3 : do: x=0}

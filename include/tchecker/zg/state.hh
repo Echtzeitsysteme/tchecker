@@ -101,6 +101,13 @@ public:
   */
   constexpr inline tchecker::zg::zone_t const & zone() const { return *_zone; }
 
+
+  /*!
+  \brief Accessor
+  \return zone in this state
+  */
+  constexpr inline tchecker::zg::zone_t & zone() { return *_zone; }
+
   /*!
   \brief Accessor
   \return reference to pointer to the zone in this state
