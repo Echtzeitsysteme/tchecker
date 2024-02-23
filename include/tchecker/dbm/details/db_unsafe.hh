@@ -99,6 +99,11 @@ inline tchecker::dbm::db_t add(tchecker::dbm::db_t db, tchecker::integer_t value
   return (db + (value << 1));
 }
 
+inline tchecker::dbm::db_t invert(tchecker::dbm::db_t const & to_invert)
+{
+  return tchecker::dbm::db(to_invert.cmp==tchecker::LE ? tchecker::LT : tchecker::LE, to_invert.value);
+}
+
 /*!
  \note Standard comparison operators <, <=, ==, !=, >= and > on integers carry on difference bounds
  */

@@ -11,6 +11,10 @@
 #include "tchecker/vcg/virtual_constraint.hh"
 #include "tchecker/zg/zone.hh"
 
+namespace tchecker {
+
+namespace vcg {
+
 /*!
  \brief revert-action-trans function (see the TR of Lieb et al.)
  \param zone : the original zone
@@ -35,5 +39,9 @@ revert_action_trans(const tchecker::zg::zone_t & zone,
  */
 std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t>
 revert_epsilon_trans(const tchecker::zg::zone_t & zone, const tchecker::virtual_constraint::virtual_constraint_t & phi_split);
+
+} // end of namespace vcg
+
+} // end of namespace tchecker
 
 #endif

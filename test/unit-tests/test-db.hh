@@ -70,11 +70,15 @@ TEST_CASE("construction of upper bounds", "[db]")
 
   SECTION("non representable upper bounds")
   {
-    REQUIRE_THROWS_AS(DB(tchecker::LT, max_int_used), std::invalid_argument);
     REQUIRE_THROWS_AS(DB(tchecker::LT, max_int_used + 1), std::invalid_argument);
     REQUIRE_THROWS_AS(DB(tchecker::LT, min_int_used - 1), std::invalid_argument);
     REQUIRE_NOTHROW(DB(tchecker::LT, max_int_used - 1));
     REQUIRE_NOTHROW(DB(tchecker::LT, min_int_used));
+  }
+
+  SECTION("Lower than infinity test")
+  {
+    REQUIRE(DB(tchecker::LT, max_int_used) == tchecker::dbm::LT_INFINITY);
   }
 }
 

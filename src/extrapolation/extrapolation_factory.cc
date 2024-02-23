@@ -16,7 +16,6 @@
 #include "tchecker/extrapolation/extrapolation.hh"
 #include "tchecker/extrapolation/global_lu_extrapolation.hh"
 #include "tchecker/extrapolation/global_m_extrapolation.hh"
-#include "tchecker/extrapolation/k_norm.hh"
 #include "tchecker/extrapolation/local_lu_extrapolation.hh"
 #include "tchecker/extrapolation/local_m_extrapolation.hh"
 
@@ -62,8 +61,6 @@ tchecker::zg::extrapolation_t * extrapolation_factory(enum extrapolation_type_t 
     return new tchecker::zg::global_extra_m_plus_t{clock_bounds.global_m_map()};
   case tchecker::zg::EXTRA_M_PLUS_LOCAL:
     return new tchecker::zg::local_extra_m_plus_t{clock_bounds.local_m_map()};
-  case tchecker::zg::EXTRA_K_NORM:
-    return new tchecker::zg::k_norm{clock_bounds.global_lu_map()};
   default:
     throw std::invalid_argument("Unknown zone extrapolation");
   }
@@ -75,70 +72,51 @@ namespace vcg {
 
 tchecker::zg::extrapolation_t * extrapolation_factory(
                   enum tchecker::zg::extrapolation_type_t type,
-                  std::shared_ptr<tchecker::ta::system_t const> const & orig_system_first,
-                  std::shared_ptr<tchecker::ta::system_t const> const & orig_system_second,
+                  std::shared_ptr<const tchecker::ta::system_t> system_first,
+                  std::shared_ptr<const tchecker::ta::system_t> system_second,
                   bool first_not_second)
 {
-  if(tchecker::zg::EXTRA_K_NORM != type)
-    throw std::invalid_argument("vcg currently supports k normalization only.");
 
-  std::vector<std::vector<tchecker::clockbounds::bound_t>> bounds;
-  bounds.push_back(std::vector<tchecker::clockbounds::bound_t>());
-  bounds.push_back(std::vector<tchecker::clockbounds::bound_t>());
-
-  for(std::size_t i = 0; i < 2; ++i) {
-    std::unique_ptr<tchecker::clockbounds::clockbounds_t> clock_bounds{
-      tchecker::clockbounds::compute_clockbounds(0 == i ? *orig_system_first : *orig_system_second)};
-
-    if (clock_bounds.get() == nullptr)
-      return nullptr;
-
-    std::shared_ptr<tchecker::clockbounds::global_lu_map_t> lu_map = clock_bounds->global_lu_map();
-
-      // we set the upper and lower clock bound to the same value to receive k-norm.
-    tchecker::clockbounds::map_t *U = const_cast<tchecker::clockbounds::map_t*>(&(lu_map->U()));
-    tchecker::clockbounds::map_t *L = const_cast<tchecker::clockbounds::map_t*>(& (lu_map->L()));
-
-    tchecker::clockbounds::update(*U, *L);
-
-    for(tchecker::clock_id_t j = 0; j < clock_bounds->clock_number(); ++j) {
-      bounds[i].push_back(U[0][j]);
-    }
+  if(tchecker::zg::EXTRA_M_GLOBAL != type) { // vcg currently support k norm (m_global) only
+    throw std::invalid_argument("Unknown zone extrapolation");
   }
 
-  tchecker::clock_id_t no_of_virtual_clocks = orig_system_first->clocks_count(VK_FLATTENED) + orig_system_second->clocks_count(VK_FLATTENED);
-  tchecker::clock_id_t no_of_original_clocks = first_not_second ? orig_system_first->clocks_count(VK_FLATTENED) : orig_system_second->clocks_count(VK_FLATTENED);
-  tchecker::clock_id_t no_of_clocks = no_of_original_clocks + no_of_virtual_clocks;
+  std::unique_ptr<tchecker::clockbounds::clockbounds_t> clock_bounds_first{tchecker::clockbounds::compute_clockbounds(*system_first)};
+  if (clock_bounds_first.get() == nullptr)
+    return nullptr;
 
-  std::shared_ptr<tchecker::clockbounds::global_lu_map_t> resulting_clock_bounds = std::make_shared<tchecker::clockbounds::global_lu_map_t>(no_of_clocks);
+  std::unique_ptr<tchecker::clockbounds::clockbounds_t> clock_bounds_second{tchecker::clockbounds::compute_clockbounds(*system_second)};
+  if (clock_bounds_second.get() == nullptr)
+    return nullptr;
 
-  /* set the bounds */
 
-  // original
-  for(tchecker::clock_id_t i = 0; i < no_of_original_clocks; ++i) {
+  std::shared_ptr<const tchecker::clockbounds::global_m_map_t> M_first = clock_bounds_first->global_m_map();
+  std::shared_ptr<const tchecker::clockbounds::global_m_map_t> M_second = clock_bounds_second->global_m_map();
 
-    tchecker::clockbounds::bound_t bound = first_not_second ? bounds[0][i] : bounds[1][i];
 
-    tchecker::clockbounds::update(resulting_clock_bounds->L(), i, bound);
-    tchecker::clockbounds::update(resulting_clock_bounds->U(), i, bound);
+  tchecker::clock_id_t no_orig_clocks = (first_not_second) ? clock_bounds_first->clocks_number() : clock_bounds_second->clocks_number();
+
+  tchecker::clockbounds::global_m_map_t m_map_with_virt_clks{no_orig_clocks + clock_bounds_first->clocks_number() + clock_bounds_second->clocks_number()};
+
+  tchecker::clockbounds::clear(m_map_with_virt_clks.M());
+
+  for(clock_id_t i = 0; i < no_orig_clocks; ++i) {
+    tchecker::clockbounds::update(m_map_with_virt_clks.M(), i, (first_not_second) ? M_first->M()[i] : M_second->M()[i]);
   }
 
-
-  // first virtual
-  for(tchecker::clock_id_t i = no_of_original_clocks; i < no_of_original_clocks + orig_system_first->clocks_count(VK_FLATTENED); ++i) {
-    tchecker::clockbounds::update(resulting_clock_bounds->L(), i, bounds[0][i - no_of_original_clocks]);
-    tchecker::clockbounds::update(resulting_clock_bounds->U(), i, bounds[0][i - no_of_original_clocks]);
+  for(clock_id_t i = 0; i < clock_bounds_first->clocks_number(); ++i) {
+    tchecker::clockbounds::update(m_map_with_virt_clks.M(), i + no_orig_clocks, M_first->M()[i]);
   }
 
-  // second virtual
-  tchecker::clock_id_t offset_second_virtual = no_of_original_clocks + orig_system_first->clocks_count(VK_FLATTENED);
-
-  for(tchecker::clock_id_t i = offset_second_virtual; i < no_of_clocks; ++i) {
-    tchecker::clockbounds::update(resulting_clock_bounds->L(), i, bounds[1][i - offset_second_virtual]);
-    tchecker::clockbounds::update(resulting_clock_bounds->U(), i, bounds[1][i - offset_second_virtual]);
+  for(clock_id_t i = 0; i < clock_bounds_second->clocks_number(); ++i) {
+    tchecker::clockbounds::update(m_map_with_virt_clks.M(), i + no_orig_clocks + clock_bounds_first->clocks_number(), M_second->M()[i]);
   }
 
-  return new tchecker::vcg::k_norm_virtual{resulting_clock_bounds};
+  //std::cout << __FILE__ << ": " << __LINE__ << ": " << m_map_with_virt_clks << std::endl;
+
+  std::shared_ptr<tchecker::clockbounds::global_m_map_t const> final_map = std::make_shared<tchecker::clockbounds::global_m_map_t const>(m_map_with_virt_clks);
+
+  return new tchecker::zg::global_extra_m_t{final_map};
 
 }
 

@@ -9,6 +9,7 @@
 #define TCHECKER_ZG_ZONE_CONTAINER_HH
 
 #include <iterator>
+#include <memory>
 
 #include "tchecker/zg/zone.hh"
 #include "tchecker/vcg/virtual_constraint.hh"
@@ -34,13 +35,13 @@ public:
    \brief Constructor
    \param dim : dimension
    */
-  zone_container_t(tchecker::clock_id_t dim) : _dim(dim){ }
+  zone_container_t<T>(tchecker::clock_id_t dim) : _dim(dim), _storage(std::make_shared<std::vector<std::shared_ptr<T>>>(0)) { }
 
   /*!
    \brief Copy Constructor
    \param container : the container to copy
    */
-  zone_container_t(zone_container_t &t) : _dim(t.dim()), _storage(0)
+  zone_container_t<T>(zone_container_t<T> &t) : _dim(t.dim()), _storage(std::make_shared<std::vector<std::shared_ptr<T>>>(0))
   {
     for(auto iter = t.begin(); iter < t.end(); iter++) {
       this->append_zone(*(*iter));
@@ -60,23 +61,13 @@ public:
 
   std::shared_ptr<T> create_element(T const &zone);
 
-  /*!
-   \brief destructor of zone. Calling the destructor of tchecker::zg::zone_t
-   \note If T extends tchecker::zg::zone_t by a datastructure, there is a need for 
-   specialisation here!
-  */
-  void destruct_element(std::shared_ptr<T> zone)
-  {
-    tchecker::zg::zone_destruct_and_deallocate(&(*zone));
-  }
-
   /*
    \brief check for emptiness of the container
    \return true if and only if the container is empty
    */
   bool is_empty()
   {
-    return 0 == _storage.size();
+    return 0 == _storage->size();
   }
 
   /*!
@@ -84,7 +75,7 @@ public:
    */
   void append_zone()
   {
-    _storage.emplace_back(create_element());
+    _storage->emplace_back(create_element());
   }
 
   /*!
@@ -92,7 +83,8 @@ public:
    */
   void append_zone(T const & zone)
   {
-    _storage.emplace_back(create_element(zone));
+    assert(_dim == zone.dim());
+    _storage->emplace_back(create_element(zone));
   }
 
 
@@ -103,16 +95,55 @@ public:
    */
   void append_zone(std::shared_ptr<T> zone)
   {
-    _storage.emplace_back(zone);
+    assert(_dim == zone->dim());
+    _storage->emplace_back(zone);
+  }
+
+  /*!
+   \brief adds the elements of other to this
+   \param other: the container to append
+   \post other is appended to the container
+   */
+  void append_container(std::shared_ptr<zone_container_t<T>> other)
+  {
+    assert(other->_dim == this->_dim);
+    for(auto iter = other->begin(); iter < other->end(); iter++) {
+      this->append_zone(*iter);
+    }
+  }
+
+  /*!
+   \brief adds the elements of other to this. The elements that can be accessed are the same!
+   \param other: the container to append
+   \post other is appended to the container
+   */
+  void append_container(zone_container_t<T> &other)
+  {
+    assert(other._dim == this->_dim);
+    for(auto iter = other.begin(); iter < other.end(); iter++) {
+      this->append_zone(*iter);
+    }
   }
 
   /*!
    \brief removes the last zone and deletes the content
    */
-  void remove_back()
+  void remove_first()
   {
     destruct_element(*(_storage.begin()));
-    _storage.erase(_storage.begin());
+    _storage->erase(_storage.begin());
+  }
+
+  /*!
+   \brief removes all empty zones
+   */
+  void remove_empty()
+  {
+    for(auto iter = this->begin(); iter < this->end(); iter++) {
+      if(iter->empty()) {
+        _storage->erase(iter);
+      }
+    }
   }
 
   /*!
@@ -121,7 +152,7 @@ public:
    */
   std::shared_ptr<T> back()
   {
-    return _storage.back();
+    return _storage->back();
   }
 
   /*!
@@ -131,7 +162,7 @@ public:
    */
   std::shared_ptr<T> operator[](typename std::vector<std::shared_ptr<T>>::size_type i)
   {
-    return _storage[i];
+    return (*_storage)[i];
   }
 
   /*!
@@ -140,7 +171,7 @@ public:
    */
   typename std::vector<std::shared_ptr<T>>::size_type size()
   {
-    return _storage.size();
+    return _storage->size();
   }
 
   /*!
@@ -148,7 +179,7 @@ public:
    */
   typename std::vector<std::shared_ptr<T>>::iterator begin()
   {
-    return _storage.begin();
+    return _storage->begin();
   }
 
   /*!
@@ -156,22 +187,63 @@ public:
    */
   typename std::vector<std::shared_ptr<T>>::iterator end()
   {
-    return _storage.end();
+    return _storage->end();
   }
 
   /*!
-   \brief Destructor
+   \brief compresses the zone container if possible
+   \post let zc_prev be the zone container before the call and zc_after the zone container after. The following conditions hold:
+           - zc_prev._dim = zc_after._dim
+           - for all zone_prev in zc_prev : for all u in zone_prev : exists zone_after in zc_after : u in zone_after
+           - for all zone_after in zc_after : for all u in zone_after : exists zone_prev in zc_prev : u in zone_prev
    */
-  ~zone_container_t()
+
+  void compress()
   {
-    for(auto iter = begin(); iter < end(); ++iter) {
-      destruct_element(*iter);
-    }
+
+    std::shared_ptr<std::vector<std::shared_ptr<T>>> result = _storage;
+
+    bool reduced;
+
+    do {
+      auto prev = result->size();
+      result = find_union_partner(*result);
+      reduced = (result->size() < prev);
+    } while (reduced);
+
+    assert(result->size() <= _storage->size());
+
+    _storage = result;
+
   }
 
 private:
+
+  std::shared_ptr<std::vector<std::shared_ptr<T>>> find_union_partner(std::vector<std::shared_ptr<T>> const cur)
+  {
+    std::shared_ptr<std::vector<std::shared_ptr<T>>> result = std::make_shared<std::vector<std::shared_ptr<T>>>();
+
+    for(auto to_add = cur.begin(); to_add < cur.end(); ++to_add) {
+      bool found = false;
+      for(auto in_result = result->begin(); in_result < result->end(); ++in_result) {
+        tchecker::dbm::db_t cur_union[this->dim() * this->dim()];
+        if(tchecker::dbm::union_convex_t::UNION_IS_CONVEX == tchecker::dbm::convex_union(cur_union, (*to_add)->dbm(), (*in_result)->dbm(), this->dim())) {
+          found = true;
+          tchecker::dbm::copy((*in_result)->dbm(), cur_union, this->dim());
+          break;
+        }
+      }
+
+      if(!found) {
+        result->emplace_back(*to_add);
+      }
+    }
+
+    return result;
+  }
+
   const tchecker::clock_id_t _dim;
-  std::vector<std::shared_ptr<T>> _storage;
+  std::shared_ptr<std::vector<std::shared_ptr<T>>> _storage;
 
 };
 
@@ -187,13 +259,6 @@ std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> zone_contain
 
 template<>
 std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>::create_element(tchecker::virtual_constraint::virtual_constraint_t const & zone);
-
-/*!
- \brief contained-in-all function (see the TR of Lieb et al.)
- \param a vector of vector of zones
- \return a vector of zones
- */
-zone_container_t<tchecker::zg::zone_t> contained_in_all(std::vector<zone_container_t<tchecker::zg::zone_t>> & zones, tchecker::clock_id_t dim);
 
 
 } // end of namespace tchecker
