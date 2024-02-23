@@ -123,9 +123,9 @@ int parse_command_line(int argc, char * argv[])
  of errors
  \post all errors have been reported to std::cerr
  */
-tchecker::parsing::system_declaration_t * load_system_declaration(std::string const & filename)
+std::shared_ptr<tchecker::parsing::system_declaration_t> load_system_declaration(std::string const & filename)
 {
-  tchecker::parsing::system_declaration_t * sysdecl = nullptr;
+  std::shared_ptr<tchecker::parsing::system_declaration_t> sysdecl = nullptr;
   try {
     sysdecl = tchecker::parsing::parse_system_declaration(filename);
     if (sysdecl == nullptr)
@@ -147,11 +147,7 @@ tchecker::parsing::system_declaration_t * load_system_declaration(std::string co
 void strong_timed_bisim(std::shared_ptr<tchecker::parsing::system_declaration_t> const & sysdecl_first, std::shared_ptr<tchecker::parsing::system_declaration_t> const & sysdecl_second)
 {
 
-  std::cout << "tck-compare.cc: run" << std::endl;
-
   auto stats = tchecker::tck_compare::vcg_timed_bisim::run(sysdecl_first, sysdecl_second, os, block_size, table_size);
-
-  std::cerr << "tck-compare.cc : print stats" << std::endl;
 
   // stats
   std::map<std::string, std::string> m;

@@ -185,8 +185,9 @@ enum tchecker::dbm::status_t tighten(tchecker::dbm::db_t * dbm, tchecker::clock_
     for (tchecker::clock_id_t i = 0; i < dim; ++i) {
       if ((i == k) || (DBM(i, k) == tchecker::dbm::LT_INFINITY)) // optimization
         continue;
-      for (tchecker::clock_id_t j = 0; j < dim; ++j)
+      for (tchecker::clock_id_t j = 0; j < dim; ++j) {
         DBM(i, j) = tchecker::dbm::min(tchecker::dbm::sum(DBM(i, k), DBM(k, j)), DBM(i, j));
+      }
       if (DBM(i, i) < tchecker::dbm::LE_ZERO) {
         DBM(0, 0) = tchecker::dbm::LT_ZERO;
         return tchecker::dbm::EMPTY;
@@ -524,12 +525,61 @@ enum tchecker::dbm::status_t intersection(tchecker::dbm::db_t * dbm, tchecker::d
   return tchecker::dbm::tighten(dbm, dim);
 }
 
+// used for assertion only
+bool split_is_subset_of_R_orig(const tchecker::dbm::db_t * orig_zone,
+                               tchecker::clock_id_t dim, tchecker::dbm::db_t * zone_split,
+                               tchecker::clock_reset_container_t reset)
+{
+
+  tchecker::dbm::db_t r_orig[dim*dim];
+  tchecker::dbm::copy(r_orig, orig_zone, dim);
+
+  // resets to zero allowed, only
+  for(const tchecker::clock_reset_t & r : reset) {
+    reset_to_value(r_orig, dim, r.left_id() + 1, 0);
+  }
+
+  assert(tchecker::dbm::is_tight(r_orig, dim));
+  assert(tchecker::dbm::is_consistent(r_orig, dim));
+
+  if(!tchecker::dbm::is_le(zone_split, r_orig, dim)) {
+    std::cout << __FILE__ << ": " << __LINE__ << ": orig_zone:" << std::endl;
+    tchecker::dbm::output_matrix(std::cout, orig_zone, dim);
+
+    std::cout << __FILE__ << ": " << __LINE__ << ": zone_split:" << std::endl;
+    tchecker::dbm::output_matrix(std::cout, orig_zone, dim);
+
+
+    std::cout << __FILE__ << ": " << __LINE__ << ": resets:" << std::endl;
+
+    for(const tchecker::clock_reset_t & r : reset) {
+      std::cout << r << std::endl;
+    }
+
+    std::cout << __FILE__ << ": " << __LINE__ << ": R(orig_zone):" << std::endl;
+    tchecker::dbm::output_matrix(std::cout, r_orig, dim);
+
+    return false;
+  }
+
+  return true;
+
+}
+
 tchecker::dbm::db_t * revert_multiple_reset(const tchecker::dbm::db_t * orig_zone,
                                             tchecker::clock_id_t dim, tchecker::dbm::db_t * zone_split,
                                             tchecker::clock_reset_container_t reset)
 {
 
-  // TODO: add assertions
+  assert(dim >= 1);
+  assert(orig_zone != nullptr);
+  assert(zone_split != nullptr);
+  assert(tchecker::dbm::is_consistent(orig_zone, dim));
+  assert(tchecker::dbm::is_consistent(zone_split, dim));
+  assert(tchecker::dbm::is_tight(orig_zone, dim));
+  assert(tchecker::dbm::is_tight(zone_split, dim));
+
+  assert(split_is_subset_of_R_orig(orig_zone, dim, zone_split, reset));
 
   if(reset.empty()) {
     // place the dbm to return at the heap s.t. it is not destroyed during the returns
@@ -1262,6 +1312,61 @@ enum tchecker::dbm::clock_position_t clock_position(tchecker::dbm::db_t const * 
   if (cmp == tchecker::dbm::CLK_EQ)
     return tchecker::dbm::CLK_SYNCHRONIZED;
   return tchecker::dbm::CLK_SYNCHRONIZABLE;
+}
+
+enum tchecker::dbm::union_convex_t convex_union(tchecker::dbm::db_t *result, tchecker::dbm::db_t const * dbm1, tchecker::dbm::db_t const * dbm2, tchecker::clock_id_t dim)
+{
+  assert(result != nullptr);
+  assert(dbm1 != nullptr);
+  assert(dbm2 != nullptr);
+
+  assert(dim >= 1);
+
+  assert(tchecker::dbm::is_consistent(dbm1, dim));
+  assert(tchecker::dbm::is_tight(dbm1, dim));
+
+  assert(tchecker::dbm::is_consistent(dbm2, dim));
+  assert(tchecker::dbm::is_tight(dbm2, dim));
+
+  tchecker::dbm::copy(result, dbm1, dim);
+
+  std::vector<std::tuple<tchecker::clock_id_t, tchecker::clock_id_t, tchecker::dbm::db_t>> dbm1_tight;
+  std::vector<std::tuple<tchecker::clock_id_t, tchecker::clock_id_t, tchecker::dbm::db_t>> dbm2_tight;
+
+  for(tchecker::clock_id_t i = 0; i < dim; ++i) {
+    for(tchecker::clock_id_t j = 0; j < dim; ++j) {
+      if(DBM1(i, j) <  DBM2(i, j) ) {
+        result[i*dim + j] = DBM2(i, j);
+        dbm1_tight.emplace_back(std::make_tuple<tchecker::clock_id_t, tchecker::clock_id_t, tchecker::dbm::db_t>(std::move(i), std::move(j), tchecker::dbm::db_t(DBM1(i, j))));
+      } else if (DBM2(i, j) < DBM1(i, j)) {
+        dbm2_tight.emplace_back(std::make_tuple<tchecker::clock_id_t, tchecker::clock_id_t, tchecker::dbm::db_t>(std::move(i), std::move(j), tchecker::dbm::db_t(DBM2(i, j))));
+      }
+    }
+  }
+
+  if(dbm2_tight.empty()) {
+    return tchecker::dbm::union_convex_t::UNION_IS_CONVEX;
+  }
+
+  if (dbm1_tight.empty()) {
+    tchecker::dbm::copy(result, dbm2, dim);
+    return tchecker::dbm::union_convex_t::UNION_IS_CONVEX;
+  }
+
+  for(auto iter = dbm1_tight.begin(); iter < dbm1_tight.end(); iter++) {
+    tchecker::dbm::db_t diff_dbm[dim*dim];
+    tchecker::dbm::copy(diff_dbm, result, dim);
+    diff_dbm[std::get<1>(*iter) * dim + std::get<0>(*iter)] = tchecker::dbm::invert(std::get<2>(*iter));
+    tchecker::dbm::tighten(diff_dbm, dim);
+    for(auto iter2 = dbm2_tight.begin(); iter2 < dbm2_tight.end(); iter2++) {
+      if(diff_dbm[std::get<0>(*iter2) * dim + std::get<1>(*iter2)] > std::get<2>(*iter2)) {
+        return tchecker::dbm::union_convex_t::UNION_IS_NOT_CONVEX;
+      }
+    }
+  }
+
+  return tchecker::dbm::union_convex_t::UNION_IS_CONVEX;
+
 }
 
 } // end of namespace dbm
