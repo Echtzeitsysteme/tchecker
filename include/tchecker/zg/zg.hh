@@ -169,12 +169,14 @@ public:
    */
   zg_t(std::shared_ptr<tchecker::ta::system_t const> const & system, enum tchecker::ts::sharing_type_t sharing_type,
        std::shared_ptr<tchecker::zg::semantics_t> const & semantics,
-       std::shared_ptr<tchecker::zg::extrapolation_t> const & extrapolation, std::size_t block_size, std::size_t table_size)
+       std::shared_ptr<tchecker::zg::extrapolation_t> const & extrapolation, std::size_t block_size, std::size_t table_size,
+       bool enable_extrapolation = true)
     : _system(system), _sharing_type(sharing_type), _semantics(semantics), _extrapolation(extrapolation),
       _state_allocator(block_size, block_size, _system->processes_count(), block_size,
                        _system->intvars_count(tchecker::VK_FLATTENED), block_size,
                        _system->clocks_count(tchecker::VK_FLATTENED) + 1, table_size),
-      _transition_allocator(block_size, block_size, _system->processes_count(), table_size)
+      _transition_allocator(block_size, block_size, _system->processes_count(), table_size),
+      _enable_extrapolation(enable_extrapolation)
   {
   }
 
@@ -402,6 +404,14 @@ public:
   void split(tchecker::zg::const_state_sptr_t const & s, tchecker::clock_constraint_container_t const & constraints,
              std::vector<tchecker::zg::state_sptr_t> & v);
 
+  /*!
+   \brief runs the extrapolation on the given dbm
+   \param dbm : the dbm to extrapolate
+   \param dim : the dimension of the dbm
+   \param vloc : a set of locations
+   \post the dbm is extrapolated
+   */
+  inline void run_extrapolation(tchecker::dbm::db_t *dbm, tchecker::clock_id_t dim, tchecker::vloc_t const & vloc) const { _extrapolation->extrapolate(dbm, dim, vloc); }
 
   // Inspector
 
@@ -474,6 +484,12 @@ public:
 
   /*!
    \brief Accessor
+   \return Underlying semantics
+   */
+  inline std::shared_ptr<tchecker::zg::semantics_t> const & semantics() const { return _semantics; }
+
+  /*!
+   \brief Accessor
    \return sharing type of this synchronized product
   */
   inline enum tchecker::ts::sharing_type_t sharing_type() const { return _sharing_type; }
@@ -482,9 +498,13 @@ public:
    \brief Accessor
    \return number of clocks
    */
-  inline tchecker::clock_id_t clocks_count()  { return _system->clocks_count(tchecker::VK_FLATTENED);  }
+  inline tchecker::clock_id_t clocks_count() const { return _system->clocks_count(tchecker::VK_FLATTENED);  }
 
-private:
+  inline tchecker::zg::state_sptr_t create_state() {return _state_allocator.construct();}
+  inline tchecker::zg::state_sptr_t clone_state(tchecker::zg::const_state_sptr_t const & to_clone) {return _state_allocator.clone(*to_clone);}
+  inline tchecker::zg::state_sptr_t clone_state(tchecker::zg::state_sptr_t const & to_clone) {return _state_allocator.clone(*to_clone);}
+
+protected:
 
   /*!
    \brief High-Order function to shorten the handling of states and transitions
@@ -511,7 +531,7 @@ private:
                                                          tchecker::zg::state_sptr_t &,
                                                         tchecker::zg::transition_sptr_t &,
                                                          helping_hand_t *),
-                  tchecker::zg::const_state_sptr_t const & to_clone, bool clone
+                  tchecker::zg::const_state_sptr_t const & to_clone, bool clone, bool enable_extrapolation = true
                   );
   /*!
    \brief Clone and constrain a state
@@ -537,6 +557,7 @@ private:
   std::shared_ptr<tchecker::zg::extrapolation_t> _extrapolation;   /*!< Zone extrapolation */
   tchecker::zg::state_pool_allocator_t _state_allocator;           /*!< Pool allocator of states */
   tchecker::zg::transition_pool_allocator_t _transition_allocator; /*! Pool allocator of transitions */
+  bool _enable_extrapolation;
 };
 
 /* tools */
@@ -571,13 +592,13 @@ next(tchecker::zg::zg_t &zg,
 std::shared_ptr<zg_t> factory(std::shared_ptr<tchecker::ta::system_t const> const & system,
                              enum tchecker::ts::sharing_type_t sharing_type, enum tchecker::zg::semantics_type_t semantics_type,
                              enum tchecker::zg::extrapolation_type_t extrapolation_type, std::size_t block_size,
-                             std::size_t table_size);
+                             std::size_t table_size, bool enable_extrapolation = true);
 
 std::shared_ptr<zg_t> factory(std::shared_ptr<tchecker::ta::system_t const> const & system,
                              enum tchecker::ts::sharing_type_t sharing_type, enum tchecker::zg::semantics_type_t semantics_type,
                              enum tchecker::zg::extrapolation_type_t extrapolation_type,
                              tchecker::clockbounds::clockbounds_t const & clock_bounds, std::size_t block_size,
-                             std::size_t table_size);
+                             std::size_t table_size, bool enable_extrapolation = true);
 
 } // end of namespace zg
 

@@ -4,7 +4,7 @@ ARG CXX
 RUN apt update && \
     apt install -y \
     git cmake bison flex doxygen wget \
-    valgrind graphviz
+    valgrind graphviz cppcheck
 
 
 FROM base as gcc-image

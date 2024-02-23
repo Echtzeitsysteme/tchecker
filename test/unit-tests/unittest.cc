@@ -26,5 +26,6 @@
 #include "test-reference_clock_variables.hh"
 #include "test-refzg-semantics.hh"
 #include "test-variables-access.hh"
+#include "test-virtual_constraint.hh"
 #include "test-waiting.hh"
 #include "test-zg-semantics.hh"

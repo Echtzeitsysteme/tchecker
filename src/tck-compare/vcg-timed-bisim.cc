@@ -73,8 +73,6 @@ run(std::shared_ptr<tchecker::parsing::system_declaration_t> const & sysdecl_fir
 
   std::vector<std::shared_ptr<tchecker::ta::system_t>> systems;
 
-  std::cout << "vcg-timed-bisim.cc : run" << std::endl;
-
   for(size_t i = 0; i < 2; ++i) {
     std::shared_ptr<tchecker::ta::system_t> cur_system{new tchecker::ta::system_t{ (i == 0) ? *sysdecl_first : *sysdecl_second}};
     std::shared_ptr<tchecker::syncprod::system_t const> system_syncprod = std::make_shared<tchecker::syncprod::system_t const>(cur_system->as_syncprod_system());
@@ -90,98 +88,15 @@ run(std::shared_ptr<tchecker::parsing::system_declaration_t> const & sysdecl_fir
   for(size_t i = 0; i < 2; ++i) {
     std::shared_ptr<tchecker::strong_timed_bisim::system_virtual_clocks_t const> extended_system{new tchecker::strong_timed_bisim::system_virtual_clocks_t{*(systems[i]), no_of_virt_clocks, 0 == i}};
     std::shared_ptr<tchecker::vcg::vcg_t> vcg{tchecker::vcg::factory(extended_system, 0 == i, systems[0], systems[1], tchecker::ts::SHARING, tchecker::zg::DISTINGUISHED_SEMANTICS,
-                                                               tchecker::zg::EXTRA_K_NORM, block_size, table_size)};
+                                                               tchecker::zg::EXTRA_M_GLOBAL, block_size, table_size)};
     vcgs.push_back(vcg);
   }
 
-  std::cout << "vcg-timed-bisim.cc : created vcgs" << std::endl;
+//  std::cout << __FILE__ << ": " << __LINE__ << ": created vcgs" << std::endl;
 
   auto algorithm = new tchecker::strong_timed_bisim::Lieb_et_al(vcgs[0], vcgs[1]);
 
   return algorithm->run();
-
-
-  /* DELETE ME!
-
-  std::cout << "no. of processes: " << system_first->processes_count() << std::endl;
-  std::cout << "no. of processes of product: " << product_first->processes_count() << std::endl;
-
-  auto r = system_first->attributes().range();
-  auto begin = r.begin(), end = r.end();
-
-  std::cout << "loop system attributes" << std::endl;
-
-  for(auto it = begin; it != end; ++it) {
-    std::cout << "found attribute: " << (*it).key() << ":" << (*it).value() << std::endl;
-  }
-
-  auto p = product_first->attributes().range();
-  auto pbegin = p.begin(), pend = p.end();
-
-  std::cout << "loop product attributes" << std::endl;
-
-  for(auto it = pbegin; it != pend; ++it) {
-    std::cout << "found attribute: " << (*it).key() << ":" << (*it).value() << std::endl;
-  }
-
-  auto r_l = system_first->locations();
-  auto begin_l = r_l.begin(), end_l = r_l.end();
-
-  std::cout << "loop system locations" << std::endl;
-
-  for(auto it = begin_l; it != end_l; ++it) {
-    std::cout << "found location: " << (*it)->name() << std::endl;
-  }
-
-  auto p_l = product_first->locations();
-  auto begin_p_l = p_l.begin(), end_p_l = p_l.end();
-
-  std::cout << "loop product locations" << std::endl;
-
-  for(auto it = begin_p_l; it != end_p_l; ++it) {
-    std::cout << "found location: " << (*it)->name() << std::endl;
-  }
-
-  std::cout << "initial system locations" << std::endl;
-
-  for(std::size_t i = 0; i < system_first->processes_count(); ++i) {
-      auto r_init = system_first->initial_locations(i);
-      auto begin_init = r_init.begin(), end_init = r_init.end();
-
-    for(auto it = begin_init; it != end_init; ++it) {
-      std::cout << "found initial location for process " << i << "(" << system_first->process_name(i) << "): " << (*it)->name() << std::endl;
-    }
-  }
-
-  std::cout << "initial product locations" << std::endl;
-
-  auto p_init = product_first->initial_locations(0);
-  auto begin_init = p_init.begin(), end_init = p_init.end();
-
-  for(auto it = begin_init; it != end_init; ++it) {
-      std::cout << "found initial location for process " << 0 << "(" << product_first->process_name(0) << "): " << (*it)->name() << std::endl;
-  }
-
-  auto r_c = system_first->clock_variables().identifiers();
-  auto begin_c = r_c.begin(), end_c = r_c.end();
-
-  std::cout << "loop system clocks" << std::endl;
-
-  for(auto it = begin_c; it != end_c; ++it) {
-    std::cout << "found clock: " << it << ": " << system_first->clock_name(it) << std::endl;
-  }
-
-  auto p_c = product_first->clock_variables().identifiers();
-  auto begin_p_c = p_c.begin(), end_p_c = p_c.end();
-
-  std::cout << "loop product clocks" << std::endl;
-
-    for(auto it = begin_p_c; it != end_p_c; ++it) {
-    std::cout << "found clock: " << it << ": " << product_first->clock_name(it) << std::endl;
-  }
-
-
-  /* UNTIL ME! */
 
 }
 
