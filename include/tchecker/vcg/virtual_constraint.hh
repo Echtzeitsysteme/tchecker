@@ -60,16 +60,6 @@ public:
    */
   clock_constraint_container_t get_vc(tchecker::clock_id_t no_of_orig_clocks, bool system_clocks) const;
 
-  /*!
-   \brief returns the negated version of this clock constraint
-   \return let result be the return value.
-   *  forall u with u model this and for all vc in result u does not model vc
-   *  forall u with u does not model this exists a vc in result such that u models vc
-   *  (for u in ({\chi_0, ..., \chi_{|C_A| + | C_B| - 1}} \rightarrow T))
-   \note the result can easily become very large. Try to avoid this method and use neg_logic_and instead.
-   */
-  std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> neg() const;
-
   /*
    \brief returns the (not this and other)
    \param result : the pointer in which the result will be stored. Has to be allocated!
@@ -109,6 +99,12 @@ public:
   */
   void logic_and(std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> result,
                  std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> const container) const;
+
+ /*
+  \brief returns, whether there exists any clock valuation that fulfills this
+  \return false, if no clock valuation exists that fulfills this
+  */
+  bool is_fulfillable() {return !this->is_empty();}
 
 private:
 
@@ -158,7 +154,7 @@ std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> combine(tcheck
  \param a vector of container of zones
  \return a container of zones
  */
-std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> contained_in_all(std::vector<std::shared_ptr<zone_container_t<virtual_constraint_t>>> & zones, tchecker::clock_id_t no_of_virtual_clocks);
+std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> contained_in_all(std::vector<std::shared_ptr<zone_container_t<virtual_constraint_t>>> & vc, tchecker::clock_id_t no_of_virtual_clocks);
 
 
 } // end of namespace virtual_constraint

@@ -140,7 +140,7 @@ public:
   void remove_empty()
   {
     for(auto iter = this->begin(); iter < this->end(); iter++) {
-      if(iter->empty()) {
+      if((*iter)->is_empty()) {
         _storage->erase(iter);
       }
     }
@@ -200,6 +200,8 @@ public:
 
   void compress()
   {
+
+    this->remove_empty();
 
     std::shared_ptr<std::vector<std::shared_ptr<T>>> result = _storage;
 
