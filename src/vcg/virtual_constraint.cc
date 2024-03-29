@@ -84,14 +84,9 @@ std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> virtual_constr
     }
   }
 
-  return result;
-}
+  result->compress();
 
-std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> virtual_constraint_t::neg() const
-{
-  tchecker::dbm::db_t univ[this->dim()*this->dim()];
-  tchecker::dbm::universal(univ, this->dim());
-  return neg_helper(univ);
+  return result;
 }
 
 clock_constraint_container_t virtual_constraint_t::get_vc(tchecker::clock_id_t no_of_orig_clocks, bool system_clocks) const
@@ -256,6 +251,8 @@ std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> combine(tcheck
 
   }
 
+  result->compress();
+
   return result;
 }
 
@@ -273,27 +270,28 @@ bool all_elements_are_stronger_than(std::shared_ptr<zone_container_t<virtual_con
   return result;
 }
 
-std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> contained_in_all(std::vector<std::shared_ptr<zone_container_t<virtual_constraint_t>>> & zones, tchecker::clock_id_t no_of_virtual_clocks)
+std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> contained_in_all(std::vector<std::shared_ptr<zone_container_t<virtual_constraint_t>>> & vc, tchecker::clock_id_t no_of_virtual_clocks)
 {
 
   assert(
-    std::all_of(zones.begin(), zones.end(),
-                [no_of_virtual_clocks](std::shared_ptr<zone_container_t<virtual_constraint_t>> & lo_zones){return no_of_virtual_clocks + 1 == lo_zones->dim();} // cppcheck-suppress [assertWithSideEffect]
+    std::all_of(vc.begin(), vc.end(),
+                [no_of_virtual_clocks](std::shared_ptr<zone_container_t<virtual_constraint_t>> & lo_vc){return no_of_virtual_clocks + 1 == lo_vc->dim();} // cppcheck-suppress [assertWithSideEffect]
     )
   );
 
-  if (zones.empty()) {
+  if (vc.empty()) {
     return std::make_shared<tchecker::zone_container_t<virtual_constraint_t>>(no_of_virtual_clocks + 1);
   }
 
-  if (1 == zones.size()) {
-    return (zones[0]);
+  if (1 == vc.size()) {
+    (vc[0])->compress();
+    return vc[0];
   }
 
-  std::shared_ptr<zone_container_t<virtual_constraint_t>> cur = zones.back();
-  zones.pop_back();
+  std::shared_ptr<zone_container_t<virtual_constraint_t>> cur = vc.back();
+  vc.pop_back();
 
-  std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> inter = contained_in_all(zones, no_of_virtual_clocks);
+  std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> inter = contained_in_all(vc, no_of_virtual_clocks);
 
   std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> result = std::make_shared<zone_container_t<virtual_constraint_t>>(no_of_virtual_clocks + 1);
 
@@ -319,6 +317,8 @@ std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> contained_in_a
   );
 
   assert(all_elements_are_stronger_than(cur, result, no_of_virtual_clocks));
+
+  result->compress();
 
   return result;
 }
