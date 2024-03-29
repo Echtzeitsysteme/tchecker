@@ -34,11 +34,12 @@ revert_action_trans(const tchecker::zg::zone_t & zone,
 /*!
  \brief revert-epsilon-trans function (see the TR of Lieb et al.)
  \param zone : the original zone
+ \param zone_eps : the original target zone
  \param phi_split : the sub vc of the target
  \return a shared pointer to the resulting virtual constraint
  */
 std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t>
-revert_epsilon_trans(const tchecker::zg::zone_t & zone, const tchecker::virtual_constraint::virtual_constraint_t & phi_split);
+revert_epsilon_trans(const tchecker::zg::zone_t & zone, const tchecker::zg::zone_t & zone_eps, const tchecker::virtual_constraint::virtual_constraint_t & phi_split);
 
 } // end of namespace vcg
 

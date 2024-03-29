@@ -592,7 +592,7 @@ enum tchecker::dbm::status_t intersection(tchecker::dbm::db_t * dbm, tchecker::d
  \return the dbm with reverted resets (same dim as orig_zone)
  \note the returned dbm is allocated on the heap. You have to free it!
  */
-tchecker::dbm::db_t * revert_multiple_reset(const tchecker::dbm::db_t * orig_zone,
+enum tchecker::dbm::status_t revert_multiple_reset(tchecker::dbm::db_t *result, const tchecker::dbm::db_t * orig_zone,
                                             tchecker::clock_id_t dim, tchecker::dbm::db_t * zone_split,
                                             tchecker::clock_reset_container_t reset);
 

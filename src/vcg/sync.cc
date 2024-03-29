@@ -92,7 +92,18 @@ bool is_phi_subset_of_a_zone(const tchecker::dbm::db_t *dbm, tchecker::clock_id_
 {
   std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> phi = tchecker::virtual_constraint::factory(dbm, dim, dim - no_of_orig_clocks - 1);
 
-  return tchecker::dbm::is_le(phi_e.dbm(), phi->dbm(), phi_e.dim());
+  if(!tchecker::dbm::is_le(phi_e.dbm(), phi->dbm(), phi_e.dim())) {
+    std::cout << __FILE__ << ": " << __LINE__ << ": phi of zone:" << std::endl;
+    tchecker::dbm::output_matrix(std::cout, phi->dbm(), phi->dim());
+
+    std::cout << __FILE__ << ": " << __LINE__ << ": phi given:" << std::endl;
+    tchecker::dbm::output_matrix(std::cout, phi_e.dbm(), phi_e.dim());
+
+    return false;
+
+  }
+
+  return true;
 }
 
 void sync(tchecker::dbm::db_t *dbm1, tchecker::dbm::db_t *dbm2,
@@ -182,7 +193,7 @@ revert_sync(const tchecker::dbm::db_t *dbm1, const tchecker::dbm::db_t *dbm2,
 
   sync(dbm1_synced, dbm2_synced, dim1, dim2, no_of_orig_clocks_1, no_of_orig_clocks_2, orig_reset_set_A, orig_reset_set_B);
 
-  assert(is_phi_subset_of_a_zone(dbm1_synced, dim1, no_of_orig_clocks_1, phi_e) || is_phi_subset_of_a_zone(dbm2_synced, dim2, no_of_orig_clocks_2, phi_e));
+  assert(is_phi_subset_of_a_zone(dbm1_synced, dim1, no_of_orig_clocks_1, phi_e) && is_phi_subset_of_a_zone(dbm2_synced, dim2, no_of_orig_clocks_2, phi_e));
 
   if(tchecker::dbm::status_t::EMPTY == tchecker::dbm::constrain(dbm1_synced, dim1, phi_e.get_vc(no_of_orig_clocks_1, true))) {
     throw std::runtime_error("problems in _A while reverting the sync"); // should NEVER occur
@@ -192,14 +203,18 @@ revert_sync(const tchecker::dbm::db_t *dbm1, const tchecker::dbm::db_t *dbm2,
     throw std::runtime_error("problems in _B while reverting the sync"); // should NEVER occur
   }
 
-  tchecker::dbm::db_t * multiple_reset = revert_multiple_reset(dbm1, dim1, dbm1_synced, virt_reset_set_A);
+  tchecker::dbm::db_t *multiple_reset = (tchecker::dbm::db_t *)malloc(dim1*dim1*sizeof(tchecker::dbm::db_t));
+
+  enum tchecker::dbm::status_t stat_1 = revert_multiple_reset(multiple_reset, dbm1, dim1, dbm1_synced, virt_reset_set_A);
 
   std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> first
     = tchecker::virtual_constraint::factory(multiple_reset, dim1, no_of_orig_clocks_1 + no_of_orig_clocks_2);
 
   free(multiple_reset);
 
-  multiple_reset = revert_multiple_reset(dbm2, dim2, dbm2_synced, virt_reset_set_B);
+  multiple_reset = (tchecker::dbm::db_t *)malloc(dim2*dim2*sizeof(tchecker::dbm::db_t));
+
+  enum tchecker::dbm::status_t stat_2 = revert_multiple_reset(multiple_reset, dbm2, dim2, dbm2_synced, virt_reset_set_B);
 
   std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> second
     = tchecker::virtual_constraint::factory(multiple_reset, dim2, no_of_orig_clocks_1 + no_of_orig_clocks_2);
@@ -213,8 +228,17 @@ revert_sync(const tchecker::dbm::db_t *dbm1, const tchecker::dbm::db_t *dbm2,
   virt_reset_set_A.clear();
   virt_reset_set_B.clear();
 
-  assert(is_phi_subset_of_a_zone(dbm1, dim1, no_of_orig_clocks_1, *first));
-  assert(is_phi_subset_of_a_zone(dbm2, dim2, no_of_orig_clocks_2, *second));
+  if (tchecker::dbm::EMPTY == stat_1) {
+    tchecker::dbm::empty(first->dbm(), first->dim());
+  } else {
+    assert(is_phi_subset_of_a_zone(dbm1, dim1, no_of_orig_clocks_1, *first));
+  }
+
+  if (tchecker::dbm::EMPTY == stat_2) {
+    tchecker::dbm::empty(second->dbm(), second->dim());
+  } else {
+    assert(is_phi_subset_of_a_zone(dbm2, dim2, no_of_orig_clocks_2, *second));
+  }
 
   return std::make_pair(first, second);
 }

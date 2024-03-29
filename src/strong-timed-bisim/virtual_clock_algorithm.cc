@@ -255,7 +255,8 @@ Lieb_et_al::check_for_virt_bisim(tchecker::zg::const_state_sptr_t symb_state_fir
     // now, we calculate the problematic virtual constraints by using the revert-epsilon function and adding it to lo_not_simulatable
 
     for(auto iter = result_epsilon->begin(); iter < result_epsilon->end(); iter++) {
-      lo_not_simulatable->append_zone(tchecker::vcg::revert_epsilon_trans(A_normed->zone(), **iter));
+      lo_not_simulatable->append_zone(tchecker::vcg::revert_epsilon_trans(A_normed->zone(), A_epsilon->zone(), **iter));
+      lo_not_simulatable->append_zone(tchecker::vcg::revert_epsilon_trans(B_normed->zone(), B_epsilon->zone(), **iter));
     }
 
   }
@@ -304,11 +305,17 @@ Lieb_et_al::check_for_virt_bisim(tchecker::zg::const_state_sptr_t symb_state_fir
       = tchecker::vcg::revert_sync(A_clone->zone_ptr()->dbm(), B_clone->zone_ptr()->dbm(), A_clone->zone_ptr()->dim(), B_clone->zone_ptr()->dim(),
                     _A->get_no_of_original_clocks(), _B->get_no_of_original_clocks(),
                     **iter);
-    inter.append_zone(sync_reverted.first);
-    inter.append_zone(sync_reverted.second);
 
-    assert(is_phi_subset_of_a_zone(symb_state_first->zone().dbm(), symb_state_first->zone().dim(), _A->get_no_of_virtual_clocks(), *(sync_reverted.first)));
-    assert(is_phi_subset_of_a_zone(symb_state_second->zone().dbm(), symb_state_second->zone().dim(), _B->get_no_of_virtual_clocks(), *(sync_reverted.second)));
+    if(sync_reverted.first->is_fulfillable()) {
+      inter.append_zone(sync_reverted.first);
+      assert(is_phi_subset_of_a_zone(symb_state_first->zone().dbm(), symb_state_first->zone().dim(), _A->get_no_of_virtual_clocks(), *(sync_reverted.first)));
+    }
+
+    if(sync_reverted.second->is_fulfillable()) {
+      inter.append_zone(sync_reverted.second);
+      assert(is_phi_subset_of_a_zone(symb_state_second->zone().dbm(), symb_state_second->zone().dim(), _B->get_no_of_virtual_clocks(), *(sync_reverted.second)));
+    }
+
   }
 
   inter.compress();
