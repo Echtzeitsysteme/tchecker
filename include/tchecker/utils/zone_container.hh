@@ -196,6 +196,7 @@ public:
            - zc_prev._dim = zc_after._dim
            - for all zone_prev in zc_prev : for all u in zone_prev : exists zone_after in zc_after : u in zone_after
            - for all zone_after in zc_after : for all u in zone_after : exists zone_prev in zc_prev : u in zone_prev
+   \note see chapter 7.6 of Rokicki "Representing and modeling digital circuits" (PhD thesis)
    */
 
   void compress()

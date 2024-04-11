@@ -213,17 +213,11 @@ std::shared_ptr<virtual_constraint_t> factory(const tchecker::dbm::db_t * dbm, t
 std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> combine(tchecker::zone_container_t<virtual_constraint_t> & lo_vc, tchecker::clock_id_t no_of_virtual_clocks)
 {
 
-  tchecker::zone_container_t<virtual_constraint_t> lo_of_non_empty_vc{no_of_virtual_clocks + 1};
-
-  for(auto phi = lo_vc.begin(); phi < lo_vc.end(); phi++) {
-    if(!(*phi)->is_empty()) {
-      lo_of_non_empty_vc.append_zone(*phi);
-    }
-  }
+  lo_vc.compress();
 
   std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> result = std::make_shared<tchecker::zone_container_t<virtual_constraint_t>>(no_of_virtual_clocks + 1);
 
-  for(auto iter = lo_of_non_empty_vc.begin(); iter < lo_of_non_empty_vc.end(); iter++) {
+  for(auto iter = lo_vc.begin(); iter < lo_vc.end(); iter++) {
 
     std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> inter = std::make_shared<tchecker::zone_container_t<virtual_constraint_t>>(no_of_virtual_clocks + 1);
     std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> helper;
@@ -248,10 +242,8 @@ std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> combine(tcheck
         result->append_zone(**phi);
       }
     }
-
+    result->compress();
   }
-
-  result->compress();
 
   return result;
 }
