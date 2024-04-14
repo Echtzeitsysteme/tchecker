@@ -318,21 +318,20 @@ Lieb_et_al::check_for_virt_bisim(tchecker::zg::const_state_sptr_t symb_state_fir
 
   }
 
-  _delete_me++;
-
   inter.compress();
 
-/*
   assert(all_vc_are_sub_vc_of_phi_a_or_phi_b(inter, symb_state_first, symb_state_second, _A->get_no_of_virtual_clocks()));
 
   result->append_container(tchecker::virtual_constraint::combine(inter, _A->get_no_of_virtual_clocks()));
 
+  assert(all_vc_are_sub_vc_of_phi_a_or_phi_b(*result, symb_state_first, symb_state_second, _A->get_no_of_virtual_clocks()));
+
+  _delete_me++;
   //std::cout << __FILE__ << ": " << __LINE__ << ": _delete_me: " << _delete_me << std::endl;
 
   result->compress();
-*/
 
-  return inter;
+  return result;
 }
 
 
@@ -341,7 +340,6 @@ Lieb_et_al::check_for_outgoing_transitions( tchecker::zg::const_state_sptr_t A_s
                                             tchecker::zg::const_state_sptr_t B_state,
                                             std::unordered_set<std::pair<tchecker::zg::state_sptr_t, tchecker::zg::state_sptr_t>, custom_hash, custom_equal> & visited)
 {
-
   std::vector<tchecker::vcg::vcg_t::sst_t> v_first, v_second;
   _A->next(A_state, v_first);
   _B->next(B_state, v_second);
@@ -404,37 +402,39 @@ Lieb_et_al::check_for_outgoing_transitions( tchecker::zg::const_state_sptr_t A_s
       std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> inter
         = this->check_for_virt_bisim(const_s_first, t_first, const_s_second, t_second, copy, false);
 
-      auto A_s_ret_val_idx = std::make_tuple<tchecker::intrusive_shared_ptr_t<tchecker::make_shared_t<tchecker::zg::state_t> >*, 
-                                             lo_return_values *,
-                                             long unsigned int *>(&s_first, &A_return_values, &i);
+      std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> to_append_A 
+        = std::make_shared<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(_A->get_no_of_virtual_clocks() + 1);
 
+      std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> to_append_B 
+        = std::make_shared<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(_A->get_no_of_virtual_clocks() + 1);
 
-      auto B_s_ret_val_idx = std::make_tuple<tchecker::intrusive_shared_ptr_t<tchecker::make_shared_t<tchecker::zg::state_t> >*, 
-                                             lo_return_values *,
-                                             long unsigned int *>(&s_second, &B_return_values, &j);
+      for(auto iter = inter->begin(); iter < inter->end(); iter++) {
+        std::shared_ptr<tchecker::zg::zone_t> tmp_first = tchecker::zg::factory(s_first->zone().dim());
+        std::shared_ptr<tchecker::zg::zone_t> tmp_second = tchecker::zg::factory(s_second->zone().dim());
 
-      auto s_ret_val_idx_together = {&A_s_ret_val_idx, &B_s_ret_val_idx};
-
-      for(auto iter : s_ret_val_idx_together) {
-        auto s_cur = *(std::get<0>(*iter));
-        auto ret_val_cur = std::get<1>(*iter);
-        auto index_cur = std::get<2>(*iter);
-        tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t> to_add{_A->get_no_of_virtual_clocks() + 1};
-        for(auto iter = inter->begin(); iter < inter->end(); iter++) {
-          std::shared_ptr<tchecker::zg::zone_t> tmp = tchecker::zg::factory(s_cur->zone().dim());
-          if(tchecker::dbm::status_t::NON_EMPTY == (*iter)->logic_and(tmp, s_cur->zone())) {
-            to_add.append_zone(tchecker::virtual_constraint::factory(tmp, _A->get_no_of_virtual_clocks()));
-          }
+        
+        if(tchecker::dbm::NON_EMPTY == (*iter)->logic_and(tmp_first, s_first->zone()) ) {
+          to_append_A->append_zone(tchecker::virtual_constraint::factory(tmp_first, _A->get_no_of_virtual_clocks()));
         }
-        to_add.compress();
-       (*ret_val_cur)[*index_cur].emplace_back(std::make_shared<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(to_add));
+
+        if(tchecker::dbm::NON_EMPTY == (*iter)->logic_and(tmp_second, s_second->zone()) ) {
+          to_append_B->append_zone(tchecker::virtual_constraint::factory(tmp_second, _A->get_no_of_virtual_clocks()));
+        }
       }
+
+      to_append_A->compress();
+      to_append_B->compress();
+
+      A_return_values[i].emplace_back(to_append_A);
+      B_return_values[j].emplace_back(to_append_B);
+
     }
   }
 
-  std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> collapse_action
-     = std::make_shared<zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(_A->get_no_of_virtual_clocks() + 1);
   //std::cout << __FILE__ << ": " << __LINE__ << ": start revert_action_trans" << std::endl;
+
+  std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> collapsed
+     = std::make_shared<zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(_A->get_no_of_virtual_clocks() + 1);
 
   for(auto iter : together) {
     auto v_cur = std::get<0>(*iter);
@@ -447,7 +447,7 @@ Lieb_et_al::check_for_outgoing_transitions( tchecker::zg::const_state_sptr_t A_s
       for(auto iter_in_all = in_all->begin(); iter_in_all < in_all->end(); iter_in_all++) {
         if(!((*iter_in_all)->is_empty())) {
             assert(is_phi_subset_of_a_zone(s_cur->zone().dbm(), s_cur->zone().dim(), (*iter_in_all)->get_no_of_virt_clocks(), **iter_in_all));
-            collapse_action->append_zone(tchecker::vcg::revert_action_trans((*(std::get<2>(*iter)))->zone(), t_cur->guard_container(), t_cur->reset_container(), t_cur->tgt_invariant_container(), **iter_in_all));
+            collapsed->append_zone(tchecker::vcg::revert_action_trans((*(std::get<2>(*iter)))->zone(), t_cur->guard_container(), t_cur->reset_container(), t_cur->tgt_invariant_container(), **iter_in_all));
         }
       }
     }
@@ -457,7 +457,7 @@ Lieb_et_al::check_for_outgoing_transitions( tchecker::zg::const_state_sptr_t A_s
   //std::cout << __FILE__ << ": " << __LINE__ << ": end revert_action_trans" << std::endl;
 
   assert(
-    std::all_of(collapse_action->begin(), collapse_action->end(),
+    std::all_of(collapsed->begin(), collapsed->end(),
                 [A_state, B_state](std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> vc)
                 {
                   return (is_phi_subset_of_a_zone(A_state->zone().dbm(), A_state->zone().dim(), vc->get_no_of_virt_clocks(), *vc)) ||
@@ -466,19 +466,11 @@ Lieb_et_al::check_for_outgoing_transitions( tchecker::zg::const_state_sptr_t A_s
     )
   );
 
-  collapse_action->compress();
-
-  std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> result
-     = std::make_shared<zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(_A->get_no_of_virtual_clocks() + 1);
-
-  result->append_container(tchecker::virtual_constraint::combine(collapse_action, _A->get_no_of_virtual_clocks()));
-
-  result->compress();
+  collapsed->compress();
 
   //std::cout << __FILE__ << ": " << __LINE__ << ": return from check-outgoing-trans" << std::endl;
 
-  return result;
-
+  return combine(*collapsed, collapsed->dim() - 1);
 }
 
 } // end of namespace strong_timed_bisim
