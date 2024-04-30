@@ -59,8 +59,9 @@ bool are_dbm_synced(tchecker::dbm::db_t *dbm1, tchecker::dbm::db_t *dbm2,
  \param dbm1 : a dbm
  \param dbm2 : a dbm
  \param dim : dimension of dbm1 and dbm2
- \param lowest_virt_clk_id : the clk id of chi_0
  \param  no_of_orig_clocks_1 : the number of orig clocks in the first TA
+ \param  no_of_orig_clocks_1 : the number of orig clocks in the first TA
+ \param phi_e : the vc to revert
  \pre dbm1 and dbm2 are not nullptr (checked by assertion)
  dbm, dbm1 and dbm2 are dim*dim arrays of difference bounds
  dbm1 and dbm2 are consistent (checked by assertion)

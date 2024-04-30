@@ -74,14 +74,12 @@ private:
    \param symbolic_trans_first : the transition with which we reached the first symbolic state
    \param symb_state_second : the symbolic state that belongs to the second vcg
    \param symbolic_trans_second : the transition with which we reached the second symbolic state
-   \param last_was_epsilon : whether the last transition was a delay transition
    \return a list of virtual constraints that are not bisimilar
    */
   std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>
   check_for_virt_bisim(tchecker::zg::const_state_sptr_t symb_state_first, tchecker::zg::transition_sptr_t symbolic_trans_first,
                        tchecker::zg::const_state_sptr_t symb_state_second, tchecker::zg::transition_sptr_t symbolic_trans_second,
-                       std::unordered_set<std::pair<tchecker::zg::state_sptr_t, tchecker::zg::state_sptr_t>, custom_hash, custom_equal> & visited,
-                       bool last_was_epsilon);
+                       std::unordered_set<std::pair<tchecker::zg::state_sptr_t, tchecker::zg::state_sptr_t>, custom_hash, custom_equal> & visited);
 
   /*!
    \brief check-for-outgoing-transitions-impl function of Lieb et al.

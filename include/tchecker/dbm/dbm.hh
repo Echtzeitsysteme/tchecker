@@ -586,15 +586,15 @@ enum tchecker::dbm::status_t intersection(tchecker::dbm::db_t * dbm, tchecker::d
 
 /*!
  \brief revert-multiple-reset function (see the TR of Lieb et al.)
- \param orig_zone the previous zone
+ \param result : where the result will be stored (must be allocated)
+ \param orig_zone : the previous zone
  \param zone_split : the split of reset(orig_zone)
  \param reset : the used reset set
- \return the dbm with reverted resets (same dim as orig_zone)
- \note the returned dbm is allocated on the heap. You have to free it!
+ \return void
  */
 enum tchecker::dbm::status_t revert_multiple_reset(tchecker::dbm::db_t *result, const tchecker::dbm::db_t * orig_zone,
-                                            tchecker::clock_id_t dim, tchecker::dbm::db_t * zone_split,
-                                            tchecker::clock_reset_container_t reset);
+                                                   tchecker::clock_id_t dim, tchecker::dbm::db_t * zone_split,
+                                                   tchecker::clock_reset_container_t reset);
 
 /*!
  \brief ExtraM extrapolation
