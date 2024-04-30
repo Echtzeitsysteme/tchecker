@@ -144,39 +144,47 @@ Lieb_et_al::check_for_virt_bisim(tchecker::zg::const_state_sptr_t symb_state_fir
 
   _visited_pair_of_states++;
 
-  //std::cout << __FILE__ << ": " << __LINE__ << ": _visited_pair_of_states: " << _visited_pair_of_states << std::endl;
-  //std::cout << __FILE__ << ": " << __LINE__ << ": check-for-virt-bisim" << std::endl;
-  //std::cout << __FILE__ << ": " << __LINE__ << ": " << symb_state_first->vloc() << std::endl;
-  //tchecker::dbm::output_matrix(std::cout, symb_state_first->zone().dbm(), symb_state_first->zone().dim());
+/*
+  std::cout << __FILE__ << ": " << __LINE__ << ": _visited_pair_of_states: " << _visited_pair_of_states << std::endl;
+  std::cout << __FILE__ << ": " << __LINE__ << ": check-for-virt-bisim" << std::endl;
+  std::cout << __FILE__ << ": " << __LINE__ << ": " << symb_state_first->vloc() << std::endl;
+  tchecker::dbm::output_matrix(std::cout, symb_state_first->zone().dbm(), symb_state_first->zone().dim());
 
-  //std::cout << __FILE__ << ": " << __LINE__ << ": " << symb_state_second->vloc() << std::endl;
-  //tchecker::dbm::output_matrix(std::cout, symb_state_second->zone().dbm(), symb_state_second->zone().dim());
-
-  std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> overhang
-    = std::make_shared<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(_A->get_no_of_virtual_clocks() + 1);
+  std::cout << __FILE__ << ": " << __LINE__ << ": " << symb_state_second->vloc() << std::endl;
+  tchecker::dbm::output_matrix(std::cout, symb_state_second->zone().dbm(), symb_state_second->zone().dim());
+*/
 
   // the following is a difference to the original function, done for efficiency reasons.
   // before we do anything, we check whether there even exist an overlap between the symbolic states
-  std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> phi_A = tchecker::virtual_constraint::factory(symb_state_first->zone(), _A->get_no_of_virtual_clocks());
-  std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> phi_B = tchecker::virtual_constraint::factory(symb_state_second->zone(), _A->get_no_of_virtual_clocks());
+  // to do so, we build zone_A \land virtual_constraint(zone_B) and vice versa first and check whether they are empty
+  std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> overhang
+    = std::make_shared<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(_A->get_no_of_virtual_clocks() + 1);
 
   tchecker::zg::state_sptr_t A_constrained = _A->clone_state(symb_state_first);
   tchecker::zg::state_sptr_t B_constrained = _B->clone_state(symb_state_second);
 
+  std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> phi_A = tchecker::virtual_constraint::factory(symb_state_first->zone(), _A->get_no_of_virtual_clocks());
+  std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> phi_B = tchecker::virtual_constraint::factory(symb_state_second->zone(), _A->get_no_of_virtual_clocks());
+
   if(
-    tchecker::dbm::status_t::EMPTY == phi_B->logic_and(A_constrained->zone(), symb_state_first->zone()) ||
-    tchecker::dbm::status_t::EMPTY == phi_A->logic_and(B_constrained->zone(), symb_state_second->zone())
+    tchecker::dbm::status_t::EMPTY == phi_B->logic_and(A_constrained->zone(), A_constrained->zone()) ||
+    tchecker::dbm::status_t::EMPTY == phi_A->logic_and(B_constrained->zone(), B_constrained->zone())
     )
   {
-    overhang->append_zone(phi_A);
-    overhang->append_zone(phi_B);
+
+    std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> A_helper = tchecker::virtual_constraint::factory(symb_state_first->zone(), _A->get_no_of_virtual_clocks());
+    std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> B_helper = tchecker::virtual_constraint::factory(symb_state_second->zone(), _A->get_no_of_virtual_clocks());
+
+    overhang->append_zone(A_helper);
+    overhang->append_zone(B_helper);
     assert(all_vc_are_sub_vc_of_phi_a_or_phi_b(*overhang, symb_state_first, symb_state_second, _A->get_no_of_virtual_clocks()));
     _delete_me++;
     overhang->compress();
     return overhang;
   }
 
-  // Since they do overlap, we add those parts of the zone that do not overlap to overhang
+
+  // we calculate the overhang
   std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> overhang_A 
     = std::make_shared<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(_A->get_no_of_virtual_clocks() + 1);
   std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> overhang_B 
@@ -190,10 +198,12 @@ Lieb_et_al::check_for_virt_bisim(tchecker::zg::const_state_sptr_t symb_state_fir
 
   assert(all_vc_are_sub_vc_of_phi_a_or_phi_b(*overhang, symb_state_first, symb_state_second, _A->get_no_of_virtual_clocks()));
 
+
+  // now that we have calculated the overhang, we can go on with our algorithm
   tchecker::zg::state_sptr_t A_synced = _A->clone_state(A_constrained);
   tchecker::zg::state_sptr_t B_synced = _B->clone_state(B_constrained);
 
-  // now we sync the symbolic states
+  // we sync the symbolic states
   tchecker::vcg::sync( A_synced->zone_ptr()->dbm(), B_synced->zone_ptr()->dbm(),
                        A_synced->zone_ptr()->dim(), B_synced->zone_ptr()->dim(),
                        _A->get_no_of_original_clocks(), _B->get_no_of_original_clocks(),
@@ -203,7 +213,8 @@ Lieb_et_al::check_for_virt_bisim(tchecker::zg::const_state_sptr_t symb_state_fir
                                        A_synced->zone_ptr()->dim(), B_synced->zone_ptr()->dim(),
                                        _A->get_no_of_original_clocks(), _B->get_no_of_original_clocks()));
 
-  // calculating the future
+
+  //calculating the future
   tchecker::zg::state_sptr_t A_epsilon = _A->clone_state(A_synced);
   tchecker::zg::state_sptr_t B_epsilon = _B->clone_state(B_synced);
   _A->semantics()->delay(A_epsilon->zone_ptr()->dbm(), A_epsilon->zone_ptr()->dim(), symb_trans_first->tgt_invariant_container());
@@ -212,7 +223,27 @@ Lieb_et_al::check_for_virt_bisim(tchecker::zg::const_state_sptr_t symb_state_fir
   assert(tchecker::dbm::is_tight(A_epsilon->zone().dbm(), A_epsilon->zone().dim()));
   assert(tchecker::dbm::is_tight(B_epsilon->zone().dbm(), B_epsilon->zone().dim()));
 
-  // normalizing, checking whether we have already seen this pair.
+
+  //calculating the overhang of the future
+  std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> epsilon_overhang
+    = std::make_shared<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(_A->get_no_of_virtual_clocks() + 1);
+
+
+  std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> phi_A_epsilon = tchecker::virtual_constraint::factory(A_epsilon->zone(), _A->get_no_of_virtual_clocks());
+  std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> phi_B_epsilon = tchecker::virtual_constraint::factory(B_epsilon->zone(), _A->get_no_of_virtual_clocks());
+
+  overhang_A = std::make_shared<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(_A->get_no_of_virtual_clocks() + 1);
+  overhang_B = std::make_shared<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(_A->get_no_of_virtual_clocks() + 1);
+
+
+  phi_B_epsilon->neg_logic_and(overhang_A, *phi_A_epsilon);
+  phi_A_epsilon->neg_logic_and(overhang_B, *phi_B_epsilon);
+
+  epsilon_overhang->append_container(overhang_A);
+  epsilon_overhang->append_container(overhang_B);
+
+
+  // normalizing, to check whether we have already seen this pair.
   tchecker::zg::state_sptr_t A_normed = _A->clone_state(A_epsilon);
   tchecker::zg::state_sptr_t B_normed = _B->clone_state(B_epsilon);
 
@@ -224,42 +255,50 @@ Lieb_et_al::check_for_virt_bisim(tchecker::zg::const_state_sptr_t symb_state_fir
 
   std::pair<tchecker::zg::state_sptr_t, tchecker::zg::state_sptr_t> normalized_pair{A_normed, B_normed};
 
-  // if we have already seen this pair, return overhang
-  if(visited.count(normalized_pair)) {
-    assert(all_vc_are_sub_vc_of_phi_a_or_phi_b(*overhang, symb_state_first, symb_state_second, _A->get_no_of_virtual_clocks()));
-    _delete_me++;
-    overhang->compress();
-    return overhang;
-  }
-
-  // add the pair to visited
-  visited.insert(normalized_pair);
-
-  // check the outgoing action transitions
   std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> check_trans
     = std::make_shared<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(_A->get_no_of_virtual_clocks() + 1);
 
-  tchecker::zg::const_state_sptr_t const_A_normed{A_normed};
-  tchecker::zg::const_state_sptr_t const_B_normed{B_normed};
+  // only go into the recursion if we have not seen this pair yet
+  if(0 == visited.count(normalized_pair)) {
+    // add the pair to visited
+    visited.insert(normalized_pair);
 
-  check_trans->append_container(check_for_outgoing_transitions(const_A_normed, const_B_normed, visited));
+    // check the outgoing action transitions
+    tchecker::zg::const_state_sptr_t const_A_normed{A_normed};
+    tchecker::zg::const_state_sptr_t const_B_normed{B_normed};
 
-  // revert the eps transition
-  std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> rev_eps
+    check_trans->append_container(check_for_outgoing_transitions(const_A_normed, const_B_normed, visited));
+  }
+
+
+  // collect all results for the epsilon transition
+  std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> epsilon_result
     = std::make_shared<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(_A->get_no_of_virtual_clocks() + 1);
-  for(auto iter = check_trans->begin(); iter < check_trans->end(); iter++) {
+
+  epsilon_result->append_container(check_trans);
+  epsilon_result->append_container(epsilon_overhang);
+
+  epsilon_result->compress();
+
+  // now revert them
+  std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> epsilon_rev_not_comb
+    = std::make_shared<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(_A->get_no_of_virtual_clocks() + 1);
+  for(auto iter = epsilon_result->begin(); iter < epsilon_result->end(); iter++) {
     std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> A_helper = tchecker::virtual_constraint::factory(A_epsilon->zone(), _A->get_no_of_virtual_clocks());
     std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> B_helper = tchecker::virtual_constraint::factory(B_epsilon->zone(), _A->get_no_of_virtual_clocks());
     (*iter)->logic_and(A_helper, *A_helper);
     (*iter)->logic_and(B_helper, *B_helper);
 
-    rev_eps->append_zone(tchecker::vcg::revert_epsilon_trans(A_synced->zone(), A_epsilon->zone(), *A_helper));
-    rev_eps->append_zone(tchecker::vcg::revert_epsilon_trans(B_synced->zone(), B_epsilon->zone(), *B_helper));
+    epsilon_rev_not_comb->append_zone(tchecker::vcg::revert_epsilon_trans(A_synced->zone(), A_epsilon->zone(), *A_helper));
+    epsilon_rev_not_comb->append_zone(tchecker::vcg::revert_epsilon_trans(B_synced->zone(), B_epsilon->zone(), *B_helper));
   }
 
-  rev_eps = tchecker::virtual_constraint::combine(*rev_eps, _A->get_no_of_virtual_clocks());
+  std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> epsilon_rev = tchecker::virtual_constraint::combine(*epsilon_rev_not_comb, _A->get_no_of_virtual_clocks());
 
-  for(auto iter = rev_eps->begin(); iter < rev_eps->end(); iter++) {
+  epsilon_rev->compress();
+
+  // in the technical report, we rename overhang to sync-reverted. this is not necessary here. Therefore, we proceed to use the variable overhang instead.
+  for(auto iter = epsilon_rev->begin(); iter < epsilon_rev->end(); iter++) {
     std::pair<std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t>, std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t>> sync_reverted
       = tchecker::vcg::revert_sync(A_constrained->zone_ptr()->dbm(), B_constrained->zone_ptr()->dbm(), A_constrained->zone_ptr()->dim(), B_constrained->zone_ptr()->dim(),
                                   _A->get_no_of_original_clocks(), _B->get_no_of_original_clocks(),
@@ -285,7 +324,16 @@ Lieb_et_al::check_for_virt_bisim(tchecker::zg::const_state_sptr_t symb_state_fir
   //std::cout << __FILE__ << ": " << __LINE__ << ": _delete_me: " << _delete_me << std::endl;
 
   result->compress();
+/*
+  std::cout << __FILE__ << ": " << __LINE__ << ": _visited_pair_of_states: " << _visited_pair_of_states << std::endl;
+  std::cout << __FILE__ << ": " << __LINE__ << ": check-for-virt-bisim return value" << std::endl;
+  std::cout << __FILE__ << ": " << __LINE__ << ": " << symb_state_first->vloc() << symb_state_second->vloc() << std::endl;
 
+  for(auto iter = result->begin(); iter < result->end(); iter++) {
+    std::cout << std::endl;
+    tchecker::dbm::output_matrix(std::cout, (*iter)->dbm(), (*iter)->dim());
+  }
+*/
   return result;
 }
 
