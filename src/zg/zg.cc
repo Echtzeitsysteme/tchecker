@@ -200,8 +200,11 @@ tchecker::state_status_t initialize(tchecker::ta::system_t const & system, tchec
 
 zg_t::zg_t(std::shared_ptr<tchecker::ta::system_t const> const & system, enum tchecker::ts::sharing_type_t sharing_type,
            std::shared_ptr<tchecker::zg::semantics_t> const & semantics,
-           std::shared_ptr<tchecker::zg::extrapolation_t> const & extrapolation, std::size_t block_size, std::size_t table_size)
-    : _system(system), _sharing_type(sharing_type), _semantics(semantics), _extrapolation(extrapolation),
+           std::shared_ptr<tchecker::zg::extrapolation_t> const & extrapolation, std::size_t block_size, std::size_t table_size,
+           bool enable_extrapolation)
+    : _system(system), _sharing_type(sharing_type), _semantics(semantics), 
+      _extrapolation((enable_extrapolation) ? extrapolation : std::shared_ptr<tchecker::zg::extrapolation_t>(extrapolation_factory(extrapolation_type_t::NO_EXTRAPOLATION, *system))),
+      _non_enabled_extrapolation(extrapolation),
       _state_allocator(block_size, block_size, _system->processes_count(), block_size,
                        _system->intvars_count(tchecker::VK_FLATTENED), block_size,
                        _system->clocks_count(tchecker::VK_FLATTENED) + 1, table_size),
