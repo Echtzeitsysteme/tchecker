@@ -42,7 +42,7 @@ public:
   Lieb_et_al(std::shared_ptr<tchecker::vcg::vcg_t> input_first, std::shared_ptr<tchecker::vcg::vcg_t> input_second);
 
   /*!
-   \brief running the algorithm of Lieb et al. (TODO: add paper ref here)
+   \brief running the algorithm of Lieb et al.
    \param input_first : the first vcg
    \param input_second : the second vcg
    */
@@ -100,9 +100,6 @@ private:
   const std::shared_ptr<tchecker::vcg::vcg_t> _B;
 
   long _visited_pair_of_states;
-
-  long _delete_me;
-
 
 };
 

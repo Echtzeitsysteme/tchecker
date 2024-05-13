@@ -16,7 +16,7 @@ namespace tchecker {
 namespace strong_timed_bisim {
 
 Lieb_et_al::Lieb_et_al(std::shared_ptr<tchecker::vcg::vcg_t> input_first, std::shared_ptr<tchecker::vcg::vcg_t> input_second)
-  : _A(input_first), _B(input_second), _visited_pair_of_states(0), _delete_me(0)
+  : _A(input_first), _B(input_second), _visited_pair_of_states(0)
 {
   assert(_A->get_no_of_virtual_clocks() == _B->get_no_of_virtual_clocks());
 }
@@ -144,7 +144,7 @@ Lieb_et_al::check_for_virt_bisim(tchecker::zg::const_state_sptr_t A_state, tchec
 
   _visited_pair_of_states++;
 
-/*
+
   std::cout << __FILE__ << ": " << __LINE__ << ": _visited_pair_of_states: " << _visited_pair_of_states << std::endl;
   std::cout << __FILE__ << ": " << __LINE__ << ": check-for-virt-bisim" << std::endl;
   std::cout << __FILE__ << ": " << __LINE__ << ": " << A_state->vloc() << std::endl;
@@ -152,7 +152,7 @@ Lieb_et_al::check_for_virt_bisim(tchecker::zg::const_state_sptr_t A_state, tchec
 
   std::cout << __FILE__ << ": " << __LINE__ << ": " << B_state->vloc() << std::endl;
   tchecker::dbm::output_matrix(std::cout, B_state->zone().dbm(), B_state->zone().dim());
-*/
+
 
   // the following is a difference to the original function, done for efficiency reasons.
   // before we do anything, we check whether there even exist an overlap between the symbolic states
@@ -166,6 +166,8 @@ Lieb_et_al::check_for_virt_bisim(tchecker::zg::const_state_sptr_t A_state, tchec
   std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> phi_A = tchecker::virtual_constraint::factory(A_state->zone(), _A->get_no_of_virtual_clocks());
   std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> phi_B = tchecker::virtual_constraint::factory(B_state->zone(), _A->get_no_of_virtual_clocks());
 
+  // in contrast to the check-for-virt-bisim-impl function presented in Lieb et al, we create the constrained zones first. If they are empty, we know what to return.
+  // This improves efficiency
   if(
     tchecker::dbm::status_t::EMPTY == phi_B->logic_and(A_constrained->zone(), A_constrained->zone()) ||
     tchecker::dbm::status_t::EMPTY == phi_A->logic_and(B_constrained->zone(), B_constrained->zone())
@@ -178,7 +180,6 @@ Lieb_et_al::check_for_virt_bisim(tchecker::zg::const_state_sptr_t A_state, tchec
     overhang->append_zone(A_helper);
     overhang->append_zone(B_helper);
     assert(all_vc_are_sub_vc_of_phi_a_or_phi_b(*overhang, A_state, B_state, _A->get_no_of_virtual_clocks()));
-    _delete_me++;
     overhang->compress();
     return overhang;
   }
@@ -213,12 +214,29 @@ Lieb_et_al::check_for_virt_bisim(tchecker::zg::const_state_sptr_t A_state, tchec
                                        A_synced->zone_ptr()->dim(), B_synced->zone_ptr()->dim(),
                                        _A->get_no_of_original_clocks(), _B->get_no_of_original_clocks()));
 
-
-  //calculating the future
   tchecker::zg::state_sptr_t A_epsilon = _A->clone_state(A_synced);
   tchecker::zg::state_sptr_t B_epsilon = _B->clone_state(B_synced);
-  _A->semantics()->delay(A_epsilon->zone_ptr()->dbm(), A_epsilon->zone_ptr()->dim(), A_trans->tgt_invariant_container());
-  _B->semantics()->delay(B_epsilon->zone_ptr()->dbm(), B_epsilon->zone_ptr()->dim(), B_trans->tgt_invariant_container());
+
+  //calculating the future. delay allowed checks whether the locations are urgent or commited
+  if(tchecker::ta::delay_allowed(_A->system(), A_state->vloc())) {
+    _A->semantics()->delay(A_epsilon->zone_ptr()->dbm(), A_epsilon->zone_ptr()->dim(), A_trans->tgt_invariant_container());
+    for(auto iter = A_trans->tgt_invariant_container().begin(); iter < A_trans->tgt_invariant_container().end(); iter++) {
+      std::cout << __FILE__ << ": " << __LINE__ << ": _visited_pair_of_states: " << *iter  << std::endl;
+    }
+  }
+
+  if(tchecker::ta::delay_allowed(_B->system(), B_state->vloc())) {
+    _B->semantics()->delay(B_epsilon->zone_ptr()->dbm(), B_epsilon->zone_ptr()->dim(), B_trans->tgt_invariant_container());
+  }
+
+
+  std::cout << __FILE__ << ": " << __LINE__ << ": _visited_pair_of_states: " << _visited_pair_of_states << std::endl;
+  std::cout << __FILE__ << ": " << __LINE__ << ": check-for-virt-bisim" << std::endl;
+  std::cout << __FILE__ << ": " << __LINE__ << ": " << A_state->vloc() << std::endl;
+  tchecker::dbm::output_matrix(std::cout, A_epsilon->zone().dbm(), A_state->zone().dim());
+
+  std::cout << __FILE__ << ": " << __LINE__ << ": " << B_state->vloc() << std::endl;
+  tchecker::dbm::output_matrix(std::cout, B_epsilon->zone().dbm(), B_state->zone().dim());
 
   assert(tchecker::dbm::is_tight(A_epsilon->zone().dbm(), A_epsilon->zone().dim()));
   assert(tchecker::dbm::is_tight(B_epsilon->zone().dbm(), B_epsilon->zone().dim()));
@@ -246,6 +264,9 @@ Lieb_et_al::check_for_virt_bisim(tchecker::zg::const_state_sptr_t A_state, tchec
   // normalizing, to check whether we have already seen this pair.
   tchecker::zg::state_sptr_t A_normed = _A->clone_state(A_epsilon);
   tchecker::zg::state_sptr_t B_normed = _B->clone_state(B_epsilon);
+
+  phi_B_epsilon->logic_and(A_normed->zone(), A_epsilon->zone());
+  phi_A_epsilon->logic_and(B_normed->zone(), B_epsilon->zone());
 
   _A->run_extrapolation(A_normed->zone().dbm(), A_normed->zone().dim(), *(A_normed->vloc_ptr()));
   _B->run_extrapolation(B_normed->zone().dbm(), B_normed->zone().dim(), *(B_normed->vloc_ptr()));
@@ -320,20 +341,8 @@ Lieb_et_al::check_for_virt_bisim(tchecker::zg::const_state_sptr_t A_state, tchec
 
   assert(all_vc_are_sub_vc_of_phi_a_or_phi_b(*result, A_state, B_state, _A->get_no_of_virtual_clocks()));
 
-  _delete_me++;
-  //std::cout << __FILE__ << ": " << __LINE__ << ": _delete_me: " << _delete_me << std::endl;
-
   result->compress();
-/*
-  std::cout << __FILE__ << ": " << __LINE__ << ": _visited_pair_of_states: " << _visited_pair_of_states << std::endl;
-  std::cout << __FILE__ << ": " << __LINE__ << ": check-for-virt-bisim return value" << std::endl;
-  std::cout << __FILE__ << ": " << __LINE__ << ": " << A_state->vloc() << B_state->vloc() << std::endl;
 
-  for(auto iter = result->begin(); iter < result->end(); iter++) {
-    std::cout << std::endl;
-    tchecker::dbm::output_matrix(std::cout, (*iter)->dbm(), (*iter)->dim());
-  }
-*/
   return result;
 }
 
