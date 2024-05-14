@@ -115,8 +115,10 @@ revert_epsilon_trans(const tchecker::zg::zone_t & zone, const tchecker::zg::zone
   std::shared_ptr<tchecker::zg::zone_t> zone_eps_copy = tchecker::zg::factory(zone_eps);
 
   if(tchecker::dbm::EMPTY == tchecker::dbm::constrain(zone_eps_copy->dbm(), zone_eps_copy->dim(), phi_split.get_vc(zone_eps_copy->dim() - phi_split.dim(), true))) {
-    tchecker::dbm::tighten(zone_eps_copy->dbm(), zone_eps_copy->dim());
-    std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> result = tchecker::virtual_constraint::factory(zone_eps_copy->dbm(), zone_eps_copy->dim(), phi_split.dim() - 1);
+    //tchecker::dbm::tighten(zone_eps_copy->dbm(), zone_eps_copy->dim());
+    // std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> result = tchecker::virtual_constraint::factory(zone_eps_copy->dbm(), zone_eps_copy->dim(), phi_split.dim() - 1);
+    std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> result = tchecker::virtual_constraint::factory(phi_split.dim() - 1);
+    tchecker::dbm::empty(result->dbm(), result->dim());
     return result;
   }
 
