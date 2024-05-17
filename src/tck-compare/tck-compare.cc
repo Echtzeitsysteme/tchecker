@@ -90,12 +90,6 @@ int parse_command_line(int argc, char * argv[])
         else
           throw std::runtime_error("Unknow relationship: " + std::string(optarg));
         break;
-<<<<<<< HEAD
-      case 'n':
-        order = std::stoul(optarg);
-        break;
-=======
->>>>>>> add_strong_timed_sim
       case 'o':
         output_file = optarg;
         break;
