@@ -102,23 +102,24 @@ tchecker::zg::extrapolation_t * extrapolation_factory(
 
   tchecker::clockbounds::clear(m_map_with_virt_clks.M());
 
+  /* since the virtual clock value must be the same as the original clock value in ab-synced states, we cannot extrapolate <=0 to <inf. Therefore, negative bounds must be removed */
+
   for(clock_id_t i = 0; i < no_orig_clocks; ++i) {
-    tchecker::clockbounds::update(m_map_with_virt_clks.M(), i, (first_not_second) ? M_first->M()[i] : M_second->M()[i]);
+    tchecker::clockbounds::bound_t tmp = (first_not_second) ? M_first->M()[i] : M_second->M()[i];
+    tchecker::clockbounds::update(m_map_with_virt_clks.M(), i, (0 > tmp) ? 0 : tmp);
   }
 
   for(clock_id_t i = 0; i < clock_bounds_first->clocks_number(); ++i) {
-    tchecker::clockbounds::update(m_map_with_virt_clks.M(), i + no_orig_clocks, M_first->M()[i]);
+    tchecker::clockbounds::update(m_map_with_virt_clks.M(), i + no_orig_clocks, (0 > M_first->M()[i]) ? 0 : M_first->M()[i]);
   }
 
   for(clock_id_t i = 0; i < clock_bounds_second->clocks_number(); ++i) {
-    tchecker::clockbounds::update(m_map_with_virt_clks.M(), i + no_orig_clocks + clock_bounds_first->clocks_number(), M_second->M()[i]);
+    tchecker::clockbounds::update(m_map_with_virt_clks.M(), i + no_orig_clocks + clock_bounds_first->clocks_number(), (0 > M_second->M()[i]) ? 0 : M_second->M()[i]);
   }
 
   if(urgent_or_committed) {
     tchecker::clockbounds::update(m_map_with_virt_clks.M(), no_orig_clocks + clock_bounds_first->clocks_number() + clock_bounds_second->clocks_number(), tchecker::clockbounds::NO_BOUND);
   }
-
-  //std::cout << __FILE__ << ": " << __LINE__ << ": " << m_map_with_virt_clks << std::endl;
 
   std::shared_ptr<tchecker::clockbounds::global_m_map_t const> final_map = std::make_shared<tchecker::clockbounds::global_m_map_t const>(m_map_with_virt_clks);
 
