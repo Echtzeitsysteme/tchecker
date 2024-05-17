@@ -42,7 +42,7 @@ public:
   Lieb_et_al(std::shared_ptr<tchecker::vcg::vcg_t> input_first, std::shared_ptr<tchecker::vcg::vcg_t> input_second);
 
   /*!
-   \brief running the algorithm of Lieb et al. (TODO: add paper ref here)
+   \brief running the algorithm of Lieb et al.
    \param input_first : the first vcg
    \param input_second : the second vcg
    */
@@ -71,14 +71,14 @@ private:
   /*!
    \brief check-for-virt-bisim function of Lieb et al.
    \param symb_state_first : the symbolic state that belongs to the first vcg
-   \param symbolic_trans_first : the transition with which we reached the first symbolic state
+   \param A_trans : the transition with which we reached the first symbolic state
    \param symb_state_second : the symbolic state that belongs to the second vcg
-   \param symbolic_trans_second : the transition with which we reached the second symbolic state
+   \param B_trans : the transition with which we reached the second symbolic state
    \return a list of virtual constraints that are not bisimilar
    */
   std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>
-  check_for_virt_bisim(tchecker::zg::const_state_sptr_t symb_state_first, tchecker::zg::transition_sptr_t symbolic_trans_first,
-                       tchecker::zg::const_state_sptr_t symb_state_second, tchecker::zg::transition_sptr_t symbolic_trans_second,
+  check_for_virt_bisim(tchecker::zg::const_state_sptr_t A_state, tchecker::zg::transition_sptr_t A_trans,
+                       tchecker::zg::const_state_sptr_t B_state, tchecker::zg::transition_sptr_t B_trans,
                        std::unordered_set<std::pair<tchecker::zg::state_sptr_t, tchecker::zg::state_sptr_t>, custom_hash, custom_equal> & visited);
 
   /*!
@@ -100,9 +100,6 @@ private:
   const std::shared_ptr<tchecker::vcg::vcg_t> _B;
 
   long _visited_pair_of_states;
-
-  long _delete_me;
-
 
 };
 

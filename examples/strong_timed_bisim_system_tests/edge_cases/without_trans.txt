@@ -1,0 +1,14 @@
+# This file is a part of the TChecker project.
+#
+# See files AUTHORS and LICENSE for copyright details.
+
+system:without_trans
+
+clock:1:x
+
+event:a
+event:b
+event:c
+
+process:P
+location:P:A{initial::invariant: x<2}

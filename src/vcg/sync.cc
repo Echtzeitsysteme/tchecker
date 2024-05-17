@@ -44,9 +44,6 @@ bool are_dbm_synced(tchecker::dbm::db_t *dbm1, tchecker::dbm::db_t *dbm2,
   assert(no_of_orig_clocks_1 >= 1);
   assert(no_of_orig_clocks_2 >= 1);
 
-  assert(dim1 == no_of_orig_clocks_1 + no_of_orig_clocks_1 + no_of_orig_clocks_2 + 1);
-  assert(dim2 == no_of_orig_clocks_1 + no_of_orig_clocks_2 + no_of_orig_clocks_2 + 1);
-
   bool result = is_virtually_equivalent(dbm1, dbm2, dim1, dim2, no_of_orig_clocks_1, no_of_orig_clocks_2);
 
   if(!result) {
@@ -90,7 +87,16 @@ bool are_dbm_synced(tchecker::dbm::db_t *dbm1, tchecker::dbm::db_t *dbm2,
 bool is_phi_subset_of_a_zone(const tchecker::dbm::db_t *dbm, tchecker::clock_id_t dim, tchecker::clock_id_t no_of_orig_clocks,
                              const tchecker::virtual_constraint::virtual_constraint_t & phi_e)
 {
+
+  assert(phi_e.dim() == dim - no_of_orig_clocks);
+
   std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> phi = tchecker::virtual_constraint::factory(dbm, dim, dim - no_of_orig_clocks - 1);
+
+  assert(tchecker::dbm::is_consistent(dbm, dim));
+  assert(tchecker::dbm::is_tight(dbm, dim));
+
+  assert(tchecker::dbm::is_consistent(phi->dbm(), phi->dim()));
+  assert(tchecker::dbm::is_tight(phi->dbm(), phi->dim()));
 
   if(!tchecker::dbm::is_le(phi_e.dbm(), phi->dbm(), phi_e.dim())) {
     std::cout << __FILE__ << ": " << __LINE__ << ": phi of zone:" << std::endl;
@@ -146,6 +152,11 @@ revert_sync(const tchecker::dbm::db_t *dbm1, const tchecker::dbm::db_t *dbm2,
             tchecker::clock_id_t no_of_orig_clocks_1, tchecker::clock_id_t no_of_orig_clocks_2,
             const tchecker::virtual_constraint::virtual_constraint_t & phi_e)
 {
+
+  assert(tchecker::dbm::is_consistent(dbm1, dim1));
+  assert(tchecker::dbm::is_consistent(dbm2, dim2));
+  assert(tchecker::dbm::is_tight(dbm1, dim1));
+  assert(tchecker::dbm::is_tight(dbm2, dim2));
 
   assert(is_virtually_equivalent(const_cast<tchecker::dbm::db_t *>(dbm1), const_cast<tchecker::dbm::db_t *>(dbm2), dim1, dim2, no_of_orig_clocks_1, no_of_orig_clocks_2));
 
@@ -208,7 +219,7 @@ revert_sync(const tchecker::dbm::db_t *dbm1, const tchecker::dbm::db_t *dbm2,
   enum tchecker::dbm::status_t stat_1 = revert_multiple_reset(multiple_reset, dbm1, dim1, dbm1_synced, virt_reset_set_A);
 
   std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> first
-    = tchecker::virtual_constraint::factory(multiple_reset, dim1, no_of_orig_clocks_1 + no_of_orig_clocks_2);
+    = tchecker::virtual_constraint::factory(multiple_reset, dim1, phi_e.get_no_of_virt_clocks());
 
   free(multiple_reset);
 
@@ -217,7 +228,7 @@ revert_sync(const tchecker::dbm::db_t *dbm1, const tchecker::dbm::db_t *dbm2,
   enum tchecker::dbm::status_t stat_2 = revert_multiple_reset(multiple_reset, dbm2, dim2, dbm2_synced, virt_reset_set_B);
 
   std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> second
-    = tchecker::virtual_constraint::factory(multiple_reset, dim2, no_of_orig_clocks_1 + no_of_orig_clocks_2);
+    = tchecker::virtual_constraint::factory(multiple_reset, dim2, phi_e.get_no_of_virt_clocks());
 
   free(multiple_reset);
 

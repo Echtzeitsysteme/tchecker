@@ -81,7 +81,7 @@ tchecker::zg::extrapolation_t * extrapolation_factory(
                   enum tchecker::zg::extrapolation_type_t type,
                   std::shared_ptr<const tchecker::ta::system_t> system_first,
                   std::shared_ptr<const tchecker::ta::system_t> system_second,
-                  bool first_not_second);
+                  bool first_not_second, bool urgent_or_committed);
 
 } // end of namespace vcg
 
