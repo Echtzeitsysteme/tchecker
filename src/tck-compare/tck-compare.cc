@@ -24,7 +24,6 @@
  */
 
 static struct option long_options[] = {{"relationship", required_argument, 0, 'r'},
-                                       {"order", required_argument, 0, 'n'},
                                        {"output", required_argument, 0, 'o'},
                                        {"help", no_argument, 0, 'h'},
                                        {"block-size", required_argument, 0, 0},
@@ -40,12 +39,10 @@ static char const * const options = (char *)"hr:n:";
 void usage(char * progname)
 {
   std::cerr << "Usage: " << progname << " [options] [file1] [file2]" << std::endl;
-  std::cerr << "   -r relationship    relationship to check" << std::endl;
-  std::cerr << "                strong-timed-bisim  strong timed bisimilarity" << std::endl;
-  std::cerr << "   -n order           the order in which the relationship shall be checked" << std::endl
-            << std::endl;
   std::cerr << "   -h                 help" << std::endl;
   std::cerr << "   -o out_file        output file for certificate (default is standard output)" << std::endl;
+  std::cerr << "   -r relationship    relationship to check" << std::endl;
+  std::cerr << "                strong-timed-bisim  strong timed bisimilarity" << std::endl;
 }
 
 enum relationship_t {
@@ -53,7 +50,7 @@ enum relationship_t {
 };
 
 enum relationship_t relationship = STRONG_TIMED_BISIM;   /*!< Selected relationship */
-unsigned int order = std::numeric_limits<unsigned int>::max();
+
 bool help = false;                                 /*!< Help flag */
 std::string output_file = "";                      /*!< Output file name (empty means standard output) */
 std::ostream * os = &std::cout;                    /*!< Default output stream */
@@ -65,7 +62,11 @@ std::size_t table_size = 65536;                    /*!< Size of hash tables */
  \param argc : number of arguments
  \param argv : array of arguments
  \pre argv[0] up to argv[argc-1] are valid accesses
+<<<<<<< HEAD
  \post global variables help, output_file, search_order and labels have been set
+=======
+ \post global variables help, output_file, and labels have been set
+>>>>>>> add_strong_timed_sim
  from argv
  */
 int parse_command_line(int argc, char * argv[])
@@ -88,9 +89,6 @@ int parse_command_line(int argc, char * argv[])
           relationship = STRONG_TIMED_BISIM;
         else
           throw std::runtime_error("Unknow relationship: " + std::string(optarg));
-        break;
-      case 'n':
-        order = std::stoul(optarg);
         break;
       case 'o':
         output_file = optarg;

@@ -53,6 +53,13 @@ set(INPUTS
     Lieb_et_al_2_non_determ_bisim.sh:
     Lieb_et_al_2_determ_split_bisim.sh:
     Lieb_et_al_2_determ_split_non_bisim.sh:
+    Lieb_et_al_6.sh:
+    strong_timed_bisim_system_tests_edge_case_changed_actions.sh:
+    strong_timed_bisim_system_tests_edge_case_changed_actions_changed.sh:
+    strong_timed_bisim_system_tests_edge_case_urgent.sh:
+    strong_timed_bisim_system_tests_edge_case_urgent_non_urgent.sh:
+    strong_timed_bisim_system_tests_edge_case_without_trans.sh:
+    strong_timed_bisim_system_tests_edge_case_without_trans_changed_inv.sh:
     corsso.sh:2:2:10:1:2
     critical-region-async.sh:2:10
     csmacd.sh:3
@@ -94,6 +101,13 @@ list(GET TCK_COMPARE_INPUT_FILES 12 Lieb1_non_determ_bisim)
 list(GET TCK_COMPARE_INPUT_FILES 13 Lieb_et_al_2_non_determ_bisim)
 list(GET TCK_COMPARE_INPUT_FILES 14 Lieb_et_al_2_determ_split_bisim)
 list(GET TCK_COMPARE_INPUT_FILES 15 Lieb_et_al_2_determ_split_non_bisim)
+list(GET TCK_COMPARE_INPUT_FILES 16 Lieb6)
+list(GET TCK_COMPARE_INPUT_FILES 17 edge_case_changed_actions)
+list(GET TCK_COMPARE_INPUT_FILES 18 edge_case_changed_actions_changed)
+list(GET TCK_COMPARE_INPUT_FILES 19 edge_case_urgent)
+list(GET TCK_COMPARE_INPUT_FILES 20 edge_case_urgent_non_urgent)
+list(GET TCK_COMPARE_INPUT_FILES 21 edge_case_without_trans)
+list(GET TCK_COMPARE_INPUT_FILES 22 edge_case_without_trans_changed_inv)
 
 # check whether the no_initial_check works
 create_testcase(no_initial_first ${no_initial} ${ad} strong-timed-bisim)
@@ -124,6 +138,7 @@ create_testcase(Lieb-et-al-1-Lieb-et-al-2 ${Lieb1} ${Lieb2} strong-timed-bisim)
 create_testcase(Lieb-et-al-1-Lieb-et-al-3 ${Lieb1} ${Lieb3} strong-timed-bisim)
 create_testcase(Lieb-et-al-1-Lieb-et-al-4 ${Lieb1} ${Lieb4} strong-timed-bisim)
 create_testcase(Lieb-et-al-1-Lieb-et-al-5 ${Lieb1} ${Lieb5} strong-timed-bisim)
+create_testcase(Lieb-et-al-1-Lieb-et-al-6 ${Lieb1} ${Lieb6} strong-timed-bisim)
 
 # Lieb2
 create_testcase(Lieb-et-al-2-self ${Lieb2} ${Lieb2} strong-timed-bisim)
@@ -135,20 +150,45 @@ create_testcase(Lieb-et-al-2-Lieb-et-al-2-determ-split-non-bisim ${Lieb2} ${Lieb
 create_testcase(Lieb-et-al-2-Lieb-et-al-3 ${Lieb2} ${Lieb3} strong-timed-bisim)
 create_testcase(Lieb-et-al-2-Lieb-et-al-4 ${Lieb2} ${Lieb4} strong-timed-bisim)
 create_testcase(Lieb-et-al-2-Lieb-et-al-5 ${Lieb2} ${Lieb5} strong-timed-bisim)
+create_testcase(Lieb-et-al-2-Lieb-et-al-6 ${Lieb2} ${Lieb6} strong-timed-bisim)
 
 #Lieb 3
 create_testcase(Lieb-et-al-3-self ${Lieb3} ${Lieb3} strong-timed-bisim)
 
 create_testcase(Lieb-et-al-3-Lieb-et-al-4 ${Lieb3} ${Lieb4} strong-timed-bisim)
 create_testcase(Lieb-et-al-3-Lieb-et-al-5 ${Lieb3} ${Lieb5} strong-timed-bisim)
+create_testcase(Lieb-et-al-3-Lieb-et-al-6 ${Lieb3} ${Lieb6} strong-timed-bisim)
 
 #Lieb 4
 create_testcase(Lieb-et-al-4-self ${Lieb4} ${Lieb4} strong-timed-bisim)
 
 create_testcase(Lieb-et-al-4-Lieb-et-al-5 ${Lieb4} ${Lieb5} strong-timed-bisim)
+create_testcase(Lieb-et-al-4-Lieb-et-al-6 ${Lieb4} ${Lieb6} strong-timed-bisim)
 
 #Lieb 5
 create_testcase(Lieb-et-al-5-self ${Lieb5} ${Lieb5} strong-timed-bisim)
+create_testcase(Lieb-et-al-5-Lieb-et-al-6 ${Lieb5} ${Lieb6} strong-timed-bisim)
+
+# Lieb 6
+create_testcase(Lieb-et-al-6-self ${Lieb6} ${Lieb6} strong-timed-bisim)
+
+# edge cases
+
+## changed actions
+create_testcase(edge-case-changed-actions-self ${edge_case_changed_actions} ${edge_case_changed_actions} strong-timed-bisim)
+create_testcase(edge-case-changed-actions-changed-self ${edge_case_changed_actions_changed} ${edge_case_changed_actions_changed} strong-timed-bisim)
+create_testcase(edge-case-changed-actions ${edge_case_changed_actions} ${edge_case_changed_actions_changed} strong-timed-bisim)
+
+## urgent
+create_testcase(edge-case-urgent-self ${edge_case_urgent} ${edge_case_urgent} strong-timed-bisim)
+create_testcase(edge-case-urgent-non-urgent-self ${edge_case_urgent_non_urgent} ${edge_case_urgent_non_urgent} strong-timed-bisim)
+create_testcase(edge-case-urgent ${edge_case_urgent} ${edge_case_urgent_non_urgent} strong-timed-bisim)
+
+## without transitions
+create_testcase(edge-case-without-transitions-self ${edge_case_without_trans} ${edge_case_without_trans} strong-timed-bisim)
+create_testcase(edge-case-without-transitions-changed-inv-self ${edge_case_without_trans_changed_inv} ${edge_case_without_trans_changed_inv} strong-timed-bisim)
+create_testcase(edge-case-without-transitions ${edge_case_without_trans} ${edge_case_without_trans_changed_inv} strong-timed-bisim)
+create_testcase(edge-case-without-transitions-Lieb-et-al-1 ${edge_case_without_trans} ${Lieb1} strong-timed-bisim)
 
 # some self test take to long
 #foreach(cur ${TCK_COMPARE_INPUT_FILES})

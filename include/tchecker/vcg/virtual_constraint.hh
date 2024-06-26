@@ -10,7 +10,8 @@
 
 #include "tchecker/zg/zone.hh"
 #include "tchecker/dbm/dbm.hh"
-#include "tchecker/utils/zone_container.hh"
+#include "tchecker/zg/zone_container.hh"
+#include "tchecker/vcg/vcg.hh"
 
 /*
  \file virtual_constraint.hh
@@ -52,7 +53,7 @@ public:
    \brief Accessor
    \return no of virtual clocks
    */
-  tchecker::clock_id_t get_no_of_virt_clocks() const;
+  tchecker::clock_id_t get_no_of_virtual_clocks() const;
 
   /*!
    \brief return the virtual constraint as list of clock constraints
@@ -60,18 +61,8 @@ public:
    */
   clock_constraint_container_t get_vc(tchecker::clock_id_t no_of_orig_clocks, bool system_clocks) const;
 
-  /*!
-   \brief returns the negated version of this clock constraint
-   \return let result be the return value.
-   *  forall u with u model this and for all vc in result u does not model vc
-   *  forall u with u does not model this exists a vc in result such that u models vc
-   *  (for u in ({\chi_0, ..., \chi_{|C_A| + | C_B| - 1}} \rightarrow T))
-   \note the result can easily become very large. Try to avoid this method and use neg_logic_and instead.
-   */
-  std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> neg() const;
-
   /*
-   \brief returns the (not this and other)
+   \brief returns (not this and other)
    \param result : the pointer in which the result will be stored. Has to be allocated!
    \param other : the other vc not this shall be anded with
    */
@@ -109,6 +100,12 @@ public:
   */
   void logic_and(std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> result,
                  std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> const container) const;
+
+ /*
+  \brief returns, whether there exists any clock valuation that fulfills this
+  \return false, if no clock valuation exists that fulfills this
+  */
+  bool is_fulfillable() {return !this->is_empty();}
 
 private:
 
@@ -154,11 +151,24 @@ std::shared_ptr<virtual_constraint_t> factory(const tchecker::dbm::db_t * dbm, t
 std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> combine(tchecker::zone_container_t<virtual_constraint_t> & lo_vc, tchecker::clock_id_t no_of_virtual_clocks);
 
 /*!
- \brief contained-in-all function (see the TR of Lieb et al.)
- \param a vector of container of zones
- \return a container of zones
+ \brief find_contradiction operator (see the TR of Lieb et al.)
+ \param zone_A : the base zone of all transitions of trans_A
+ \param zone_B : the base zone of all transisions of trans_B
+ \param trans_A : a reference to a vector of transitions
+ \param trans_B : a reference to a vector of transitions
+ \param vcs : a matrix of container of virtual constraints
  */
-std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> contained_in_all(std::vector<std::shared_ptr<zone_container_t<virtual_constraint_t>>> & zones, tchecker::clock_id_t no_of_virtual_clocks);
+std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> find_contradiction(tchecker::zg::zone_t const & zone_A, tchecker::zg::zone_t const & zone_B, 
+                                                                                     std::vector<tchecker::vcg::vcg_t::sst_t *> & trans_A, std::vector<tchecker::vcg::vcg_t::sst_t *> & trans_B,
+                                                                                     tchecker::zone_matrix_t<virtual_constraint_t> & vcs);
+
+
+/*!
+ \brief contained-in-all function (see the TR of Lieb et al.)
+ \param a vector of container of virtual constraints
+ \return a container of virtual constraints
+ */
+std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> contained_in_all(std::vector<std::shared_ptr<zone_container_t<virtual_constraint_t>>> & vc, tchecker::clock_id_t no_of_virtual_clocks);
 
 
 } // end of namespace virtual_constraint

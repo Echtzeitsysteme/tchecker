@@ -18,7 +18,7 @@
 
 #include "tchecker/strong-timed-bisim/stats.hh"
 #include "tchecker/vcg/vcg.hh"
-#include "tchecker/utils/zone_container.hh"
+#include "tchecker/zg/zone_container.hh"
 
 namespace tchecker {
 
@@ -42,7 +42,7 @@ public:
   Lieb_et_al(std::shared_ptr<tchecker::vcg::vcg_t> input_first, std::shared_ptr<tchecker::vcg::vcg_t> input_second);
 
   /*!
-   \brief running the algorithm of Lieb et al. (TODO: add paper ref here)
+   \brief running the algorithm of Lieb et al.
    \param input_first : the first vcg
    \param input_second : the second vcg
    */
@@ -69,42 +69,80 @@ private:
   };
 
   /*!
+   \brief checks whether we need to do an epsilon transition
+   \param A_state : first state
+   \param B_state : second state
+   \Return true if the states are either not synced or the result of a delay is different than the original symbolic states
+  */
+  bool do_an_epsilon_transition(tchecker::zg::state_sptr_t A_state, tchecker::zg::transition_sptr_t A_trans,
+                                tchecker::zg::state_sptr_t B_state, tchecker::zg::transition_sptr_t B_trans);
+
+  /*!
    \brief check-for-virt-bisim function of Lieb et al.
    \param symb_state_first : the symbolic state that belongs to the first vcg
-   \param symbolic_trans_first : the transition with which we reached the first symbolic state
+   \param A_trans : the transition with which we reached the first symbolic state
    \param symb_state_second : the symbolic state that belongs to the second vcg
-   \param symbolic_trans_second : the transition with which we reached the second symbolic state
-   \param last_was_epsilon : whether the last transition was a delay transition
+   \param B_trans : the transition with which we reached the second symbolic state
+   \param last_was_epsilon : whether the last transition was an epsilon transition
+   \param visited : a set of assumptions
    \return a list of virtual constraints that are not bisimilar
    */
   std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>
-  check_for_virt_bisim(tchecker::zg::const_state_sptr_t symb_state_first, tchecker::zg::transition_sptr_t symbolic_trans_first,
-                       tchecker::zg::const_state_sptr_t symb_state_second, tchecker::zg::transition_sptr_t symbolic_trans_second,
-                       std::unordered_set<std::pair<tchecker::zg::state_sptr_t, tchecker::zg::state_sptr_t>, custom_hash, custom_equal> & visited,
-                       bool last_was_epsilon);
+  check_for_virt_bisim(tchecker::zg::const_state_sptr_t A_state, tchecker::zg::transition_sptr_t A_trans,
+                       tchecker::zg::const_state_sptr_t B_state, tchecker::zg::transition_sptr_t B_trans,
+                       std::unordered_set<std::pair<tchecker::zg::state_sptr_t, tchecker::zg::state_sptr_t>, custom_hash, custom_equal> & visited);
+
+  /*!
+   \brief helping function for check-for-outgoing-transitions. Is called if the other side has no transitions.
+   \param zone : the zone of the starting symbolic states that has some transitions.
+   \param trans : the corresponding transitions
+   \return the virtual constraints that represent the part of zone that has any of the given outgoing transitions.
+   */
+  std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>
+  check_for_outgoing_transitions_single_empty(tchecker::zg::zone_t const & zone, std::vector<tchecker::vcg::vcg_t::sst_t *> & trans);
+
+  /*!
+   \brief : removes found contradictions from a zone
+   \param zone : the zone to constraint
+   \param contradictions : the virtual constraints that shall be removed from zone
+   \return zone && (! && of all elements in contradictions)
+   */
+  std::shared_ptr<tchecker::zone_container_t<tchecker::zg::zone_t>>
+  extract_zone_without_contradictions(tchecker::zg::zone_t const & zone, std::shared_ptr<zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> contradictions);
+
+  /*!
+   \brief : takes two transitions and splits of the target zones. Returns a contradiction if one is found.
+   \param : zones-A : the splits of the target zones of trans_A
+   \param : trans_A : the first transition
+   \param : zones_B : the splits of the target zones of trans_B
+   \param : trans_B : the second transition
+   \param : visted : the assumptions.
+   \return a contradiction if there is one. Otherwise an empty list of virtual constraints.
+   */
+  std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>
+  check_splitted_transitions(std::shared_ptr<tchecker::zone_container_t<tchecker::zg::zone_t>> zones_A, tchecker::zg::transition_sptr_t trans_A, tchecker::zg::state_sptr_t state_A,
+                             std::shared_ptr<tchecker::zone_container_t<tchecker::zg::zone_t>> zones_B, tchecker::zg::transition_sptr_t trans_B, tchecker::zg::state_sptr_t state_B,
+                             std::unordered_set<std::pair<tchecker::zg::state_sptr_t, tchecker::zg::state_sptr_t>, custom_hash, custom_equal> & visited);
 
   /*!
    \brief check-for-outgoing-transitions-impl function of Lieb et al.
-   \param symb_state_first : the symbolic state that belongs to the first vcg
-   \param vcg_first : the first vcg
-   \param symb_state_second : the symbolic state that belongs to the second vcg
-   \param vcg_second : the second vcg
-   \param A_is_first : whether the outgoing transitions of A or B shall be checked
+   \param zone_A : the zone of the symbolic state that belongs to the first vcg
+   \param zone_B : the zone of the symbolic state that belongs to the second vcg
+   \param trans_A : the list of transitions that belongs to the first vcg
+   \param trans_B : the list of transitions that belongs to the second vcg
+   \param visited : the assumptions
    \return a list of virtual constraints that cannot be simulated.
    \note the result is allocated at the heap and must be freed.
    */
   std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>
-  check_for_outgoing_transitions( tchecker::zg::const_state_sptr_t A_state,
-                                  tchecker::zg::const_state_sptr_t B_state,
+  check_for_outgoing_transitions( tchecker::zg::zone_t const & zone_A, tchecker::zg::zone_t const & zone_B,
+                                  std::vector<tchecker::vcg::vcg_t::sst_t *> & trans_A, std::vector<tchecker::vcg::vcg_t::sst_t *> & trans_B,
                                   std::unordered_set<std::pair<tchecker::zg::state_sptr_t, tchecker::zg::state_sptr_t>, custom_hash, custom_equal> & visited);
 
   const std::shared_ptr<tchecker::vcg::vcg_t> _A;
   const std::shared_ptr<tchecker::vcg::vcg_t> _B;
 
   long _visited_pair_of_states;
-
-  long _delete_me;
-
 
 };
 

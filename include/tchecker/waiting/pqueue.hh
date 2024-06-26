@@ -57,7 +57,7 @@ public:
    \pre not empty()
    \post first element has been removed from the queue
    */
-  virtual inline void remove_first() { assert(! empty()); _s.erase(_s.begin()); }
+  virtual inline void remove_first() { assert(! empty()); _s.erase(_s.begin()); } // cppcheck-suppress assertWithSideEffect
 
   /*!
    \brief Accessor

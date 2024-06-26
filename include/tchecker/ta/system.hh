@@ -200,6 +200,12 @@ public:
 
   /*!
    \brief Accessor
+   \return the set of urgent location ids
+  */
+  boost::dynamic_bitset<> & urgent_locations();
+
+  /*!
+   \brief Accessor
    \param id : location identifier
    \pre id is a location identifier (checked by assertion)
    \return invariant typed expression for location id

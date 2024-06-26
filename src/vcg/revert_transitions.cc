@@ -48,7 +48,7 @@ bool check_whether_phi_is_subset_of_target(
   }
 
   std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> target_vc 
-    = tchecker::virtual_constraint::factory(target_dbm, zone.dim(), phi_split.get_no_of_virt_clocks());
+    = tchecker::virtual_constraint::factory(target_dbm, zone.dim(), phi_split.get_no_of_virtual_clocks());
 
   return tchecker::dbm::is_le(phi_split.dbm(), target_vc->dbm(), target_vc->dim());
 
@@ -75,7 +75,7 @@ revert_action_trans(const tchecker::zg::zone_t & zone,
   // copy the reset container since revert_multiple_reset will change it
   tchecker::clock_reset_container_t reset_copy(reset);
 
-  // According to the implementation of revert-action-trans, described in Lieb et al., we first have to calculate R(zone && g).
+  // According to the implementation of revert-action-trans, described in Lieb et al., we first have to calculate R(zone && g) && phi_split.
   tchecker::dbm::db_t d_land_g[zone.dim()*zone.dim()];
   zone.to_dbm(d_land_g);
 
@@ -98,39 +98,36 @@ revert_action_trans(const tchecker::zg::zone_t & zone,
   assert(tchecker::dbm::is_tight(r_d_land_g_land_phi, zone.dim()));
   assert(tchecker::dbm::is_consistent(r_d_land_g_land_phi, zone.dim()));
 
-  tchecker::dbm::db_t *reverted = tchecker::dbm::revert_multiple_reset(d_land_g, zone.dim(), r_d_land_g_land_phi, reset_copy);
+  tchecker::dbm::db_t *reverted = (tchecker::dbm::db_t *)malloc(zone.dim()*zone.dim()*sizeof(tchecker::dbm::db_t));
+
+  tchecker::dbm::revert_multiple_reset(reverted, d_land_g, zone.dim(), r_d_land_g_land_phi, reset_copy);
 
   std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> virt_mult_reset 
-      = tchecker::virtual_constraint::factory(reverted, zone.dim(), phi_split.get_no_of_virt_clocks());
+      = tchecker::virtual_constraint::factory(reverted, zone.dim(), phi_split.get_no_of_virtual_clocks());
 
-
-  tchecker::dbm::db_t zone_clone[zone.dim()*zone.dim()];
-  zone.to_dbm(zone_clone);
-
-  tchecker::dbm::constrain(zone_clone, zone.dim(), virt_mult_reset->get_vc(zone.dim() - phi_split.dim(), true));
-
-  std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> result
-      = tchecker::virtual_constraint::factory(zone_clone, zone.dim(), phi_split.get_no_of_virt_clocks());
-
-  //std::cout << __FILE__ << ": " << __LINE__ << ": return from revert_action_trans" << std::endl;
-
-  return result;
+  return virt_mult_reset;
 }
 
 std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t>
-revert_epsilon_trans(const tchecker::zg::zone_t & zone, const tchecker::virtual_constraint::virtual_constraint_t & phi_split)
+revert_epsilon_trans(const tchecker::zg::zone_t & zone, const tchecker::zg::zone_t & zone_eps, const tchecker::virtual_constraint::virtual_constraint_t & phi_split)
 {
 
-  std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> phi_copy = factory(phi_split);
+  std::shared_ptr<tchecker::zg::zone_t> zone_eps_copy = tchecker::zg::factory(zone_eps);
 
-  tchecker::dbm::open_down(phi_copy->dbm(), phi_copy->dim());
+  if(tchecker::dbm::EMPTY == tchecker::dbm::constrain(zone_eps_copy->dbm(), zone_eps_copy->dim(), phi_split.get_vc(zone_eps_copy->dim() - phi_split.dim(), true))) {
+    std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> result = tchecker::virtual_constraint::factory(phi_split.dim() - 1);
+    tchecker::dbm::empty(result->dbm(), result->dim());
+    return result;
+  }
+
+  tchecker::dbm::open_down(zone_eps_copy->dbm(), zone_eps_copy->dim());
 
   std::shared_ptr<tchecker::zg::zone_t> zone_copy = tchecker::zg::factory(zone);
 
-  tchecker::dbm::constrain(zone_copy->dbm(), zone_copy->dim(), phi_copy->get_vc(zone_copy->dim() - phi_copy->dim(), true));
+  intersection(zone_copy->dbm(), zone_copy->dbm(), zone_eps_copy->dbm(), zone_eps_copy->dim());
 
   std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> result
-    = tchecker::virtual_constraint::factory(zone_copy, phi_split.get_no_of_virt_clocks());
+    = tchecker::virtual_constraint::factory(zone_copy, phi_split.get_no_of_virtual_clocks());
 
   return result;
 }

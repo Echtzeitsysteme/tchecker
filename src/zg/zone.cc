@@ -10,6 +10,7 @@
 
 #include "tchecker/dbm/dbm.hh"
 #include "tchecker/zg/zone.hh"
+#include "tchecker/vcg/virtual_constraint.hh"
 
 namespace tchecker {
 
@@ -29,6 +30,8 @@ tchecker::zg::zone_t & zone_t::operator=(tchecker::zg::zone_t const & zone)
 bool zone_t::is_empty() const { return tchecker::dbm::is_empty_0(dbm_ptr(), _dim); }
 
 bool zone_t::is_universal_positive() const { return tchecker::dbm::is_universal_positive(dbm_ptr(), _dim); }
+
+void zone_t::make_universal() { tchecker::dbm::universal(dbm(), _dim); }
 
 bool zone_t::operator==(tchecker::zg::zone_t const & zone) const
 {
@@ -96,6 +99,73 @@ bool zone_t::belongs(tchecker::clockval_t const & clockval) const
   return tchecker::dbm::satisfies(dbm_ptr(), _dim, clockval);
 }
 
+bool zone_t::is_virtual_equivalent(tchecker::zg::zone_t const & zone, tchecker::clock_id_t no_of_virt_clocks) const
+{
+
+  assert(no_of_virt_clocks < _dim);
+
+  auto phi_this = tchecker::virtual_constraint::factory(*this, no_of_virt_clocks);
+  auto phi_other = tchecker::virtual_constraint::factory(zone, no_of_virt_clocks);
+
+  return (*phi_this) == (*phi_other);
+
+}
+
+std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>
+zone_t::get_virtual_overhang(tchecker::virtual_constraint::virtual_constraint_t const & phi) const
+{
+  assert(phi.dim() <= this->dim());
+
+  auto phi_this = tchecker::virtual_constraint::factory(*this, phi.get_no_of_virtual_clocks());
+
+  auto result = std::make_shared<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(phi_this->dim());
+
+  // if phi_this <= phi, then phi_this && not phi = emptyset
+  if(*phi_this <= phi) {
+    return result;
+  }
+
+  auto copy = factory(*this);
+
+  // if this && phi = empty, then phi_this && not phi = phi_this
+  if(tchecker::dbm::status_t::EMPTY == phi.logic_and(copy, *this)) {
+    result->append_zone(phi_this);
+    return result;
+  }
+
+  phi.neg_logic_and(result, *phi_this);
+  result->compress();
+  return result;
+}
+
+std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>
+zone_t::get_virtual_overhang(tchecker::zg::zone_t const & other, tchecker::clock_id_t no_of_virtual_clocks) const
+{
+  auto phi_other = tchecker::virtual_constraint::factory(other, no_of_virtual_clocks);
+  return this->get_virtual_overhang(*phi_other);
+}
+
+std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>
+zone_t::get_virtual_overhang_in_both_directions(tchecker::zg::zone_t const & other, tchecker::clock_id_t no_of_virtual_clocks) const
+{
+  auto result = this->get_virtual_overhang(other, no_of_virtual_clocks);
+  result->append_container(other.get_virtual_overhang(*this, no_of_virtual_clocks));
+  result->compress();
+
+  assert(
+    std::all_of(result->begin(), result->end(),
+                [no_of_virtual_clocks](std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> vc)
+                {
+                  return (no_of_virtual_clocks == vc->get_no_of_virtual_clocks());
+                }
+    )
+  );
+
+  return result;
+}
+
+
+
 zone_t::zone_t(tchecker::clock_id_t dim) : _dim(dim) { tchecker::dbm::universal_positive(dbm_ptr(), _dim); }
 
 zone_t::zone_t(tchecker::zg::zone_t const & zone) : _dim(zone._dim)
@@ -134,5 +204,19 @@ std::string to_string(tchecker::zg::zone_t const & zone, tchecker::clock_index_t
   zone.output(sstream, index);
   return sstream.str();
 }
+
+// specializations for the zone container
+template<>
+std::shared_ptr<tchecker::zg::zone_t> zone_container_t<tchecker::zg::zone_t>::create_element()
+{
+  return tchecker::zg::factory(_dim);
+}
+
+template<>
+std::shared_ptr<tchecker::zg::zone_t> zone_container_t<tchecker::zg::zone_t>::create_element(tchecker::zg::zone_t const & zone)
+{
+  return tchecker::zg::factory(zone);
+}
+
 
 } // end of namespace tchecker
