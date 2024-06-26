@@ -100,6 +100,8 @@ bool system_t::is_urgent(tchecker::loc_id_t id) const
   return _urgent[id] == 1;
 }
 
+boost::dynamic_bitset<> & system_t::urgent_locations() { return _urgent; }
+
 tchecker::typed_expression_t const & system_t::invariant(tchecker::loc_id_t id) const
 {
   assert(is_location(id));

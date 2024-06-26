@@ -11,17 +11,9 @@
 #include <iterator>
 #include <memory>
 
-#include "tchecker/zg/zone.hh"
-#include "tchecker/vcg/virtual_constraint.hh"
+#include "tchecker/dbm/dbm.hh"
 
 namespace tchecker {
-
-// forward declaration
-namespace virtual_constraint {
-
-class virtual_constraint_t;
-
-}
 
 /*
  \brief a container for all subtypes of zone
@@ -38,6 +30,14 @@ public:
   zone_container_t<T>(tchecker::clock_id_t dim) : _dim(dim), _storage(std::make_shared<std::vector<std::shared_ptr<T>>>(0)) { }
 
   /*!
+   \brief Constructor
+   \param zone : the only zone of the resulting container
+   */
+  zone_container_t<T>(T const &zone) : _dim(zone.dim()), _storage(std::make_shared<std::vector<std::shared_ptr<T>>>(0)) {
+    this->append_zone(zone);
+  }
+
+  /*!
    \brief Copy Constructor
    \param container : the container to copy
    */
@@ -51,7 +51,7 @@ public:
   /*!
    \brief Accessor
    */
-  tchecker::clock_id_t dim() {return this->_dim;}
+  tchecker::clock_id_t dim() const {return this->_dim;}
 
   /*!
    \brief factory functions to be used by the append functions
@@ -65,7 +65,7 @@ public:
    \brief check for emptiness of the container
    \return true if and only if the container is empty
    */
-  bool is_empty()
+  bool is_empty() const
   {
     return 0 == _storage->size();
   }
@@ -106,6 +106,7 @@ public:
    */
   void append_container(std::shared_ptr<zone_container_t<T>> other)
   {
+    assert(nullptr != other);
     assert(other->_dim == this->_dim);
     for(auto iter = other->begin(); iter < other->end(); iter++) {
       this->append_zone(*iter);
@@ -140,14 +141,14 @@ public:
   void remove_empty()
   {
     for(auto iter = this->begin(); iter < this->end(); iter++) {
-      if(iter->empty()) {
+      if((*iter)->is_empty()) {
         _storage->erase(iter);
       }
     }
   }
 
   /*!
-   \brief gets the the last zone
+   \brief gets the last zone
    \return the pointer to that zone
    */
   std::shared_ptr<T> back()
@@ -196,10 +197,13 @@ public:
            - zc_prev._dim = zc_after._dim
            - for all zone_prev in zc_prev : for all u in zone_prev : exists zone_after in zc_after : u in zone_after
            - for all zone_after in zc_after : for all u in zone_after : exists zone_prev in zc_prev : u in zone_prev
+   \note see chapter 7.6 of Rokicki "Representing and modeling digital circuits" (PhD thesis)
    */
 
   void compress()
   {
+
+    this->remove_empty();
 
     std::shared_ptr<std::vector<std::shared_ptr<T>>> result = _storage;
 
@@ -247,20 +251,86 @@ private:
 
 };
 
-// specializations
-template<>
-std::shared_ptr<tchecker::zg::zone_t> zone_container_t<tchecker::zg::zone_t>::create_element();
+/*
+ \brief a matrix of container for all subtypes of zone
+ */
+template <typename T>
+class zone_matrix_t {
 
-template<>
-std::shared_ptr<tchecker::zg::zone_t> zone_container_t<tchecker::zg::zone_t>::create_element(tchecker::zg::zone_t const & zone);
+public:
 
-template<>
-std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>::create_element();
+  
+  /*!
+   \brief Constructor
+   \param line_size : number of lines in matrix
+   \param column_size : number of columns in matrix
+   \param dim : the dimension of the zones
+   */
+  zone_matrix_t<T>(size_t line_size, size_t column_size, tchecker::clock_id_t dim) :
+    _dim(dim), _line_size(line_size), _column_size(column_size), _matrix(std::vector<std::shared_ptr<zone_container_t<T>>>(line_size * column_size)) {
 
-template<>
-std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>::create_element(tchecker::virtual_constraint::virtual_constraint_t const & zone);
+    for(std::size_t i = 0; i < line_size*column_size; ++i) {
+      _matrix[i] = std::make_shared<zone_container_t<T>>(dim);
+    }
+  };
 
+  /*!
+   \brief Getter for matrix element
+   \param line : line of the element
+   \param column : column of the element
+   \return pointer to the element
+  */
+  std::shared_ptr<zone_container_t<T>> get(size_t line, size_t column) {
+    assert(line < _line_size);
+    assert(column < _column_size);
 
+    return _matrix[line*_column_size + column];
+  }
+
+  /*!
+   \brief Accessor for the line size
+   \return the line size
+  */
+  size_t get_line_size() const { return _line_size; }
+
+  /*!
+   \brief Accessor for the column size
+   \return the column size
+  */
+  size_t get_column_size() const { return _column_size; }
+
+  /*!
+   \brief Accessor for the dim
+   \return the dimension of the virtual constraints
+  */
+  size_t get_dim() const { return _dim; }
+
+  std::shared_ptr<std::vector<std::shared_ptr<zone_container_t<T>>>>  get_line(size_t line)
+  {
+    auto result = std::make_shared<std::vector<std::shared_ptr<zone_container_t<T>>>>();
+    for(size_t i = 0; i < this->get_column_size(); i++) {
+      result->emplace_back(this->get(line, i));
+    }
+    return result;
+  }
+
+  std::shared_ptr<std::vector<std::shared_ptr<zone_container_t<T>>>> get_column(size_t column)
+  {
+    auto result = std::make_shared<std::vector<std::shared_ptr<zone_container_t<T>>>>();
+    for(size_t i = 0; i < this->get_line_size(); i++) {
+      result->emplace_back(this->get(i, column));
+    }
+    return result;
+  }
+
+  private:
+
+    const tchecker::clock_id_t _dim;
+
+    const size_t _line_size, _column_size;
+    std::vector<std::shared_ptr<zone_container_t<T>>> _matrix;
+
+};
 } // end of namespace tchecker
 
 #endif

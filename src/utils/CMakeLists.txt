@@ -8,7 +8,6 @@ set(UTILS_SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/iterator.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/log.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/string.cc
-    ${CMAKE_CURRENT_SOURCE_DIR}/zone_container.cc
     ${TCHECKER_INCLUDE_DIR}/tchecker/utils/allocation_size.hh
     ${TCHECKER_INCLUDE_DIR}/tchecker/utils/array.hh
     ${TCHECKER_INCLUDE_DIR}/tchecker/utils/bitset.hh
@@ -23,5 +22,4 @@ set(UTILS_SRC
     ${TCHECKER_INCLUDE_DIR}/tchecker/utils/singleton_pool.hh
     ${TCHECKER_INCLUDE_DIR}/tchecker/utils/spinlock.hh
     ${TCHECKER_INCLUDE_DIR}/tchecker/utils/string.hh
-    ${TCHECKER_INCLUDE_DIR}/tchecker/utils/zone_container.hh
     PARENT_SCOPE)

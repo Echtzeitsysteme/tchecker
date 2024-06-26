@@ -16,4 +16,5 @@ ${TCHECKER_INCLUDE_DIR}/tchecker/zg/state.hh
 ${TCHECKER_INCLUDE_DIR}/tchecker/zg/transition.hh
 ${TCHECKER_INCLUDE_DIR}/tchecker/zg/zg.hh
 ${TCHECKER_INCLUDE_DIR}/tchecker/zg/zone.hh
+${TCHECKER_INCLUDE_DIR}/tchecker/zg/zone_container.hh
 PARENT_SCOPE)

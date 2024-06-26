@@ -270,6 +270,7 @@ enum tchecker::dbm::status_t constrain(tchecker::dbm::db_t * dbm, tchecker::cloc
   return tchecker::dbm::NON_EMPTY;
 }
 
+
 enum tchecker::dbm::status_t constrain(tchecker::dbm::db_t * dbm, tchecker::clock_id_t dim,
                                        tchecker::clock_constraint_container_t const & constraints)
 {
@@ -523,6 +524,13 @@ enum tchecker::dbm::status_t intersection(tchecker::dbm::db_t * dbm, tchecker::d
       DBM(i, j) = tchecker::dbm::min(DBM1(i, j), DBM2(i, j));
 
   return tchecker::dbm::tighten(dbm, dim);
+
+}
+
+bool disjoint(tchecker::dbm::db_t * dbm_1, tchecker::dbm::db_t * dbm_2, tchecker::clock_id_t dim)
+{
+  tchecker::dbm::db_t helper[dim*dim];
+  return tchecker::dbm::EMPTY == intersection(helper, dbm_1, dbm_2, dim);
 }
 
 // used for assertion only
@@ -547,7 +555,7 @@ bool split_is_subset_of_R_orig(const tchecker::dbm::db_t * orig_zone,
     tchecker::dbm::output_matrix(std::cout, orig_zone, dim);
 
     std::cout << __FILE__ << ": " << __LINE__ << ": zone_split:" << std::endl;
-    tchecker::dbm::output_matrix(std::cout, orig_zone, dim);
+    tchecker::dbm::output_matrix(std::cout, zone_split, dim);
 
 
     std::cout << __FILE__ << ": " << __LINE__ << ": resets:" << std::endl;
@@ -566,7 +574,7 @@ bool split_is_subset_of_R_orig(const tchecker::dbm::db_t * orig_zone,
 
 }
 
-tchecker::dbm::db_t * revert_multiple_reset(const tchecker::dbm::db_t * orig_zone,
+enum tchecker::dbm::status_t revert_multiple_reset(tchecker::dbm::db_t *result, const tchecker::dbm::db_t * orig_zone,
                                             tchecker::clock_id_t dim, tchecker::dbm::db_t * zone_split,
                                             tchecker::clock_reset_container_t reset)
 {
@@ -582,10 +590,9 @@ tchecker::dbm::db_t * revert_multiple_reset(const tchecker::dbm::db_t * orig_zon
   assert(split_is_subset_of_R_orig(orig_zone, dim, zone_split, reset));
 
   if(reset.empty()) {
-    // place the dbm to return at the heap s.t. it is not destroyed during the returns
-    tchecker::dbm::db_t * result = (tchecker::dbm::db_t *)malloc(dim*dim*sizeof(tchecker::dbm::db_t));
     tchecker::dbm::copy(result, zone_split, dim);
-    return result;
+    tchecker::dbm::tighten(result, dim);
+    return (is_empty_0(result, dim) ? tchecker::dbm::EMPTY : tchecker::dbm::NON_EMPTY);
   }
 
   tchecker::dbm::db_t zone_clone[dim*dim];
@@ -594,19 +601,23 @@ tchecker::dbm::db_t * revert_multiple_reset(const tchecker::dbm::db_t * orig_zon
   tchecker::clock_reset_t cur = reset.back();
   reset.pop_back();
 
-  if(cur.right_id() != tchecker::REFCLOCK_ID || cur.value() != 0) {
+  if(cur.left_id() == tchecker::REFCLOCK_ID || cur.right_id() != tchecker::REFCLOCK_ID || cur.value() != 0) {
     throw std::runtime_error("when checking for timed bisim, only resets to value zero are allowed");
   }
 
-  tchecker::dbm::reset(zone_clone, dim, reset);
+  tchecker::dbm::reset_to_value(zone_clone, dim, cur.left_id() + 1, cur.value());
 
-  tchecker::dbm::free_clock(zone_split, dim, cur);
+  revert_multiple_reset(result, zone_clone, dim, zone_split, reset);
 
-  tchecker::dbm::db_t new_split[dim*dim];
+  tchecker::dbm::free_clock(result, dim, cur.left_id() + 1);
 
-  intersection(new_split, zone_clone, zone_split, dim);
+  enum tchecker::dbm::status_t ret_val = intersection(result, result, orig_zone, dim);
 
-  return revert_multiple_reset(orig_zone, dim, new_split, reset);
+  if(tchecker::dbm::EMPTY != ret_val) {
+    assert(tchecker::dbm::is_tight(result, dim));
+  }
+
+  return ret_val;
 
 }
 
@@ -1345,11 +1356,15 @@ enum tchecker::dbm::union_convex_t convex_union(tchecker::dbm::db_t *result, tch
   }
 
   if(dbm2_tight.empty()) {
+    assert(tchecker::dbm::is_consistent(result, dim));
+    assert(tchecker::dbm::is_tight(result, dim));
     return tchecker::dbm::union_convex_t::UNION_IS_CONVEX;
   }
 
   if (dbm1_tight.empty()) {
     tchecker::dbm::copy(result, dbm2, dim);
+    assert(tchecker::dbm::is_consistent(result, dim));
+    assert(tchecker::dbm::is_tight(result, dim));
     return tchecker::dbm::union_convex_t::UNION_IS_CONVEX;
   }
 
@@ -1365,6 +1380,8 @@ enum tchecker::dbm::union_convex_t convex_union(tchecker::dbm::db_t *result, tch
     }
   }
 
+  assert(tchecker::dbm::is_consistent(result, dim));
+  assert(tchecker::dbm::is_tight(result, dim));
   return tchecker::dbm::union_convex_t::UNION_IS_CONVEX;
 
 }

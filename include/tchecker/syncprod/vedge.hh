@@ -163,14 +163,32 @@ public:
   const_array_iterator_t end_array() const;
 
   /*!
+   \brief This functions returns the event names of the transition
+   \param system : the system this transitions belongs to
+   \return the set of events of this transition
+   */
+  std::set<std::string> event_names(const tchecker::system::system_t & system) const;
+
+  /*!
    \brief This function checks whether all events of this are also
           contained by other and vice versa.
    \param my_system : the system this belongs to
    \param other : the other transition
    \param other_system: the system other belongs to
+   \return true, if the set of event names is the same
    */
   bool event_equal(tchecker::system::system_t const & my_system, const vedge_t & other, tchecker::system::system_t const & other_system) const
     { return this->contains_events(my_system, other, other_system) && other.contains_events(other_system, *this, my_system); }
+
+  /*!
+   \brief This function checks whether all events of this are also
+          contained by the given set.
+   \param system : the system this belongs to
+   \param event: the other event
+   \return true, if the given set is the same as the event names of this transition
+   */
+  bool event_equal(tchecker::system::system_t const & system, std::set<std::string> const & events) const
+    { return this->event_names(system) == events; }
 
 protected:
 

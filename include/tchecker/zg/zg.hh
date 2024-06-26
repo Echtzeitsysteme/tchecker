@@ -12,6 +12,8 @@
 
 #include "tchecker/basictypes.hh"
 #include "tchecker/clockbounds/clockbounds.hh"
+#include "tchecker/extrapolation/extrapolation.hh"
+#include "tchecker/extrapolation/extrapolation_factory.hh"
 #include "tchecker/syncprod/vedge.hh"
 #include "tchecker/syncprod/vloc.hh"
 #include "tchecker/ta/system.hh"
@@ -25,7 +27,6 @@
 #include "tchecker/variables/clocks.hh"
 #include "tchecker/variables/intvars.hh"
 #include "tchecker/zg/allocators.hh"
-#include "tchecker/zg/extrapolation.hh"
 #include "tchecker/zg/semantics.hh"
 #include "tchecker/zg/state.hh"
 #include "tchecker/zg/transition.hh"
@@ -591,7 +592,7 @@ inline tchecker::state_status_t initialize(tchecker::ta::system_t const & system
  state and transition allocation
  \note all returned states and transitions are deallocated automatically
  */
-class zg_t final : public tchecker::ts::fwd_t<tchecker::zg::state_sptr_t, tchecker::zg::const_state_sptr_t,
+class zg_t : public tchecker::ts::fwd_t<tchecker::zg::state_sptr_t, tchecker::zg::const_state_sptr_t,
                                               tchecker::zg::transition_sptr_t, tchecker::zg::const_transition_sptr_t>,
                    public tchecker::ts::bwd_t<tchecker::zg::state_sptr_t, tchecker::zg::const_state_sptr_t,
                                               tchecker::zg::transition_sptr_t, tchecker::zg::const_transition_sptr_t>,
@@ -647,11 +648,13 @@ public:
    \param extrapolation : a zone extrapolation
    \param block_size : number of objects allocated in a block
    \param table_size : size of hash tables
+   \param enable_extrapolation : whether the extrapolation should automatically be run or not
    \note all states and transitions are pool allocated and deallocated automatically
    */
   zg_t(std::shared_ptr<tchecker::ta::system_t const> const & system, enum tchecker::ts::sharing_type_t sharing_type,
        std::shared_ptr<tchecker::zg::semantics_t> const & semantics,
-       std::shared_ptr<tchecker::zg::extrapolation_t> const & extrapolation, std::size_t block_size, std::size_t table_size);
+       std::shared_ptr<tchecker::zg::extrapolation_t> const & extrapolation, std::size_t block_size, std::size_t table_size,
+       bool enable_extrapolation = true);
 
   /*!
    \brief Copy constructor (deleted)
@@ -875,6 +878,15 @@ public:
   void split(tchecker::zg::const_state_sptr_t const & s, tchecker::clock_constraint_container_t const & constraints,
              std::vector<tchecker::zg::state_sptr_t> & v);
 
+  /*!
+   \brief runs the extrapolation on the given dbm
+   \param dbm : the dbm to extrapolate
+   \param dim : the dimension of the dbm
+   \param vloc : a set of locations
+   \post the dbm is extrapolated
+   */
+  inline void run_extrapolation(tchecker::dbm::db_t *dbm, tchecker::clock_id_t dim, tchecker::vloc_t const & vloc) const { _non_enabled_extrapolation->extrapolate(dbm, dim, vloc); }
+
   // Inspector
 
   /*!
@@ -950,7 +962,33 @@ public:
   */
   inline enum tchecker::ts::sharing_type_t sharing_type() const { return _sharing_type; }
 
-private:
+  /*!
+   \brief Accessor
+   \return Underlying semantics
+   */
+  inline std::shared_ptr<tchecker::zg::semantics_t> const & semantics() const { return _semantics; }
+
+  /*!
+   \brief Accessor
+   \return number of clocks
+   */
+  inline tchecker::clock_id_t clocks_count() const { return _system->clocks_count(tchecker::VK_FLATTENED);  }
+
+  /*!
+   \brief clones a state of this zg
+   \param the state to clone
+   \brief the cloned state
+   */
+  inline tchecker::zg::state_sptr_t clone_state(tchecker::zg::const_state_sptr_t const & to_clone) {return _state_allocator.clone(*to_clone);}
+
+  /*!
+   \brief clones a state of this zg
+   \param the state to clone
+   \brief the cloned state
+   */
+  inline tchecker::zg::state_sptr_t clone_state(tchecker::zg::state_sptr_t const & to_clone) {return _state_allocator.clone(*to_clone);}
+
+protected:
   /*!
    \brief Clone and constrain a state
    \param s : a state
@@ -960,12 +998,13 @@ private:
   tchecker::zg::state_sptr_t clone_and_constrain(tchecker::zg::const_state_sptr_t const & s,
                                                  tchecker::clock_constraint_t const & c);
 
-  std::shared_ptr<tchecker::ta::system_t const> _system;           /*!< System of timed processes */
-  enum tchecker::ts::sharing_type_t _sharing_type;                 /*!< Sharing of state/transition components */
-  std::shared_ptr<tchecker::zg::semantics_t> _semantics;           /*!< Zone semantics */
-  std::shared_ptr<tchecker::zg::extrapolation_t> _extrapolation;   /*!< Zone extrapolation */
-  tchecker::zg::state_pool_allocator_t _state_allocator;           /*!< Pool allocator of states */
-  tchecker::zg::transition_pool_allocator_t _transition_allocator; /*! Pool allocator of transitions */
+  std::shared_ptr<tchecker::ta::system_t const> _system;                        /*!< System of timed processes */
+  enum tchecker::ts::sharing_type_t _sharing_type;                              /*!< Sharing of state/transition components */
+  std::shared_ptr<tchecker::zg::semantics_t> _semantics;                        /*!< Zone semantics */
+  std::shared_ptr<tchecker::zg::extrapolation_t> _extrapolation;                /*!< Zone extrapolation. Is "no_extrapolation if enable_extrapolation is set to false in the constructor*/
+  std::shared_ptr<tchecker::zg::extrapolation_t> _non_enabled_extrapolation;    /*!< if enabled_extrapolation, its the same as _extrapolation. Otherwise it is the actual used extrapolation*/
+  tchecker::zg::state_pool_allocator_t _state_allocator;                        /*!< Pool allocator of states */
+  tchecker::zg::transition_pool_allocator_t _transition_allocator;              /*! Pool allocator of transitions */
 };
 
 /*!
