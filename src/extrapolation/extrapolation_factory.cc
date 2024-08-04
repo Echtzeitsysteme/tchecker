@@ -77,7 +77,7 @@ tchecker::zg::extrapolation_t * extrapolation_factory(
                   bool first_not_second, bool urgent_or_committed)
 {
 
-  if(tchecker::zg::EXTRA_M_GLOBAL != type) { // vcg currently support k norm (m_global) only
+  if(tchecker::zg::EXTRA_M_GLOBAL != type && tchecker::zg::EXTRA_M_LOCAL != type) { // vcg currently support k norm (m_global) and local extrapolation (m_local) only
     throw std::invalid_argument("Unknown zone extrapolation");
   }
 
@@ -89,41 +89,79 @@ tchecker::zg::extrapolation_t * extrapolation_factory(
   if (clock_bounds_second.get() == nullptr)
     return nullptr;
 
-
-  std::shared_ptr<const tchecker::clockbounds::global_m_map_t> M_first = clock_bounds_first->global_m_map();
-  std::shared_ptr<const tchecker::clockbounds::global_m_map_t> M_second = clock_bounds_second->global_m_map();
-
-
   tchecker::clock_id_t no_orig_clocks = (first_not_second) ? clock_bounds_first->clocks_number() : clock_bounds_second->clocks_number();
 
   auto map_size = no_orig_clocks + clock_bounds_first->clocks_number() + clock_bounds_second->clocks_number() + ((urgent_or_committed) ? 1 : 0);
 
-  tchecker::clockbounds::global_m_map_t m_map_with_virt_clks{map_size};
+  if(tchecker::zg::EXTRA_M_GLOBAL == type) { 
+    
+    std::shared_ptr<const tchecker::clockbounds::global_m_map_t> M_first = clock_bounds_first->global_m_map();
+    std::shared_ptr<const tchecker::clockbounds::global_m_map_t> M_second = clock_bounds_second->global_m_map();
 
-  tchecker::clockbounds::clear(m_map_with_virt_clks.M());
+    tchecker::clockbounds::global_m_map_t m_map_with_virt_clks{map_size};
 
-  /* since the virtual clock value must be the same as the original clock value in ab-synced states, we cannot extrapolate <=0 to <inf. Therefore, negative bounds must be removed */
+    tchecker::clockbounds::clear(m_map_with_virt_clks.M());
 
-  for(clock_id_t i = 0; i < no_orig_clocks; ++i) {
-    tchecker::clockbounds::bound_t tmp = (first_not_second) ? M_first->M()[i] : M_second->M()[i];
-    tchecker::clockbounds::update(m_map_with_virt_clks.M(), i, (0 > tmp) ? 0 : tmp);
+    /* since the virtual clock value must be the same as the original clock value in ab-synced states, we cannot extrapolate <=0 to <inf. Therefore, negative bounds must be removed */
+
+    for(clock_id_t i = 0; i < no_orig_clocks; ++i) {
+      tchecker::clockbounds::bound_t tmp = (first_not_second) ? M_first->M()[i] : M_second->M()[i];
+      tchecker::clockbounds::update(m_map_with_virt_clks.M(), i, (0 > tmp) ? 0 : tmp);
+    }
+
+    for(clock_id_t i = 0; i < clock_bounds_first->clocks_number(); ++i) {
+      tchecker::clockbounds::update(m_map_with_virt_clks.M(), i + no_orig_clocks, (0 > M_first->M()[i]) ? 0 : M_first->M()[i]);
+    }
+
+    for(clock_id_t i = 0; i < clock_bounds_second->clocks_number(); ++i) {
+      tchecker::clockbounds::update(m_map_with_virt_clks.M(), i + no_orig_clocks + clock_bounds_first->clocks_number(), (0 > M_second->M()[i]) ? 0 : M_second->M()[i]);
+    }
+
+    if(urgent_or_committed) {
+      tchecker::clockbounds::update(m_map_with_virt_clks.M(), no_orig_clocks + clock_bounds_first->clocks_number() + clock_bounds_second->clocks_number(), tchecker::clockbounds::NO_BOUND);
+    }
+
+    std::shared_ptr<tchecker::clockbounds::global_m_map_t const> final_map = std::make_shared<tchecker::clockbounds::global_m_map_t const>(m_map_with_virt_clks);
+
+    return new tchecker::zg::global_extra_m_t{final_map};
   }
 
-  for(clock_id_t i = 0; i < clock_bounds_first->clocks_number(); ++i) {
-    tchecker::clockbounds::update(m_map_with_virt_clks.M(), i + no_orig_clocks, (0 > M_first->M()[i]) ? 0 : M_first->M()[i]);
+  std::shared_ptr<const tchecker::clockbounds::local_m_map_t> M_first = clock_bounds_first->local_m_map();
+  std::shared_ptr<const tchecker::clockbounds::local_m_map_t> M_second = clock_bounds_second->local_m_map();
+
+  /* one map for each possible combination of locations */
+  tchecker::clockbounds::local_m_map_t m_map_with_virt_clks{clock_bounds_first->locations_number() * clock_bounds_second->locations_number(), map_size};
+  
+  for(loc_id_t j = 0; j < clock_bounds_first->locations_number(); ++j) {
+
+    for(loc_id_t k = 0; k < clock_bounds_second->locations_number(); ++k) {
+
+      auto current_loc_combination = clock_bounds_second->locations_number() * j + k;
+
+      tchecker::clockbounds::clear(m_map_with_virt_clks.M(current_loc_combination));
+
+      for(clock_id_t i = 0; i < no_orig_clocks; ++i) {
+        tchecker::clockbounds::bound_t tmp = (first_not_second) ? M_first->M(j)[i] : M_second->M(k)[i];
+        tchecker::clockbounds::update(m_map_with_virt_clks.M(current_loc_combination), i, (0 > tmp) ? 0 : tmp);
+      }
+
+      for(clock_id_t i = 0; i < clock_bounds_first->clocks_number(); ++i) {
+        tchecker::clockbounds::update(m_map_with_virt_clks.M(current_loc_combination), i + no_orig_clocks, (0 > M_first->M(j)[i]) ? 0 : M_first->M(j)[i]);
+      }
+
+      for(clock_id_t i = 0; i < clock_bounds_second->clocks_number(); ++i) {
+        tchecker::clockbounds::update(m_map_with_virt_clks.M(current_loc_combination), i + no_orig_clocks + clock_bounds_first->clocks_number(), (0 > M_second->M(k)[i]) ? 0 : M_second->M(k)[i]);
+      }
+
+      if(urgent_or_committed) {
+        tchecker::clockbounds::update(m_map_with_virt_clks.M(current_loc_combination), no_orig_clocks + clock_bounds_first->clocks_number() + clock_bounds_second->clocks_number(), tchecker::clockbounds::NO_BOUND);
+      }
+    }
   }
 
-  for(clock_id_t i = 0; i < clock_bounds_second->clocks_number(); ++i) {
-    tchecker::clockbounds::update(m_map_with_virt_clks.M(), i + no_orig_clocks + clock_bounds_first->clocks_number(), (0 > M_second->M()[i]) ? 0 : M_second->M()[i]);
-  }
+  std::shared_ptr<tchecker::clockbounds::local_m_map_t const> final_map = std::make_shared<tchecker::clockbounds::local_m_map_t const>(m_map_with_virt_clks);
 
-  if(urgent_or_committed) {
-    tchecker::clockbounds::update(m_map_with_virt_clks.M(), no_orig_clocks + clock_bounds_first->clocks_number() + clock_bounds_second->clocks_number(), tchecker::clockbounds::NO_BOUND);
-  }
-
-  std::shared_ptr<tchecker::clockbounds::global_m_map_t const> final_map = std::make_shared<tchecker::clockbounds::global_m_map_t const>(m_map_with_virt_clks);
-
-  return new tchecker::zg::global_extra_m_t{final_map};
+  return new tchecker::zg::local_extra_m_t{final_map};
 
 }
 

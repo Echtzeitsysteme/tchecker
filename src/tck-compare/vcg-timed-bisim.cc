@@ -94,7 +94,7 @@ run(std::shared_ptr<tchecker::parsing::system_declaration_t> const & sysdecl_fir
   for(size_t i = 0; i < 2; ++i) {
     std::shared_ptr<tchecker::strong_timed_bisim::system_virtual_clocks_t const> extended_system{new tchecker::strong_timed_bisim::system_virtual_clocks_t{*(systems[i]), no_of_virt_clocks, 0 == i}};
     std::shared_ptr<tchecker::vcg::vcg_t> vcg{tchecker::vcg::factory(extended_system, 0 == i, systems[0], systems[1], urgent_or_committed_clock, tchecker::ts::SHARING, tchecker::zg::DISTINGUISHED_SEMANTICS,
-                                                                     tchecker::zg::EXTRA_M_GLOBAL, block_size, table_size)};
+                                                                     tchecker::zg::EXTRA_M_LOCAL, block_size, table_size)};
     vcgs.push_back(vcg);
   }
 

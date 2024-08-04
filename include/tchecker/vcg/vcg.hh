@@ -60,6 +60,8 @@ public:
 
   inline tchecker::clock_id_t get_no_of_original_clocks() const { return _system->clocks_count(tchecker::variable_kind_t::VK_FLATTENED) - _no_of_virtual_clocks;}
 
+  inline std::size_t get_no_of_locations() const { return _system->locations_count();}
+
 private:
 
   tchecker::clock_id_t _no_of_virtual_clocks;
@@ -75,7 +77,7 @@ private:
  \param urgent_or_committed : indicates whether the systems contain urgent or committed locations
  \param sharing_type : type of sharing
  \param semantics_type : type of zone semantics
- \param extrapolation_type : type of zone extrapolation (currently, k_norm only!)
+ \param extrapolation_type : type of zone extrapolation (currently, k_norm and local_m only!)
  \param block_size : number of objects allocated in a block
  \param table_size : size of hash tables
  \return a vcg over system with zone semantics and zone extrapolation
