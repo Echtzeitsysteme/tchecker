@@ -145,6 +145,7 @@ enum tchecker::dbm::status_t virtual_constraint_t::logic_and(std::shared_ptr<tch
 enum tchecker::dbm::status_t virtual_constraint_t::logic_and(tchecker::zg::zone_t & result, const tchecker::zg::zone_t & zone) const
 {
   assert(result.dim() == zone.dim());
+  assert(tchecker::dbm::is_tight(zone.dbm(), zone.dim()));
   tchecker::dbm::copy(result.dbm(), zone.dbm(), zone.dim());
   return tchecker::dbm::constrain(result.dbm(), result.dim(), this->get_vc(result.dim() - this->dim(), true));
 }
@@ -261,63 +262,6 @@ bool all_elements_are_stronger_than(std::shared_ptr<zone_container_t<virtual_con
     result &= inter;
   }
   return result;
-}
-
-std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> find_contradiction_helper(tchecker::zg::zone_t const & zone, std::vector<tchecker::vcg::vcg_t::sst_t *> & trans,
-                                                                                            zone_matrix_t<virtual_constraint_t> & vcs, bool first_not_second)
-{
-
-  std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> result = std::make_shared<tchecker::zone_container_t<virtual_constraint_t>>(vcs.get_dim());
-
-  for(unsigned int i = 0; i < (first_not_second ? vcs.get_line_size() : vcs.get_column_size()); ++i) {
-    auto && [status, s, t] = *(trans[i]);
-    auto lo_sets = (first_not_second ? vcs.get_line(i) : vcs.get_column(i));
-
-    std::shared_ptr<virtual_constraint_t> phi = factory(s->zone(), vcs.get_dim() - 1);
-
-    if(0 == lo_sets->size()) {
-      result->append_zone(tchecker::vcg::revert_action_trans(zone, t->guard_container(), t->reset_container(), t->tgt_invariant_container(), *phi));
-    }
-
-    auto big_land = std::make_shared<tchecker::zone_container_t<virtual_constraint_t>>(vcs.get_dim());
-    phi->logic_and(big_land, contained_in_all(*lo_sets, vcs.get_dim() - 1));
-
-    big_land->compress();
-
-    for(auto vc = big_land->begin(); vc < big_land->end(); vc++) {
-      result->append_zone(tchecker::vcg::revert_action_trans(zone, t->guard_container(), t->reset_container(), t->tgt_invariant_container(), **vc));
-    }
-
-  }
-
-  result->compress();
-  return result;
-
-}
-
-std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> find_contradiction(tchecker::zg::zone_t const & zone_A, tchecker::zg::zone_t const & zone_B,
-                                                                                   std::vector<tchecker::vcg::vcg_t::sst_t *> & trans_A, std::vector<tchecker::vcg::vcg_t::sst_t *> & trans_B,
-                                                                                   zone_matrix_t<virtual_constraint_t> & vcs)
-{
-
-  assert(vcs.get_line_size() == trans_A.size());
-  assert(vcs.get_column_size() == trans_B.size());
-
-  if(0 == trans_A.size() && 0 == trans_B.size()) {
-    return std::make_shared<tchecker::zone_container_t<virtual_constraint_t>>(vcs.get_dim());
-  }
-
-  std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> result = find_contradiction_helper(zone_A, trans_A, vcs, true);
-  result->append_container(find_contradiction_helper(zone_B, trans_B, vcs, false));
-
-  result->compress();
-
-  result = tchecker::virtual_constraint::combine(*result, vcs.get_dim() - 1);
-
-  result->compress();
-
-  return result;
-
 }
 
 std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> contained_in_all(std::vector<std::shared_ptr<zone_container_t<virtual_constraint_t>>> & vc, tchecker::clock_id_t no_of_virtual_clocks)

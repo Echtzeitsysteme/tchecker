@@ -221,6 +221,13 @@ public:
 
   }
 
+  void print_zone_container(std::ostream & os)
+  {
+    for(auto cur : _storage) {
+      os << *cur << " ";
+    }
+  }
+
 private:
 
   std::shared_ptr<std::vector<std::shared_ptr<T>>> find_union_partner(std::vector<std::shared_ptr<T>> const cur)
@@ -251,6 +258,30 @@ private:
 
 };
 
+template<typename T>
+std::shared_ptr<zone_container_t<T>> logical_and_container(zone_container_t<T> & first, zone_container_t<T> & second,
+                                                           std::shared_ptr<T> (*factory)(tchecker::clock_id_t))
+{
+  assert(first.dim() == second.dim());
+
+  first.compress();
+  second.compress();
+  auto result = std::make_shared<zone_container_t<T>>(first.dim());
+
+  for(auto cur_first : first) {
+    assert(tchecker::dbm::is_tight(cur_first->dbm(), cur_first->dim()));
+    for(auto cur_second : second) {
+      assert(tchecker::dbm::is_tight(cur_second->dbm(), cur_second->dim()));
+      auto inter = factory(first.dim());
+      cur_first->logic_and(inter, *cur_second);
+      result->append_zone(inter);
+    }
+    result->compress();
+  }
+
+  return result;
+
+}
 /*
  \brief a matrix of container for all subtypes of zone
  */
@@ -262,36 +293,36 @@ public:
   
   /*!
    \brief Constructor
-   \param line_size : number of lines in matrix
+   \param row_size : number of rows in matrix
    \param column_size : number of columns in matrix
    \param dim : the dimension of the zones
    */
-  zone_matrix_t<T>(size_t line_size, size_t column_size, tchecker::clock_id_t dim) :
-    _dim(dim), _line_size(line_size), _column_size(column_size), _matrix(std::vector<std::shared_ptr<zone_container_t<T>>>(line_size * column_size)) {
+  zone_matrix_t<T>(size_t row_size, size_t column_size, tchecker::clock_id_t dim) :
+    _dim(dim), _row_size(row_size), _column_size(column_size), _matrix(std::vector<std::shared_ptr<zone_container_t<T>>>(row_size * column_size)) {
 
-    for(std::size_t i = 0; i < line_size*column_size; ++i) {
+    for(std::size_t i = 0; i < row_size*column_size; ++i) {
       _matrix[i] = std::make_shared<zone_container_t<T>>(dim);
     }
   };
 
   /*!
    \brief Getter for matrix element
-   \param line : line of the element
+   \param row : row of the element
    \param column : column of the element
    \return pointer to the element
   */
-  std::shared_ptr<zone_container_t<T>> get(size_t line, size_t column) {
-    assert(line < _line_size);
+  std::shared_ptr<zone_container_t<T>> get(size_t row, size_t column) {
+    assert(row < _row_size);
     assert(column < _column_size);
 
-    return _matrix[line*_column_size + column];
+    return _matrix[row*_column_size + column];
   }
 
   /*!
-   \brief Accessor for the line size
-   \return the line size
+   \brief Accessor for the row size
+   \return the row size
   */
-  size_t get_line_size() const { return _line_size; }
+  size_t get_row_size() const { return _row_size; }
 
   /*!
    \brief Accessor for the column size
@@ -305,11 +336,11 @@ public:
   */
   size_t get_dim() const { return _dim; }
 
-  std::shared_ptr<std::vector<std::shared_ptr<zone_container_t<T>>>>  get_line(size_t line)
+  std::shared_ptr<std::vector<std::shared_ptr<zone_container_t<T>>>>  get_row(size_t row)
   {
     auto result = std::make_shared<std::vector<std::shared_ptr<zone_container_t<T>>>>();
     for(size_t i = 0; i < this->get_column_size(); i++) {
-      result->emplace_back(this->get(line, i));
+      result->emplace_back(this->get(row, i));
     }
     return result;
   }
@@ -317,17 +348,29 @@ public:
   std::shared_ptr<std::vector<std::shared_ptr<zone_container_t<T>>>> get_column(size_t column)
   {
     auto result = std::make_shared<std::vector<std::shared_ptr<zone_container_t<T>>>>();
-    for(size_t i = 0; i < this->get_line_size(); i++) {
+    for(size_t i = 0; i < this->get_row_size(); i++) {
       result->emplace_back(this->get(i, column));
     }
     return result;
+  }
+
+  void print_zone_matrix(std::ostream & os)
+  {
+    for(auto i = 0; i < _row_size; ++i) {
+      auto row = get_row(i);
+      for(auto cur : row) {
+        row->print_container(os);
+        os << "    ";
+      }
+      os << std::endl;
+    }
   }
 
   private:
 
     const tchecker::clock_id_t _dim;
 
-    const size_t _line_size, _column_size;
+    const size_t _row_size, _column_size;
     std::vector<std::shared_ptr<zone_container_t<T>>> _matrix;
 
 };
