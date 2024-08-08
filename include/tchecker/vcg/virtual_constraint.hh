@@ -30,9 +30,8 @@ namespace virtual_constraint {
  \class virtual_constraint_t
  \brief Implementation of virtual constraints
  \note We model the virtual constraint as zone
- * using the virtual clocks, only. This is
- * fine since a zone always corresponds to a
- * clock constraint
+ * using the virtual clocks, only. Do not add
+ * any fields to this class (or change the factory)
  */
 
 class virtual_constraint_t : public tchecker::zg::zone_t {
@@ -149,19 +148,6 @@ std::shared_ptr<virtual_constraint_t> factory(const tchecker::dbm::db_t * dbm, t
  \return a container of virtual constraints
  */
 std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> combine(tchecker::zone_container_t<virtual_constraint_t> & lo_vc, tchecker::clock_id_t no_of_virtual_clocks);
-
-/*!
- \brief find_contradiction operator (see the TR of Lieb et al.)
- \param zone_A : the base zone of all transitions of trans_A
- \param zone_B : the base zone of all transisions of trans_B
- \param trans_A : a reference to a vector of transitions
- \param trans_B : a reference to a vector of transitions
- \param vcs : a matrix of container of virtual constraints
- */
-std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> find_contradiction(tchecker::zg::zone_t const & zone_A, tchecker::zg::zone_t const & zone_B, 
-                                                                                     std::vector<tchecker::vcg::vcg_t::sst_t *> & trans_A, std::vector<tchecker::vcg::vcg_t::sst_t *> & trans_B,
-                                                                                     tchecker::zone_matrix_t<virtual_constraint_t> & vcs);
-
 
 /*!
  \brief contained-in-all function (see the TR of Lieb et al.)
