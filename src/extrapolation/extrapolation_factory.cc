@@ -129,39 +129,55 @@ tchecker::zg::extrapolation_t * extrapolation_factory(
   std::shared_ptr<const tchecker::clockbounds::local_m_map_t> M_first = clock_bounds_first->local_m_map();
   std::shared_ptr<const tchecker::clockbounds::local_m_map_t> M_second = clock_bounds_second->local_m_map();
 
-  /* one map for each possible combination of locations */
-  tchecker::clockbounds::local_m_map_t m_map_with_virt_clks{clock_bounds_first->locations_number() * clock_bounds_second->locations_number(), map_size};
-  
+  tchecker::clockbounds::local_m_map_t m_map_with_virt_clks{clock_bounds_first->locations_number() + clock_bounds_second->locations_number(), map_size};
+
+  /* One map for each location of first TA. Contains bounds for virtual clocks of first TA as well as bounds for original clocks of first TA only if it is the current TA. */
   for(loc_id_t j = 0; j < clock_bounds_first->locations_number(); ++j) {
+    tchecker::clockbounds::clear(m_map_with_virt_clks.M(j));
 
-    for(loc_id_t k = 0; k < clock_bounds_second->locations_number(); ++k) {
+    for(clock_id_t i = 0; i < no_orig_clocks; ++i) {
+      tchecker::clockbounds::bound_t tmp = (first_not_second) ? M_first->M(j)[i] : 0;
+      tchecker::clockbounds::update(m_map_with_virt_clks.M(j), i, (0 > tmp) ? 0 : tmp);
+    }
 
-      auto current_loc_combination = clock_bounds_second->locations_number() * j + k;
+    for(clock_id_t i = 0; i < clock_bounds_first->clocks_number(); ++i) {
+      tchecker::clockbounds::update(m_map_with_virt_clks.M(j), i + no_orig_clocks, (0 > M_first->M(j)[i]) ? 0 : M_first->M(j)[i]);
+    }
 
-      tchecker::clockbounds::clear(m_map_with_virt_clks.M(current_loc_combination));
+    for(clock_id_t i = 0; i < clock_bounds_second->clocks_number(); ++i) {
+      tchecker::clockbounds::update(m_map_with_virt_clks.M(j), i + no_orig_clocks + clock_bounds_first->clocks_number(), 0);
+    }
 
-      for(clock_id_t i = 0; i < no_orig_clocks; ++i) {
-        tchecker::clockbounds::bound_t tmp = (first_not_second) ? M_first->M(j)[i] : M_second->M(k)[i];
-        tchecker::clockbounds::update(m_map_with_virt_clks.M(current_loc_combination), i, (0 > tmp) ? 0 : tmp);
-      }
+    if(urgent_or_committed) {
+      tchecker::clockbounds::update(m_map_with_virt_clks.M(j), no_orig_clocks + clock_bounds_first->clocks_number() + clock_bounds_second->clocks_number(), tchecker::clockbounds::NO_BOUND);
+    }
+  }
 
-      for(clock_id_t i = 0; i < clock_bounds_first->clocks_number(); ++i) {
-        tchecker::clockbounds::update(m_map_with_virt_clks.M(current_loc_combination), i + no_orig_clocks, (0 > M_first->M(j)[i]) ? 0 : M_first->M(j)[i]);
-      }
+  /* One map for each location of second TA. Contains bounds for virtual clocks of second TA as well as bounds for original clocks of second TA only if it is the current TA. */
+  for(loc_id_t j = 0; j < clock_bounds_second->locations_number(); ++j) {
+    tchecker::clockbounds::clear(m_map_with_virt_clks.M(clock_bounds_first->locations_number() + j));
 
-      for(clock_id_t i = 0; i < clock_bounds_second->clocks_number(); ++i) {
-        tchecker::clockbounds::update(m_map_with_virt_clks.M(current_loc_combination), i + no_orig_clocks + clock_bounds_first->clocks_number(), (0 > M_second->M(k)[i]) ? 0 : M_second->M(k)[i]);
-      }
+    for(clock_id_t i = 0; i < no_orig_clocks; ++i) {
+      tchecker::clockbounds::bound_t tmp = (first_not_second) ? 0 : M_second->M(j)[i];
+      tchecker::clockbounds::update(m_map_with_virt_clks.M(clock_bounds_first->locations_number() + j), i, (0 > tmp) ? 0 : tmp);
+    }
 
-      if(urgent_or_committed) {
-        tchecker::clockbounds::update(m_map_with_virt_clks.M(current_loc_combination), no_orig_clocks + clock_bounds_first->clocks_number() + clock_bounds_second->clocks_number(), tchecker::clockbounds::NO_BOUND);
-      }
+    for(clock_id_t i = 0; i < clock_bounds_first->clocks_number(); ++i) {
+      tchecker::clockbounds::update(m_map_with_virt_clks.M(clock_bounds_first->locations_number() + j), i + no_orig_clocks, 0);
+    }
+
+    for(clock_id_t i = 0; i < clock_bounds_second->clocks_number(); ++i) {
+      tchecker::clockbounds::update(m_map_with_virt_clks.M(clock_bounds_first->locations_number() + j), i + no_orig_clocks + clock_bounds_first->clocks_number(),  (0 > M_second->M(j)[i]) ? 0 : M_second->M(j)[i]);
+    }
+
+    if(urgent_or_committed) {
+      tchecker::clockbounds::update(m_map_with_virt_clks.M(clock_bounds_first->locations_number() + j), no_orig_clocks + clock_bounds_first->clocks_number() + clock_bounds_second->clocks_number(), tchecker::clockbounds::NO_BOUND);
     }
   }
 
   std::shared_ptr<tchecker::clockbounds::local_m_map_t const> final_map = std::make_shared<tchecker::clockbounds::local_m_map_t const>(m_map_with_virt_clks);
 
-  return new tchecker::zg::local_extra_m_t{final_map};
+  return new tchecker::zg::local_extra_m_t{final_map}; 
 
 }
 

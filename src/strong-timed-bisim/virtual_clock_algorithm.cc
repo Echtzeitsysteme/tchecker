@@ -235,23 +235,23 @@ Lieb_et_al::check_for_virt_bisim(tchecker::zg::const_state_sptr_t A_state, tchec
     return sync_reverted;
 
   } else {
-
-    // das hier ist mehr zum Ausprobieren
-
-    tchecker::loc_id_t temp = (*(A_cloned->vloc_ptr()))[0];
-    (*(A_cloned->vloc_ptr()))[0] = _B->get_no_of_locations() * (*(A_cloned->vloc_ptr()))[0] + (*(B_cloned->vloc_ptr()))[0];
-    _A->run_extrapolation(A_cloned->zone().dbm(), A_cloned->zone().dim(), *(A_cloned->vloc_ptr()));
-    (*(A_cloned->vloc_ptr()))[0] = temp;
-
-    temp = (*(B_cloned->vloc_ptr()))[0];
-    (*(B_cloned->vloc_ptr()))[0] = _A->get_no_of_locations() * (*(B_cloned->vloc_ptr()))[0] + (*(A_cloned->vloc_ptr()))[0];
-    _B->run_extrapolation(B_cloned->zone().dbm(), B_cloned->zone().dim(), *(B_cloned->vloc_ptr()));
-    (*(B_cloned->vloc_ptr()))[0] = temp;
-
+    
     // normalizing, to check whether we have already seen this pair.
-    //_A->run_extrapolation(A_cloned->zone().dbm(), A_cloned->zone().dim(), *(A_cloned->vloc_ptr()));
-    //_B->run_extrapolation(B_cloned->zone().dbm(), B_cloned->zone().dim(), *(B_cloned->vloc_ptr()));
+    tchecker::vloc_t * extrapolation_vloc = tchecker::vloc_allocate_and_construct((*(A_cloned->vloc_ptr())).size() + (*(B_cloned->vloc_ptr())).size(), (*(A_cloned->vloc_ptr())).size() + (*(B_cloned->vloc_ptr())).size());
 
+    // get location maps for clocks of first TA for locations of first TA
+    for(size_t i = 0; i < (*(A_cloned->vloc_ptr())).size(); ++i){
+      (*extrapolation_vloc)[i] = (*(A_cloned->vloc_ptr()))[i];
+    }
+    // get location maps for clocks of second TA for locations of second TA
+    for(size_t i = 0; i < (*(B_cloned->vloc_ptr())).size(); ++i){
+      (*extrapolation_vloc)[(*(A_cloned->vloc_ptr())).size() + i] = _A->get_no_of_locations() + (*(B_cloned->vloc_ptr()))[i];
+    }
+
+    _A->run_extrapolation(A_cloned->zone().dbm(), A_cloned->zone().dim(), *extrapolation_vloc);
+    _B->run_extrapolation(B_cloned->zone().dbm(), B_cloned->zone().dim(), *extrapolation_vloc);
+
+    vloc_destruct_and_deallocate(extrapolation_vloc);
 
     tchecker::dbm::tighten(A_norm->zone().dbm(), A_norm->zone().dim());
     tchecker::dbm::tighten(B_norm->zone().dbm(), B_norm->zone().dim());
