@@ -1,0 +1,72 @@
+# 
+# This file has been generated automatically with uppaal-to-tchecker
+# 
+system:ieee_rcp_reset_6.xml
+# no iodecl
+# compilation of process Process
+process:Process
+# x:(clock)
+clock:1:Process_x
+# y:(clock)
+clock:1:Process_y
+# snd_idle_i:(broadcast (channel))
+# global event: Process_snd_idle_i
+# snd_req_i:(broadcast (channel))
+# global event: Process_snd_req_i
+# snd_ack_i:(broadcast (channel))
+# global event: Process_snd_ack_i
+# rec_idle_j:(broadcast (channel))
+# global event: Process_rec_idle_j
+# rec_req_j:(broadcast (channel))
+# global event: Process_rec_req_j
+# rec_ack_j:(broadcast (channel))
+# global event: Process_rec_ack_j
+location:Process:REC_IDLE{invariant:(1 && (Process_y <= 42))}
+location:Process:REC_IDLE_REC{invariant:(1 && (Process_x <= 42))}
+location:Process:REC_REQ_ACK{invariant:(1 && (Process_x <= 42))}
+location:Process:REC_ACK{invariant:(1 && (Process_y <= 42))}
+location:Process:REC_REQ_IDLE{invariant:(1 && (Process_x <= 42))}
+location:Process:REC_ACK_REQ{invariant:(1 && (Process_x <= 42))}
+location:Process:EMPTY{}
+location:Process:REC_ACK_IDLE{invariant:(1 && (Process_x <= 42))}
+location:Process:REC_REQ{invariant:(1 && (Process_y <= 42))}
+location:Process:REC_IDLE_ACK{initial::invariant:(1 && (Process_x <= 42))}
+event:Process_snd_idle_i
+event:Process_snd_idle_i_emit
+edge:Process:REC_REQ_IDLE:REC_REQ_IDLE:Process_snd_idle_i_emit{}
+event:Process_snd_req_i
+event:Process_snd_req_i_emit
+edge:Process:REC_IDLE_REC:REC_IDLE_REC:Process_snd_req_i_emit{}
+edge:Process:REC_IDLE:REC_IDLE:Process_snd_idle_i_emit{}
+edge:Process:REC_ACK_IDLE:REC_ACK_IDLE:Process_snd_idle_i_emit{}
+event:Process_snd_ack_i
+event:Process_snd_ack_i_emit
+edge:Process:REC_IDLE_ACK:REC_IDLE_ACK:Process_snd_ack_i_emit{}
+edge:Process:REC_REQ:REC_REQ_IDLE:Process_snd_idle_i_emit{}
+edge:Process:REC_IDLE:REC_IDLE_ACK:Process_snd_ack_i_emit{do:Process_y=0}
+event:Process_rec_req_j
+event:Process_rec_req_j_emit
+edge:Process:REC_REQ_IDLE:REC_IDLE:Process_rec_req_j_emit{}
+event:Process_rec_idle_j
+event:Process_rec_idle_j_emit
+edge:Process:REC_IDLE_REC:REC_REQ:Process_rec_idle_j_emit{}
+edge:Process:REC_IDLE:REC_IDLE_REC:Process_snd_req_i_emit{do:Process_y=0}
+event:Process_rec_ack_j
+event:Process_rec_ack_j_emit
+edge:Process:REC_ACK_IDLE:REC_IDLE:Process_rec_ack_j_emit{}
+edge:Process:REC_REQ:REC_REQ:Process_snd_req_i_emit{}
+edge:Process:EMPTY:REC_IDLE:Process_snd_idle_i_emit{}
+edge:Process:REC_IDLE:EMPTY:Process_rec_idle_j_emit{}
+edge:Process:REC_ACK:EMPTY:Process_rec_ack_j_emit{}
+edge:Process:EMPTY:REC_ACK:Process_snd_ack_i_emit{do:Process_x=0;Process_y=0}
+edge:Process:EMPTY:REC_REQ:Process_snd_req_i_emit{do:Process_x=0;Process_y=0}
+edge:Process:REC_REQ:EMPTY:Process_rec_req_j_emit{}
+edge:Process:REC_REQ_ACK:REC_REQ_ACK:Process_snd_ack_i_emit{}
+edge:Process:REC_ACK:REC_ACK_IDLE:Process_snd_idle_i_emit{do:Process_y=0}
+edge:Process:REC_REQ_ACK:REC_ACK:Process_rec_req_j_emit{}
+edge:Process:REC_REQ:REC_REQ_ACK:Process_snd_ack_i_emit{}
+edge:Process:REC_ACK_REQ:REC_REQ:Process_rec_ack_j_emit{}
+edge:Process:REC_ACK_REQ:REC_ACK_REQ:Process_snd_req_i_emit{}
+edge:Process:REC_ACK:REC_ACK_REQ:Process_snd_req_i_emit{do:Process_y=0}
+edge:Process:REC_IDLE_ACK:REC_ACK:Process_rec_idle_j_emit{}
+
