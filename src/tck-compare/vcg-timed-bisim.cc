@@ -51,7 +51,6 @@ void check_for_init(std::shared_ptr<tchecker::system::system_t> const system){
 }
 
 tchecker::clock_id_t clocks_check(std::shared_ptr<tchecker::ta::system_t> const system) {
-  std::size_t result = 0;
   auto p_c = system->clock_variables().identifiers(tchecker::VK_FLATTENED);
   for(auto it = p_c.begin(); it != p_c.end(); ++it) {
     std::string clock_name{system->clock_name(*it)};
@@ -61,7 +60,6 @@ tchecker::clock_id_t clocks_check(std::shared_ptr<tchecker::ta::system_t> const 
           error_message.append(" is reserved for virtual clocks and should not be used by the TA.");
           throw std::runtime_error(error_message);
     }
-    ++result;
   }
   return system->clocks_count(VK_FLATTENED);
 }
