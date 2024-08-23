@@ -3,6 +3,7 @@
 nullPointer:*/tchecker/src/refzg/refzg.cc:[181, 176, 189, 190, 197, 203, 208]
 uninitdata:*/include/tchecker/utils/shared_objects.hh
 nullPointer:*/src/refzg/refzg.cc
+duplInheritedMember:*
 
 // the following is a known cppcheck bug
 internalAstError:*/include/tchecker/graph/directed_graph.hh
