@@ -143,6 +143,8 @@ public:
     for(auto iter = this->begin(); iter < this->end(); iter++) {
       if((*iter)->is_empty()) {
         _storage->erase(iter);
+       this->remove_empty();
+       return;
       }
     }
   }
