@@ -284,6 +284,22 @@ std::shared_ptr<zone_container_t<T>> logical_and_container(zone_container_t<T> &
   return result;
 
 }
+
+template<typename T>
+std::shared_ptr<zone_container_t<T>> logical_and_container(std::vector<std::shared_ptr<zone_container_t<T>>> & lo_container,
+                                                           std::shared_ptr<T> (*factory)(tchecker::clock_id_t))
+{
+  assert(!lo_container.empty());
+
+  auto iter = lo_container.begin();
+  auto result = std::make_shared<zone_container_t<T>>(**iter);
+  iter++;
+  for( ; iter < lo_container.end(); iter++) {
+    result = logical_and_container<T>(*result, **iter, factory);
+  }
+  return result;
+}
+
 /*
  \brief a matrix of container for all subtypes of zone
  */
@@ -295,14 +311,14 @@ public:
   
   /*!
    \brief Constructor
-   \param row_size : number of rows in matrix
-   \param column_size : number of columns in matrix
+   \param no_of_rows : number of rows in matrix
+   \param no_of_columns : number of columns in matrix
    \param dim : the dimension of the zones
    */
-  zone_matrix_t<T>(size_t row_size, size_t column_size, tchecker::clock_id_t dim) :
-    _dim(dim), _row_size(row_size), _column_size(column_size), _matrix(std::vector<std::shared_ptr<zone_container_t<T>>>(row_size * column_size)) {
+  zone_matrix_t<T>(size_t no_of_rows, size_t no_of_columns, tchecker::clock_id_t dim) :
+    _dim(dim), _no_of_rows(no_of_rows), _no_of_columns(no_of_columns), _matrix(std::vector<std::shared_ptr<zone_container_t<T>>>(no_of_rows * no_of_columns)) {
 
-    for(std::size_t i = 0; i < row_size*column_size; ++i) {
+    for(std::size_t i = 0; i < no_of_rows*no_of_columns; ++i) {
       _matrix[i] = std::make_shared<zone_container_t<T>>(dim);
     }
   };
@@ -314,34 +330,34 @@ public:
    \return pointer to the element
   */
   std::shared_ptr<zone_container_t<T>> get(size_t row, size_t column) {
-    assert(row < _row_size);
-    assert(column < _column_size);
+    assert(row < _no_of_rows);
+    assert(column < _no_of_columns);
 
-    return _matrix[row*_column_size + column];
+    return _matrix[row*_no_of_columns + column];
   }
 
   /*!
    \brief Accessor for the row size
    \return the row size
   */
-  size_t get_row_size() const { return _row_size; }
+  size_t get_no_of_rows() const { return _no_of_rows; }
 
   /*!
    \brief Accessor for the column size
    \return the column size
   */
-  size_t get_column_size() const { return _column_size; }
+  size_t get_no_of_columns() const { return _no_of_columns; }
 
   /*!
    \brief Accessor for the dim
    \return the dimension of the virtual constraints
   */
-  size_t get_dim() const { return _dim; }
+  tchecker::clock_id_t get_dim() const { return _dim; }
 
   std::shared_ptr<std::vector<std::shared_ptr<zone_container_t<T>>>>  get_row(size_t row)
   {
     auto result = std::make_shared<std::vector<std::shared_ptr<zone_container_t<T>>>>();
-    for(size_t i = 0; i < this->get_column_size(); i++) {
+    for(size_t i = 0; i < this->get_no_of_columns(); i++) {
       result->emplace_back(this->get(row, i));
     }
     return result;
@@ -350,7 +366,7 @@ public:
   std::shared_ptr<std::vector<std::shared_ptr<zone_container_t<T>>>> get_column(size_t column)
   {
     auto result = std::make_shared<std::vector<std::shared_ptr<zone_container_t<T>>>>();
-    for(size_t i = 0; i < this->get_row_size(); i++) {
+    for(size_t i = 0; i < this->get_no_of_rows(); i++) {
       result->emplace_back(this->get(i, column));
     }
     return result;
@@ -358,7 +374,7 @@ public:
 
   void print_zone_matrix(std::ostream & os)
   {
-    for(auto i = 0; i < _row_size; ++i) {
+    for(auto i = 0; i < _no_of_rows; ++i) {
       auto row = get_row(i);
       for(auto cur : row) {
         row->print_container(os);
@@ -372,7 +388,7 @@ public:
 
     const tchecker::clock_id_t _dim;
 
-    const size_t _row_size, _column_size;
+    const size_t _no_of_rows, _no_of_columns;
     std::vector<std::shared_ptr<zone_container_t<T>>> _matrix;
 
 };

@@ -28,8 +28,9 @@ std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual
 
 }
 
-std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> find_contradiction(tchecker::zg::zone_t const & zone, std::vector<tchecker::vcg::vcg_t::sst_t *> & trans,
-                                                                                     std::vector<std::shared_ptr<zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>> & vcs, tchecker::clock_id_t no_of_virt_clks)
+std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> 
+find_contradiction(tchecker::zg::zone_t const & zone, std::vector<tchecker::vcg::vcg_t::sst_t *> & trans,
+                   std::vector<std::shared_ptr<zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>> & vcs, tchecker::clock_id_t no_of_virt_clks)
 {
 
   assert(0 != trans.size());
