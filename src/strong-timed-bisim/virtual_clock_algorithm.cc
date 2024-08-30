@@ -180,12 +180,11 @@ Lieb_et_al::check_for_virt_bisim(tchecker::zg::const_state_sptr_t A_state, tchec
     reset_to_value(B_cloned->zone().dbm(), B_cloned->zone_ptr()->dim(), _B->get_no_of_original_clocks() + _B->get_no_of_virtual_clocks(), 0);
   }
 
+  tchecker::vcg::sync( A_cloned->zone(), B_cloned->zone(),
+                       _A->get_no_of_original_clocks(), _B->get_no_of_original_clocks(),
+                       A_trans->reset_container(), B_trans->reset_container());
 
   if(do_an_epsilon_transition(A_cloned, A_trans, B_cloned, B_trans))  {
-
-    tchecker::vcg::sync( A_cloned->zone(), B_cloned->zone(),
-                         _A->get_no_of_original_clocks(), _B->get_no_of_original_clocks(),
-                         A_trans->reset_container(), B_trans->reset_container());
 
     tchecker::zg::state_sptr_t A_epsilon = _A->clone_state(A_cloned);
     tchecker::zg::state_sptr_t B_epsilon = _B->clone_state(B_cloned);
@@ -304,9 +303,20 @@ Lieb_et_al::check_for_virt_bisim(tchecker::zg::const_state_sptr_t A_state, tchec
         = check_for_outgoing_transitions( A_cloned->zone(), B_cloned->zone(), trans_A, trans_B, visited);
 
       if(!(contradiction->is_empty())) {
-        return contradiction;
-      }
+        std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> sync_reverted
+          = std::make_shared<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(_A->get_no_of_virtual_clocks() + 1);
 
+        for(auto phi = contradiction->begin(); phi < contradiction->end(); phi++) {
+          auto pair = tchecker::vcg::revert_sync(A_cloned->zone(), B_cloned->zone(), _A->get_no_of_original_clocks(), _B->get_no_of_original_clocks(), **phi);
+          sync_reverted->append_zone(pair.first);
+          sync_reverted->append_zone(pair.second);
+        }
+
+        sync_reverted->compress();
+        sync_reverted = tchecker::virtual_constraint::combine(*sync_reverted, _A->get_no_of_virtual_clocks());
+        sync_reverted->compress();
+        return sync_reverted;
+      }
     }
 
     return std::make_shared<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(_A->get_no_of_virtual_clocks() + 1);
