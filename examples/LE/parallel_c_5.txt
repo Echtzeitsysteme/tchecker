@@ -1,0 +1,85 @@
+#labels=access1:access2:access3:access4:access5
+system:parallel_bis5
+
+event:tau
+event:acquire
+event:release
+
+# Process 1
+process:P1
+clock:1:x1
+location:P1:A{initial:}	
+location:P1:B{}
+location:P1:C{invariant:x1<=3 : labels: access1}
+edge:P1:A:B:tau{do:x1=0}
+edge:P1:B:A:tau{provided:x1>=1}
+edge:P1:B:C:acquire{provided:x1<1 : do:x1=0}
+edge:P1:C:A:release{provided:x1>=1}
+
+# Process 2
+process:P2
+clock:1:x2
+location:P2:A{initial:}	
+location:P2:B{}
+location:P2:C{invariant:x2<=3 : labels: access2}
+edge:P2:A:B:tau{do:x2=0}
+edge:P2:B:A:tau{provided:x2>=1}
+edge:P2:B:C:acquire{provided:x2<1 : do:x2=0}
+edge:P2:C:A:release{provided:x2>=1}
+
+# Process 3
+process:P3
+clock:1:x3
+location:P3:A{initial:}	
+location:P3:B{}
+location:P3:C{invariant:x3<=3 : labels: access3}
+edge:P3:A:B:tau{do:x3=0}
+edge:P3:B:A:tau{provided:x3>=1}
+edge:P3:B:C:acquire{provided:x3<1 : do:x3=0}
+edge:P3:C:A:release{provided:x3>=1}
+
+# Process 4
+process:P4
+clock:1:x4
+location:P4:A{initial:}	
+location:P4:B{}
+location:P4:C{invariant:x4<=3 : labels: access4}
+edge:P4:A:B:tau{do:x4=0}
+edge:P4:B:A:tau{provided:x4>=1}
+edge:P4:B:C:acquire{provided:x4<1 : do:x4=0}
+edge:P4:C:A:release{provided:x4>=1}
+
+# Process 5
+process:P5
+clock:1:x5
+location:P5:A{initial:}	
+location:P5:B{}
+location:P5:C{invariant:x5<=3 : labels: access5}
+edge:P5:A:B:tau{do:x5=0}
+edge:P5:B:A:tau{provided:x5>=1}
+edge:P5:B:C:acquire{provided:x5<1 : do:x5=0}
+edge:P5:C:A:release{provided:x5>=1}
+
+# Process lock
+process:lock
+clock:1:y
+location:lock:U{initial:}
+location:lock:L{}
+edge:lock:U:L:acquire{provided:y>=1}
+edge:lock:L:U:release{do:y=0}
+
+sync:P1@acquire:lock@acquire
+sync:P1@release:lock@release
+
+sync:P2@acquire:lock@acquire
+sync:P2@release:lock@release
+
+sync:P3@acquire:lock@acquire
+sync:P3@release:lock@release
+
+sync:P4@acquire:lock@acquire
+sync:P4@release:lock@release
+
+sync:P5@acquire:lock@acquire
+sync:P5@release:lock@release
+

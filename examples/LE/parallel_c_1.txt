@@ -1,0 +1,29 @@
+#labels=access1
+system:parallel_bis1
+
+event:tau
+event:acquire
+event:release
+
+# Process 1
+process:P1
+clock:1:x1
+location:P1:A{initial:}	
+location:P1:B{}
+location:P1:C{invariant:x1<=3 : labels: access1}
+edge:P1:A:B:tau{do:x1=0}
+edge:P1:B:A:tau{provided:x1>=1}
+edge:P1:B:C:acquire{provided:x1<1 : do:x1=0}
+edge:P1:C:A:release{provided:x1>=1}
+
+# Process lock
+process:lock
+clock:1:y
+location:lock:U{initial:}
+location:lock:L{}
+edge:lock:U:L:acquire{provided:y>=1}
+edge:lock:L:U:release{do:y=0}
+
+sync:P1@acquire:lock@acquire
+sync:P1@release:lock@release
+

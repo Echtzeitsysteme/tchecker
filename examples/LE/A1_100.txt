@@ -1,0 +1,19 @@
+# This file is a part of the TChecker project.
+#
+# See files AUTHORS and LICENSE for copyright details.
+
+system:Lieb_et_al_A1
+
+clock:1:x
+clock:1:y
+
+event:z
+event:a
+
+process:P
+location:P:q{initial:}
+location:P:q0{invariant: x<100}
+location:P:q1{invariant: y<=1}
+edge:P:q:q0:z{provided: x<=0}
+edge:P:q0:q1:a{do: x=0; y=0}
+edge:P:q1:q1:z{provided: y>=1 : do: y=0}

@@ -1,0 +1,155 @@
+#labels=access1:access2:access3:access4:access5:access6:access7:access8:access9:access10
+system:parallel_bis10
+
+event:tau
+event:acquire
+event:release
+
+# Process 1
+process:P1
+clock:1:x1
+location:P1:A{initial:}	
+location:P1:B{}
+location:P1:C{invariant:x1<=3 : labels: access1}
+edge:P1:A:B:tau{do:x1=0}
+edge:P1:B:A:tau{provided:x1>=1}
+edge:P1:B:C:acquire{provided:x1<1 : do:x1=0}
+edge:P1:C:A:release{provided:x1>=1}
+
+# Process 2
+process:P2
+clock:1:x2
+location:P2:A{initial:}	
+location:P2:B{}
+location:P2:C{invariant:x2<=3 : labels: access2}
+edge:P2:A:B:tau{do:x2=0}
+edge:P2:B:A:tau{provided:x2>=1}
+edge:P2:B:C:acquire{provided:x2<1 : do:x2=0}
+edge:P2:C:A:release{provided:x2>=1}
+
+# Process 3
+process:P3
+clock:1:x3
+location:P3:A{initial:}	
+location:P3:B{}
+location:P3:C{invariant:x3<=3 : labels: access3}
+edge:P3:A:B:tau{do:x3=0}
+edge:P3:B:A:tau{provided:x3>=1}
+edge:P3:B:C:acquire{provided:x3<1 : do:x3=0}
+edge:P3:C:A:release{provided:x3>=1}
+
+# Process 4
+process:P4
+clock:1:x4
+location:P4:A{initial:}	
+location:P4:B{}
+location:P4:C{invariant:x4<=3 : labels: access4}
+edge:P4:A:B:tau{do:x4=0}
+edge:P4:B:A:tau{provided:x4>=1}
+edge:P4:B:C:acquire{provided:x4<1 : do:x4=0}
+edge:P4:C:A:release{provided:x4>=1}
+
+# Process 5
+process:P5
+clock:1:x5
+location:P5:A{initial:}	
+location:P5:B{}
+location:P5:C{invariant:x5<=3 : labels: access5}
+edge:P5:A:B:tau{do:x5=0}
+edge:P5:B:A:tau{provided:x5>=1}
+edge:P5:B:C:acquire{provided:x5<1 : do:x5=0}
+edge:P5:C:A:release{provided:x5>=1}
+
+# Process 6
+process:P6
+clock:1:x6
+location:P6:A{initial:}	
+location:P6:B{}
+location:P6:C{invariant:x6<=3 : labels: access6}
+edge:P6:A:B:tau{do:x6=0}
+edge:P6:B:A:tau{provided:x6>=1}
+edge:P6:B:C:acquire{provided:x6<1 : do:x6=0}
+edge:P6:C:A:release{provided:x6>=1}
+
+# Process 7
+process:P7
+clock:1:x7
+location:P7:A{initial:}	
+location:P7:B{}
+location:P7:C{invariant:x7<=3 : labels: access7}
+edge:P7:A:B:tau{do:x7=0}
+edge:P7:B:A:tau{provided:x7>=1}
+edge:P7:B:C:acquire{provided:x7<1 : do:x7=0}
+edge:P7:C:A:release{provided:x7>=1}
+
+# Process 8
+process:P8
+clock:1:x8
+location:P8:A{initial:}	
+location:P8:B{}
+location:P8:C{invariant:x8<=3 : labels: access8}
+edge:P8:A:B:tau{do:x8=0}
+edge:P8:B:A:tau{provided:x8>=1}
+edge:P8:B:C:acquire{provided:x8<1 : do:x8=0}
+edge:P8:C:A:release{provided:x8>=1}
+
+# Process 9
+process:P9
+clock:1:x9
+location:P9:A{initial:}	
+location:P9:B{}
+location:P9:C{invariant:x9<=3 : labels: access9}
+edge:P9:A:B:tau{do:x9=0}
+edge:P9:B:A:tau{provided:x9>=1}
+edge:P9:B:C:acquire{provided:x9<1 : do:x9=0}
+edge:P9:C:A:release{provided:x9>=1}
+
+# Process 10
+process:P10
+clock:1:x10
+location:P10:A{initial:}	
+location:P10:B{}
+location:P10:C{invariant:x10<=3 : labels: access10}
+edge:P10:A:B:tau{do:x10=0}
+edge:P10:B:A:tau{provided:x10>=1}
+edge:P10:B:C:acquire{provided:x10<1 : do:x10=0}
+edge:P10:C:A:release{provided:x10>=1}
+
+# Process lock
+process:lock
+clock:1:y
+location:lock:U{initial:}
+location:lock:L{}
+edge:lock:U:L:acquire{provided:y>=1}
+edge:lock:L:U:release{do:y=0}
+
+sync:P1@acquire:lock@acquire
+sync:P1@release:lock@release
+
+sync:P2@acquire:lock@acquire
+sync:P2@release:lock@release
+
+sync:P3@acquire:lock@acquire
+sync:P3@release:lock@release
+
+sync:P4@acquire:lock@acquire
+sync:P4@release:lock@release
+
+sync:P5@acquire:lock@acquire
+sync:P5@release:lock@release
+
+sync:P6@acquire:lock@acquire
+sync:P6@release:lock@release
+
+sync:P7@acquire:lock@acquire
+sync:P7@release:lock@release
+
+sync:P8@acquire:lock@acquire
+sync:P8@release:lock@release
+
+sync:P9@acquire:lock@acquire
+sync:P9@release:lock@release
+
+sync:P10@acquire:lock@acquire
+sync:P10@release:lock@release
+
