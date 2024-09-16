@@ -407,7 +407,7 @@ TEST_CASE ("Revert Action Trans Operator", "[rato]") {
       std::shared_ptr<tchecker::zg::zone_t> zone_D_sigma_A_3 = tchecker::zg::factory(dim);
 
       // Set guard constraints
-      for (tchecker::clock_id_t i = 0; i < dim-1; i++)
+      for (int i = 0; i < dim-1; i++)
       {
          guard_3->emplace_back(tchecker::REFCLOCK_ID, i, tchecker::LE, -i-1);
       }
