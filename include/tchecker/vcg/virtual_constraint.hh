@@ -10,7 +10,8 @@
 
 #include "tchecker/zg/zone.hh"
 #include "tchecker/dbm/dbm.hh"
-#include "tchecker/utils/zone_container.hh"
+#include "tchecker/zg/zone_container.hh"
+#include "tchecker/vcg/vcg.hh"
 
 /*
  \file virtual_constraint.hh
@@ -29,9 +30,8 @@ namespace virtual_constraint {
  \class virtual_constraint_t
  \brief Implementation of virtual constraints
  \note We model the virtual constraint as zone
- * using the virtual clocks, only. This is
- * fine since a zone always corresponds to a
- * clock constraint
+ * using the virtual clocks, only. Do not add
+ * any fields to this class (or change the factory)
  */
 
 class virtual_constraint_t : public tchecker::zg::zone_t {
@@ -52,7 +52,7 @@ public:
    \brief Accessor
    \return no of virtual clocks
    */
-  tchecker::clock_id_t get_no_of_virt_clocks() const;
+  tchecker::clock_id_t get_no_of_virtual_clocks() const;
 
   /*!
    \brief return the virtual constraint as list of clock constraints
@@ -61,7 +61,7 @@ public:
   clock_constraint_container_t get_vc(tchecker::clock_id_t no_of_orig_clocks, bool system_clocks) const;
 
   /*
-   \brief returns the (not this and other)
+   \brief returns (not this and other)
    \param result : the pointer in which the result will be stored. Has to be allocated!
    \param other : the other vc not this shall be anded with
    */
@@ -151,8 +151,8 @@ std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> combine(tcheck
 
 /*!
  \brief contained-in-all function (see the TR of Lieb et al.)
- \param a vector of container of zones
- \return a container of zones
+ \param a vector of container of virtual constraints
+ \return a container of virtual constraints
  */
 std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> contained_in_all(std::vector<std::shared_ptr<zone_container_t<virtual_constraint_t>>> & vc, tchecker::clock_id_t no_of_virtual_clocks);
 

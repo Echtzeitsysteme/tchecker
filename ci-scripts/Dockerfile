@@ -6,7 +6,6 @@ RUN apt update && \
     git cmake bison flex doxygen wget \
     valgrind graphviz cppcheck
 
-
 FROM base as gcc-image
 RUN apt install -y gcc-12 g++-12 \
     build-essential g++ python-dev-is-python3 autotools-dev libicu-dev libbz2-dev && \
@@ -34,10 +33,10 @@ ENTRYPOINT ["/bin/bash", "-s"]
 
 FROM base as clang-image
 
-RUN apt install -y clang-13 \
+RUN apt install -y clang-18 \
     build-essential g++ python-dev-is-python3 autotools-dev libicu-dev libbz2-dev && \
-    update-alternatives --install /usr/bin/clang clang /usr/bin/clang-13 1 && \
-    update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-13 1
+    update-alternatives --install /usr/bin/clang clang /usr/bin/clang-18 1 && \
+    update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-18 1
 
 RUN apt --purge remove libboost-all-dev libboost-doc libboost-dev
 
@@ -48,7 +47,7 @@ RUN wget http://downloads.sourceforge.net/project/boost/boost/1.81.0/boost_1_81_
     ./b2 --with=all install && \
     cd ..
 
-RUN git clone --branch v3.2.0 https://github.com/catchorg/Catch2.git /tmp/catch2
+RUN git clone --branch v3.7.0 https://github.com/catchorg/Catch2.git /tmp/catch2
 
 RUN mkdir -p /tmp/catch2/build && \
     cd /tmp/catch2/build && \

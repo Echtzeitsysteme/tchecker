@@ -10,6 +10,7 @@
 
 #include <string>
 
+#include "tchecker/zg/zone_container.hh"
 #include "tchecker/basictypes.hh"
 #include "tchecker/clockbounds/clockbounds.hh"
 #include "tchecker/dbm/dbm.hh"
@@ -23,6 +24,14 @@
  */
 
 namespace tchecker {
+
+// forward declaration of virtual constraints since we want to be able to check for virtual equivalence
+
+namespace virtual_constraint {
+
+class virtual_constraint_t;
+
+} // end of namespace virtual_constraint
 
 namespace zg {
 
@@ -62,6 +71,11 @@ public:
    \return true if this zone is universal-positive (i.e. no constraint on clocks except x>=0), false otherwise
    */
   bool is_universal_positive() const;
+
+  /*!
+   \brief makes this zone universal
+   */
+  void make_universal();
 
   /*!
    \brief Equality predicate
@@ -166,6 +180,39 @@ public:
    \return true if clockval belongs to this zone, false otherwise
   */
   bool belongs(tchecker::clockval_t const & clockval) const;
+
+  /*!
+   \brief Checks whether the zones are virtual equivalent
+   \param zone : the other zone
+   \param no_virt_clocks : the number of virtual clocks
+   \return true, if and only if the zones are virtual equivalent
+  */
+  bool is_virtual_equivalent(tchecker::zg::zone_t const & zone, tchecker::clock_id_t no_of_virt_clocks) const;
+
+  /*!
+   \brief Calculates the set of virtual constraints of (this && not phi)
+   \param phi : the virtual constraint phi
+   \return the virtual constraint of (this && not phi)
+  */
+  std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>
+  get_virtual_overhang(tchecker::virtual_constraint::virtual_constraint_t const & phi) const;
+
+  /*!
+   \brief Calculates the set of virtual constraints of (this && not virtual_constraint(other))
+   \param other : the other zone
+   \return the virtual constraint of (this && not virtual_constraint(other))
+  */
+  std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>
+  get_virtual_overhang(tchecker::zg::zone_t const & other, tchecker::clock_id_t no_of_virtual_clocks) const;
+
+  /*!
+   \brief Calculates the set of virtual constraints of (this && not virtual_constraint(other)) concatenated with
+          the set of virtual constraints of (other && not virtual_constraint(this))
+   \param other : the other zone
+   \return (this && not virtual_constraint(other)) concatenated with (other && not virtual_constraint(this))
+  */
+  std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>
+  get_virtual_overhang_in_both_directions(tchecker::zg::zone_t const & other, tchecker::clock_id_t no_of_virtual_clocks) const;
 
   /*!
    \brief Construction
@@ -315,13 +362,13 @@ template <class... ARGS> tchecker::zg::zone_t * zone_allocate_and_construct(tche
 void zone_destruct_and_deallocate(tchecker::zg::zone_t * zone);
 
 /*!
- \brief factory of zones of a vcg
+ \brief factory
  \param dim : the dimension
  */
 std::shared_ptr<zone_t> factory(tchecker::clock_id_t dim);
 
 /*!
- \brief factory of zones of a vcg
+ \brief factory
  \param zone : the zone to copy
  */
 std::shared_ptr<zone_t> factory(zone_t const & zone);

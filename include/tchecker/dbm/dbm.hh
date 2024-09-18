@@ -584,6 +584,33 @@ void open_down(tchecker::dbm::db_t * dbm, tchecker::clock_id_t dim);
 enum tchecker::dbm::status_t intersection(tchecker::dbm::db_t * dbm, tchecker::dbm::db_t const * dbm1,
                                           tchecker::dbm::db_t const * dbm2, tchecker::clock_id_t dim);
 
+
+/*!
+ \brief disjoint
+ \param dbm1 : a dbm
+ \param dbm2 : a dbm
+ \param dim : dimension of dbm1 and dbm2
+ \pre dbm1 and dbm2 are not nullptr (checked by assertion)
+ dbm1 and dbm2 are dim*dim arrays of difference bounds
+ dbm1 and dbm2 are consistent (checked by assertion)
+ dbm1 and dbm2 are tight (checked by assertion)
+ dim >= 1 (checked by assertion).
+ \return [dbm1 && dbm2] == emptyset
+ */
+bool disjoint(tchecker::dbm::db_t * dbm_1, tchecker::dbm::db_t * dbm2, tchecker::clock_id_t dim);
+
+/*!
+ \brief revert-multiple-reset function (see the TR of Lieb et al.)
+ \param result : where the result will be stored (must be allocated)
+ \param orig_zone : the previous zone
+ \param zone_split : the split of reset(orig_zone)
+ \param reset : the used reset set
+ \return void
+ */
+enum tchecker::dbm::status_t revert_multiple_reset(tchecker::dbm::db_t *result, const tchecker::dbm::db_t * orig_zone,
+                                                   tchecker::clock_id_t dim, tchecker::dbm::db_t * zone_split,
+                                                   tchecker::clock_reset_container_t reset);
+
 /*!
  \brief revert-multiple-reset function (see the TR of Lieb et al.)
  \param result : where the result will be stored (must be allocated)

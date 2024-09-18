@@ -975,12 +975,6 @@ public:
   inline tchecker::clock_id_t clocks_count() const { return _system->clocks_count(tchecker::VK_FLATTENED);  }
 
   /*!
-   \brief creates a new state of this zg
-   \return a new state of this zg
-   */
-  inline tchecker::zg::state_sptr_t create_state() {return _state_allocator.construct();}
-
-  /*!
    \brief clones a state of this zg
    \param the state to clone
    \brief the cloned state

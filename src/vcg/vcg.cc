@@ -50,7 +50,6 @@ tchecker::vcg::vcg_t * factory(std::shared_ptr<tchecker::strong_timed_bisim::sys
   tchecker::clock_id_t vc = extended_system->get_no_of_virtual_clocks();
 
   return new tchecker::vcg::vcg_t(extended_system, sharing_type, semantics, vc, urgent_or_committed, extrapolation, block_size, table_size);
-
 }
 
 } // end of namespace vcg

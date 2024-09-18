@@ -270,6 +270,7 @@ enum tchecker::dbm::status_t constrain(tchecker::dbm::db_t * dbm, tchecker::cloc
   return tchecker::dbm::NON_EMPTY;
 }
 
+
 enum tchecker::dbm::status_t constrain(tchecker::dbm::db_t * dbm, tchecker::clock_id_t dim,
                                        tchecker::clock_constraint_container_t const & constraints)
 {
@@ -524,6 +525,12 @@ enum tchecker::dbm::status_t intersection(tchecker::dbm::db_t * dbm, tchecker::d
 
   return tchecker::dbm::tighten(dbm, dim);
 
+}
+
+bool disjoint(tchecker::dbm::db_t * dbm_1, tchecker::dbm::db_t * dbm_2, tchecker::clock_id_t dim)
+{
+  tchecker::dbm::db_t helper[dim*dim];
+  return tchecker::dbm::EMPTY == intersection(helper, dbm_1, dbm_2, dim);
 }
 
 // used for assertion only

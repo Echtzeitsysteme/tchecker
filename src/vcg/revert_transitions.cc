@@ -48,7 +48,7 @@ bool check_whether_phi_is_subset_of_target(
   }
 
   std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> target_vc 
-    = tchecker::virtual_constraint::factory(target_dbm, zone.dim(), phi_split.get_no_of_virt_clocks());
+    = tchecker::virtual_constraint::factory(target_dbm, zone.dim(), phi_split.get_no_of_virtual_clocks());
 
   return tchecker::dbm::is_le(phi_split.dbm(), target_vc->dbm(), target_vc->dim());
 
@@ -103,7 +103,7 @@ revert_action_trans(const tchecker::zg::zone_t & zone,
   tchecker::dbm::revert_multiple_reset(reverted, d_land_g, zone.dim(), r_d_land_g_land_phi, reset_copy);
 
   std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> virt_mult_reset 
-      = tchecker::virtual_constraint::factory(reverted, zone.dim(), phi_split.get_no_of_virt_clocks());
+      = tchecker::virtual_constraint::factory(reverted, zone.dim(), phi_split.get_no_of_virtual_clocks());
 
   return virt_mult_reset;
 }
@@ -115,8 +115,6 @@ revert_epsilon_trans(const tchecker::zg::zone_t & zone, const tchecker::zg::zone
   std::shared_ptr<tchecker::zg::zone_t> zone_eps_copy = tchecker::zg::factory(zone_eps);
 
   if(tchecker::dbm::EMPTY == tchecker::dbm::constrain(zone_eps_copy->dbm(), zone_eps_copy->dim(), phi_split.get_vc(zone_eps_copy->dim() - phi_split.dim(), true))) {
-    //tchecker::dbm::tighten(zone_eps_copy->dbm(), zone_eps_copy->dim());
-    // std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> result = tchecker::virtual_constraint::factory(zone_eps_copy->dbm(), zone_eps_copy->dim(), phi_split.dim() - 1);
     std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> result = tchecker::virtual_constraint::factory(phi_split.dim() - 1);
     tchecker::dbm::empty(result->dbm(), result->dim());
     return result;
@@ -129,7 +127,7 @@ revert_epsilon_trans(const tchecker::zg::zone_t & zone, const tchecker::zg::zone
   intersection(zone_copy->dbm(), zone_copy->dbm(), zone_eps_copy->dbm(), zone_eps_copy->dim());
 
   std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> result
-    = tchecker::virtual_constraint::factory(zone_copy, phi_split.get_no_of_virt_clocks());
+    = tchecker::virtual_constraint::factory(zone_copy, phi_split.get_no_of_virtual_clocks());
 
   return result;
 }

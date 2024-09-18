@@ -123,6 +123,16 @@ public:
     return tchecker::intrusive_shared_ptr_t<tchecker::zg::shared_zone_t const>(_zone.ptr());
   }
 
+  /*!
+  \brief replaces the zone
+  \param : the new zone of this state
+  */
+  inline void replace_zone(tchecker::zg::zone_t & zone)
+  {
+    assert(zone.dim() == _zone->dim());
+    tchecker::dbm::copy(_zone->dbm(), zone.dbm(), zone.dim());
+  }
+
 private:
   tchecker::intrusive_shared_ptr_t<tchecker::zg::shared_zone_t> _zone; /*!< Zone over clock valuations */
 };

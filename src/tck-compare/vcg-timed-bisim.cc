@@ -51,18 +51,15 @@ void check_for_init(std::shared_ptr<tchecker::system::system_t> const system){
 }
 
 tchecker::clock_id_t clocks_check(std::shared_ptr<tchecker::ta::system_t> const system) {
-  std::size_t result = 0;
-  auto p_c = system->clock_variables().identifiers();
-  auto begin_p_c = p_c.begin(), end_p_c = p_c.end();
-  for(auto it = begin_p_c; it != end_p_c; ++it) {
-    std::string clock_name{system->clock_name(it)};
+  auto p_c = system->clock_variables().identifiers(tchecker::VK_FLATTENED);
+  for(auto it = p_c.begin(); it != p_c.end(); ++it) {
+    std::string clock_name{system->clock_name(*it)};
     if (clock_name.rfind(VIRTUAL_CLOCK_PREFIX, 0) == 0) {
           std::string error_message{"The clock prefix "};
           error_message.append(VIRTUAL_CLOCK_PREFIX);
           error_message.append(" is reserved for virtual clocks and should not be used by the TA.");
           throw std::runtime_error(error_message);
     }
-    ++result;
   }
   return system->clocks_count(VK_FLATTENED);
 }
@@ -97,7 +94,7 @@ run(std::shared_ptr<tchecker::parsing::system_declaration_t> const & sysdecl_fir
   for(size_t i = 0; i < 2; ++i) {
     std::shared_ptr<tchecker::strong_timed_bisim::system_virtual_clocks_t const> extended_system{new tchecker::strong_timed_bisim::system_virtual_clocks_t{*(systems[i]), no_of_virt_clocks, 0 == i}};
     std::shared_ptr<tchecker::vcg::vcg_t> vcg{tchecker::vcg::factory(extended_system, 0 == i, systems[0], systems[1], urgent_or_committed_clock, tchecker::ts::SHARING, tchecker::zg::DISTINGUISHED_SEMANTICS,
-                                                               tchecker::zg::EXTRA_M_GLOBAL, block_size, table_size)};
+                                                                     tchecker::zg::EXTRA_M_GLOBAL, block_size, table_size)};
     vcgs.push_back(vcg);
   }
 

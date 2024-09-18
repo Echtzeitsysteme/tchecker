@@ -11,10 +11,22 @@ namespace tchecker {
 
 namespace vcg {
 
-bool is_virtually_equivalent(tchecker::dbm::db_t *dbm1, tchecker::dbm::db_t *dbm2,
+bool is_virtually_equivalent(tchecker::dbm::db_t const *dbm1, tchecker::dbm::db_t const *dbm2,
                                 tchecker::clock_id_t dim1, tchecker::clock_id_t dim2,
                                 tchecker::clock_id_t no_of_orig_clocks_1, tchecker::clock_id_t no_of_orig_clocks_2)
 {
+
+  assert(dbm1 != nullptr);
+  assert(dbm2 != nullptr);
+
+  assert(dim1 >= 1);
+  assert(dim2 >= 1);
+
+  assert(tchecker::dbm::is_consistent(dbm1, dim1));
+  assert(tchecker::dbm::is_consistent(dbm2, dim2));
+  assert(tchecker::dbm::is_tight(dbm1, dim1));
+  assert(tchecker::dbm::is_tight(dbm2, dim2));
+
   std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> vc1 
     = tchecker::virtual_constraint::factory(dbm1, dim1, dim1 - no_of_orig_clocks_1 - 1);
 
@@ -25,7 +37,7 @@ bool is_virtually_equivalent(tchecker::dbm::db_t *dbm1, tchecker::dbm::db_t *dbm
 }
 
 
-bool are_dbm_synced(tchecker::dbm::db_t *dbm1, tchecker::dbm::db_t *dbm2,
+bool are_dbm_synced(tchecker::dbm::db_t const *dbm1, tchecker::dbm::db_t const *dbm2,
                     tchecker::clock_id_t dim1, tchecker::clock_id_t dim2,
                     tchecker::clock_id_t no_of_orig_clocks_1, tchecker::clock_id_t no_of_orig_clocks_2)
 {
@@ -47,41 +59,40 @@ bool are_dbm_synced(tchecker::dbm::db_t *dbm1, tchecker::dbm::db_t *dbm2,
   bool result = is_virtually_equivalent(dbm1, dbm2, dim1, dim2, no_of_orig_clocks_1, no_of_orig_clocks_2);
 
   if(!result) {
-    std::cout << __FILE__ << ": " << __LINE__ << ": the dbm are not virtually equivalent." << std::endl;
-    tchecker::dbm::output_matrix(std::cout, dbm1, dim1);
-    tchecker::dbm::output_matrix(std::cout, dbm2, dim2);
     return result;
   }
 
   for(tchecker::clock_id_t i = 1; i <= no_of_orig_clocks_1; ++i) {
-    tchecker::dbm::db_t * orig_min_virt = tchecker::dbm::access(dbm1, dim1, i, i + no_of_orig_clocks_1);
-    tchecker::dbm::db_t * virt_min_orig = tchecker::dbm::access(dbm1, dim1, i + no_of_orig_clocks_1, i);
+    tchecker::dbm::db_t * orig_min_virt = tchecker::dbm::access(const_cast<tchecker::dbm::db_t *>(dbm1), dim1, i, i + no_of_orig_clocks_1);
+    tchecker::dbm::db_t * virt_min_orig = tchecker::dbm::access(const_cast<tchecker::dbm::db_t *>(dbm1), dim1, i + no_of_orig_clocks_1, i);
 
     result &= (*orig_min_virt == *virt_min_orig);
     result &= (orig_min_virt->cmp == tchecker::LE);
     result &= (orig_min_virt->value == 0);
     if(!result) {
-      std::cout << __FILE__ << ": " << __LINE__ << ": " << i << " virtual and original clock of first dbm are not equivalent" << std::endl;
-      tchecker::dbm::output_matrix(std::cout, dbm1, dim1);
       return result;
     }
   }
 
   for(tchecker::clock_id_t i = 1; i <= no_of_orig_clocks_2; ++i) {
-    tchecker::dbm::db_t * orig_min_virt = tchecker::dbm::access(dbm2, dim2, i, i + no_of_orig_clocks_1 + no_of_orig_clocks_2);
-    tchecker::dbm::db_t * virt_min_orig = tchecker::dbm::access(dbm2, dim2, i + no_of_orig_clocks_1 + no_of_orig_clocks_2, i);
+    tchecker::dbm::db_t * orig_min_virt = tchecker::dbm::access(const_cast<tchecker::dbm::db_t *>(dbm2), dim2, i, i + no_of_orig_clocks_1 + no_of_orig_clocks_2);
+    tchecker::dbm::db_t * virt_min_orig = tchecker::dbm::access(const_cast<tchecker::dbm::db_t *>(dbm2), dim2, i + no_of_orig_clocks_1 + no_of_orig_clocks_2, i);
 
     result &= (*orig_min_virt == *virt_min_orig);
     result &= (orig_min_virt->cmp == tchecker::LE);
     result &=(orig_min_virt->value == 0);
     if(!result) {
-      std::cout << __FILE__ << ": " << __LINE__ << ": " << i << " virtual and original clock of second dbm are not equivalent" << std::endl;
-      tchecker::dbm::output_matrix(std::cout, dbm2, dim2);
       return result;
     }
   }
 
   return result;
+}
+
+bool are_zones_synced(tchecker::zg::zone_t const & zone_1, tchecker::zg::zone_t const & zone_2,
+                      tchecker::clock_id_t no_of_orig_clocks_1, tchecker::clock_id_t no_of_orig_clocks_2)
+{
+  return are_dbm_synced(zone_1.dbm(), zone_2.dbm(), zone_1.dim(), zone_2.dim(), no_of_orig_clocks_1, no_of_orig_clocks_2);
 }
 
 bool is_phi_subset_of_a_zone(const tchecker::dbm::db_t *dbm, tchecker::clock_id_t dim, tchecker::clock_id_t no_of_orig_clocks,
@@ -118,8 +129,11 @@ void sync(tchecker::dbm::db_t *dbm1, tchecker::dbm::db_t *dbm2,
           tchecker::clock_reset_container_t const & orig_reset1,
           tchecker::clock_reset_container_t const & orig_reset2)
 {
-
   assert(is_virtually_equivalent(dbm1, dbm2, dim1, dim2, no_of_orig_clocks_1, no_of_orig_clocks_2));
+
+  if(are_dbm_synced(dbm1, dbm2, dim1, dim2, no_of_orig_clocks_1, no_of_orig_clocks_2)) {
+    return;
+  }
 
   for(const tchecker::clock_reset_t & r : orig_reset1) {
 
@@ -144,14 +158,24 @@ void sync(tchecker::dbm::db_t *dbm1, tchecker::dbm::db_t *dbm2,
   assert(are_dbm_synced(dbm1, dbm2, dim1, dim2, no_of_orig_clocks_1, no_of_orig_clocks_2));
 }
 
-
+void sync(tchecker::zg::zone_t & zone_1, tchecker::zg::zone_t & zone_2,
+          tchecker::clock_id_t no_of_orig_clocks_1, tchecker::clock_id_t no_of_orig_clocks_2,
+          tchecker::clock_reset_container_t const & orig_reset1,
+          tchecker::clock_reset_container_t const & orig_reset2)
+{
+  sync(zone_1.dbm(), zone_2.dbm(), zone_1.dim(), zone_2.dim(), no_of_orig_clocks_1, no_of_orig_clocks_2, orig_reset1, orig_reset2);
+}
 
 std::pair<std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t>, std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t>>
-revert_sync(const tchecker::dbm::db_t *dbm1, const tchecker::dbm::db_t *dbm2,
-            tchecker::clock_id_t dim1, tchecker::clock_id_t dim2,
+revert_sync(tchecker::zg::zone_t const & zone_1, tchecker::zg::zone_t const & zone_2,
             tchecker::clock_id_t no_of_orig_clocks_1, tchecker::clock_id_t no_of_orig_clocks_2,
             const tchecker::virtual_constraint::virtual_constraint_t & phi_e)
 {
+
+  auto dbm1 = zone_1.dbm();
+  auto dim1 = zone_1.dim();
+  auto dbm2 = zone_2.dbm();
+  auto dim2 = zone_2.dim();
 
   assert(tchecker::dbm::is_consistent(dbm1, dim1));
   assert(tchecker::dbm::is_consistent(dbm2, dim2));
@@ -219,7 +243,7 @@ revert_sync(const tchecker::dbm::db_t *dbm1, const tchecker::dbm::db_t *dbm2,
   enum tchecker::dbm::status_t stat_1 = revert_multiple_reset(multiple_reset, dbm1, dim1, dbm1_synced, virt_reset_set_A);
 
   std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> first
-    = tchecker::virtual_constraint::factory(multiple_reset, dim1, phi_e.get_no_of_virt_clocks());
+    = tchecker::virtual_constraint::factory(multiple_reset, dim1, phi_e.get_no_of_virtual_clocks());
 
   free(multiple_reset);
 
@@ -228,7 +252,7 @@ revert_sync(const tchecker::dbm::db_t *dbm1, const tchecker::dbm::db_t *dbm2,
   enum tchecker::dbm::status_t stat_2 = revert_multiple_reset(multiple_reset, dbm2, dim2, dbm2_synced, virt_reset_set_B);
 
   std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> second
-    = tchecker::virtual_constraint::factory(multiple_reset, dim2, phi_e.get_no_of_virt_clocks());
+    = tchecker::virtual_constraint::factory(multiple_reset, dim2, phi_e.get_no_of_virtual_clocks());
 
   free(multiple_reset);
 
