@@ -23,9 +23,9 @@ TEST_CASE ("Extract virtual constraint", "[evc]") {
 
       std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> vc_big = tchecker::virtual_constraint::factory(zone_basic_fivedim, 50);
 
-      REQUIRE(vc->get_no_of_virt_clocks() == 2);
-      REQUIRE(vc_empty->get_no_of_virt_clocks() == 0);
-      REQUIRE(vc_big->get_no_of_virt_clocks() == 50 );
+      REQUIRE(vc->get_no_of_virtual_clocks() == 2);
+      REQUIRE(vc_empty->get_no_of_virtual_clocks() == 0);
+      REQUIRE(vc_big->get_no_of_virtual_clocks() == 50 );
       REQUIRE_THROWS_AS(vc_minusone = tchecker::virtual_constraint::factory(zone_basic_fivedim, -1), std::invalid_argument);
    }
 
