@@ -124,10 +124,7 @@ bool is_phi_subset_of_a_zone(const tchecker::dbm::db_t *dbm, tchecker::clock_id_
 bool Lieb_et_al::do_an_epsilon_transition(tchecker::zg::state_sptr_t A_state, tchecker::zg::transition_sptr_t A_trans,
                                           tchecker::zg::state_sptr_t B_state, tchecker::zg::transition_sptr_t B_trans) {
 
-  // if the states are not synced, the last transition must have been an action transition
-  if(!tchecker::vcg::are_zones_synced(A_state->zone(), B_state->zone(), _A->get_no_of_original_clocks(), _B->get_no_of_original_clocks())) {
-    return true;
-  }
+  assert(tchecker::vcg::are_zones_synced(A_state->zone(), B_state->zone(), _A->get_no_of_original_clocks(), _B->get_no_of_original_clocks()));
 
   tchecker::zg::state_sptr_t A_epsilon = _A->clone_state(A_state);
   tchecker::zg::state_sptr_t B_epsilon = _B->clone_state(B_state);
@@ -184,8 +181,8 @@ Lieb_et_al::check_for_virt_bisim(tchecker::zg::const_state_sptr_t A_state, tchec
                        _A->get_no_of_original_clocks(), _B->get_no_of_original_clocks(),
                        A_trans->reset_container(), B_trans->reset_container());
 
-  if(do_an_epsilon_transition(A_cloned, A_trans, B_cloned, B_trans))  {
 
+  if(do_an_epsilon_transition(A_cloned, A_trans, B_cloned, B_trans))  {
     tchecker::zg::state_sptr_t A_epsilon = _A->clone_state(A_cloned);
     tchecker::zg::state_sptr_t B_epsilon = _B->clone_state(B_cloned);
 
@@ -238,14 +235,18 @@ Lieb_et_al::check_for_virt_bisim(tchecker::zg::const_state_sptr_t A_state, tchec
     return sync_reverted;
 
   } else {
+
+    auto A_norm = _A->clone_state(A_cloned);
+    auto B_norm = _B->clone_state(B_cloned);
+
     // normalizing, to check whether we have already seen this pair.
-    _A->run_extrapolation(A_cloned->zone().dbm(), A_cloned->zone().dim(), *(A_cloned->vloc_ptr()));
-    _B->run_extrapolation(B_cloned->zone().dbm(), B_cloned->zone().dim(), *(B_cloned->vloc_ptr()));
+    _A->run_extrapolation(A_norm->zone().dbm(), A_norm->zone().dim(), *(A_norm->vloc_ptr()));
+    _B->run_extrapolation(B_norm->zone().dbm(), B_norm->zone().dim(), *(B_norm->vloc_ptr()));
 
-    tchecker::dbm::tighten(A_cloned->zone().dbm(), A_cloned->zone().dim());
-    tchecker::dbm::tighten(B_cloned->zone().dbm(), B_cloned->zone().dim());
+    tchecker::dbm::tighten(A_norm->zone().dbm(), A_norm->zone().dim());
+    tchecker::dbm::tighten(B_norm->zone().dbm(), B_norm->zone().dim());
 
-    std::pair<tchecker::zg::state_sptr_t, tchecker::zg::state_sptr_t> normalized_pair{A_cloned, B_cloned};
+    std::pair<tchecker::zg::state_sptr_t, tchecker::zg::state_sptr_t> normalized_pair{A_norm, B_norm};
 
     if(0 != visited.count(normalized_pair)) {
       return std::make_shared<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(_A->get_no_of_virtual_clocks()+1);
@@ -254,9 +255,6 @@ Lieb_et_al::check_for_virt_bisim(tchecker::zg::const_state_sptr_t A_state, tchec
     visited.insert(normalized_pair);
 
     // we go on with the non-normalized symbolic states
-    A_cloned = _A->clone_state(A_state);
-    B_cloned = _B->clone_state(B_state);
-
     assert(tchecker::dbm::is_tight(A_cloned->zone().dbm(), A_cloned->zone().dim()));
     assert(tchecker::dbm::is_tight(B_cloned->zone().dbm(), B_cloned->zone().dim()));
 

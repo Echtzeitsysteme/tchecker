@@ -140,7 +140,6 @@ void sync(tchecker::dbm::db_t *dbm1, tchecker::dbm::db_t *dbm2,
     if(r.right_id() != tchecker::REFCLOCK_ID || r.value() != 0) {
       throw std::runtime_error("when checking for timed bisim, only resets to value zero are allowed");
     }
-
     reset_to_value(dbm1, dim1, r.left_id() + 1 + no_of_orig_clocks_1, 0);
     reset_to_value(dbm2, dim2, r.left_id() + 1 + no_of_orig_clocks_2, 0);
   }
@@ -150,7 +149,6 @@ void sync(tchecker::dbm::db_t *dbm1, tchecker::dbm::db_t *dbm2,
     if(r.right_id() != tchecker::REFCLOCK_ID || r.value() != 0) {
       throw std::runtime_error("when checking for timed bisim, only resets to value zero are allowed");
     }
-
     reset_to_value(dbm1, dim1, r.left_id() + 1 + no_of_orig_clocks_1 + no_of_orig_clocks_1, 0);
     reset_to_value(dbm2, dim2, r.left_id() + 1 + no_of_orig_clocks_2 + no_of_orig_clocks_1, 0);
   }
