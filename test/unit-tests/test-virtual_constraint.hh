@@ -147,10 +147,14 @@ TEST_CASE ("Extract virtual constraint", "[evc]") {
    
    
    SECTION ("Test for completeness of vc_comp and zone_comp") {
-      std::string base_string = "dbm is ";
+      std::string base_string = "zone dbm is ";
       std::stringstream info(base_string);
       info << std::endl;
       tchecker::dbm::output_matrix(info, zone_comp->dbm(), zone_comp->dim());
+      info << "vc dbm is " << std::endl;
+      tchecker::dbm::output_matrix(info, vc_comp->dbm(), vc_comp->dim());
+      info << "clock_val_w_toosmall is " << std::endl;
+      tchecker::output(info, clock_val_w_toosmall, [](tchecker::clock_id_t clk) {std::to_string(clk);});
       INFO(info.str());
       REQUIRE(zone_comp->belongs(*clockval_fitting));
       REQUIRE_FALSE(zone_comp->belongs(*clockval_x_toobig));
