@@ -50,7 +50,6 @@ enum relationship_t {
 };
 
 enum relationship_t relationship = STRONG_TIMED_BISIM;   /*!< Selected relationship */
-
 bool help = false;                                 /*!< Help flag */
 std::string output_file = "";                      /*!< Output file name (empty means standard output) */
 std::ostream * os = &std::cout;                    /*!< Default output stream */
@@ -62,11 +61,7 @@ std::size_t table_size = 65536;                    /*!< Size of hash tables */
  \param argc : number of arguments
  \param argv : array of arguments
  \pre argv[0] up to argv[argc-1] are valid accesses
-<<<<<<< HEAD
- \post global variables help, output_file, search_order and labels have been set
-=======
  \post global variables help, output_file, and labels have been set
->>>>>>> add_strong_timed_sim
  from argv
  */
 int parse_command_line(int argc, char * argv[])
