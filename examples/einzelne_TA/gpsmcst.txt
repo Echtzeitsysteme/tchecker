@@ -1,0 +1,20 @@
+#labels=error
+system:gps_mc_1_1_10_10
+
+# Events
+event:tau
+event:finished0
+event:finished1
+event:start1
+event:start2
+
+# Station 1
+process:S1
+location:S1:idle{initial:}
+location:S1:start{committed:}
+location:S1:processing{}
+location:S1:done{committed:}
+edge:S1:idle:start:finished0{}
+edge:S1:start:processing:start1{}
+edge:S1:processing:done:start2{}
+edge:S1:done:idle:finished1{}

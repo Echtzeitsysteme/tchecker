@@ -1,0 +1,45 @@
+#labels=error
+system:leader_election_async_2_50
+
+# Events
+event:tau
+event:read_out
+event:finished1
+event:lock1
+event:unlock1
+event:read_out_prev1
+event:finished2
+event:lock2
+event:unlock2
+event:read_out_prev2
+
+# Candidate process 1
+process:C1
+clock:1:x1
+int:1:1:2:1:in1
+int:1:1:2:1:out1
+location:C1:eval{invariant: x1<=1}
+location:C1:init{initial: : invariant: x1<=0}
+location:C1:leader
+location:C1:read{invariant: x1<=1}
+location:C1:release{invariant: x1<=1}
+location:C1:wait_prev{invariant: x1<=0}
+location:C1:wait_succ
+location:C1:wait_succ_read_out
+edge:C1:eval:eval:read_out
+edge:C1:init:init:read_out
+edge:C1:leader:leader:read_out
+edge:C1:read:read:read_out
+edge:C1:release:release:read_out
+edge:C1:wait_prev:wait_prev:read_out
+edge:C1:wait_succ:wait_succ:read_out
+edge:C1:wait_succ_read_out:wait_succ_read_out:read_out
+edge:C1:eval:leader:finished1{provided: in1==1}
+edge:C1:eval:wait_succ:tau{provided: in1!=1 : do: out1=in1}
+edge:C1:init:read:lock2{do: x1=0}
+edge:C1:init:wait_succ_read_out:lock1
+edge:C1:read:release:read_out_prev1{do: in1=out2}
+edge:C1:release:eval:unlock2
+edge:C1:wait_prev:read:lock2{do: x1=0}
+edge:C1:wait_succ:wait_succ_read_out:lock1
+edge:C1:wait_succ_read_out:wait_prev:unlock1{do: x1=0}

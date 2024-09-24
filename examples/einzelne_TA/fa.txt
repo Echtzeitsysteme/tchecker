@@ -1,0 +1,19 @@
+system:fire_alarm_2_10_100
+
+# Events
+event:tau
+event:alive
+event:ack
+
+# Sensor processes
+process:sensor1
+clock:1:x1
+location:sensor1:ini{initial: : invariant: x1<=10}
+location:sensor1:wait{invariant: x1<=15}
+location:sensor1:sent{invariant: x1<=20}
+location:sensor1:fin{invariant: x1<=100}
+edge:sensor1:ini:wait:tau{provided: x1>=10}
+edge:sensor1:wait:sent:alive{}
+edge:sensor1:sent:fin:ack{}
+edge:sensor1:sent:fin:tau{provided: x1>=20}
+edge:sensor1:fin:ini:tau{provided: x1>=100 : do: x1=0}

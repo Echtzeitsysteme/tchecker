@@ -1,0 +1,18 @@
+system:CorSSO_2_2_10_1_2
+
+event:tau
+
+# Process 1
+process:P1
+clock:1:x1
+clock:1:y1
+int:1:0:3:0:a1
+int:1:0:3:0:p1
+location:P1:auth{initial:}
+location:P1:access{labels: access1}
+edge:P1:auth:auth:tau{provided: p1>0 && x1>2 && a1<2 : do: a1=a1+1; x1=0}
+edge:P1:auth:auth:tau{provided: p1==0 : do: p1=1; a1=0; x1=0; y1=0}
+edge:P1:auth:access:tau{provided: y1<10 && p1==1 && a1 >= 1}
+edge:P1:auth:auth:tau{provided: p1==0 : do: p1=2; a1=0; x1=0; y1=0}
+edge:P1:auth:access:tau{provided: y1<10 && p1==2 && a1 >= 2}
+edge:P1:access:auth:tau{do: p1=0}

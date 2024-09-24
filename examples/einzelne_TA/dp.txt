@@ -1,0 +1,21 @@
+system:dining_philosophers_2_3_10_0
+
+# events
+event:tau
+event:take1
+event:release1
+event:take2
+event:release2
+
+# Philosopher 1
+process:P1
+clock:1:x1
+location:P1:idle{initial:}
+location:P1:acq{invariant: x1<=3}
+location:P1:eat{invariant: x1<=10 : labels: eating1}
+location:P1:rel{invariant: x1<=0}
+edge:P1:idle:acq:take2{do: x1=0}
+edge:P1:acq:idle:release2{provided: x1>=3}
+edge:P1:acq:eat:take1{provided: x1<=3 : do: x1=0}
+edge:P1:eat:rel:release1{provided: x1>=10 : do: x1=0}
+edge:P1:rel:idle:release2

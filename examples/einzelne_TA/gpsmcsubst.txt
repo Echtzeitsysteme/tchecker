@@ -1,0 +1,16 @@
+system:gps_mc_1_1_10_10
+
+# Events
+event:tau
+event:finished0
+event:finished1
+event:start1
+event:start2
+
+# Substation 1 1
+process:Sub1_1
+clock:1:x1_1
+location:Sub1_1:idle{initial:}
+location:Sub1_1:processing{invariant: x1_1<=10}
+edge:Sub1_1:idle:processing:start1{do: x1_1=0}
+edge:Sub1_1:processing:idle:start2{provided: x1_1<=10}

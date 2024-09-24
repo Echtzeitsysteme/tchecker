@@ -1,0 +1,48 @@
+
+# Model of the FDDI protocol inspired from:
+# The tool Kronos, C. Daws, A. Oliveiro, S. Tripakis and S. Yovine,
+# Hybrid Systems III, 1996
+
+system:fddi_1_50_20_0
+
+event:tau
+event:TT
+event:RT
+event:TT1
+event:RT1
+
+# Process 1
+process:P1
+clock:1:trt1
+clock:1:xA1
+clock:1:xB1
+location:P1:q0{initial:}
+location:P1:q1{invariant: trt1<=20}
+location:P1:q2{invariant: trt1<=20}
+location:P1:q3{invariant: xA1<=70}
+location:P1:q4{}
+location:P1:q5{invariant: trt1<=20}
+location:P1:q6{invariant: trt1<=20}
+location:P1:q7{invariant: xB1<=70}
+edge:P1:q0:q1:TT{provided: trt1>=50 : do: trt1=0;xB1=0}
+edge:P1:q0:q2:TT{provided: trt1<50 : do: trt1=0;xB1=0}
+edge:P1:q1:q4:RT{provided: trt1==20}
+edge:P1:q2:q3:tau{provided: trt1==20}
+edge:P1:q3:q4:RT{}
+edge:P1:q4:q5:TT{provided: trt1>=50 : do: trt1=0;xA1=0}
+edge:P1:q4:q6:TT{provided: trt1<50 : do: trt1=0;xA1=0}
+edge:P1:q5:q0:RT{provided: trt1==20}
+edge:P1:q6:q7:tau{provided: trt1==20}
+edge:P1:q7:q0:RT{}
+
+# Ring
+process:R
+clock:1:t
+location:R:q1{initial: : invariant: t<=0}
+location:R:r1{}
+edge:R:q1:r1:TT1{provided: t==0}
+edge:R:r1:q1:RT1{do: t=0}
+
+# Synchros
+sync:P1@TT:R@TT1
+sync:P1@RT:R@RT1

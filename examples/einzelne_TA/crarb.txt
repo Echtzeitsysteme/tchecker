@@ -1,0 +1,18 @@
+system:critical_region_2_10
+
+# Events
+event:tau
+event:enter1
+event:exit1
+event:enter2
+event:exit2
+
+# Global variables
+int:1:0:2:0:id
+
+# Arbiter 1
+process:arbiter1
+location:arbiter1:req{initial:}
+location:arbiter1:ack{}
+edge:arbiter1:req:ack:enter1{provided: id==1 : do: id=0}
+edge:arbiter1:ack:req:exit1{do: id=1}

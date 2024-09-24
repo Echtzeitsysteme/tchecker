@@ -1,0 +1,25 @@
+system:csmacd_2_808_26
+
+event:tau
+event:begin
+event:busy
+event:end
+event:cd
+event:cd1
+event:cd2
+
+# Station 1
+process:Station1
+clock:1:x1
+location:Station1:Wait{initial:}
+location:Station1:Start{invariant:x1<=808}
+location:Station1:Retry{invariant:x1<2*26}
+edge:Station1:Wait:Start:begin{do:x1=0}
+edge:Station1:Wait:Retry:busy{do:x1=0}
+edge:Station1:Wait:Wait:cd{do:x1=0}
+edge:Station1:Wait:Retry:cd{do:x1=0}
+edge:Station1:Start:Wait:end{provided:x1==808 : do:x1=0}
+edge:Station1:Start:Retry:cd{provided:x1<26 : do:x1=0}
+edge:Station1:Retry:Start:begin{provided:x1<2*26 : do:x1=0}
+edge:Station1:Retry:Retry:busy{provided:x1<2*26 : do:x1=0}
+edge:Station1:Retry:Retry:cd{provided:x1<2*26 : do:x1=0}
