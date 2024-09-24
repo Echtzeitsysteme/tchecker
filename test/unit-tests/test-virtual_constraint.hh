@@ -154,7 +154,8 @@ TEST_CASE ("Extract virtual constraint", "[evc]") {
       info << "vc dbm is " << std::endl;
       tchecker::dbm::output_matrix(info, vc_comp->dbm(), vc_comp->dim());
       info << "clock_val_w_toosmall is " << std::endl;
-      tchecker::output(info, clock_val_w_toosmall, [](tchecker::clock_id_t clk) {std::to_string(clk);});
+      std::function<std::string(tchecker::clock_id_t)> clk_name {[](tchecker::clock_id_t clk) {return std::to_string(clk);}};
+      tchecker::output(info, *clockval_w_toosmall, clk_name  );
       INFO(info.str());
       REQUIRE(zone_comp->belongs(*clockval_fitting));
       REQUIRE_FALSE(zone_comp->belongs(*clockval_x_toobig));
