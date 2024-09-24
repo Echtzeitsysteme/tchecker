@@ -38,7 +38,7 @@ TEST_CASE ("Extract virtual constraint", "[evc]") {
 
    // create container with all clock constraints, 0 = x, 1 = y, 2 = z, 3 = w, for zero clock one has to use tchecker::REFCLOCK_ID
    tchecker::clock_constraint_container_t cc_container;
-   for (int i = 0; i < dim-1; i++)
+   for (unsigned int i = 0; i < dim-1; i++)
    {
       tchecker::clock_constraint_t cc_tmp = tchecker::clock_constraint_t(i, tchecker::REFCLOCK_ID, tchecker::LE, i+1);
       cc_container.push_back(cc_tmp);
@@ -270,7 +270,7 @@ TEST_CASE ("Revert Action Trans Operator", "[rato]") {
       std::shared_ptr<tchecker::zg::zone_t> zone_D_sigma_A_0 = tchecker::zg::factory(dim);
 
       // Set guard constraints
-      for (int i = 0; i < dim-1; i++)
+      for (unsigned int i = 0; i < dim-1; i++)
          {
             // guard->emplace_back(i, tchecker::REFCLOCK_ID, tchecker::LE, i+1);
             guard->emplace_back(tchecker::REFCLOCK_ID, i, tchecker::LE, -i-1);
@@ -321,7 +321,7 @@ TEST_CASE ("Revert Action Trans Operator", "[rato]") {
       std::shared_ptr<tchecker::zg::zone_t> zone_D_sigma_A_1 = tchecker::zg::factory(dim);
 
       // Set guard constraints
-      for (int i = 0; i < dim-1; i++)
+      for (unsigned int i = 0; i < dim-1; i++)
       {
          guard_1->emplace_back(tchecker::REFCLOCK_ID, i, tchecker::LE, -i-1);
       }
@@ -364,7 +364,7 @@ TEST_CASE ("Revert Action Trans Operator", "[rato]") {
       std::shared_ptr<tchecker::zg::zone_t> zone_D_sigma_A_2 = tchecker::zg::factory(dim);
 
       // Set guard constraints
-      for (int i = 0; i < dim-1; i++)
+      for (unsigned int i = 0; i < dim-1; i++)
       {
          guard_2->emplace_back(tchecker::REFCLOCK_ID, i, tchecker::LE, -i-1);
       }
@@ -407,7 +407,7 @@ TEST_CASE ("Revert Action Trans Operator", "[rato]") {
       std::shared_ptr<tchecker::zg::zone_t> zone_D_sigma_A_3 = tchecker::zg::factory(dim);
 
       // Set guard constraints
-      for (int i = 0; i < dim-1; i++)
+      for (unsigned int i = 0; i < dim-1; i++)
       {
          guard_3->emplace_back(tchecker::REFCLOCK_ID, i, tchecker::LE, -i-1);
       }
@@ -446,7 +446,7 @@ TEST_CASE ("Revert Action Trans Operator", "[rato]") {
       std::shared_ptr<tchecker::zg::zone_t> zone_D_sigma_A_4 = tchecker::zg::factory(dim);
       
       // Set guard constraints
-      for (int i = 0; i < dim-1; i++) {
+      for (unsigned int i = 0; i < dim-1; i++) {
          guard_4->emplace_back(tchecker::REFCLOCK_ID, i, tchecker::LE, -i-1);
       }
 
