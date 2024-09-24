@@ -38,16 +38,17 @@ TEST_CASE ("Extract virtual constraint", "[evc]") {
 
    // create container with all clock constraints, 0 = x, 1 = y, 2 = z, 3 = w, for zero clock one has to use tchecker::REFCLOCK_ID
    tchecker::clock_constraint_container_t cc_container;
-   for (int i = 0; i < dim-1; i++)
+   for (tchecker::clock_id_t i = 0; i < dim-1; i++)
    {
-      tchecker::clock_constraint_t cc_tmp = tchecker::clock_constraint_t(i, tchecker::REFCLOCK_ID, tchecker::LE, i+1);
+      int32_t i_32bit = (int32_t) i;
+      tchecker::clock_constraint_t cc_tmp = tchecker::clock_constraint_t(i, tchecker::REFCLOCK_ID, tchecker::LE, i_32bit+1);
       cc_container.push_back(cc_tmp);
-      cc_tmp = tchecker::clock_constraint_t(tchecker::REFCLOCK_ID, i, tchecker::LE, -i-1);
+      cc_tmp = tchecker::clock_constraint_t(tchecker::REFCLOCK_ID, i, tchecker::LE, -i_32bit-1);
       cc_container.push_back(cc_tmp);
 
       for (tchecker::clock_id_t j = 0; j < dim-1; j++)
       {
-         tchecker::clock_constraint_t cc_tmp = tchecker::clock_constraint_t(i, j, tchecker::LE, i-j);
+         tchecker::clock_constraint_t cc_tmp = tchecker::clock_constraint_t(i, j, tchecker::LE, i_32bit-j);
          cc_container.push_back(cc_tmp);
       }  
    }
@@ -147,6 +148,16 @@ TEST_CASE ("Extract virtual constraint", "[evc]") {
    
    
    SECTION ("Test for completeness of vc_comp and zone_comp") {
+      std::string base_string = "zone dbm is ";
+      std::stringstream info(base_string);
+      info << std::endl;
+      tchecker::dbm::output_matrix(info, zone_comp->dbm(), zone_comp->dim());
+      info << "vc dbm is " << std::endl;
+      tchecker::dbm::output_matrix(info, vc_comp->dbm(), vc_comp->dim());
+      info << "clock_val_w_toosmall is " << std::endl;
+      std::function<std::string(tchecker::clock_id_t)> clk_name {[](tchecker::clock_id_t clk) {return std::to_string(clk);}};
+      tchecker::output(info, *clockval_w_toosmall, clk_name  );
+      INFO(info.str());
       REQUIRE(zone_comp->belongs(*clockval_fitting));
       REQUIRE_FALSE(zone_comp->belongs(*clockval_x_toobig));
       REQUIRE_FALSE(zone_comp->belongs(*clockval_x_toosmall));
@@ -270,7 +281,7 @@ TEST_CASE ("Revert Action Trans Operator", "[rato]") {
       std::shared_ptr<tchecker::zg::zone_t> zone_D_sigma_A_0 = tchecker::zg::factory(dim);
 
       // Set guard constraints
-      for (int i = 0; i < dim-1; i++)
+      for (unsigned int i = 0; i < dim-1; i++)
          {
             // guard->emplace_back(i, tchecker::REFCLOCK_ID, tchecker::LE, i+1);
             guard->emplace_back(tchecker::REFCLOCK_ID, i, tchecker::LE, -i-1);
@@ -321,7 +332,7 @@ TEST_CASE ("Revert Action Trans Operator", "[rato]") {
       std::shared_ptr<tchecker::zg::zone_t> zone_D_sigma_A_1 = tchecker::zg::factory(dim);
 
       // Set guard constraints
-      for (int i = 0; i < dim-1; i++)
+      for (unsigned int i = 0; i < dim-1; i++)
       {
          guard_1->emplace_back(tchecker::REFCLOCK_ID, i, tchecker::LE, -i-1);
       }
@@ -364,7 +375,7 @@ TEST_CASE ("Revert Action Trans Operator", "[rato]") {
       std::shared_ptr<tchecker::zg::zone_t> zone_D_sigma_A_2 = tchecker::zg::factory(dim);
 
       // Set guard constraints
-      for (int i = 0; i < dim-1; i++)
+      for (unsigned int i = 0; i < dim-1; i++)
       {
          guard_2->emplace_back(tchecker::REFCLOCK_ID, i, tchecker::LE, -i-1);
       }
@@ -407,7 +418,7 @@ TEST_CASE ("Revert Action Trans Operator", "[rato]") {
       std::shared_ptr<tchecker::zg::zone_t> zone_D_sigma_A_3 = tchecker::zg::factory(dim);
 
       // Set guard constraints
-      for (int i = 0; i < dim-1; i++)
+      for (unsigned int i = 0; i < dim-1; i++)
       {
          guard_3->emplace_back(tchecker::REFCLOCK_ID, i, tchecker::LE, -i-1);
       }
@@ -446,7 +457,7 @@ TEST_CASE ("Revert Action Trans Operator", "[rato]") {
       std::shared_ptr<tchecker::zg::zone_t> zone_D_sigma_A_4 = tchecker::zg::factory(dim);
       
       // Set guard constraints
-      for (int i = 0; i < dim-1; i++) {
+      for (unsigned int i = 0; i < dim-1; i++) {
          guard_4->emplace_back(tchecker::REFCLOCK_ID, i, tchecker::LE, -i-1);
       }
 
