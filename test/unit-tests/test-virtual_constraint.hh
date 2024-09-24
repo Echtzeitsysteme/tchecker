@@ -38,7 +38,7 @@ TEST_CASE ("Extract virtual constraint", "[evc]") {
 
    // create container with all clock constraints, 0 = x, 1 = y, 2 = z, 3 = w, for zero clock one has to use tchecker::REFCLOCK_ID
    tchecker::clock_constraint_container_t cc_container;
-   for (unsigned int i = 0; i < dim-1; i++)
+   for (tchecker::clock_id_t i = 0; i < dim-1; i++)
    {
       tchecker::clock_constraint_t cc_tmp = tchecker::clock_constraint_t(i, tchecker::REFCLOCK_ID, tchecker::LE, i+1);
       cc_container.push_back(cc_tmp);
