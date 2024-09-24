@@ -105,6 +105,8 @@ revert_action_trans(const tchecker::zg::zone_t & zone,
   std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> virt_mult_reset 
       = tchecker::virtual_constraint::factory(reverted, zone.dim(), phi_split.get_no_of_virtual_clocks());
 
+  free(reverted);
+
   return virt_mult_reset;
 }
 
