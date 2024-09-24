@@ -40,14 +40,15 @@ TEST_CASE ("Extract virtual constraint", "[evc]") {
    tchecker::clock_constraint_container_t cc_container;
    for (tchecker::clock_id_t i = 0; i < dim-1; i++)
    {
-      tchecker::clock_constraint_t cc_tmp = tchecker::clock_constraint_t(i, tchecker::REFCLOCK_ID, tchecker::LE, i+1);
+      int32_t i_32bit = (int32_t) i;
+      tchecker::clock_constraint_t cc_tmp = tchecker::clock_constraint_t(i, tchecker::REFCLOCK_ID, tchecker::LE, i_32bit+1);
       cc_container.push_back(cc_tmp);
-      cc_tmp = tchecker::clock_constraint_t(tchecker::REFCLOCK_ID, i, tchecker::LE, -i-1);
+      cc_tmp = tchecker::clock_constraint_t(tchecker::REFCLOCK_ID, i, tchecker::LE, -i_32bit-1);
       cc_container.push_back(cc_tmp);
 
       for (tchecker::clock_id_t j = 0; j < dim-1; j++)
       {
-         tchecker::clock_constraint_t cc_tmp = tchecker::clock_constraint_t(i, j, tchecker::LE, i-j);
+         tchecker::clock_constraint_t cc_tmp = tchecker::clock_constraint_t(i, j, tchecker::LE, i_32bit-j);
          cc_container.push_back(cc_tmp);
       }  
    }
