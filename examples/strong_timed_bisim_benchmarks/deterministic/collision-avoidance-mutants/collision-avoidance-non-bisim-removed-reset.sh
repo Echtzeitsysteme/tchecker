@@ -4,4 +4,4 @@
 #
 # See files AUTHORS and LICENSE for copyright details.
 
-cat "$(dirname $0)/av-protocol-non-bisim-2.txt"
+cat "$(dirname $0)/collision-avoidance-non-bisim-removed-reset.txt"
