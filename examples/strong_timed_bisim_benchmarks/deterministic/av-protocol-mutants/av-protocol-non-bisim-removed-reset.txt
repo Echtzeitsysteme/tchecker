@@ -1,7 +1,7 @@
 # 
 # This file has been generated automatically with uppaal-to-tchecker
 # 
-system:av_protocol_reset_9.xml
+system:av_protocol_reset_1.xml
 # no iodecl
 # compilation of process Process
 process:Process
@@ -69,7 +69,7 @@ location:Process:idle{}
 location:Process:start{initial:}
 event:Process__zero
 event:Process__zero_recv
-edge:Process:until_silence:until_silence:Process__zero_recv{do:Process_clock_A_c=0}
+edge:Process:until_silence:until_silence:Process__zero_recv{} # Mutation
 event:Process__one
 event:Process__one_recv
 edge:Process:until_silence:stop:Process__one_recv{do:Process_clock_A_c=0}
@@ -89,7 +89,7 @@ edge:Process:sample:call_observe:Process__zero_recv{provided:(Process_clock_A_c 
 edge:Process:sample:call_observe:Process__one_recv{provided:(Process_clock_A_c == 781)}
 event:Process__errMode3
 event:Process__errMode3_recv
-edge:Process:newPn:sample:Process__errMode3_recv{do:Process_clock_A_c=0:provided:(Process_clock_A_c > 30)}
+edge:Process:newPn:sample:Process__errMode3_recv{provided:(Process_clock_A_c > 30)}
 event:Process__errMode1
 event:Process__errMode1_recv
 edge:Process:newPn:sample:Process__errMode1_recv{provided:(Process_clock_A_c < 30)}

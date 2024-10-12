@@ -1,12 +1,15 @@
 # 
 # This file has been generated automatically with uppaal-to-tchecker
 # 
-system:collision_avoidance_reset_2.xml
+# the original model was published by
+# Henrik E. Jensen, Kim G. Larsen & Arne Skou (1996): Modelling and analysis of a collision avoidance protocol using Spin and Uppaal.
+# In: DIMACS’96.
+system:collision_avoidance.xml
 # no iodecl
 # compilation of process Process
 process:Process
-# clock_c2:(clock)
-clock:1:Process_clock_c2
+# clock_c3:(clock)
+clock:1:Process_clock_c3
 # a:(broadcast (channel))
 # global event: Process_a
 # _from_medium_slave:(broadcast (channel))
@@ -35,35 +38,34 @@ location:Process:s2_1{}
 location:Process:s2_0{initial:}
 event:Process__from_medium_slave
 event:Process__from_medium_slave_recv
-edge:Process:s2_4:s2_4:Process__from_medium_slave_recv{provided:(Process_clock_c2 <= 2)}
+edge:Process:s2_4:s2_4:Process__from_medium_slave_recv{provided:(Process_clock_c3 <= 2)}
 event:Process__empty_slave
 event:Process__empty_slave_recv
-edge:Process:s2_5:s2_0:Process__empty_slave_recv{do:Process_clock_c2=0}
+edge:Process:s2_5:s2_0:Process__empty_slave_recv{do:Process_clock_c3=0} # Mutation! Added Reset
 event:Process__to_medium_slave
 event:Process__to_medium_slave_emit
-edge:Process:s2_4:s2_5:Process__to_medium_slave_emit{provided:(Process_clock_c2 == 2)}
+edge:Process:s2_4:s2_5:Process__to_medium_slave_emit{provided:(Process_clock_c3 == 2)}
 event:Process__in_2
 event:Process__in_2_recv
-edge:Process:s2_3:s2_4:Process__in_2_recv{provided:(Process_clock_c2 == 1)}
+edge:Process:s2_3:s2_4:Process__in_2_recv{provided:(Process_clock_c3 == 1)}
 event:Process_a
 event:Process_a_emit
-edge:Process:s2_1:s2_3:Process_a_emit{provided:(Process_clock_c2 == 0)}
-edge:Process:s2_2:s2_2:Process__from_medium_slave_recv{provided:(Process_clock_c2 <= 2)}
-edge:Process:s2_2:s2_0:Process_a_emit{provided:(Process_clock_c2 == 2)}
+edge:Process:s2_1:s2_3:Process_a_emit{provided:(Process_clock_c3 == 0)}
+edge:Process:s2_2:s2_2:Process__from_medium_slave_recv{provided:(Process_clock_c3 <= 2)}
+edge:Process:s2_2:s2_0:Process_a_emit{provided:(Process_clock_c3 == 2)}
 event:Process__out_2
 event:Process__out_2_emit
-edge:Process:s2_1:s2_2:Process__out_2_emit{provided:(Process_clock_c2 == 0)}
+edge:Process:s2_1:s2_2:Process__out_2_emit{provided:(Process_clock_c3 == 0)}
 event:Process__data1
 event:Process__data1_recv
-edge:Process:s2_1:s2_0:Process__data1_recv{provided:(Process_clock_c2 == 0)}
+edge:Process:s2_1:s2_0:Process__data1_recv{provided:(Process_clock_c3 == 0)}
 event:Process__data2
 event:Process__data2_recv
-edge:Process:s2_1:s2_0:Process__data2_recv{provided:(Process_clock_c2 == 0)}
+edge:Process:s2_1:s2_0:Process__data2_recv{provided:(Process_clock_c3 == 0)}
 event:Process__data3
 event:Process__data3_recv
-edge:Process:s2_1:s2_0:Process__data3_recv{provided:(Process_clock_c2 == 0)}
+edge:Process:s2_1:s2_0:Process__data3_recv{provided:(Process_clock_c3 == 0)}
 event:Process__data0
 event:Process__data0_recv
-edge:Process:s2_1:s2_0:Process__data0_recv{provided:(Process_clock_c2 == 0)}
-edge:Process:s2_0:s2_1:Process__from_medium_slave_recv{do:Process_clock_c2=0}
-
+edge:Process:s2_1:s2_0:Process__data0_recv{provided:(Process_clock_c3 == 0)}
+edge:Process:s2_0:s2_1:Process__from_medium_slave_recv{do:Process_clock_c3=0}
