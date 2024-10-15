@@ -4,4 +4,4 @@
 #
 # See files AUTHORS and LICENSE for copyright details.
 
-cat "$(dirname $0)/ieee-rcp-non-bisim-1.txt"
+cat "$(dirname $0)/av-protocol-non-bisim-changed-guard.txt"

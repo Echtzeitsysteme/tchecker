@@ -1,7 +1,10 @@
 # 
 # This file has been generated automatically with uppaal-to-tchecker
-# 
-system:av_protocol_reset_9.xml
+#
+# the original model was published by
+# Klaus Havelund, Arne Skou, Kim G. Larsen & Kristian Lund (1997): Formal Modeling and Analysis of an Audio/Video Protocol:
+# An Industrial Case Study Using UPPAAL. In: RTSS’97, pp. 2–13, doi:10.1109/REAL.1997.641264 
+system:av_protocol.xml
 # no iodecl
 # compilation of process Process
 process:Process
@@ -60,7 +63,7 @@ location:Process:ex_jam{invariant:(1 && (Process_clock_A_c <= 781))}
 location:Process:check_eof{}
 location:Process:stop{invariant:(1 && (Process_clock_A_c <= 50000))}
 location:Process:transmit{invariant:(1 && (Process_clock_A_c <= 781))}
-location:Process:ex_silence2{invariant:(1 && (Process_clock_A_c <= 781))}
+location:Process:ex_silence2{invariant:(1 && (Process_clock_A_c <= 782))} # Mutation!
 location:Process:goto_idle{}
 location:Process:other_started{invariant:(1 && (Process_clock_A_c <= 3124))}
 location:Process:ex_silence1{invariant:(1 && (Process_clock_A_c <= 2343))}
@@ -85,12 +88,11 @@ edge:Process:call_check:ex_jam:Process__fast_recv{do:Process_clock_A_c=0}
 event:Process_A_observe
 event:Process_A_observe_emit
 edge:Process:call_observe:call_check:Process_A_observe_emit{}
-edge:Process:call_observe:call_check:Process_A_observe_emit{}
 edge:Process:sample:call_observe:Process__zero_recv{provided:(Process_clock_A_c == 781)}
 edge:Process:sample:call_observe:Process__one_recv{provided:(Process_clock_A_c == 781)}
 event:Process__errMode3
 event:Process__errMode3_recv
-edge:Process:newPn:sample:Process__errMode3_recv{do:Process_clock_A_c=0:provided:(Process_clock_A_c > 30)}
+edge:Process:newPn:sample:Process__errMode3_recv{provided:(Process_clock_A_c > 30)}
 event:Process__errMode1
 event:Process__errMode1_recv
 edge:Process:newPn:sample:Process__errMode1_recv{provided:(Process_clock_A_c < 30)}
@@ -140,4 +142,5 @@ edge:Process:idle:ex_start:Process_k_emit{provided:(Process_clock_A_c == 781)}
 event:Process_l
 event:Process_l_emit
 edge:Process:start:idle:Process_l_emit{do:Process_clock_A_c=0}
+edge:Process:ex_silence2:idle:Process__zero_recv{do:Process_clock_A_c=0} # Non-deterministic Choice
 

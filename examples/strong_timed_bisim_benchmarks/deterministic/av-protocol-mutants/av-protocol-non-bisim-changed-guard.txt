@@ -89,7 +89,7 @@ edge:Process:sample:call_observe:Process__zero_recv{provided:(Process_clock_A_c 
 edge:Process:sample:call_observe:Process__one_recv{provided:(Process_clock_A_c == 781)}
 event:Process__errMode3
 event:Process__errMode3_recv
-edge:Process:newPn:sample:Process__errMode3_recv{provided:(Process_clock_A_c >= 30)}
+edge:Process:newPn:sample:Process__errMode3_recv{provided:(Process_clock_A_c >= 30)} # Mutation!
 event:Process__errMode1
 event:Process__errMode1_recv
 edge:Process:newPn:sample:Process__errMode1_recv{provided:(Process_clock_A_c < 30)}

@@ -84,8 +84,7 @@ event:Process__fast_recv
 edge:Process:call_check:ex_jam:Process__fast_recv{do:Process_clock_A_c=0}
 event:Process_A_observe
 event:Process_A_observe_emit
-edge:Process:call_observe:call_check:Process_A_observe_emit{do:Process_clock_A_c=0}
-edge:Process:call_observe:call_check:Process_A_observe_emit{do:Process_clock_A_c=0}
+edge:Process:call_observe:call_check:Process_A_observe_emit{do:Process_clock_A_c=0} # Mutation!
 edge:Process:sample:call_observe:Process__zero_recv{provided:(Process_clock_A_c == 781)}
 edge:Process:sample:call_observe:Process__one_recv{provided:(Process_clock_A_c == 781)}
 event:Process__errMode3
@@ -140,4 +139,6 @@ edge:Process:idle:ex_start:Process_k_emit{provided:(Process_clock_A_c == 781)}
 event:Process_l
 event:Process_l_emit
 edge:Process:start:idle:Process_l_emit{do:Process_clock_A_c=0}
+edge:Process:ex_silence2:idle:Process__zero_recv{do:Process_clock_A_c=0} # Non-deterministic Choice
+
 

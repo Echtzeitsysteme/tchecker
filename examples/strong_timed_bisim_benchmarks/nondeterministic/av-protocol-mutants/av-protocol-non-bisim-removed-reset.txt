@@ -1,7 +1,7 @@
 # 
 # This file has been generated automatically with uppaal-to-tchecker
 # 
-system:av_protocol_change_guard_1.xml
+system:av_protocol_reset_1.xml
 # no iodecl
 # compilation of process Process
 process:Process
@@ -69,7 +69,7 @@ location:Process:idle{}
 location:Process:start{initial:}
 event:Process__zero
 event:Process__zero_recv
-edge:Process:until_silence:until_silence:Process__zero_recv{do:Process_clock_A_c=0}
+edge:Process:until_silence:until_silence:Process__zero_recv{} # Mutation
 event:Process__one
 event:Process__one_recv
 edge:Process:until_silence:stop:Process__one_recv{do:Process_clock_A_c=0}
@@ -85,12 +85,11 @@ edge:Process:call_check:ex_jam:Process__fast_recv{do:Process_clock_A_c=0}
 event:Process_A_observe
 event:Process_A_observe_emit
 edge:Process:call_observe:call_check:Process_A_observe_emit{}
-edge:Process:call_observe:call_check:Process_A_observe_emit{}
 edge:Process:sample:call_observe:Process__zero_recv{provided:(Process_clock_A_c == 781)}
 edge:Process:sample:call_observe:Process__one_recv{provided:(Process_clock_A_c == 781)}
 event:Process__errMode3
 event:Process__errMode3_recv
-edge:Process:newPn:sample:Process__errMode3_recv{provided:(Process_clock_A_c >= 30)}
+edge:Process:newPn:sample:Process__errMode3_recv{provided:(Process_clock_A_c > 30)}
 event:Process__errMode1
 event:Process__errMode1_recv
 edge:Process:newPn:sample:Process__errMode1_recv{provided:(Process_clock_A_c < 30)}
@@ -140,4 +139,6 @@ edge:Process:idle:ex_start:Process_k_emit{provided:(Process_clock_A_c == 781)}
 event:Process_l
 event:Process_l_emit
 edge:Process:start:idle:Process_l_emit{do:Process_clock_A_c=0}
+edge:Process:ex_silence2:idle:Process__zero_recv{do:Process_clock_A_c=0} # Non-deterministic Choice
+
 
