@@ -27,13 +27,13 @@ public:
    \brief Constructor
    \param dim : dimension
    */
-  zone_container_t<T>(tchecker::clock_id_t dim) : _dim(dim), _storage(std::make_shared<std::vector<std::shared_ptr<T>>>(0)) { }
+  zone_container_t(tchecker::clock_id_t dim) : _dim(dim), _storage(std::make_shared<std::vector<std::shared_ptr<T>>>(0)) { }
 
   /*!
    \brief Constructor
    \param zone : the only zone of the resulting container
    */
-  zone_container_t<T>(T const &zone) : _dim(zone.dim()), _storage(std::make_shared<std::vector<std::shared_ptr<T>>>(0)) {
+  zone_container_t(T const &zone) : _dim(zone.dim()), _storage(std::make_shared<std::vector<std::shared_ptr<T>>>(0)) {
     this->append_zone(zone);
   }
 
@@ -41,7 +41,7 @@ public:
    \brief Copy Constructor
    \param container : the container to copy
    */
-  zone_container_t<T>(zone_container_t<T> &t) : _dim(t.dim()), _storage(std::make_shared<std::vector<std::shared_ptr<T>>>(0))
+  zone_container_t(zone_container_t<T> &t) : _dim(t.dim()), _storage(std::make_shared<std::vector<std::shared_ptr<T>>>(0))
   {
     for(auto iter = t.begin(); iter < t.end(); iter++) {
       this->append_zone(*(*iter));
@@ -315,7 +315,7 @@ public:
    \param no_of_columns : number of columns in matrix
    \param dim : the dimension of the zones
    */
-  zone_matrix_t<T>(size_t no_of_rows, size_t no_of_columns, tchecker::clock_id_t dim) :
+  zone_matrix_t(size_t no_of_rows, size_t no_of_columns, tchecker::clock_id_t dim) :
     _dim(dim), _no_of_rows(no_of_rows), _no_of_columns(no_of_columns), _matrix(std::vector<std::shared_ptr<zone_container_t<T>>>(no_of_rows * no_of_columns)) {
 
     for(std::size_t i = 0; i < no_of_rows*no_of_columns; ++i) {

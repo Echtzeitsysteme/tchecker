@@ -44,14 +44,14 @@ edge:Process:REC_IDLE:REC_IDLE:Process_snd_idle_i_emit{}
 edge:Process:REC_ACK_IDLE:REC_ACK_IDLE:Process_snd_idle_i_emit{}
 event:Process_snd_ack_i
 event:Process_snd_ack_i_emit
-edge:Process:REC_IDLE_ACK:REC_IDLE_ACK:Process_snd_ack_i_emit{}
+event:Process_rec_idle_j_emit
+edge:Process:REC_IDLE_ACK:REC_IDLE_ACK:Process_rec_idle_j_emit{} # Non-Deterministic Mutation
 edge:Process:REC_REQ:REC_REQ_IDLE:Process_snd_idle_i_emit{do:Process_yr=0}
 edge:Process:REC_IDLE:REC_IDLE_ACK:Process_snd_ack_i_emit{do:Process_yr=0}
 event:Process_rec_req_j
 event:Process_rec_req_j_emit
 edge:Process:REC_REQ_IDLE:REC_IDLE:Process_rec_req_j_emit{}
 event:Process_rec_idle_j
-event:Process_rec_idle_j_emit
 edge:Process:REC_IDLE_REC:REC_REQ:Process_rec_idle_j_emit{}
 edge:Process:REC_IDLE:REC_IDLE_REC:Process_snd_req_i_emit{do:Process_yr=0}
 event:Process_rec_ack_j
@@ -73,4 +73,3 @@ edge:Process:REC_ACK_REQ:REC_REQ:Process_rec_ack_j_emit{}
 edge:Process:REC_ACK_REQ:REC_ACK_REQ:Process_snd_req_i_emit{}
 edge:Process:REC_ACK:REC_ACK_REQ:Process_snd_req_i_emit{do:Process_yr=0}
 edge:Process:REC_IDLE_ACK:REC_ACK:Process_rec_idle_j_emit{}
-edge:Process:REC_REQ_ACK:REC_IDLE_ACK:Process_rec_req_j_emit{} # Added Nondeterministic Choice
