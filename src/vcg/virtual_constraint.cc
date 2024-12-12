@@ -190,6 +190,8 @@ std::shared_ptr<virtual_constraint_t> factory(tchecker::zg::zone_t const & zone,
 std::shared_ptr<virtual_constraint_t> factory(const tchecker::dbm::db_t * dbm, tchecker::clock_id_t dim, tchecker::clock_id_t no_of_virtual_clocks)
 {
 
+  assert(dim > no_of_virtual_clocks);
+
   std::shared_ptr<virtual_constraint_t> result = factory(no_of_virtual_clocks);
 
   std::vector<tchecker::clock_id_t> indices;
@@ -261,59 +263,6 @@ bool all_elements_are_stronger_than(std::shared_ptr<zone_container_t<virtual_con
     }
     result &= inter;
   }
-  return result;
-}
-
-std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> contained_in_all(std::vector<std::shared_ptr<zone_container_t<virtual_constraint_t>>> & vc, tchecker::clock_id_t no_of_virtual_clocks)
-{
-
-  assert(
-    std::all_of(vc.begin(), vc.end(),
-                [no_of_virtual_clocks](std::shared_ptr<zone_container_t<virtual_constraint_t>> & lo_vc){return no_of_virtual_clocks + 1 == lo_vc->dim();} // cppcheck-suppress [assertWithSideEffect]
-    )
-  );
-
-  if (vc.empty()) {
-    return std::make_shared<tchecker::zone_container_t<virtual_constraint_t>>(no_of_virtual_clocks + 1);
-  }
-
-  if (1 == vc.size()) {
-    (vc[0])->compress();
-    return vc[0];
-  }
-
-  std::shared_ptr<zone_container_t<virtual_constraint_t>> cur = vc.back();
-  vc.pop_back();
-
-  std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> inter = contained_in_all(vc, no_of_virtual_clocks);
-
-  std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> result = std::make_shared<zone_container_t<virtual_constraint_t>>(no_of_virtual_clocks + 1);
-
-  for(auto iter_cur = cur->begin(); iter_cur < cur->end(); iter_cur++) {
-    for(auto iter_inter = inter->begin(); iter_inter < inter->end(); iter_inter++) {
-      std::shared_ptr<virtual_constraint_t> tmp = factory(no_of_virtual_clocks);
-      if(tchecker::dbm::NON_EMPTY == tchecker::dbm::intersection(tmp->dbm(), (**iter_cur).dbm(), (**iter_inter).dbm(), (**iter_cur).dim())) {
-        result->append_zone(tmp);
-      }
-    }
-  }
-
-  assert(
-    std::all_of(result->begin(), result->end(),
-                [](std::shared_ptr<virtual_constraint_t> res){return tchecker::dbm::is_consistent(res->dbm(), res->dim());} // cppcheck-suppress assertWithSideEffect
-    )
-  );
-
-  assert(
-    std::all_of(result->begin(), result->end(),
-                [](std::shared_ptr<virtual_constraint_t> res){return tchecker::dbm::is_tight(res->dbm(), res->dim());} // cppcheck-suppress assertWithSideEffect
-    )
-  );
-
-  assert(all_elements_are_stronger_than(cur, result, no_of_virtual_clocks));
-
-  result->compress();
-
   return result;
 }
 

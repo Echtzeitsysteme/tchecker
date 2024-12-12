@@ -149,14 +149,6 @@ std::shared_ptr<virtual_constraint_t> factory(const tchecker::dbm::db_t * dbm, t
  */
 std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> combine(tchecker::zone_container_t<virtual_constraint_t> & lo_vc, tchecker::clock_id_t no_of_virtual_clocks);
 
-/*!
- \brief contained-in-all function (see the TR of Lieb et al.)
- \param a vector of container of virtual constraints
- \return a container of virtual constraints
- */
-std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> contained_in_all(std::vector<std::shared_ptr<zone_container_t<virtual_constraint_t>>> & vc, tchecker::clock_id_t no_of_virtual_clocks);
-
-
 } // end of namespace virtual_constraint
 
 } // end of namespace tchecker

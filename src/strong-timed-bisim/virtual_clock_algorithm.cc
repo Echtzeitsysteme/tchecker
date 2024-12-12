@@ -6,7 +6,7 @@
  */
 
 #include "tchecker/strong-timed-bisim/virtual_clock_algorithm.hh"
-#include "tchecker/strong-timed-bisim/search_contradiction.hh"
+#include "tchecker/strong-timed-bisim/contradiction_searcher.hh"
 #include "tchecker/vcg/virtual_constraint.hh"
 #include "tchecker/vcg/revert_transitions.hh"
 #include "tchecker/vcg/sync.hh"
@@ -413,39 +413,6 @@ Lieb_et_al::check_target_pair(tchecker::zg::state_sptr_t target_state_A, tchecke
 
 }
 
-bool contradiction_still_possible(tchecker::zg::zone_t const & zone_A, tchecker::zg::zone_t const & zone_B,
-                                  std::vector<tchecker::vcg::vcg_t::sst_t *> & trans_A, std::vector<tchecker::vcg::vcg_t::sst_t *> & trans_B,
-                                  tchecker::zone_matrix_t<tchecker::virtual_constraint::virtual_constraint_t> & found_cont,
-                                  std::vector< std::vector<bool> > finished)
-{
-
-  assert(found_cont.get_no_of_rows() > 0);
-  assert(found_cont.get_no_of_columns() > 0);
-
-  assert(finished.size() == found_cont.get_no_of_rows());
-  std::for_each(finished.begin(), finished.end(), [found_cont](std::vector<bool> cur) { assert(cur.size() == found_cont.get_no_of_columns()); } );
-
-  tchecker::zone_matrix_t<tchecker::virtual_constraint::virtual_constraint_t> new_cont{found_cont.get_no_of_rows(), found_cont.get_no_of_columns(), found_cont.get_dim()};
-
-  for(size_t i = 0; i < found_cont.get_no_of_rows(); ++i) {
-    for(size_t j = 0; j < found_cont.get_no_of_columns(); ++j) {
-      if(finished[i][j]) {
-        new_cont.get(i, j)->append_container(found_cont.get(i, j));
-      } else {
-        auto vc_true = tchecker::virtual_constraint::factory(found_cont.get_dim() - 1);
-        vc_true->make_universal();
-        new_cont.get(i, j)->append_zone(vc_true);
-      }
-    }
-  }
-
-  auto cont_possible = search_contradiction(zone_A, zone_B, trans_A, trans_B, new_cont, found_cont.get_dim() - 1);
-  cont_possible->compress();
-
-  return !cont_possible->is_empty();
-
-}
-
 std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>
 Lieb_et_al::check_for_outgoing_transitions( tchecker::zg::zone_t const & zone_A, tchecker::zg::zone_t const & zone_B,
                                             std::vector<tchecker::vcg::vcg_t::sst_t *> & trans_A, std::vector<tchecker::vcg::vcg_t::sst_t *> & trans_B,
@@ -465,15 +432,21 @@ Lieb_et_al::check_for_outgoing_transitions( tchecker::zg::zone_t const & zone_A,
 
     for(auto cur : trans_A) {
       auto && [status_A, s_A, t_A] = *cur;
-      auto to_append = tchecker::virtual_constraint::factory(s_A->zone(), _A->get_no_of_virtual_clocks());
+      auto target = tchecker::virtual_constraint::factory(s_A->zone(), _A->get_no_of_virtual_clocks());
+      auto to_append = tchecker::vcg::revert_action_trans(zone_A, t_A->guard_container(), t_A->reset_container(), t_A->tgt_invariant_container(), *target);      
       result->append_zone(to_append);
     }
 
     for(auto cur : trans_B) {
       auto && [status_B, s_B, t_B] = *cur;
-      auto to_append = tchecker::virtual_constraint::factory(s_B->zone(), _B->get_no_of_virtual_clocks());
+      auto target = tchecker::virtual_constraint::factory(s_B->zone(), _B->get_no_of_virtual_clocks());
+      auto to_append = tchecker::vcg::revert_action_trans(zone_B, t_B->guard_container(), t_B->reset_container(), t_B->tgt_invariant_container(), *target); 
       result->append_zone(to_append);
     }
+
+    result->compress();
+    result = tchecker::virtual_constraint::combine(*result, _A->get_no_of_virtual_clocks());
+    result->compress();
 
     return result;
 
@@ -482,10 +455,12 @@ Lieb_et_al::check_for_outgoing_transitions( tchecker::zg::zone_t const & zone_A,
   tchecker::zone_matrix_t<tchecker::virtual_constraint::virtual_constraint_t> found_cont{trans_A.size(), trans_B.size(), _A->get_no_of_virtual_clocks() + 1};
   std::vector<std::vector<bool>> finished(trans_A.size(), std::vector<bool>(trans_B.size(), false)); // init the finished matrix with false
 
-  // we add an optimization here. We first check if the union of the targets of both sides are virtually equivalent. If they are not, we can already stop here.
-  // We do this by running the search_contradiction function without an empty matrix and checking, whether this already returns a contradiction.
+  contradiction_searcher_t con_searcher{trans_A, trans_B, _A->get_no_of_virtual_clocks()};
 
-  auto contradiction = search_contradiction(zone_A, zone_B, trans_A, trans_B, found_cont, _A->get_no_of_virtual_clocks());
+  // we add an optimization here. We first check if the union of the targets of both sides are virtually equivalent. If they are not, we can already stop here.
+  // We do this by running the search_contradiction function without any found contradiction and checking, whether this already returns a contradiction.
+
+  auto contradiction = con_searcher.search_contradiction(zone_A, zone_B, trans_A, trans_B, found_cont);
 
   if(!(contradiction->is_empty())) {
     return contradiction;
@@ -527,13 +502,13 @@ Lieb_et_al::check_for_outgoing_transitions( tchecker::zg::zone_t const & zone_A,
       }
     }
 
-    auto contradiction = search_contradiction(zone_A, zone_B, trans_A, trans_B, found_cont, _A->get_no_of_virtual_clocks());
+    auto contradiction = con_searcher.search_contradiction(zone_A, zone_B, trans_A, trans_B, found_cont);
 
     if(!(contradiction->is_empty())) {
       return contradiction;
     }
 
-  } while(contradiction_still_possible(zone_A, zone_B, trans_A, trans_B, found_cont, finished));
+  } while(con_searcher.contradiction_still_possible(zone_A, zone_B, trans_A, trans_B, found_cont, finished));
 
   return std::make_shared<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(_A->get_no_of_virtual_clocks() + 1);
 

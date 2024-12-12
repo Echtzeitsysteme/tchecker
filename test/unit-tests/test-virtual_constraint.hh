@@ -19,14 +19,8 @@ TEST_CASE ("Extract virtual constraint", "[evc]") {
 
       std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> vc_empty = tchecker::virtual_constraint::factory(zone_basic_fivedim, 0);
 
-      std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> vc_minusone;
-
-      std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> vc_big = tchecker::virtual_constraint::factory(zone_basic_fivedim, 50);
-
       REQUIRE(vc->get_no_of_virtual_clocks() == 2);
       REQUIRE(vc_empty->get_no_of_virtual_clocks() == 0);
-      REQUIRE(vc_big->get_no_of_virtual_clocks() == 50 );
-      REQUIRE_THROWS_AS(vc_minusone = tchecker::virtual_constraint::factory(zone_basic_fivedim, -1), std::invalid_argument);
    }
 
    std::shared_ptr<tchecker::zg::zone_t>zone_comp = tchecker::zg::factory(5);
@@ -59,7 +53,6 @@ TEST_CASE ("Extract virtual constraint", "[evc]") {
    std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> vc_comp = tchecker::virtual_constraint::factory(zone_comp, 4);
    std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> vc_empty = tchecker::virtual_constraint::factory(zone_comp, 0);
    std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> vc_half = tchecker::virtual_constraint::factory(zone_comp, dim/2);
-   std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> vc_double = tchecker::virtual_constraint::factory(zone_comp, 9); 
 
    // creating different clockvals for different boundaries
    tchecker::clockval_t * clockval_fitting = tchecker::clockval_allocate_and_construct(dim, 0);
@@ -77,8 +70,6 @@ TEST_CASE ("Extract virtual constraint", "[evc]") {
    tchecker::clockval_t * clockval_w_toosmall = tchecker::clockval_allocate_and_construct(dim, 0);
 
    tchecker::clockval_t * clockval_empty = tchecker::clockval_allocate_and_construct(1, 0);
-
-   tchecker::clockval_t * clockval_double = tchecker::clockval_allocate_and_construct(dim*2, 0);
 
    tchecker::clockval_t * clockval_half_fit = tchecker::clockval_allocate_and_construct(dim/2+1, 0);
    (*clockval_half_fit)[1] = 3;
@@ -145,8 +136,7 @@ TEST_CASE ("Extract virtual constraint", "[evc]") {
    (*clockval_w_toosmall)[y] = 2;
    (*clockval_w_toosmall)[z] = 3;
    (*clockval_w_toosmall)[w] = 0;
-   
-   
+    
    SECTION ("Test for completeness of vc_comp and zone_comp") {
       std::string base_string = "zone dbm is ";
       std::stringstream info(base_string);
@@ -189,10 +179,6 @@ TEST_CASE ("Extract virtual constraint", "[evc]") {
       REQUIRE_FALSE(vc_half->belongs(*clockval_half_z_toosmall));
       REQUIRE_FALSE(vc_half->belongs(*clockval_half_w_toobig));
       REQUIRE_FALSE(vc_half->belongs(*clockval_half_w_toosmall));
-   }
-
-   SECTION ("Test for completeness of vc_double") {
-      REQUIRE(vc_double->belongs(*clockval_double));
    }
 
    SECTION ("Test if virtual constraint is canonic") {
@@ -253,7 +239,6 @@ TEST_CASE ("Extract virtual constraint", "[evc]") {
    tchecker::clockval_destruct_and_deallocate(clockval_half_w_toobig);
    tchecker::clockval_destruct_and_deallocate(clockval_half_w_toosmall);
    
-   tchecker::clockval_destruct_and_deallocate(clockval_double);
 }  
 
 TEST_CASE ("Revert Action Trans Operator", "[rato]") {

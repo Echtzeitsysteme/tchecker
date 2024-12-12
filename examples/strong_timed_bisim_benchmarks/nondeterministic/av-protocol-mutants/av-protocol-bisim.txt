@@ -97,7 +97,7 @@ event:Process__errMode2
 event:Process__errMode2_recv
 edge:Process:newPn:sample:Process__errMode2_recv{provided:(Process_clock_A_c > 30)}
 edge:Process:check_eof:newPn:Process__one_recv{do:Process_clock_A_c=0}
-edge:Process:check_eof:newPn:Process__zero_recv{do:Process_clock_A_c=0}
+edge:Process:check_eof:newPn:Process__one_recv{do:Process_clock_A_c=0} # Non-Deterministic Mutation
 event:Process_a
 event:Process_a_emit
 edge:Process:jam:transmit:Process_a_emit{do:Process_clock_A_c=0}
@@ -139,6 +139,4 @@ edge:Process:idle:ex_start:Process_k_emit{provided:(Process_clock_A_c == 781)}
 event:Process_l
 event:Process_l_emit
 edge:Process:start:idle:Process_l_emit{do:Process_clock_A_c=0}
-edge:Process:ex_silence2:idle:Process__zero_recv{do:Process_clock_A_c=0} # Non-deterministic Choice
-
 
