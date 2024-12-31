@@ -230,6 +230,17 @@ public:
     }
   }
 
+  bool is_superset(T const & zone)
+  {
+    // temporary implementation to preserve functionality
+    for(auto current_zone = _storage->begin(); current_zone < _storage->end(); ++current_zone) {
+      if (**current_zone == zone) {
+        return true;
+      }
+    }
+    return false;
+  }
+
 private:
 
   std::shared_ptr<std::vector<std::shared_ptr<T>>> find_union_partner(std::vector<std::shared_ptr<T>> const cur)
