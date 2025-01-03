@@ -246,21 +246,21 @@ Lieb_et_al::check_for_virt_bisim(tchecker::zg::const_state_sptr_t A_state, tchec
     tchecker::dbm::tighten(A_norm->zone().dbm(), A_norm->zone().dim());
     tchecker::dbm::tighten(B_norm->zone().dbm(), B_norm->zone().dim());
 
-    // check whether normalized_pair is subset of visited
+    // checking whether normalized_pair is subset of visited
     std::pair<tchecker::vloc_sptr_t, tchecker::vloc_sptr_t> vloc_pair{A_norm->vloc_ptr(), B_norm->vloc_ptr()};
 
     if (0 == visited.count(vloc_pair)) {
-      std::pair<std::shared_ptr<tchecker::zone_container_t<zg::zone_t>>, std::shared_ptr<tchecker::zone_container_t<zg::zone_t>>> zone_container_pair{new zone_container_t(A_norm->zone()), new zone_container_t(B_norm->zone())};
+      std::pair<std::shared_ptr<tchecker::zone_container_t<zg::zone_t>>, std::shared_ptr<tchecker::zone_container_t<zg::zone_t>>> zone_container_pair{std::make_shared<tchecker::zone_container_t<zg::zone_t>>(A_norm->zone()), std::make_shared<tchecker::zone_container_t<zg::zone_t>>(B_norm->zone())};
       visited.emplace(vloc_pair, zone_container_pair);
     } else {
-      if ((*visited[vloc_pair].first).is_superset(A_norm->zone()) && (*visited[vloc_pair].second).is_superset(B_norm->zone()))
+      if ((*visited[vloc_pair].first).is_superset_approx(A_norm->zone()) && (*visited[vloc_pair].second).is_superset_approx(B_norm->zone()))
         return std::make_shared<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(_A->get_no_of_virtual_clocks()+1);
 
       (*visited[vloc_pair].first).append_zone(A_norm->zone());
       (*visited[vloc_pair].second).append_zone(B_norm->zone());
 
-      // (*visited[vloc_pair].first).compress();
-      // (*visited[vloc_pair].second).compress();
+      (*visited[vloc_pair].first).compress();
+      (*visited[vloc_pair].second).compress();
     }
 
     // we go on with the non-normalized symbolic states
