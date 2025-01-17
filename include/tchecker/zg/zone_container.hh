@@ -8,6 +8,8 @@
 #ifndef TCHECKER_ZG_ZONE_CONTAINER_HH
 #define TCHECKER_ZG_ZONE_CONTAINER_HH
 
+#define SUBSETS_WITH_INTERSECTIONS
+
 #include <iterator>
 #include <memory>
 
@@ -234,26 +236,45 @@ public:
    \brief checks whether the given zone is a subset of the union of all zones in the zone container (approximately)
    \note only returns true if container is superset but might return false incorrectly. Always returns true if given zone is a subset of a single element in the zone container
    */
-  bool is_superset_approx(T const & zone)
+  bool is_superset(T const & zone)
   { 
-    assert(this->dim() == zone.dim());
-    auto intersections = std::make_shared<zone_container_t<T>>(_dim);
+    #if defined(SUBSETS_WITH_INTERSECTIONS)
+      assert(this->dim() == zone.dim());
+      auto intersections = std::make_shared<zone_container_t<T>>(_dim);
 
-    for(auto current_zone = _storage->begin(); current_zone < _storage->end(); ++current_zone) {
-      tchecker::dbm::db_t intersection[this->dim() * this->dim()];
-      if(tchecker::dbm::NON_EMPTY == tchecker::dbm::intersection(intersection, (*current_zone)->dbm(), zone.dbm(), _dim)) {
-        intersections->append_zone();
-        tchecker::dbm::copy(intersections->back()->dbm(), intersection, this->dim());
-      } 
-    }
+      for(auto current_zone = _storage->begin(); current_zone < _storage->end(); ++current_zone) {
+        tchecker::dbm::db_t intersection[this->dim() * this->dim()];
+        if(tchecker::dbm::NON_EMPTY == tchecker::dbm::intersection(intersection, (*current_zone)->dbm(), zone.dbm(), _dim)) {
+          intersections->append_zone();
+          tchecker::dbm::copy(intersections->back()->dbm(), intersection, this->dim());
+        } 
+      }
 
-    intersections->compress();
+      intersections->compress();
 
-    // since all elements of intersections are subsets of zone, we know that if zone is an element of intersections, it must be the only (and therefore first) element of intersections after compression
-    if(intersections->size() > 0) 
-      return(tchecker::dbm::is_equal(zone.dbm(), (*intersections->begin())->dbm(), _dim));
-  
-    return false;
+      // since all elements of intersections are subsets of zone, we know that if zone is an element of intersections, it must be the only (and therefore first) element of intersections after compression
+      if(intersections->size() > 0) 
+        return(zone == **intersections->begin());
+    
+      return false;
+
+    #elif defined(SUBSETS_WITH_COMPRESS) || defined(SUBSETS_WITHOUT_COMPRESS)
+      for(auto current_zone = _storage->begin(); current_zone < _storage->end(); ++current_zone) {
+        if (zone <= **current_zone)
+          return true;
+      }
+      return false;
+
+    #elif defined(WITHOUT_SUBSETS)
+      for(auto current_zone = _storage->begin(); current_zone < _storage->end(); ++current_zone) {
+        if (zone == **current_zone) 
+          return true;
+      }
+      return false;
+
+    #else
+      #error "Define SUBSETS_WITH_INTERSECTIONS, SUBSETS_WITH_COMPRESS, SUBSETS_WITHOUT_COMPRESS or WITHOUT_SUBSETS."
+    #endif
   }
 
 private:
