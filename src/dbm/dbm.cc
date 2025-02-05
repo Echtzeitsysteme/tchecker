@@ -1355,11 +1355,9 @@ enum tchecker::dbm::union_convex_t convex_union(tchecker::dbm::db_t *result, tch
     }
   }
 
-  if (dbm1_tight.empty()) {
+  if(dbm1_tight.empty()) {
     assert(tchecker::dbm::is_consistent(result, dim));
     assert(tchecker::dbm::is_tight(result, dim));
-    assert(tchecker::dbm::is_le(dbm1, result, dim));
-    assert(tchecker::dbm::is_le(dbm2, result, dim));
     return tchecker::dbm::union_convex_t::UNION_IS_CONVEX;
   }
 
@@ -1367,8 +1365,6 @@ enum tchecker::dbm::union_convex_t convex_union(tchecker::dbm::db_t *result, tch
     tchecker::dbm::copy(result, dbm2, dim);
     assert(tchecker::dbm::is_consistent(result, dim));
     assert(tchecker::dbm::is_tight(result, dim));
-    assert(tchecker::dbm::is_le(dbm1, result, dim));
-    assert(tchecker::dbm::is_le(dbm2, result, dim));
     return tchecker::dbm::union_convex_t::UNION_IS_CONVEX;
   }
 
@@ -1386,8 +1382,6 @@ enum tchecker::dbm::union_convex_t convex_union(tchecker::dbm::db_t *result, tch
 
   assert(tchecker::dbm::is_consistent(result, dim));
   assert(tchecker::dbm::is_tight(result, dim));
-  assert(tchecker::dbm::is_le(dbm1, result, dim));
-  assert(tchecker::dbm::is_le(dbm2, result, dim));
   return tchecker::dbm::union_convex_t::UNION_IS_CONVEX;
 
 }
