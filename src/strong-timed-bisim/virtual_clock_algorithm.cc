@@ -238,10 +238,23 @@ Lieb_et_al::check_for_virt_bisim(tchecker::zg::const_state_sptr_t A_state, tchec
 
     auto A_norm = _A->clone_state(A_cloned);
     auto B_norm = _B->clone_state(B_cloned);
-
+    
     // normalizing, to check whether we have already seen this pair.
-    _A->run_extrapolation(A_norm->zone().dbm(), A_norm->zone().dim(), *(A_norm->vloc_ptr()));
-    _B->run_extrapolation(B_norm->zone().dbm(), B_norm->zone().dim(), *(B_norm->vloc_ptr()));
+    tchecker::vloc_t * extrapolation_vloc = tchecker::vloc_allocate_and_construct((*(A_norm->vloc_ptr())).size() + (*(B_norm->vloc_ptr())).size(), (*(A_norm->vloc_ptr())).size() + (*(B_norm->vloc_ptr())).size());
+
+    // get location maps for clocks of first TA for locations of first TA
+    for(size_t i = 0; i < (*(A_norm->vloc_ptr())).size(); ++i){
+      (*extrapolation_vloc)[i] = (*(A_norm->vloc_ptr()))[i];
+    }
+    // get location maps for clocks of second TA for locations of second TA
+    for(size_t i = 0; i < (*(B_norm->vloc_ptr())).size(); ++i){
+      (*extrapolation_vloc)[(*(A_norm->vloc_ptr())).size() + i] = _A->get_no_of_locations() + (*(B_norm->vloc_ptr()))[i];
+    }
+
+    _A->run_extrapolation(A_norm->zone().dbm(), A_norm->zone().dim(), *extrapolation_vloc);
+    _B->run_extrapolation(B_norm->zone().dbm(), B_norm->zone().dim(), *extrapolation_vloc);
+
+    vloc_destruct_and_deallocate(extrapolation_vloc);
 
     tchecker::dbm::tighten(A_norm->zone().dbm(), A_norm->zone().dim());
     tchecker::dbm::tighten(B_norm->zone().dbm(), B_norm->zone().dim());
