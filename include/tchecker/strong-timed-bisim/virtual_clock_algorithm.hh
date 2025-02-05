@@ -19,6 +19,7 @@
 #include "tchecker/strong-timed-bisim/stats.hh"
 #include "tchecker/vcg/vcg.hh"
 #include "tchecker/zg/zone_container.hh"
+#include "tchecker/strong-timed-bisim/visited_map.hh"
 
 namespace tchecker {
 
@@ -50,39 +51,6 @@ public:
 
 private:
 
-  /*!
-   \brief pair of two pairs consisting of one vloc and one intval each
-  */
-  using visited_map_key_t = std::pair<std::pair<tchecker::intval_sptr_t, tchecker::vloc_sptr_t>, std::pair<tchecker::intval_sptr_t, tchecker::vloc_sptr_t>>;
-                            
-  struct custom_hash {
-    size_t operator()(const visited_map_key_t &to_hash) const {
-      size_t h = TCHECKER_STRONG_TIMED_BISIM_VIRTUAL_CLOCK_ALGORITHM_HH_SEED;
-      boost::hash_combine(h, *to_hash.first.first);
-      boost::hash_combine(h, *to_hash.first.second);
-      boost::hash_combine(h, *to_hash.second.first);
-      boost::hash_combine(h, *to_hash.second.second);
-      return h;
-    }
-  };
-
-  struct custom_equal {
-    bool operator() (const visited_map_key_t &p1, const visited_map_key_t &p2) const {
-      return *p1.first.first == *p2.first.first
-             && *p1.first.second == *p2.first.second
-             && *p1.second.first == *p2.second.first
-             && *p1.second.second == *p2.second.second;
-    }
-  };
-  
-  /*!
-   \brief unordered map mapping a visited_map_key to a pair of zone containers
-  */
-  using visited_map_t = std::unordered_map<
-                        visited_map_key_t,
-                        std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>, 
-                        custom_hash, 
-                        custom_equal>;
   /*!
    \brief checks whether we need to do an epsilon transition
    \param A_state : first state

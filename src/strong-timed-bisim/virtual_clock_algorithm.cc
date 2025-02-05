@@ -46,7 +46,7 @@ tchecker::strong_timed_bisim::stats_t Lieb_et_al::run() {
 
 //  std::cout << __FILE__ << ": " << __LINE__ << ": start algorithm" << std::endl;
 
-  visited_map_t empty;
+  visited_map_t empty(_A->get_no_of_virtual_clocks());
 
   std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> result 
     = this->check_for_virt_bisim(const_first, std::get<2>(sst_first[0]), const_second, std::get<2>(sst_second[0]), empty);
@@ -247,24 +247,11 @@ Lieb_et_al::check_for_virt_bisim(tchecker::zg::const_state_sptr_t A_state, tchec
     tchecker::dbm::tighten(B_norm->zone().dbm(), B_norm->zone().dim());
 
     // checking whether normalized_pair is subset of visited
-    auto key = std::make_pair(std::make_pair(A_norm->intval_ptr(), A_norm->vloc_ptr()), std::make_pair(B_norm->intval_ptr(), B_norm->vloc_ptr()));
-    auto current_virtual_constraint = tchecker::virtual_constraint::factory(A_norm->zone(), _A->get_no_of_virtual_clocks());
-
-    if (0 == visited.count(key)) {
-      auto new_zone_container = std::make_shared<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(*current_virtual_constraint);
-      visited.emplace(key, new_zone_container);
-    } else {
-      if ((*visited[key]).is_superset(*current_virtual_constraint))
-        return std::make_shared<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(_A->get_no_of_virtual_clocks()+1);
-
-      auto zone_container_copy = std::make_shared<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(*visited[key]);
-      zone_container_copy->append_zone(current_virtual_constraint);
-      visited[key] = zone_container_copy;
-
-      #if defined(SUBSETS_WITH_INTERSECTIONS) || defined(SUBSETS_WITH_COMPRESS) // in zone_container.hh
-        (*visited[key]).compress();
-      #endif
-    }
+    if (visited.contains_superset(A_norm, B_norm)) 
+      return std::make_shared<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(_A->get_no_of_virtual_clocks()+1);
+ 
+    visited_map_t visited_copy(visited);
+    visited_copy.emplace(A_norm, B_norm);
 
     // we go on with the non-normalized symbolic states
     assert(tchecker::dbm::is_tight(A_cloned->zone().dbm(), A_cloned->zone().dim()));
@@ -310,7 +297,7 @@ Lieb_et_al::check_for_virt_bisim(tchecker::zg::const_state_sptr_t A_state, tchec
       add_to_transition_list(trans_B, v_B, _B->system(), symbol);
 
       std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> contradiction
-        = check_for_outgoing_transitions( A_cloned->zone(), B_cloned->zone(), trans_A, trans_B, visited);
+        = check_for_outgoing_transitions( A_cloned->zone(), B_cloned->zone(), trans_A, trans_B, visited_copy);
 
       if(!(contradiction->is_empty())) {
         std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> sync_reverted
