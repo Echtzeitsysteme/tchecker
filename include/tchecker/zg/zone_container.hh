@@ -227,8 +227,8 @@ public:
 
   void print_zone_container(std::ostream & os)
   {
-    for(auto cur : _storage) {
-      os << *cur << " ";
+    for(auto cur : *_storage) {
+      tchecker::dbm::output_matrix(os, cur->dbm(), _dim);
     }
   }
 
@@ -421,13 +421,12 @@ public:
 
   void print_zone_matrix(std::ostream & os)
   {
-    for(auto i = 0; i < _no_of_rows; ++i) {
+    for(size_t i = 0; i < _no_of_rows; ++i) {
       auto row = get_row(i);
-      for(auto cur : row) {
-        row->print_container(os);
-        os << "    ";
+      for(size_t j = 0; j < row->size(); ++j) {
+        os << "matrix element [" << i << ", " << j << "]:" << std::endl;
+        (*row)[i]->print_zone_container(os);
       }
-      os << std::endl;
     }
   }
 
