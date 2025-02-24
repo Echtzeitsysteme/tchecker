@@ -16,7 +16,7 @@
 #include <boost/container_hash/hash.hpp>
 #endif
 
-#include "tchecker/strong-timed-bisim/stats.hh"
+#include "tchecker/ta/state.hh"
 #include "tchecker/vcg/virtual_constraint.hh"
 
 namespace tchecker {
