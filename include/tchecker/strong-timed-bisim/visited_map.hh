@@ -32,6 +32,7 @@ private:
 
     /*
      \brief key type for visited map. A key is a pair of two pairs consisting of one intval and one vloc each
+     \note due to mismodeling we were unable to use a pair of tchecker::ta::state_t.
     */
     using visited_map_key_t = std::pair<std::pair<tchecker::intval_sptr_t, tchecker::vloc_sptr_t>, std::pair<tchecker::intval_sptr_t, tchecker::vloc_sptr_t>>;
 
