@@ -7,4 +7,5 @@ set(STRONG_TIMED_BISIM_SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/virtual_clock_algorithm.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/system.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/contradiction_searcher.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/visited_map.cc
     PARENT_SCOPE)

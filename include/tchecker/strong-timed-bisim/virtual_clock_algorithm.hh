@@ -19,6 +19,7 @@
 #include "tchecker/strong-timed-bisim/stats.hh"
 #include "tchecker/vcg/vcg.hh"
 #include "tchecker/zg/zone_container.hh"
+#include "tchecker/strong-timed-bisim/visited_map.hh"
 
 namespace tchecker {
 
@@ -50,24 +51,6 @@ public:
 
 private:
 
-  struct custom_hash {
-    size_t operator()(const std::pair<tchecker::zg::state_sptr_t, tchecker::zg::state_sptr_t> &to_hash) const {
-      std::size_t h1 = tchecker::zg::hash_value(*(to_hash.first));
-      std::size_t h2 = tchecker::zg::hash_value(*(to_hash.second));
-
-      // https://stackoverflow.com/questions/2590677/how-do-i-combine-hash-values-in-c0x
-      std::size_t h = (h1 + 0x9e3779b9 + (TCHECKER_STRONG_TIMED_BISIM_VIRTUAL_CLOCK_ALGORITHM_HH_SEED <<6) + (TCHECKER_STRONG_TIMED_BISIM_VIRTUAL_CLOCK_ALGORITHM_HH_SEED>>2));
-      h ^= (h2 + 0x9e3779b9 + + (TCHECKER_STRONG_TIMED_BISIM_VIRTUAL_CLOCK_ALGORITHM_HH_SEED <<6) + (TCHECKER_STRONG_TIMED_BISIM_VIRTUAL_CLOCK_ALGORITHM_HH_SEED>>2));
-      return h;
-    }
-  };
-
-  struct custom_equal {
-    bool operator() (const std::pair<tchecker::zg::state_sptr_t, tchecker::zg::state_sptr_t> &p1, const std::pair<tchecker::zg::state_sptr_t, tchecker::zg::state_sptr_t> &p2) const {
-      return (*(p1.first) == *(p2.first)) && (*(p1.second) == *(p2.second));
-    }
-  };
-
   /*!
    \brief checks whether we need to do an epsilon transition
    \param A_state : first state
@@ -90,7 +73,7 @@ private:
   std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>
   check_for_virt_bisim(tchecker::zg::const_state_sptr_t A_state, tchecker::zg::transition_sptr_t A_trans,
                        tchecker::zg::const_state_sptr_t B_state, tchecker::zg::transition_sptr_t B_trans,
-                       std::unordered_set<std::pair<tchecker::zg::state_sptr_t, tchecker::zg::state_sptr_t>, custom_hash, custom_equal> & visited);
+                       visited_map_t & visited);
 
   /*!
    \brief : removes found contradictions from a zone
@@ -114,7 +97,7 @@ private:
   check_target_pair(tchecker::zg::state_sptr_t target_state_A, tchecker::zg::transition_sptr_t trans_A,
                     tchecker::zg::state_sptr_t target_state_B, tchecker::zg::transition_sptr_t trans_B,
                     std::shared_ptr<zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> already_found_contradictions,
-                    std::unordered_set<std::pair<tchecker::zg::state_sptr_t, tchecker::zg::state_sptr_t>, custom_hash, custom_equal> & visited);
+                    visited_map_t & visited);
 
   /*!
    \brief check-for-outgoing-transitions-impl function of Lieb et al.
@@ -129,7 +112,7 @@ private:
   std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>
   check_for_outgoing_transitions( tchecker::zg::zone_t const & zone_A, tchecker::zg::zone_t const & zone_B,
                                   std::vector<tchecker::vcg::vcg_t::sst_t *> & trans_A, std::vector<tchecker::vcg::vcg_t::sst_t *> & trans_B,
-                                  std::unordered_set<std::pair<tchecker::zg::state_sptr_t, tchecker::zg::state_sptr_t>, custom_hash, custom_equal> & visited);
+                                  visited_map_t & visited);
 
   const std::shared_ptr<tchecker::vcg::vcg_t> _A;
   const std::shared_ptr<tchecker::vcg::vcg_t> _B;
