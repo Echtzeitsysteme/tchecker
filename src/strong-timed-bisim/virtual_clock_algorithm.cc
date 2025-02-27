@@ -46,7 +46,7 @@ tchecker::strong_timed_bisim::stats_t Lieb_et_al::run() {
 
 //  std::cout << __FILE__ << ": " << __LINE__ << ": start algorithm" << std::endl;
 
-  std::unordered_set<std::pair<tchecker::zg::state_sptr_t, tchecker::zg::state_sptr_t>, custom_hash, custom_equal> empty;
+  visited_map_t empty(_A->get_no_of_virtual_clocks());
 
   std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> result 
     = this->check_for_virt_bisim(const_first, std::get<2>(sst_first[0]), const_second, std::get<2>(sst_second[0]), empty);
@@ -144,7 +144,7 @@ bool Lieb_et_al::do_an_epsilon_transition(tchecker::zg::state_sptr_t A_state, tc
 std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>
 Lieb_et_al::check_for_virt_bisim(tchecker::zg::const_state_sptr_t A_state, tchecker::zg::transition_sptr_t A_trans,
                                  tchecker::zg::const_state_sptr_t B_state, tchecker::zg::transition_sptr_t B_trans,
-                                 std::unordered_set<std::pair<tchecker::zg::state_sptr_t, tchecker::zg::state_sptr_t>, custom_hash, custom_equal> & visited)
+                                 visited_map_t & visited)
 {
 
   assert(check_for_virt_bisim_preconditions_check(A_state, A_trans));
@@ -238,21 +238,33 @@ Lieb_et_al::check_for_virt_bisim(tchecker::zg::const_state_sptr_t A_state, tchec
 
     auto A_norm = _A->clone_state(A_cloned);
     auto B_norm = _B->clone_state(B_cloned);
-
+    
     // normalizing, to check whether we have already seen this pair.
-    _A->run_extrapolation(A_norm->zone().dbm(), A_norm->zone().dim(), *(A_norm->vloc_ptr()));
-    _B->run_extrapolation(B_norm->zone().dbm(), B_norm->zone().dim(), *(B_norm->vloc_ptr()));
+    tchecker::vloc_t * extrapolation_vloc = tchecker::vloc_allocate_and_construct((*(A_norm->vloc_ptr())).size() + (*(B_norm->vloc_ptr())).size(), (*(A_norm->vloc_ptr())).size() + (*(B_norm->vloc_ptr())).size());
+
+    // get location maps for clocks of first TA for locations of first TA
+    for(size_t i = 0; i < (*(A_norm->vloc_ptr())).size(); ++i){
+      (*extrapolation_vloc)[i] = (*(A_norm->vloc_ptr()))[i];
+    }
+    // get location maps for clocks of second TA for locations of second TA
+    for(size_t i = 0; i < (*(B_norm->vloc_ptr())).size(); ++i){
+      (*extrapolation_vloc)[(*(A_norm->vloc_ptr())).size() + i] = _A->get_no_of_locations() + (*(B_norm->vloc_ptr()))[i];
+    }
+
+    _A->run_extrapolation(A_norm->zone().dbm(), A_norm->zone().dim(), *extrapolation_vloc);
+    _B->run_extrapolation(B_norm->zone().dbm(), B_norm->zone().dim(), *extrapolation_vloc);
+
+    vloc_destruct_and_deallocate(extrapolation_vloc);
 
     tchecker::dbm::tighten(A_norm->zone().dbm(), A_norm->zone().dim());
     tchecker::dbm::tighten(B_norm->zone().dbm(), B_norm->zone().dim());
 
-    std::pair<tchecker::zg::state_sptr_t, tchecker::zg::state_sptr_t> normalized_pair{A_norm, B_norm};
-
-    if(0 != visited.count(normalized_pair)) {
+    // checking whether normalized_pair is subset of visited
+    if (visited.contains_superset(A_norm, B_norm)) 
       return std::make_shared<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(_A->get_no_of_virtual_clocks()+1);
-    }
-
-    visited.insert(normalized_pair);
+ 
+    visited_map_t visited_copy(visited);
+    visited_copy.emplace(A_norm, B_norm);
 
     // we go on with the non-normalized symbolic states
     assert(tchecker::dbm::is_tight(A_cloned->zone().dbm(), A_cloned->zone().dim()));
@@ -298,7 +310,7 @@ Lieb_et_al::check_for_virt_bisim(tchecker::zg::const_state_sptr_t A_state, tchec
       add_to_transition_list(trans_B, v_B, _B->system(), symbol);
 
       std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> contradiction
-        = check_for_outgoing_transitions( A_cloned->zone(), B_cloned->zone(), trans_A, trans_B, visited);
+        = check_for_outgoing_transitions( A_cloned->zone(), B_cloned->zone(), trans_A, trans_B, visited_copy);
 
       if(!(contradiction->is_empty())) {
         std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> sync_reverted
@@ -372,14 +384,14 @@ std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual
 Lieb_et_al::check_target_pair(tchecker::zg::state_sptr_t target_state_A, tchecker::zg::transition_sptr_t trans_A,
                               tchecker::zg::state_sptr_t target_state_B, tchecker::zg::transition_sptr_t trans_B,
                               std::shared_ptr<zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> already_found_contradictions,
-                              std::unordered_set<std::pair<tchecker::zg::state_sptr_t, tchecker::zg::state_sptr_t>, custom_hash, custom_equal> & visited)
+                              visited_map_t & visited)
 {
 
   assert(tchecker::dbm::is_tight(target_state_A->zone().dbm(), target_state_A->zone().dim()));
   assert(tchecker::dbm::is_tight(target_state_B->zone().dbm(), target_state_B->zone().dim()));
   assert(target_state_A->zone().is_virtual_equivalent(target_state_B->zone(), _A->get_no_of_virtual_clocks()));
 
-  std::unordered_set<std::pair<tchecker::zg::state_sptr_t, tchecker::zg::state_sptr_t>, custom_hash, custom_equal> copy(visited);
+  visited_map_t copy(visited);
 
   tchecker::zg::state_sptr_t clone_A = _A->clone_state(target_state_A);
   tchecker::zg::state_sptr_t clone_B = _B->clone_state(target_state_B);
@@ -416,7 +428,7 @@ Lieb_et_al::check_target_pair(tchecker::zg::state_sptr_t target_state_A, tchecke
 std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>
 Lieb_et_al::check_for_outgoing_transitions( tchecker::zg::zone_t const & zone_A, tchecker::zg::zone_t const & zone_B,
                                             std::vector<tchecker::vcg::vcg_t::sst_t *> & trans_A, std::vector<tchecker::vcg::vcg_t::sst_t *> & trans_B,
-                                            std::unordered_set<std::pair<tchecker::zg::state_sptr_t, tchecker::zg::state_sptr_t>, custom_hash, custom_equal> & visited)
+                                            visited_map_t & visited)
 {
 
   assert(tchecker::dbm::is_tight(zone_A.dbm(), zone_A.dim()));
