@@ -40,7 +40,7 @@ void visited_map_t::emplace(tchecker::zg::state_sptr_t first, tchecker::zg::stat
     } else {
         (*_storage)[key]->append_zone(common_virtual_constraint);
 
-        #if defined(SUBSETS_WITH_INTERSECTIONS) || defined(SUBSETS_WITH_COMPRESS) // in zone_container.hh
+        #if defined(SUBSETS_WITH_NEG_AND) || defined(SUBSETS_WITH_INTERSECTIONS) || defined(SUBSETS_WITH_COMPRESS) // in zone_container.hh
             (*_storage)[key]->compress();
         #endif
     }
