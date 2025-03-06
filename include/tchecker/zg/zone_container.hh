@@ -8,7 +8,7 @@
 #ifndef TCHECKER_ZG_ZONE_CONTAINER_HH
 #define TCHECKER_ZG_ZONE_CONTAINER_HH
 
-// exactly one of WITHOUT_SUBSETS, SUBSETS_WITHOUT_COMPRESS, SUBSETS_WITH_COMPRESS and SUBSETS_WITH_INTERSECTIONS must be defined
+// exactly one of SUBSETS_WITH_NEG_AND, SUBSETS_WITH_INTERSECTIONS, SUBSETS_WITH_COMPRESS, SUBSETS_WITHOUT_COMPRESS and WITHOUT_SUBSETS must be defined
 #define WITHOUT_SUBSETS
 
 #include <iterator>
@@ -239,8 +239,26 @@ public:
    */
   bool is_superset(T const & zone)
   { 
-    #if defined(SUBSETS_WITH_INTERSECTIONS)
-      assert(this->dim() == zone.dim());
+    assert(this->dim() == zone.dim());
+
+    #if defined(SUBSETS_WITH_NEG_AND) // works only for T = virtual_constraint_t
+      auto remaining_zone = std::make_shared<zone_container_t<T>>(zone);
+
+      for(auto current_zone = _storage->begin(); current_zone < _storage->end(); ++current_zone) {
+        auto new_remaining_zone = std::make_shared<zone_container_t<T>>(_dim);
+
+        for(auto current_fragment_of_remaining_zone = remaining_zone->begin(); current_fragment_of_remaining_zone < remaining_zone->end(); ++current_fragment_of_remaining_zone){
+          auto tmp = std::make_shared<zone_container_t<T>>(_dim);
+          (*current_zone)->neg_logic_and(tmp, **current_fragment_of_remaining_zone);
+          new_remaining_zone->append_container(tmp);
+        }
+        new_remaining_zone->compress();
+        remaining_zone = new_remaining_zone;
+      }
+
+      return remaining_zone->is_empty();
+
+    #elif defined(SUBSETS_WITH_INTERSECTIONS)
       auto intersections = std::make_shared<zone_container_t<T>>(_dim);
 
       for(auto current_zone = _storage->begin(); current_zone < _storage->end(); ++current_zone) {
@@ -254,7 +272,7 @@ public:
       intersections->compress();
 
       // since all elements of intersections are subsets of zone, we know that if zone is an element of intersections, it must be the only (and therefore first) element of intersections after compression
-      if(intersections->size() > 0) 
+      if(intersections->size() == 1) 
         return(zone == **intersections->begin());
     
       return false;
@@ -274,7 +292,7 @@ public:
       return false;
 
     #else
-      #error "Define SUBSETS_WITH_INTERSECTIONS, SUBSETS_WITH_COMPRESS, SUBSETS_WITHOUT_COMPRESS or WITHOUT_SUBSETS."
+      #error "Define SUBSETS_WITH_NEG_AND, SUBSETS_WITH_INTERSECTIONS, SUBSETS_WITH_COMPRESS, SUBSETS_WITHOUT_COMPRESS or WITHOUT_SUBSETS."
     #endif
   }
 
