@@ -7,6 +7,8 @@ duplInheritedMember:*
 uninitMemberVar:*/include/tchecker/utils/hashtable.hh
 uninitMemberVar:*/include/tchecker/vm/vm.hh
 accessMoved:*/include/tchecker/utils/array.hh
+throwInNoexceptFunction:*/include/tchecker/utils/shared_objects.hh
+syntaxError:*/test/unit-tests/test-refdbm.hh
 
 // the following is a known cppcheck bug
 internalAstError:*/include/tchecker/graph/directed_graph.hh
