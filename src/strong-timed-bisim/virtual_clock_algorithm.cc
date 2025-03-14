@@ -17,7 +17,7 @@ namespace tchecker {
 namespace strong_timed_bisim {
 
 Lieb_et_al::Lieb_et_al(std::shared_ptr<tchecker::vcg::vcg_t> input_first, std::shared_ptr<tchecker::vcg::vcg_t> input_second)
-  : _A(input_first), _B(input_second), _visited_pair_of_states(0)
+  : _A(input_first), _B(input_second), _visited_pair_of_states(0), non_bisim_cache(input_first->get_no_of_virtual_clocks())
 {
   assert(_A->get_no_of_virtual_clocks() == _B->get_no_of_virtual_clocks());
   assert(_A->get_urgent_or_committed() == _B->get_urgent_or_committed());
@@ -25,8 +25,8 @@ Lieb_et_al::Lieb_et_al(std::shared_ptr<tchecker::vcg::vcg_t> input_first, std::s
 
 tchecker::strong_timed_bisim::stats_t Lieb_et_al::run() {
 
-//  std::cout << __FILE__ << ": " << __LINE__ << ": no of orig clocks is " << _A->get_no_of_original_clocks() << " and " << _B->get_no_of_original_clocks() << std::endl;
-//  std::cout << __FILE__ << ": " << __LINE__ << ": no of virt clocks is " << _A->get_no_of_virtual_clocks() << " and " << _B->get_no_of_virtual_clocks() << std::endl;
+  //std::cout << __FILE__ << ": " << __LINE__ << ": no of orig clocks is " << _A->get_no_of_original_clocks() << " and " << _B->get_no_of_original_clocks() << std::endl;
+  //std::cout << __FILE__ << ": " << __LINE__ << ": no of virt clocks is " << _A->get_no_of_virtual_clocks() << " and " << _B->get_no_of_virtual_clocks() << std::endl;
 
   tchecker::strong_timed_bisim::stats_t stats;
 
@@ -141,7 +141,7 @@ bool Lieb_et_al::do_an_epsilon_transition(tchecker::zg::state_sptr_t A_state, tc
 
 }
 
-std::shared_ptr<algorithm_return_value>
+std::shared_ptr<algorithm_return_value_t>
 Lieb_et_al::check_for_virt_bisim(tchecker::zg::const_state_sptr_t A_state, tchecker::zg::transition_sptr_t A_trans,
                                  tchecker::zg::const_state_sptr_t B_state, tchecker::zg::transition_sptr_t B_trans,
                                  visited_map_t & visited)
@@ -158,14 +158,14 @@ Lieb_et_al::check_for_virt_bisim(tchecker::zg::const_state_sptr_t A_state, tchec
 //  std::cout << __FILE__ << ": " << __LINE__ << ": check-for-virt-bisim" << std::endl;
 //  std::cout << __FILE__ << ": " << __LINE__ << ": " << A_state->vloc() << std::endl;
 //  tchecker::dbm::output_matrix(std::cout, A_state->zone().dbm(), A_state->zone().dim());
-
+//
 //  std::cout << __FILE__ << ": " << __LINE__ << ": " << B_state->vloc() << std::endl;
 //  tchecker::dbm::output_matrix(std::cout, B_state->zone().dbm(), B_state->zone().dim());
 
   // check for virtual equivalence of A_state->zone() and B_state->zone()
   if(!A_state->zone().is_virtual_equivalent(B_state->zone(), _A->get_no_of_virtual_clocks()))
   {
-    auto result = std::make_shared<algorithm_return_value>(_A->get_no_of_virtual_clocks());
+    auto result = std::make_shared<algorithm_return_value_t>(_A->get_no_of_virtual_clocks());
     result->add_to_contradictions(
       A_state->zone().get_virtual_overhang_in_both_directions(B_state->zone(), _A->get_no_of_virtual_clocks())
     );
@@ -243,7 +243,7 @@ Lieb_et_al::check_for_virt_bisim(tchecker::zg::const_state_sptr_t A_state, tchec
     sync_reverted = tchecker::virtual_constraint::combine(*sync_reverted, _A->get_no_of_virtual_clocks());
     sync_reverted->compress();
 
-    auto result = std::make_shared<algorithm_return_value>(
+    auto result = std::make_shared<algorithm_return_value_t>(
       sync_reverted, std::make_shared<tchecker::strong_timed_bisim::visited_map_t>(_A->get_no_of_virtual_clocks())
     );
 
@@ -266,6 +266,19 @@ Lieb_et_al::check_for_virt_bisim(tchecker::zg::const_state_sptr_t A_state, tchec
       (*extrapolation_vloc)[(*(A_norm->vloc_ptr())).size() + i] = _A->get_no_of_locations() + (*(B_norm->vloc_ptr()))[i];
     }
 
+    assert(tchecker::dbm::is_tight(A_cloned->zone().dbm(), A_cloned->zone().dim()));
+    assert(tchecker::dbm::is_tight(B_cloned->zone().dbm(), B_cloned->zone().dim()));
+    assert(tchecker::dbm::is_tight(A_norm->zone().dbm(), A_norm->zone().dim()));
+    assert(tchecker::dbm::is_tight(B_norm->zone().dbm(), B_norm->zone().dim()));
+
+    auto cache = non_bisim_cache.already_cached(A_cloned, B_cloned);
+
+    if(! cache->is_empty()) {
+      auto result = std::make_shared<algorithm_return_value_t>(_A->get_no_of_virtual_clocks());
+      result->add_to_contradictions(cache);
+      return result;
+    }
+
     _A->run_extrapolation(A_norm->zone().dbm(), A_norm->zone().dim(), *extrapolation_vloc);
     _B->run_extrapolation(B_norm->zone().dbm(), B_norm->zone().dim(), *extrapolation_vloc);
 
@@ -276,7 +289,7 @@ Lieb_et_al::check_for_virt_bisim(tchecker::zg::const_state_sptr_t A_state, tchec
 
     // checking whether normalized_pair is subset of visited
     if (visited.contains_superset(A_norm, B_norm)) 
-      return std::make_shared<algorithm_return_value>(_A->get_no_of_virtual_clocks());
+      return std::make_shared<algorithm_return_value_t>(_A->get_no_of_virtual_clocks());
  
     visited_map_t visited_copy(visited);
     auto check_set = std::make_shared<tchecker::strong_timed_bisim::visited_map_t>(_A->get_no_of_virtual_clocks());
@@ -285,9 +298,6 @@ Lieb_et_al::check_for_virt_bisim(tchecker::zg::const_state_sptr_t A_state, tchec
     check_set->emplace(A_norm, B_norm);
 
     // we go on with the non-normalized symbolic states
-    assert(tchecker::dbm::is_tight(A_cloned->zone().dbm(), A_cloned->zone().dim()));
-    assert(tchecker::dbm::is_tight(B_cloned->zone().dbm(), B_cloned->zone().dim()));
-
     std::vector<tchecker::vcg::vcg_t::sst_t> v_A, v_B;
 
     tchecker::zg::const_state_sptr_t A_cloned_const{A_cloned};
@@ -329,12 +339,12 @@ Lieb_et_al::check_for_virt_bisim(tchecker::zg::const_state_sptr_t A_state, tchec
       add_to_transition_list(trans_A, v_A, _A->system(), symbol);
       add_to_transition_list(trans_B, v_B, _B->system(), symbol);
 
-      std::shared_ptr<algorithm_return_value> return_from_transitions
+      std::shared_ptr<algorithm_return_value_t> return_from_transitions
         = check_for_outgoing_transitions( A_cloned->zone(), B_cloned->zone(), trans_A, trans_B, visited_copy);
 
       if(!(return_from_transitions->contradiction_free())) {
 
-        auto result = std::make_shared<algorithm_return_value>(_A->get_no_of_virtual_clocks());
+        auto result = std::make_shared<algorithm_return_value_t>(_A->get_no_of_virtual_clocks());
 
         auto contradiction = return_from_transitions->get_contradictions();
 
@@ -353,7 +363,7 @@ Lieb_et_al::check_for_virt_bisim(tchecker::zg::const_state_sptr_t A_state, tchec
     auto empty_contradictions_set 
       = std::make_shared<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(_A->get_no_of_virtual_clocks() + 1);
     
-    return std::make_shared<algorithm_return_value>(empty_contradictions_set, check_set);
+    return std::make_shared<algorithm_return_value_t>(empty_contradictions_set, check_set);
 
   }
 }
@@ -404,7 +414,7 @@ bool check_disjointness(std::shared_ptr<tchecker::zone_container_t<tchecker::zg:
 
 }
 
-std::shared_ptr<algorithm_return_value>
+std::shared_ptr<algorithm_return_value_t>
 Lieb_et_al::check_target_pair(tchecker::zg::state_sptr_t target_state_A, tchecker::zg::transition_sptr_t trans_A,
                               tchecker::zg::state_sptr_t target_state_B, tchecker::zg::transition_sptr_t trans_B,
                               std::shared_ptr<zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> already_found_contradictions,
@@ -449,12 +459,12 @@ Lieb_et_al::check_target_pair(tchecker::zg::state_sptr_t target_state_A, tchecke
   auto empty_contradictions_set 
       = std::make_shared<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(_A->get_no_of_virtual_clocks() + 1);
 
-  return std::make_shared<algorithm_return_value>(empty_contradictions_set, check_set);
+  return std::make_shared<algorithm_return_value_t>(empty_contradictions_set, check_set);
 
 
 }
 
-std::shared_ptr<algorithm_return_value>
+std::shared_ptr<algorithm_return_value_t>
 Lieb_et_al::check_for_outgoing_transitions( tchecker::zg::zone_t const & zone_A, tchecker::zg::zone_t const & zone_B,
                                             std::vector<tchecker::vcg::vcg_t::sst_t *> & trans_A, std::vector<tchecker::vcg::vcg_t::sst_t *> & trans_B,
                                             visited_map_t & visited)
@@ -464,12 +474,12 @@ Lieb_et_al::check_for_outgoing_transitions( tchecker::zg::zone_t const & zone_A,
   assert(tchecker::dbm::is_tight(zone_B.dbm(), zone_B.dim()));
 
   if(0 == trans_A.size() && 0 == trans_B.size()) {
-    return std::make_shared<algorithm_return_value>(_A->get_no_of_virtual_clocks());
+    return std::make_shared<algorithm_return_value_t>(_A->get_no_of_virtual_clocks());
   }
 
   if(0 == trans_A.size() || 0 == trans_B.size()) {
     auto result =
-      std::make_shared<algorithm_return_value>(_A->get_no_of_virtual_clocks());
+      std::make_shared<algorithm_return_value_t>(_A->get_no_of_virtual_clocks());
 
     for(auto cur : trans_A) {
       auto && [status_A, s_A, t_A] = *cur;
@@ -502,7 +512,7 @@ Lieb_et_al::check_for_outgoing_transitions( tchecker::zg::zone_t const & zone_A,
   auto contradiction = con_searcher.search_contradiction(zone_A, zone_B, trans_A, trans_B, found_cont);
 
   if(!(contradiction->is_empty())) {
-    return std::make_shared<algorithm_return_value>(contradiction, check);
+    return std::make_shared<algorithm_return_value_t>(contradiction, check);
   }
 
   visited_map_t copy(visited);
@@ -536,6 +546,7 @@ Lieb_et_al::check_for_outgoing_transitions( tchecker::zg::zone_t const & zone_A,
         if(new_cont->contradiction_free()) {
           finished[idx_A][idx_B] = true;
         } else {
+          non_bisim_cache.emplace(s_A_constrained, s_B_constrained, new_cont->get_contradictions());
           found_cont.get(idx_A, idx_B)->append_container(new_cont->get_contradictions());
           found_cont.get(idx_A, idx_B)->compress();
         }
@@ -550,7 +561,7 @@ Lieb_et_al::check_for_outgoing_transitions( tchecker::zg::zone_t const & zone_A,
     if(!(contradiction->is_empty())) {  
       auto empty_check = std::make_shared<tchecker::strong_timed_bisim::visited_map_t>(_A->get_no_of_virtual_clocks());
 
-      return std::make_shared<algorithm_return_value>(contradiction, empty_check);
+      return std::make_shared<algorithm_return_value_t>(contradiction, empty_check);
     }
 
   } while(con_searcher.contradiction_still_possible(zone_A, zone_B, trans_A, trans_B, found_cont, finished));
@@ -558,7 +569,7 @@ Lieb_et_al::check_for_outgoing_transitions( tchecker::zg::zone_t const & zone_A,
   auto empty_contradictions_set 
   = std::make_shared<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(_A->get_no_of_virtual_clocks() + 1);
 
-  return std::make_shared<algorithm_return_value>(empty_contradictions_set, check);
+  return std::make_shared<algorithm_return_value_t>(empty_contradictions_set, check);
 }
 
 } // end of namespace strong_timed_bisim

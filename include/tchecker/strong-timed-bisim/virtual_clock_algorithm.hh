@@ -21,6 +21,7 @@
 #include "tchecker/zg/zone_container.hh"
 #include "tchecker/strong-timed-bisim/visited_map.hh"
 #include "tchecker/strong-timed-bisim/algorithm_return_value.hh"
+#include "tchecker/strong-timed-bisim/non_bisim_cache.hh"
 
 namespace tchecker {
 
@@ -73,7 +74,7 @@ private:
    \param visited : a set of assumptions
    \return the same as the algorithm
    */
-  std::shared_ptr<algorithm_return_value>
+  std::shared_ptr<algorithm_return_value_t>
   check_for_virt_bisim(tchecker::zg::const_state_sptr_t A_state, tchecker::zg::transition_sptr_t A_trans,
                        tchecker::zg::const_state_sptr_t B_state, tchecker::zg::transition_sptr_t B_trans,
                        visited_map_t & visited);
@@ -96,7 +97,7 @@ private:
    \param : visted : the assumptions.
    \return the same as the algorithm
    */
-  std::shared_ptr<algorithm_return_value>
+  std::shared_ptr<algorithm_return_value_t>
   check_target_pair(tchecker::zg::state_sptr_t target_state_A, tchecker::zg::transition_sptr_t trans_A,
                     tchecker::zg::state_sptr_t target_state_B, tchecker::zg::transition_sptr_t trans_B,
                     std::shared_ptr<zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> already_found_contradictions,
@@ -111,7 +112,7 @@ private:
    \param visited : the assumptions
    \return the same as the algorithm
   */
-  std::shared_ptr<algorithm_return_value>
+  std::shared_ptr<algorithm_return_value_t>
   check_for_outgoing_transitions( tchecker::zg::zone_t const & zone_A, tchecker::zg::zone_t const & zone_B,
                                   std::vector<tchecker::vcg::vcg_t::sst_t *> & trans_A, std::vector<tchecker::vcg::vcg_t::sst_t *> & trans_B,
                                   visited_map_t & visited);
@@ -120,6 +121,8 @@ private:
   const std::shared_ptr<tchecker::vcg::vcg_t> _B;
 
   long _visited_pair_of_states;
+  non_bisim_cache_t non_bisim_cache;
+
 
 };
 

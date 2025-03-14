@@ -20,26 +20,26 @@ namespace strong_timed_bisim {
  \class algorithm_return_value
  \brief the data structure that is returned by the virtual clock algorithm
  */
-class algorithm_return_value {
+class algorithm_return_value_t {
 
 public:
 
   /*!
    \brief Default Constructor, initiates the data structure with empty contradictions and empty check set
   */
-  algorithm_return_value(tchecker::clock_id_t no_of_virt_clocks);
+  algorithm_return_value_t(tchecker::clock_id_t no_of_virt_clocks);
 
   /*!
    \brief Copy Constructor
   */
-  algorithm_return_value(algorithm_return_value& other);
+  algorithm_return_value_t(algorithm_return_value_t& other);
 
   /*!
    \brief Constructor
    \param contradictions : the set of contradictions
    \param check : the check set
    */
-  algorithm_return_value(
+  algorithm_return_value_t(
     std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> contradictions,
     std::shared_ptr<tchecker::strong_timed_bisim::visited_map_t> check);
 

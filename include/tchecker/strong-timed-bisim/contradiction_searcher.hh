@@ -9,6 +9,7 @@
 #define TCHECKER_STRONG_TIMED_BISIM_SEARCH_CONTRADICTION_HH
 
 #include "tchecker/vcg/virtual_constraint.hh"
+#include "tchecker/basictypes.hh"
 
 namespace tchecker {
 
