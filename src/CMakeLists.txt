@@ -64,6 +64,8 @@ add_subdirectory(vm)
 add_subdirectory(waiting)
 add_subdirectory(zg)
 
+add_subdirectory(publicapi)
+
 set(OTHER_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/basictypes.cc
   ${TCHECKER_INCLUDE_DIR}/tchecker/basictypes.hh
@@ -91,7 +93,8 @@ set(LIBTCHECKER_SRC
   ${WAITING_SRC}
   ${VCG_SRC}
   ${VM_SRC}
-  ${ZG_SRC})
+  ${ZG_SRC}
+  ${PUBLICAPI_SRC})
 
 # Build TChecker static library
 add_library(libtchecker_static STATIC ${LIBTCHECKER_SRC}
