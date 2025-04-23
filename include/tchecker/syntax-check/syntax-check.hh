@@ -14,7 +14,7 @@
 
 namespace tchecker {
 
-namespace tck_syntax {
+namespace syntax_check {
 
 /*!
  \brief Check timed automaton syntax from a system declaration

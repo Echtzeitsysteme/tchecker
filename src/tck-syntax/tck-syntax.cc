@@ -21,7 +21,7 @@
 #include <boost/container_hash/hash.hpp>
 #endif
 
-#include "syntax-check.hh"
+#include "tchecker/syntax-check/syntax-check.hh"
 #include "tchecker/parsing/parsing.hh"
 #include "tchecker/syncprod/system.hh"
 #include "tchecker/system/output.hh"
@@ -214,7 +214,7 @@ void do_report_asynchronous_events(tchecker::parsing::system_declaration_t const
 */
 void do_syntax_check_ta(tchecker::parsing::system_declaration_t const & sysdecl)
 {
-  if (tchecker::tck_syntax::syntax_check_ta(std::cerr, sysdecl))
+  if (tchecker::syntax_check::syntax_check_ta(std::cerr, sysdecl))
     std::cout << "Syntax OK" << std::endl;
 }
 

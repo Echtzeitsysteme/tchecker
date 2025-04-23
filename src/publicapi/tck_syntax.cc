@@ -16,24 +16,24 @@
 #include "tchecker/system/system.hh"
 #include "tchecker/ta/system.hh"
 #include "tchecker/utils/log.hh"
-// #include "tchecker/publicapi/syntax-check.hh"
+#include "tchecker/syntax-check/syntax-check.hh"
 
 const char * tck_syntax_check_syntax(const char * filename)
 {
   std::shared_ptr<tchecker::parsing::system_declaration_t> sysdecl{nullptr};
   try {
     sysdecl = tchecker::parsing::parse_system_declaration(filename);
-    // std::ostringstream oss;
-    // tchecker::tck_syntax::syntax_check_ta(oss, *sysdecl);
+    std::ostringstream oss;
+    tchecker::syntax_check::syntax_check_ta(oss, *sysdecl);
     
-    // std::string result = oss.str();
+    std::string result = oss.str();
 
-    // char * c_output = (char *)std::malloc(result.size() + 1);
-    // if (c_output == nullptr)
-    //   return nullptr; // malloc failed
+    char * c_output = (char *)std::malloc(result.size() + 1);
+    if (c_output == nullptr)
+      return nullptr; // malloc failed
 
-    // std::strcpy(c_output, result.c_str());
-    // return c_output;
+    std::strcpy(c_output, result.c_str());
+    return c_output;
     return "Success";
     
   }

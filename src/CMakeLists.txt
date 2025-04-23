@@ -54,6 +54,7 @@ add_subdirectory(refzg)
 add_subdirectory(statement)
 add_subdirectory(strong-timed-bisim)
 add_subdirectory(syncprod)
+add_subdirectory(syntax-check)
 add_subdirectory(system)
 add_subdirectory(ta)
 add_subdirectory(ts)
@@ -85,6 +86,7 @@ set(LIBTCHECKER_SRC
   ${STATEMENT_SRC}
   ${STRONG_TIMED_BISIM_SRC}
   ${SYNCPROD_SRC}
+  ${SYNTAX_CHECK_SRC}
   ${SYSTEM_SRC}
   ${TA_SRC}
   ${TS_SRC}
@@ -148,8 +150,6 @@ set_property(TARGET tck-reach PROPERTY CXX_STANDARD_REQUIRED ON)
 
 # Build tck-syntax executable
 add_executable(tck-syntax
-  ${CMAKE_CURRENT_SOURCE_DIR}/tck-syntax/syntax-check.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/tck-syntax/syntax-check.hh
   ${CMAKE_CURRENT_SOURCE_DIR}/tck-syntax/tck-syntax.cc)
 target_link_libraries(tck-syntax libtchecker_static ${Boost_LIBRARIES})
 set_property(TARGET tck-syntax PROPERTY CXX_STANDARD 17)
