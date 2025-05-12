@@ -7,8 +7,8 @@
 
 #include <boost/dynamic_bitset.hpp>
 
-#include "concur19.hh"
-#include "counter_example.hh"
+#include "tchecker/algorithms/concur19/concur19.hh"
+#include "tchecker/counter-example/counter_example_reach.hh"
 #include "tchecker/algorithms/search_order.hh"
 #include "tchecker/system/static_analysis.hh"
 #include "tchecker/ta/state.hh"
@@ -16,7 +16,7 @@
 
 namespace tchecker {
 
-namespace tck_reach {
+namespace algorithms {
 
 namespace concur19 {
 
@@ -34,7 +34,7 @@ node_t::node_t(tchecker::refzg::const_state_sptr_t const & s, bool initial, bool
 
 /* node_hash_t */
 
-std::size_t node_hash_t::operator()(tchecker::tck_reach::concur19::node_t const & n) const
+std::size_t node_hash_t::operator()(tchecker::algorithms::concur19::node_t const & n) const
 {
   // NB: we hash on the discrete part of the state in n to check all nodes
   // with same discrete part for covering
@@ -48,8 +48,8 @@ node_le_t::node_le_t(std::shared_ptr<tchecker::clockbounds::local_lu_map_t> cons
 {
 }
 
-bool node_le_t::operator()(tchecker::tck_reach::concur19::node_t const & n1,
-                           tchecker::tck_reach::concur19::node_t const & n2) const
+bool node_le_t::operator()(tchecker::algorithms::concur19::node_t const & n1,
+                           tchecker::algorithms::concur19::node_t const & n2) const
 {
   auto lu_maps_references = _cached_local_lu.bounds(n2.state().vloc_ptr());
   return tchecker::refzg::shared_is_sync_alu_le(n1.state(), n2.state(), lu_maps_references.L, lu_maps_references.U);
@@ -64,22 +64,22 @@ edge_t::edge_t(tchecker::refzg::transition_t const & t) : tchecker::graph::edge_
 graph_t::graph_t(std::shared_ptr<tchecker::refzg::refzg_t> const & refzg,
                  std::shared_ptr<tchecker::clockbounds::local_lu_map_t> const & local_lu, std::size_t block_size,
                  std::size_t table_size)
-    : tchecker::graph::subsumption::graph_t<tchecker::tck_reach::concur19::node_t, tchecker::tck_reach::concur19::edge_t,
-                                            tchecker::tck_reach::concur19::node_hash_t,
-                                            tchecker::tck_reach::concur19::node_le_t>(
-          block_size, table_size, tchecker::tck_reach::concur19::node_hash_t(),
-          tchecker::tck_reach::concur19::node_le_t(local_lu, table_size)),
+    : tchecker::graph::subsumption::graph_t<tchecker::algorithms::concur19::node_t, tchecker::algorithms::concur19::edge_t,
+                                            tchecker::algorithms::concur19::node_hash_t,
+                                            tchecker::algorithms::concur19::node_le_t>(
+          block_size, table_size, tchecker::algorithms::concur19::node_hash_t(),
+          tchecker::algorithms::concur19::node_le_t(local_lu, table_size)),
       _refzg(refzg)
 {
 }
 
-void graph_t::attributes(tchecker::tck_reach::concur19::node_t const & n, std::map<std::string, std::string> & m) const
+void graph_t::attributes(tchecker::algorithms::concur19::node_t const & n, std::map<std::string, std::string> & m) const
 {
   _refzg->attributes(n.state_ptr(), m);
   tchecker::graph::attributes(static_cast<tchecker::graph::node_flags_t const &>(n), m);
 }
 
-void graph_t::attributes(tchecker::tck_reach::concur19::edge_t const & e, std::map<std::string, std::string> & m) const
+void graph_t::attributes(tchecker::algorithms::concur19::edge_t const & e, std::map<std::string, std::string> & m) const
 {
   m["vedge"] = tchecker::to_string(e.vedge(), _refzg->system().as_system_system());
 }
@@ -101,8 +101,8 @@ public:
    \return true if n1 is less-than n2 w.r.t. lexical ordering over the states in
    the nodes
   */
-  bool operator()(tchecker::tck_reach::concur19::graph_t::node_sptr_t const & n1,
-                  tchecker::tck_reach::concur19::graph_t::node_sptr_t const & n2) const
+  bool operator()(tchecker::algorithms::concur19::graph_t::node_sptr_t const & n1,
+                  tchecker::algorithms::concur19::graph_t::node_sptr_t const & n2) const
   {
     int state_cmp = tchecker::refzg::lexical_cmp(n1->state(), n2->state());
     if (state_cmp != 0)
@@ -124,18 +124,18 @@ public:
    \param e2 : an edge
    \return true if e1 is less-than  e2 w.r.t. the tuple of edges in e1 and e2
   */
-  bool operator()(tchecker::tck_reach::concur19::graph_t::edge_sptr_t const & e1,
-                  tchecker::tck_reach::concur19::graph_t::edge_sptr_t const & e2) const
+  bool operator()(tchecker::algorithms::concur19::graph_t::edge_sptr_t const & e1,
+                  tchecker::algorithms::concur19::graph_t::edge_sptr_t const & e2) const
   {
     return tchecker::lexical_cmp(e1->vedge(), e2->vedge()) < 0;
   }
 };
 
-std::ostream & dot_output(std::ostream & os, tchecker::tck_reach::concur19::graph_t const & g, std::string const & name)
+std::ostream & dot_output(std::ostream & os, tchecker::algorithms::concur19::graph_t const & g, std::string const & name)
 {
-  return tchecker::graph::subsumption::dot_output<tchecker::tck_reach::concur19::graph_t,
-                                                  tchecker::tck_reach::concur19::node_lexical_less_t,
-                                                  tchecker::tck_reach::concur19::edge_lexical_less_t>(os, g, name);
+  return tchecker::graph::subsumption::dot_output<tchecker::algorithms::concur19::graph_t,
+                                                  tchecker::algorithms::concur19::node_lexical_less_t,
+                                                  tchecker::algorithms::concur19::edge_lexical_less_t>(os, g, name);
 }
 
 /* state_space_t */
@@ -149,20 +149,20 @@ state_space_t::state_space_t(std::shared_ptr<tchecker::refzg::refzg_t> const & r
 
 tchecker::refzg::refzg_t & state_space_t::refzg() { return _ss.ts(); }
 
-tchecker::tck_reach::concur19::graph_t & state_space_t::graph() { return _ss.state_space(); }
+tchecker::algorithms::concur19::graph_t & state_space_t::graph() { return _ss.state_space(); }
 
 /* counter example */
 namespace cex {
 
 namespace symbolic {
 
-tchecker::tck_reach::concur19::cex::symbolic::cex_t * counter_example(tchecker::tck_reach::concur19::graph_t const & g)
+tchecker::algorithms::concur19::cex::symbolic::cex_t * counter_example(tchecker::algorithms::concur19::graph_t const & g)
 {
-  return tchecker::tck_reach::symbolic_counter_example_refzg<tchecker::tck_reach::concur19::graph_t,
-                                                             tchecker::tck_reach::concur19::cex::symbolic::cex_t>(g);
+  return tchecker::counter_example::symbolic_counter_example_refzg<tchecker::algorithms::concur19::graph_t,
+                                                             tchecker::algorithms::concur19::cex::symbolic::cex_t>(g);
 }
 
-std::ostream & dot_output(std::ostream & os, tchecker::tck_reach::concur19::cex::symbolic::cex_t const & cex,
+std::ostream & dot_output(std::ostream & os, tchecker::algorithms::concur19::cex::symbolic::cex_t const & cex,
                           std::string const & name)
 {
   return tchecker::refzg::path::dot_output(os, cex, name);
@@ -174,7 +174,7 @@ std::ostream & dot_output(std::ostream & os, tchecker::tck_reach::concur19::cex:
 
 /* run */
 
-std::tuple<tchecker::algorithms::covreach::stats_t, std::shared_ptr<tchecker::tck_reach::concur19::state_space_t>>
+std::tuple<tchecker::algorithms::covreach::stats_t, std::shared_ptr<tchecker::algorithms::concur19::state_space_t>>
 run(tchecker::parsing::system_declaration_t const & sysdecl, std::string const & labels, std::string const & search_order,
     tchecker::algorithms::covreach::covering_t covering, std::size_t block_size, std::size_t table_size)
 {
@@ -188,8 +188,8 @@ run(tchecker::parsing::system_declaration_t const & sysdecl, std::string const &
       system, tchecker::ts::SHARING, tchecker::refzg::PROCESS_REFERENCE_CLOCKS, tchecker::refzg::SYNC_ELAPSED_SEMANTICS,
       tchecker::refdbm::UNBOUNDED_SPREAD, block_size, table_size)};
 
-  std::shared_ptr<tchecker::tck_reach::concur19::state_space_t> state_space =
-      std::make_shared<tchecker::tck_reach::concur19::state_space_t>(refzg, clock_bounds->local_lu_map(), block_size,
+  std::shared_ptr<tchecker::algorithms::concur19::state_space_t> state_space =
+      std::make_shared<tchecker::algorithms::concur19::state_space_t>(refzg, clock_bounds->local_lu_map(), block_size,
                                                                      table_size);
 
   boost::dynamic_bitset<> accepting_labels = system->as_syncprod_system().labels(labels);
@@ -197,7 +197,7 @@ run(tchecker::parsing::system_declaration_t const & sysdecl, std::string const &
   enum tchecker::waiting::policy_t policy = tchecker::algorithms::fast_remove_waiting_policy(search_order);
 
   tchecker::algorithms::covreach::stats_t stats;
-  tchecker::tck_reach::concur19::algorithm_t algorithm;
+  tchecker::algorithms::concur19::algorithm_t algorithm;
 
   if (covering == tchecker::algorithms::covreach::COVERING_FULL)
     stats = algorithm.run<tchecker::algorithms::covreach::COVERING_FULL>(state_space->refzg(), state_space->graph(),
@@ -213,6 +213,6 @@ run(tchecker::parsing::system_declaration_t const & sysdecl, std::string const &
 
 } // end of namespace concur19
 
-} // end of namespace tck_reach
+} // end of namespace algorithms
 
 } // end of namespace tchecker

@@ -9,16 +9,16 @@
 
 #include <boost/dynamic_bitset.hpp>
 
-#include "counter_example.hh"
+#include "tchecker/counter-example/counter_example_reach.hh"
 #include "tchecker/algorithms/search_order.hh"
 #include "tchecker/system/static_analysis.hh"
 #include "tchecker/ta/system.hh"
 #include "tchecker/utils/log.hh"
-#include "zg-reach.hh"
+#include "tchecker/algorithms/reach/zg-reach.hh"
 
 namespace tchecker {
 
-namespace tck_reach {
+namespace algorithms {
 
 namespace zg_reach {
 
@@ -36,15 +36,15 @@ node_t::node_t(tchecker::zg::const_state_sptr_t const & s, bool initial, bool fi
 
 /* node_hash_t */
 
-std::size_t node_hash_t::operator()(tchecker::tck_reach::zg_reach::node_t const & n) const
+std::size_t node_hash_t::operator()(tchecker::algorithms::zg_reach::node_t const & n) const
 {
   return tchecker::zg::shared_hash_value(n.state());
 }
 
 /* node_equal_to_t */
 
-bool node_equal_to_t::operator()(tchecker::tck_reach::zg_reach::node_t const & n1,
-                                 tchecker::tck_reach::zg_reach::node_t const & n2) const
+bool node_equal_to_t::operator()(tchecker::algorithms::zg_reach::node_t const & n1,
+                                 tchecker::algorithms::zg_reach::node_t const & n2) const
 {
   return tchecker::zg::shared_equal_to(n1.state(), n2.state());
 }
@@ -56,22 +56,22 @@ edge_t::edge_t(tchecker::zg::transition_t const & t) : tchecker::graph::edge_ved
 /* graph_t */
 
 graph_t::graph_t(std::shared_ptr<tchecker::zg::zg_t> const & zg, std::size_t block_size, std::size_t table_size)
-    : tchecker::graph::reachability::graph_t<tchecker::tck_reach::zg_reach::node_t, tchecker::tck_reach::zg_reach::edge_t,
-                                             tchecker::tck_reach::zg_reach::node_hash_t,
-                                             tchecker::tck_reach::zg_reach::node_equal_to_t>(
-          block_size, table_size, tchecker::tck_reach::zg_reach::node_hash_t(),
-          tchecker::tck_reach::zg_reach::node_equal_to_t()),
+    : tchecker::graph::reachability::graph_t<tchecker::algorithms::zg_reach::node_t, tchecker::algorithms::zg_reach::edge_t,
+                                             tchecker::algorithms::zg_reach::node_hash_t,
+                                             tchecker::algorithms::zg_reach::node_equal_to_t>(
+          block_size, table_size, tchecker::algorithms::zg_reach::node_hash_t(),
+          tchecker::algorithms::zg_reach::node_equal_to_t()),
       _zg(zg)
 {
 }
 
-void graph_t::attributes(tchecker::tck_reach::zg_reach::node_t const & n, std::map<std::string, std::string> & m) const
+void graph_t::attributes(tchecker::algorithms::zg_reach::node_t const & n, std::map<std::string, std::string> & m) const
 {
   _zg->attributes(n.state_ptr(), m);
   tchecker::graph::attributes(static_cast<tchecker::graph::node_flags_t const &>(n), m);
 }
 
-void graph_t::attributes(tchecker::tck_reach::zg_reach::edge_t const & e, std::map<std::string, std::string> & m) const
+void graph_t::attributes(tchecker::algorithms::zg_reach::edge_t const & e, std::map<std::string, std::string> & m) const
 {
   m["vedge"] = tchecker::to_string(e.vedge(), _zg->system().as_system_system());
 }
@@ -91,8 +91,8 @@ public:
    \return true if n1 is less-than n2 w.r.t. lexical ordering over the states in
    the nodes
   */
-  bool operator()(tchecker::tck_reach::zg_reach::graph_t::node_sptr_t const & n1,
-                  tchecker::tck_reach::zg_reach::graph_t::node_sptr_t const & n2) const
+  bool operator()(tchecker::algorithms::zg_reach::graph_t::node_sptr_t const & n1,
+                  tchecker::algorithms::zg_reach::graph_t::node_sptr_t const & n2) const
   {
     int state_cmp = tchecker::zg::lexical_cmp(n1->state(), n2->state());
     if (state_cmp != 0)
@@ -114,18 +114,18 @@ public:
    \param e2 : an edge
    \return true if e1 is less-than  e2 w.r.t. the tuple of edges in e1 and e2
   */
-  bool operator()(tchecker::tck_reach::zg_reach::graph_t::edge_sptr_t const & e1,
-                  tchecker::tck_reach::zg_reach::graph_t::edge_sptr_t const & e2) const
+  bool operator()(tchecker::algorithms::zg_reach::graph_t::edge_sptr_t const & e1,
+                  tchecker::algorithms::zg_reach::graph_t::edge_sptr_t const & e2) const
   {
     return tchecker::lexical_cmp(e1->vedge(), e2->vedge()) < 0;
   }
 };
 
-std::ostream & dot_output(std::ostream & os, tchecker::tck_reach::zg_reach::graph_t const & g, std::string const & name)
+std::ostream & dot_output(std::ostream & os, tchecker::algorithms::zg_reach::graph_t const & g, std::string const & name)
 {
-  return tchecker::graph::reachability::dot_output<tchecker::tck_reach::zg_reach::graph_t,
-                                                   tchecker::tck_reach::zg_reach::node_lexical_less_t,
-                                                   tchecker::tck_reach::zg_reach::edge_lexical_less_t>(os, g, name);
+  return tchecker::graph::reachability::dot_output<tchecker::algorithms::zg_reach::graph_t,
+                                                   tchecker::algorithms::zg_reach::node_lexical_less_t,
+                                                   tchecker::algorithms::zg_reach::edge_lexical_less_t>(os, g, name);
 }
 
 /* state_space_t */
@@ -137,28 +137,28 @@ state_space_t::state_space_t(std::shared_ptr<tchecker::zg::zg_t> const & zg, std
 
 tchecker::zg::zg_t & state_space_t::zg() { return _ss.ts(); }
 
-tchecker::tck_reach::zg_reach::graph_t & state_space_t::graph() { return _ss.state_space(); }
+tchecker::algorithms::zg_reach::graph_t & state_space_t::graph() { return _ss.state_space(); }
 
 /* counter example */
 namespace cex {
 
-tchecker::tck_reach::zg_reach::cex::symbolic_cex_t * symbolic_counter_example(tchecker::tck_reach::zg_reach::graph_t const & g)
+tchecker::algorithms::zg_reach::cex::symbolic_cex_t * symbolic_counter_example(tchecker::algorithms::zg_reach::graph_t const & g)
 {
-  return tchecker::tck_reach::symbolic_counter_example_zg<tchecker::tck_reach::zg_reach::graph_t>(g);
+  return tchecker::counter_example::symbolic_counter_example_zg<tchecker::algorithms::zg_reach::graph_t>(g);
 }
 
-std::ostream & dot_output(std::ostream & os, tchecker::tck_reach::zg_reach::cex::symbolic_cex_t const & cex,
+std::ostream & dot_output(std::ostream & os, tchecker::algorithms::zg_reach::cex::symbolic_cex_t const & cex,
                           std::string const & name)
 {
   return tchecker::zg::path::symbolic::dot_output(os, cex, name);
 }
 
-tchecker::tck_reach::zg_reach::cex::concrete_cex_t * concrete_counter_example(tchecker::tck_reach::zg_reach::graph_t const & g)
+tchecker::algorithms::zg_reach::cex::concrete_cex_t * concrete_counter_example(tchecker::algorithms::zg_reach::graph_t const & g)
 {
-  return tchecker::tck_reach::concrete_counter_example_zg<tchecker::tck_reach::zg_reach::graph_t>(g);
+  return tchecker::counter_example::concrete_counter_example_zg<tchecker::algorithms::zg_reach::graph_t>(g);
 }
 
-std::ostream & dot_output(std::ostream & os, tchecker::tck_reach::zg_reach::cex::concrete_cex_t const & cex,
+std::ostream & dot_output(std::ostream & os, tchecker::algorithms::zg_reach::cex::concrete_cex_t const & cex,
                           std::string const & name)
 {
   return tchecker::zg::path::concrete::dot_output(os, cex, name);
@@ -168,7 +168,7 @@ std::ostream & dot_output(std::ostream & os, tchecker::tck_reach::zg_reach::cex:
 
 /* run */
 
-std::tuple<tchecker::algorithms::reach::stats_t, std::shared_ptr<tchecker::tck_reach::zg_reach::state_space_t>>
+std::tuple<tchecker::algorithms::reach::stats_t, std::shared_ptr<tchecker::algorithms::zg_reach::state_space_t>>
 run(tchecker::parsing::system_declaration_t const & sysdecl, std::string const & labels, std::string const & search_order,
     std::size_t block_size, std::size_t table_size)
 {
@@ -179,12 +179,12 @@ run(tchecker::parsing::system_declaration_t const & sysdecl, std::string const &
   std::shared_ptr<tchecker::zg::zg_t> zg{tchecker::zg::factory(system, tchecker::ts::SHARING, tchecker::zg::ELAPSED_SEMANTICS,
                                                                tchecker::zg::EXTRA_LU_PLUS_LOCAL, block_size, table_size)};
 
-  std::shared_ptr<tchecker::tck_reach::zg_reach::state_space_t> state_space =
-      std::make_shared<tchecker::tck_reach::zg_reach::state_space_t>(zg, block_size, table_size);
+  std::shared_ptr<tchecker::algorithms::zg_reach::state_space_t> state_space =
+      std::make_shared<tchecker::algorithms::zg_reach::state_space_t>(zg, block_size, table_size);
 
   boost::dynamic_bitset<> accepting_labels = system->as_syncprod_system().labels(labels);
 
-  tchecker::tck_reach::zg_reach::algorithm_t algorithm;
+  tchecker::algorithms::zg_reach::algorithm_t algorithm;
 
   enum tchecker::waiting::policy_t policy = tchecker::algorithms::waiting_policy(search_order);
 
@@ -195,6 +195,6 @@ run(tchecker::parsing::system_declaration_t const & sysdecl, std::string const &
 
 } // namespace zg_reach
 
-} // end of namespace tck_reach
+} // end of namespace algorithms
 
 } // end of namespace tchecker

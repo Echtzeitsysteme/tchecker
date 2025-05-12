@@ -1,22 +1,11 @@
-#include <cstring>
-#include <fstream>
-#include <getopt.h>
-#include <iostream>
-#include <map>
-#include <memory>
-#include <sstream>
-#include <string>
-#include <tuple>
-#include <unordered_set>
-
 #include "tchecker/parsing/parsing.hh"
-#include "tchecker/publicapi/tck_syntax.hh"
 #include "tchecker/syncprod/system.hh"
 #include "tchecker/system/output.hh"
 #include "tchecker/system/system.hh"
 #include "tchecker/ta/system.hh"
-#include "tchecker/utils/log.hh"
 #include "tchecker/syntax-check/syntax-check.hh"
+
+#include "tchecker/publicapi/tck_syntax.hh"
 
 const char * tck_syntax_check_syntax(const char * filename)
 {
@@ -29,12 +18,14 @@ const char * tck_syntax_check_syntax(const char * filename)
     std::string result = oss.str();
 
     char * c_output = (char *)std::malloc(result.size() + 1);
-    if (c_output == nullptr)
-      return nullptr; // malloc failed
+    if (c_output == nullptr) 
+    {
+      throw std::bad_alloc();
+    }
+      
 
     std::strcpy(c_output, result.c_str());
     return c_output;
-    return "Success";
     
   }
   catch (std::exception const & e) {
@@ -51,13 +42,16 @@ const char * tck_syntax_to_dot(const char * filename)
 
     std::ostringstream oss;
 
-    tchecker::system::output_dot(oss, *system, "_");
+    tchecker::system::output_dot(oss, *system, "_", tchecker::system::GRAPHVIZ_FULL);
 
     std::string result = oss.str();
 
     char * c_output = (char *)std::malloc(result.size() + 1);
-    if (c_output == nullptr)
-      return nullptr; // malloc failed
+    if (c_output == nullptr) 
+    {
+      throw std::bad_alloc();  
+    }
+      
 
     std::strcpy(c_output, result.c_str());
     return c_output;
@@ -81,9 +75,11 @@ const char * tck_syntax_to_json(const char * filename)
     std::string result = oss.str();
 
     char * c_output = (char *)std::malloc(result.size() + 1);
-    if (c_output == nullptr)
-      return nullptr; // malloc failed
-
+    if (c_output == nullptr) 
+    {
+      throw std::bad_alloc();  
+    }
+      
     std::strcpy(c_output, result.c_str());
     return c_output;
   }
@@ -92,7 +88,7 @@ const char * tck_syntax_to_json(const char * filename)
   }
 }
 
-const char * tck_syntax_create_synchronized_product(const char * filename, const char * process_name)
+const char * tck_syntax_create_synchronized_product(const char * filename, const char * new_system_name)
 {
   std::shared_ptr<tchecker::parsing::system_declaration_t> sysdecl{nullptr};
   try {
@@ -101,14 +97,17 @@ const char * tck_syntax_create_synchronized_product(const char * filename, const
 
     std::ostringstream oss;
 
-    tchecker::system::system_t product = tchecker::syncprod::synchronized_product(system, process_name, "_");
+    tchecker::system::system_t product = tchecker::syncprod::synchronized_product(system, new_system_name, "_");
     tchecker::system::output_tck(oss, product);
 
     std::string result = oss.str();
 
     char * c_output = (char *)std::malloc(result.size() + 1);
-    if (c_output == nullptr)
-      return nullptr; // malloc failed
+    if (c_output == nullptr) 
+    {
+        throw std::bad_alloc();
+    }
+      
 
     std::strcpy(c_output, result.c_str());
     return c_output;

@@ -21,13 +21,13 @@
 #include "tchecker/zg/zg.hh"
 
 /*!
- \file counter_example.hh
- \brief Generation of counter examples
+ \file counter_example_reach.hh
+ \brief Generation of counter examples for reachability analysis
 */
 
 namespace tchecker {
 
-namespace tck_reach {
+namespace counter_example {
 
 /*!
  \brief Check if a node is initial
@@ -68,8 +68,8 @@ template <class GRAPH> tchecker::zg::path::symbolic::finite_path_t * symbolic_co
   // compute sequence of edges from initial to final node in g
   tchecker::algorithms::finite_path_extraction_algorithm_t<GRAPH> algorithm;
 
-  auto && [found, root, seq] = algorithm.run(g, &tchecker::tck_reach::initial_node<GRAPH>,
-                                             &tchecker::tck_reach::final_node<GRAPH>, &tchecker::tck_reach::actual_edge<GRAPH>);
+  auto && [found, root, seq] = algorithm.run(g, &tchecker::counter_example::initial_node<GRAPH>,
+                                             &tchecker::counter_example::final_node<GRAPH>, &tchecker::counter_example::actual_edge<GRAPH>);
 
   if (!found)
     return new tchecker::zg::path::symbolic::finite_path_t{zg};
@@ -94,7 +94,7 @@ template <class GRAPH> tchecker::zg::path::symbolic::finite_path_t * symbolic_co
 template <class GRAPH> tchecker::zg::path::concrete::finite_path_t * concrete_counter_example_zg(GRAPH const & g)
 {
   std::unique_ptr<tchecker::zg::path::symbolic::finite_path_t> symbolic_cex{
-      tchecker::tck_reach::symbolic_counter_example_zg<GRAPH>(g)};
+      tchecker::counter_example::symbolic_counter_example_zg<GRAPH>(g)};
 
   // Compute concrete counter-exemple from symbolic counter-example
   tchecker::zg::path::concrete::finite_path_t * cex = tchecker::zg::path::concrete::compute_finite_path(*symbolic_cex);
@@ -118,8 +118,8 @@ template <class GRAPH, class CEX> CEX * symbolic_counter_example_refzg(GRAPH con
   // compute sequence of edges from initial to final node in g
   tchecker::algorithms::finite_path_extraction_algorithm_t<GRAPH> algorithm;
 
-  auto && [found, root, seq] = algorithm.run(g, &tchecker::tck_reach::initial_node<GRAPH>,
-                                             &tchecker::tck_reach::final_node<GRAPH>, &tchecker::tck_reach::actual_edge<GRAPH>);
+  auto && [found, root, seq] = algorithm.run(g, &tchecker::counter_example::initial_node<GRAPH>,
+                                             &tchecker::counter_example::final_node<GRAPH>, &tchecker::counter_example::actual_edge<GRAPH>);
 
   if (!found)
     return new CEX{refzg};

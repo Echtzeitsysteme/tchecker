@@ -7,7 +7,7 @@
 
 #include <boost/dynamic_bitset.hpp>
 
-#include "counter_example.hh"
+#include "tchecker/counter-example/counter_example_reach.hh"
 #include "tchecker/algorithms/search_order.hh"
 #include "tchecker/clockbounds/solver.hh"
 #include "tchecker/system/static_analysis.hh"
@@ -158,7 +158,7 @@ namespace cex {
 tchecker::tck_reach::zg_alu_covreach::cex::symbolic_cex_t *
 symbolic_counter_example(tchecker::tck_reach::zg_alu_covreach::graph_t const & g)
 {
-  return tchecker::tck_reach::symbolic_counter_example_zg<tchecker::tck_reach::zg_alu_covreach::graph_t>(g);
+  return tchecker::counter_example::symbolic_counter_example_zg<tchecker::tck_reach::zg_alu_covreach::graph_t>(g);
 }
 
 std::ostream & dot_output(std::ostream & os, tchecker::tck_reach::zg_alu_covreach::cex::symbolic_cex_t const & cex,
@@ -170,7 +170,7 @@ std::ostream & dot_output(std::ostream & os, tchecker::tck_reach::zg_alu_covreac
 tchecker::tck_reach::zg_alu_covreach::cex::concrete_cex_t *
 concrete_counter_example(tchecker::tck_reach::zg_alu_covreach::graph_t const & g)
 {
-  return tchecker::tck_reach::concrete_counter_example_zg<tchecker::tck_reach::zg_alu_covreach::graph_t>(g);
+  return tchecker::counter_example::concrete_counter_example_zg<tchecker::tck_reach::zg_alu_covreach::graph_t>(g);
 }
 
 std::ostream & dot_output(std::ostream & os, tchecker::tck_reach::zg_alu_covreach::cex::concrete_cex_t const & cex,

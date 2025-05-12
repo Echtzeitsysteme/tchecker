@@ -39,7 +39,7 @@
 
 namespace tchecker {
 
-namespace tck_reach {
+namespace algorithms {
 
 namespace concur19 {
 
@@ -83,7 +83,7 @@ public:
   locations and integer variable valuations) since we need to cover nodes with
   same discrete part
   */
-  std::size_t operator()(tchecker::tck_reach::concur19::node_t const & n) const;
+  std::size_t operator()(tchecker::algorithms::concur19::node_t const & n) const;
 };
 
 /*!
@@ -108,7 +108,7 @@ public:
   \return true if n1 and n2 have same discrete part and the zone of n1 is
   sync-aLU subsumed in the zone of n2, false otherwise
   */
-  bool operator()(tchecker::tck_reach::concur19::node_t const & n1, tchecker::tck_reach::concur19::node_t const & n2) const;
+  bool operator()(tchecker::algorithms::concur19::node_t const & n1, tchecker::algorithms::concur19::node_t const & n2) const;
 
 private:
   using const_vloc_sptr_hash_t = tchecker::intrusive_shared_ptr_hash_t;
@@ -137,9 +137,9 @@ public:
  \brief Subsumption graph over the local-time zone graph
 */
 class graph_t
-    : public tchecker::graph::subsumption::graph_t<tchecker::tck_reach::concur19::node_t, tchecker::tck_reach::concur19::edge_t,
-                                                   tchecker::tck_reach::concur19::node_hash_t,
-                                                   tchecker::tck_reach::concur19::node_le_t> {
+    : public tchecker::graph::subsumption::graph_t<tchecker::algorithms::concur19::node_t, tchecker::algorithms::concur19::edge_t,
+                                                   tchecker::algorithms::concur19::node_hash_t,
+                                                   tchecker::algorithms::concur19::node_le_t> {
 public:
   /*!
    \brief Constructor
@@ -169,9 +169,9 @@ public:
   */
   inline tchecker::refzg::refzg_t const & refzg() const { return *_refzg; }
 
-  using tchecker::graph::subsumption::graph_t<tchecker::tck_reach::concur19::node_t, tchecker::tck_reach::concur19::edge_t,
-                                              tchecker::tck_reach::concur19::node_hash_t,
-                                              tchecker::tck_reach::concur19::node_le_t>::attributes;
+  using tchecker::graph::subsumption::graph_t<tchecker::algorithms::concur19::node_t, tchecker::algorithms::concur19::edge_t,
+                                              tchecker::algorithms::concur19::node_hash_t,
+                                              tchecker::algorithms::concur19::node_le_t>::attributes;
 
   /*!
    \brief Checks is an edge is an actual edge (not a subsumption edge)
@@ -187,7 +187,7 @@ protected:
    \param m : a map (key, value) of attributes
    \post attributes of node n have been added to map m
   */
-  virtual void attributes(tchecker::tck_reach::concur19::node_t const & n, std::map<std::string, std::string> & m) const;
+  virtual void attributes(tchecker::algorithms::concur19::node_t const & n, std::map<std::string, std::string> & m) const;
 
   /*!
    \brief Accessor to edge attributes
@@ -195,7 +195,7 @@ protected:
    \param m : a map (key, value) of attributes
    \post attributes of edge e have been added to map m
   */
-  virtual void attributes(tchecker::tck_reach::concur19::edge_t const & e, std::map<std::string, std::string> & m) const;
+  virtual void attributes(tchecker::algorithms::concur19::edge_t const & e, std::map<std::string, std::string> & m) const;
 
 private:
   std::shared_ptr<tchecker::refzg::refzg_t> _refzg; /*!< Zone graph with reference clocks */
@@ -208,7 +208,7 @@ private:
  \param name : graph name
  \post graph g with name has been output to os
 */
-std::ostream & dot_output(std::ostream & os, tchecker::tck_reach::concur19::graph_t const & g, std::string const & name);
+std::ostream & dot_output(std::ostream & os, tchecker::algorithms::concur19::graph_t const & g, std::string const & name);
 
 /*!
  \class state_space_t
@@ -238,10 +238,10 @@ public:
    \brief Accessor
    \return The subsumption graph representing the state-space
    */
-  tchecker::tck_reach::concur19::graph_t & graph();
+  tchecker::algorithms::concur19::graph_t & graph();
 
 private:
-  tchecker::ts::state_space_t<tchecker::refzg::refzg_t, tchecker::tck_reach::concur19::graph_t>
+  tchecker::ts::state_space_t<tchecker::refzg::refzg_t, tchecker::algorithms::concur19::graph_t>
       _ss; /*!< State-space representation */
 };
 
@@ -261,7 +261,7 @@ using cex_t = tchecker::refzg::path::finite_path_t;
  \return a finite path from an initial node to a final node in g if any, nullptr otherwise
  \note the returned pointer shall be deleted
 */
-tchecker::tck_reach::concur19::cex::symbolic::cex_t * counter_example(tchecker::tck_reach::concur19::graph_t const & g);
+tchecker::algorithms::concur19::cex::symbolic::cex_t * counter_example(tchecker::algorithms::concur19::graph_t const & g);
 
 /*!
  \brief Counter-example output
@@ -271,7 +271,7 @@ tchecker::tck_reach::concur19::cex::symbolic::cex_t * counter_example(tchecker::
  \post cex has been output to os
  \return os after output
  */
-std::ostream & dot_output(std::ostream & os, tchecker::tck_reach::concur19::cex::symbolic::cex_t const & cex,
+std::ostream & dot_output(std::ostream & os, tchecker::algorithms::concur19::cex::symbolic::cex_t const & cex,
                           std::string const & name);
 
 } // namespace symbolic
@@ -283,10 +283,10 @@ std::ostream & dot_output(std::ostream & os, tchecker::tck_reach::concur19::cex:
  \brief Covering reachability algorithm over the local-time zone graph
 */
 class algorithm_t
-    : public tchecker::algorithms::covreach::algorithm_t<tchecker::refzg::refzg_t, tchecker::tck_reach::concur19::graph_t> {
+    : public tchecker::algorithms::covreach::algorithm_t<tchecker::refzg::refzg_t, tchecker::algorithms::concur19::graph_t> {
 public:
   using tchecker::algorithms::covreach::algorithm_t<tchecker::refzg::refzg_t,
-                                                    tchecker::tck_reach::concur19::graph_t>::algorithm_t;
+                                                    tchecker::algorithms::concur19::graph_t>::algorithm_t;
 };
 
 /*!
@@ -303,7 +303,7 @@ public:
  \return statistics on the run and a representation of the state-space as a subsumption graph
  \throw std::runtime_error : if clock bounds cannot be computed for the system modeled as sysdecl
  */
-std::tuple<tchecker::algorithms::covreach::stats_t, std::shared_ptr<tchecker::tck_reach::concur19::state_space_t>>
+std::tuple<tchecker::algorithms::covreach::stats_t, std::shared_ptr<tchecker::algorithms::concur19::state_space_t>>
 run(tchecker::parsing::system_declaration_t const & sysdecl, std::string const & labels = "",
     std::string const & search_order = "bfs",
     tchecker::algorithms::covreach::covering_t covering = tchecker::algorithms::covreach::COVERING_FULL,
@@ -311,7 +311,7 @@ run(tchecker::parsing::system_declaration_t const & sysdecl, std::string const &
 
 } // end of namespace concur19
 
-} // end of namespace tck_reach
+} // end of namespace algorithms
 
 } // end of namespace tchecker
 

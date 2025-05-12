@@ -44,6 +44,7 @@ link_directories(${Boost_LIBRARY_DIRS})
 
 add_subdirectory(algorithms)
 add_subdirectory(clockbounds)
+add_subdirectory(counter-example)
 add_subdirectory(dbm)
 add_subdirectory(expression)
 add_subdirectory(extrapolation)
@@ -75,6 +76,7 @@ set(OTHER_SRC
 set(LIBTCHECKER_SRC
   ${ALGORITHMS_SRC}
   ${CLOCKBOUNDS_SRC}
+  ${COUNTER_EXAMPLE_SRC}
   ${DBM_SRC}
   ${EXPRESSION_SRC}
   ${EXTRAPOLATION_SRC}
@@ -134,16 +136,10 @@ set_property(TARGET tck-liveness PROPERTY CXX_STANDARD_REQUIRED ON)
 
 # Build tck-reach executable
 add_executable(tck-reach
-  ${CMAKE_CURRENT_SOURCE_DIR}/tck-reach/concur19.hh
-  ${CMAKE_CURRENT_SOURCE_DIR}/tck-reach/concur19.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/tck-reach/counter_example.hh
-  ${CMAKE_CURRENT_SOURCE_DIR}/tck-reach/tck-reach.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/tck-reach/zg-aLU-covreach.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/tck-reach/zg-aLU-covreach.hh
-  ${CMAKE_CURRENT_SOURCE_DIR}/tck-reach/zg-covreach.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/tck-reach/zg-covreach.hh
-  ${CMAKE_CURRENT_SOURCE_DIR}/tck-reach/zg-reach.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/tck-reach/zg-reach.hh)
+  ${CMAKE_CURRENT_SOURCE_DIR}/tck-reach/tck-reach.cc)
+
 target_link_libraries(tck-reach libtchecker_static ${Boost_LIBRARIES})
 set_property(TARGET tck-reach PROPERTY CXX_STANDARD 17)
 set_property(TARGET tck-reach PROPERTY CXX_STANDARD_REQUIRED ON)

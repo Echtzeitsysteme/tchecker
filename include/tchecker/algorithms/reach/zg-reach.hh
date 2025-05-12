@@ -5,18 +5,20 @@
  *
  */
 
-#ifndef TCHECKER_ZG_COVREACH_ALGORITHM_HH
-#define TCHECKER_ZG_COVREACH_ALGORITHM_HH
+#ifndef TCHECKER_ZG_REACH_ALGORITHM_HH
+#define TCHECKER_ZG_REACH_ALGORITHM_HH
 
-/*!
- \file zg-covreach.hh
- \brief Covering reachability algorithm over the zone graph with zone inclusion
-*/
+#include <memory>
+#include <ostream>
+#include <string>
+#include <tuple>
 
-#include "tchecker/algorithms/covreach/algorithm.hh"
+#include "tchecker/algorithms/reach/algorithm.hh"
+#include "tchecker/algorithms/reach/stats.hh"
 #include "tchecker/graph/edge.hh"
 #include "tchecker/graph/node.hh"
-#include "tchecker/graph/subsumption_graph.hh"
+#include "tchecker/graph/reachability_graph.hh"
+#include "tchecker/parsing/declaration.hh"
 #include "tchecker/syncprod/vedge.hh"
 #include "tchecker/ts/state_space.hh"
 #include "tchecker/utils/shared_objects.hh"
@@ -28,25 +30,25 @@
 
 namespace tchecker {
 
-namespace tck_reach {
+namespace algorithms {
 
-namespace zg_covreach {
+namespace zg_reach {
 
 /*!
  \class node_t
- \brief Node of the covering reachability graph of a zone graph
+ \brief Node of the reachability graph of a zone graph
  */
 class node_t : public tchecker::waiting::element_t,
                public tchecker::graph::node_flags_t,
                public tchecker::graph::node_zg_state_t {
 public:
   /*!
-   \brief Constructor
-   \param s : a zone graph state
-   \param initial : initial node flag
-   \param final : final node flag
-   \post this node keeps a shared pointer to s, and has initial/final node flags as specified
-   */
+  \brief Constructor
+  \param s : a zone graph state
+  \param initial : initial node flag
+  \param final : final node flag
+  \post this node keeps a shared pointer to s, and has initial/final node flags as specified
+  */
   node_t(tchecker::zg::state_sptr_t const & s, bool initial = false, bool final = false);
 
   /*!
@@ -68,33 +70,29 @@ public:
   /*!
   \brief Hash function
   \param n : a node
-  \return hash value for n based on the discrete part of n (i.e. the tuple of
-  locations and integer variable valuations) since we need to cover nodes with
-  same discrete part
+  \return hash value for n
   */
-  std::size_t operator()(tchecker::tck_reach::zg_covreach::node_t const & n) const;
+  std::size_t operator()(tchecker::algorithms::zg_reach::node_t const & n) const;
 };
 
 /*!
-\class node_le_t
-\brief Covering predicate for nodes
+\class node_equal_to_t
+\brief Equality check functor for nodes
 */
-class node_le_t {
+class node_equal_to_t {
 public:
   /*!
-  \brief Covering predicate for nodes
+  \brief Equality predicate
   \param n1 : a node
   \param n2 : a node
-  \return true if n1 and n2 have same discrete part and the zone of n1 is
-  included in the zone of n2, false otherwise
+  \return true if n1 and n2 are equal (i.e. have same zone graph state), false otherwise
   */
-  bool operator()(tchecker::tck_reach::zg_covreach::node_t const & n1,
-                  tchecker::tck_reach::zg_covreach::node_t const & n2) const;
+  bool operator()(tchecker::algorithms::zg_reach::node_t const & n1, tchecker::algorithms::zg_reach::node_t const & n2) const;
 };
 
 /*!
  \class edge_t
- \brief Edge of the covering reachability graph of a zone graph
+ \brief Edge of the reachability graph of a zone graph
 */
 class edge_t : public tchecker::graph::edge_vedge_t {
 public:
@@ -110,9 +108,9 @@ public:
  \class graph_t
  \brief Reachability graph over the zone graph
 */
-class graph_t : public tchecker::graph::subsumption::graph_t<
-                    tchecker::tck_reach::zg_covreach::node_t, tchecker::tck_reach::zg_covreach::edge_t,
-                    tchecker::tck_reach::zg_covreach::node_hash_t, tchecker::tck_reach::zg_covreach::node_le_t> {
+class graph_t : public tchecker::graph::reachability::graph_t<
+                    tchecker::algorithms::zg_reach::node_t, tchecker::algorithms::zg_reach::edge_t,
+                    tchecker::algorithms::zg_reach::node_hash_t, tchecker::algorithms::zg_reach::node_equal_to_t> {
 public:
   /*!
    \brief Constructor
@@ -139,16 +137,15 @@ public:
   */
   inline tchecker::zg::zg_t const & zg() const { return *_zg; }
 
-  using tchecker::graph::subsumption::graph_t<
-      tchecker::tck_reach::zg_covreach::node_t, tchecker::tck_reach::zg_covreach::edge_t,
-      tchecker::tck_reach::zg_covreach::node_hash_t, tchecker::tck_reach::zg_covreach::node_le_t>::attributes;
+  using tchecker::graph::reachability::graph_t<tchecker::algorithms::zg_reach::node_t, tchecker::algorithms::zg_reach::edge_t,
+                                               tchecker::algorithms::zg_reach::node_hash_t,
+                                               tchecker::algorithms::zg_reach::node_equal_to_t>::attributes;
 
   /*!
-   \brief Checks if an edge is an actual edge (not a subsumption edge)
-   \param e : an edge
-   \return true if e is an actual edge, false otherwise (e is a subsumption edge)
+   \brief Checks if an edge is an actual edge in the graph
+   \return true (all edges are actual edges in the reachability graph)
    */
-  bool is_actual_edge(edge_sptr_t const & e) const;
+  bool is_actual_edge(edge_sptr_t const &) const { return true; }
 
 protected:
   /*!
@@ -157,7 +154,7 @@ protected:
    \param m : a map (key, value) of attributes
    \post attributes of node n have been added to map m
   */
-  virtual void attributes(tchecker::tck_reach::zg_covreach::node_t const & n, std::map<std::string, std::string> & m) const;
+  virtual void attributes(tchecker::algorithms::zg_reach::node_t const & n, std::map<std::string, std::string> & m) const;
 
   /*!
    \brief Accessor to edge attributes
@@ -165,7 +162,7 @@ protected:
    \param m : a map (key, value) of attributes
    \post attributes of edge e have been added to map m
   */
-  virtual void attributes(tchecker::tck_reach::zg_covreach::edge_t const & e, std::map<std::string, std::string> & m) const;
+  virtual void attributes(tchecker::algorithms::zg_reach::edge_t const & e, std::map<std::string, std::string> & m) const;
 
 private:
   std::shared_ptr<tchecker::zg::zg_t> _zg; /*!< Zone graph */
@@ -178,11 +175,11 @@ private:
  \param name : graph name
  \post graph g with name has been output to os
 */
-std::ostream & dot_output(std::ostream & os, tchecker::tck_reach::zg_covreach::graph_t const & g, std::string const & name);
+std::ostream & dot_output(std::ostream & os, tchecker::algorithms::zg_reach::graph_t const & g, std::string const & name);
 
 /*!
  \class state_space_t
- \brief State-space representation consisting of a zone graph and a subsumption graph
+ \brief State-space representation consisting of a zone graph and a reachability graph
  */
 class state_space_t {
 public:
@@ -203,12 +200,12 @@ public:
 
   /*!
    \brief Accessor
-   \return The subsumption graph representing the state-space
+   \return The reachability graph representing the state-space
    */
-  tchecker::tck_reach::zg_covreach::graph_t & graph();
+  tchecker::algorithms::zg_reach::graph_t & graph();
 
 private:
-  tchecker::ts::state_space_t<tchecker::zg::zg_t, tchecker::tck_reach::zg_covreach::graph_t>
+  tchecker::ts::state_space_t<tchecker::zg::zg_t, tchecker::algorithms::zg_reach::graph_t>
       _ss; /*!< State-space representation */
 };
 
@@ -220,14 +217,12 @@ namespace cex {
 using symbolic_cex_t = tchecker::zg::path::symbolic::finite_path_t;
 
 /*!
- \brief Compute a symbolic counter-example from a covering reachability graph of a zone graph
+ \brief Compute a symbolic counter-example from a reachability graph of a zone graph
  \param g : reachability graph on a zone graph
- \return a finite path from an initial node to a final node in g if any,
- nullptr otherwise
+ \return a finite path from an initial node to a final node in g if any, nullptr otherwise
  \note the returned pointer shall be deleted
 */
-tchecker::tck_reach::zg_covreach::cex::symbolic_cex_t *
-symbolic_counter_example(tchecker::tck_reach::zg_covreach::graph_t const & g);
+tchecker::algorithms::zg_reach::cex::symbolic_cex_t * symbolic_counter_example(tchecker::algorithms::zg_reach::graph_t const & g);
 
 /*!
  \brief Symbolic counter-example output
@@ -237,7 +232,7 @@ symbolic_counter_example(tchecker::tck_reach::zg_covreach::graph_t const & g);
  \post cex has been output to os
  \return os after output
  */
-std::ostream & dot_output(std::ostream & os, tchecker::tck_reach::zg_covreach::cex::symbolic_cex_t const & cex,
+std::ostream & dot_output(std::ostream & os, tchecker::algorithms::zg_reach::cex::symbolic_cex_t const & cex,
                           std::string const & name);
 
 /*!
@@ -246,14 +241,13 @@ std::ostream & dot_output(std::ostream & os, tchecker::tck_reach::zg_covreach::c
 using concrete_cex_t = tchecker::zg::path::concrete::finite_path_t;
 
 /*!
- \brief Compute a concrete counter-example from a covering reachability graph of a zone graph
+ \brief Compute a concrete counter-example from a reachability graph of a zone graph
  \param g : reachability graph on a zone graph
  \return a finite path from an initial node to a final node in g with concrete clock valuations if any,
  nullptr otherwise
  \note the returned pointer shall be deleted
 */
-tchecker::tck_reach::zg_covreach::cex::concrete_cex_t *
-concrete_counter_example(tchecker::tck_reach::zg_covreach::graph_t const & g);
+tchecker::algorithms::zg_reach::cex::concrete_cex_t * concrete_counter_example(tchecker::algorithms::zg_reach::graph_t const & g);
 
 /*!
  \brief Concrete counter-example output
@@ -263,44 +257,41 @@ concrete_counter_example(tchecker::tck_reach::zg_covreach::graph_t const & g);
  \post cex has been output to os
  \return os after output
  */
-std::ostream & dot_output(std::ostream & os, tchecker::tck_reach::zg_covreach::cex::concrete_cex_t const & cex,
+std::ostream & dot_output(std::ostream & os, tchecker::algorithms::zg_reach::cex::concrete_cex_t const & cex,
                           std::string const & name);
 
 } // namespace cex
 
 /*!
  \class algorithm_t
- \brief Covering reachability algorithm over the zone graph
+ \brief Reachability algorithm over the zone graph
 */
 class algorithm_t
-    : public tchecker::algorithms::covreach::algorithm_t<tchecker::zg::zg_t, tchecker::tck_reach::zg_covreach::graph_t> {
+    : public tchecker::algorithms::reach::algorithm_t<tchecker::zg::zg_t, tchecker::algorithms::zg_reach::graph_t> {
 public:
-  using tchecker::algorithms::covreach::algorithm_t<tchecker::zg::zg_t, tchecker::tck_reach::zg_covreach::graph_t>::algorithm_t;
+  using tchecker::algorithms::reach::algorithm_t<tchecker::zg::zg_t, tchecker::algorithms::zg_reach::graph_t>::algorithm_t;
 };
 
 /*!
- \brief Run covering reachability algorithm on the zone graph of a system
+ \brief Run reachability algorithm on the zone graph of a system
  \param sysdecl : system declaration
  \param labels : comma-separated string of labels
  \param search_order : search order
- \param covering : covering policy
  \param block_size : number of elements allocated in one block
  \param table_size : size of hash tables
  \pre labels must appear as node attributes in sysdecl
  search_order must be either "dfs" or "bfs"
- \return statistics on the run and a representation of the state-space as a subsumption graph
- \throw std::runtime_error : if clock bounds cannot be computed for the system modeled by sysdecl
+ \return statistics on the run and a representation of the state-space as a reachability graph
+ \throw std::runtime_error : if clock bounds cannot be computed for the system modeled by sysdecls
  */
-std::tuple<tchecker::algorithms::covreach::stats_t, std::shared_ptr<tchecker::tck_reach::zg_covreach::state_space_t>>
+std::tuple<tchecker::algorithms::reach::stats_t, std::shared_ptr<tchecker::algorithms::zg_reach::state_space_t>>
 run(tchecker::parsing::system_declaration_t const & sysdecl, std::string const & labels = "",
-    std::string const & search_order = "bfs",
-    tchecker::algorithms::covreach::covering_t covering = tchecker::algorithms::covreach::COVERING_FULL,
-    std::size_t block_size = 10000, std::size_t table_size = 65536);
+    std::string const & search_order = "bfs", std::size_t block_size = 10000, std::size_t table_size = 65536);
 
-} // end of namespace zg_covreach
+} // end of namespace zg_reach
 
-} // end of namespace tck_reach
+} // namespace algorithms
 
 } // end of namespace tchecker
 
-#endif // TCHECKER_ZG_COVREACH_ALGORITHM_HH
+#endif // TCHECKER_ZG_REACH_ALGORITHM_HH
