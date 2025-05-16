@@ -56,6 +56,8 @@ tchecker::strong_timed_bisim::stats_t Lieb_et_al::run() {
   stats.set_visited_pair_of_states(_visited_pair_of_states);
   stats.set_relationship_fulfilled(result->contradiction_free());
 
+  std::cout << __FILE__ << ": " << __LINE__ << ": no of found contradictions: " << non_bisim_cache.no_of_entries() << std::endl;
+
   return stats;
 
 }
@@ -156,10 +158,10 @@ Lieb_et_al::check_for_virt_bisim(tchecker::zg::const_state_sptr_t A_state, tchec
 
 //  std::cout << __FILE__ << ": " << __LINE__ << ": _visited_pair_of_states: " << _visited_pair_of_states << std::endl;
 //  std::cout << __FILE__ << ": " << __LINE__ << ": check-for-virt-bisim" << std::endl;
-//  std::cout << __FILE__ << ": " << __LINE__ << ": " << A_state->vloc() << std::endl;
+//  std::cout << __FILE__ << ": " << __LINE__ << ": " << tchecker::to_string(A_state->vloc(), _A->system()) << std::endl;
 //  tchecker::dbm::output_matrix(std::cout, A_state->zone().dbm(), A_state->zone().dim());
 //
-//  std::cout << __FILE__ << ": " << __LINE__ << ": " << B_state->vloc() << std::endl;
+//  std::cout << __FILE__ << ": " << __LINE__ << ": " << tchecker::to_string(B_state->vloc(), _B->system()) << std::endl;
 //  tchecker::dbm::output_matrix(std::cout, B_state->zone().dbm(), B_state->zone().dim());
 
   // check for virtual equivalence of A_state->zone() and B_state->zone()
@@ -338,6 +340,21 @@ Lieb_et_al::check_for_virt_bisim(tchecker::zg::const_state_sptr_t A_state, tchec
 
       add_to_transition_list(trans_A, v_A, _A->system(), symbol);
       add_to_transition_list(trans_B, v_B, _B->system(), symbol);
+
+      std::cout << __FILE__ << ": " << __LINE__ << ":" << trans_A.size() << std::endl;
+
+#ifndef NDEBUG
+      if(trans_A.size() > 1 && trans_B.size() > 1) {
+        std::cout << __FILE__ << ": " << __LINE__ << ": non-determ detected." << std::endl;
+        std::cout << __FILE__ << ": " << __LINE__ << ": Symbol: " << std::endl;
+        for(auto cur = symbol.begin(); cur != symbol.end(); cur++) {
+          std::cout << __FILE__ << ": " << __LINE__ << ":" << *cur << std::endl;
+        }
+        std::cout << __FILE__ << ": " << __LINE__ << ": " << tchecker::to_string(A_state->vloc(), _A->system()) << std::endl;
+        std::cout << __FILE__ << ": " << __LINE__ << ": " << tchecker::to_string(B_state->vloc(), _B->system()) << std::endl;
+        std::cout << __FILE__ << ": " << __LINE__ << ": This can have a negative impact on your runtime. We recommend to avoid non-deterministics whenever possible." << std::endl;
+      }
+#endif
 
       std::shared_ptr<algorithm_return_value_t> return_from_transitions
         = check_for_outgoing_transitions( A_cloned->zone(), B_cloned->zone(), trans_A, trans_B, visited_copy);

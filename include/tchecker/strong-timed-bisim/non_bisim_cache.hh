@@ -44,6 +44,14 @@ class non_bisim_cache_t {
   std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>
   already_cached(tchecker::zg::state_sptr_t first, tchecker::zg::state_sptr_t second);
 
+  /*!
+   \brief getter
+   \return returns the number of calls of emplace
+  */  
+  uint64_t no_of_entries() {
+    return _no_of_entries;
+  }
+
  private:
   
   // we would like to use a pair of ta states but we are unable to extract them from symbolic states :(
@@ -80,6 +88,8 @@ class non_bisim_cache_t {
 
   const tchecker::clock_id_t _no_of_virtual_clocks;
   std::shared_ptr<storage_t> _storage;
+
+  uint64_t _no_of_entries;
 
 }; // end of class non_bisim_cache
 

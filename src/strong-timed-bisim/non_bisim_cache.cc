@@ -14,7 +14,7 @@ namespace tchecker {
 namespace strong_timed_bisim {
 
 non_bisim_cache_t::non_bisim_cache_t(tchecker::clock_id_t no_of_virtual_clocks) : 
-_no_of_virtual_clocks(no_of_virtual_clocks), _storage(std::make_shared<storage_t>()){ }
+_no_of_virtual_clocks(no_of_virtual_clocks), _storage(std::make_shared<storage_t>()), _no_of_entries(0){ }
 
 void non_bisim_cache_t::emplace(
   tchecker::zg::state_sptr_t first, tchecker::zg::state_sptr_t second, 
@@ -31,12 +31,15 @@ void non_bisim_cache_t::emplace(
     return;
   }
 
-  std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> already_contained = (*_storage)[key];
+  //std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> already_contained = (*_storage)[key];
 
-  already_contained->append_container(con);
-  already_contained->compress();
-  (*_storage)[key] = tchecker::virtual_constraint::combine(*already_contained, _no_of_virtual_clocks);
+  //already_contained->append_container(con);
+  //already_contained->compress();
+  //(*_storage)[key] = tchecker::virtual_constraint::combine(*already_contained, _no_of_virtual_clocks);
+  ((*_storage)[key])->append_container(con);
   ((*_storage)[key])->compress();
+
+  _no_of_entries++;
 
 }
 
