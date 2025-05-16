@@ -12,16 +12,13 @@ namespace tchecker{
 namespace strong_timed_bisim {
 
 algorithm_return_value_t::algorithm_return_value_t(tchecker::clock_id_t no_of_virt_clocks) : 
-    _contradictions(std::make_shared<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(no_of_virt_clocks+1)), 
-    _check(no_of_virt_clocks) { };
+    _contradictions(std::make_shared<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(no_of_virt_clocks+1)) { };
 
-algorithm_return_value_t::algorithm_return_value_t(algorithm_return_value_t& other) : _contradictions(other._contradictions), _check(other._check) { };
+algorithm_return_value_t::algorithm_return_value_t(algorithm_return_value_t& other) : _contradictions(other._contradictions) { };
 
 algorithm_return_value_t::algorithm_return_value_t(
-  std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> contradictions,
-  std::shared_ptr<tchecker::strong_timed_bisim::visited_map_t> check) : 
-  _contradictions(std::make_shared<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(*contradictions)), 
-  _check(*check) { };
+  std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> contradictions) : 
+  _contradictions(std::make_shared<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(*contradictions)) { };
 
 bool algorithm_return_value_t::contradiction_free() 
 {
@@ -33,12 +30,6 @@ std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual
 algorithm_return_value_t::get_contradictions() 
 {
   return std::make_shared<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(*_contradictions);
-}
-
-std::shared_ptr<tchecker::strong_timed_bisim::visited_map_t>
-algorithm_return_value_t::get_check() 
-{
-  return std::make_shared<tchecker::strong_timed_bisim::visited_map_t>(_check);
 }
 
 void algorithm_return_value_t::add_to_contradictions(tchecker::virtual_constraint::virtual_constraint_t& to_add)
@@ -65,11 +56,6 @@ void algorithm_return_value_t::add_to_contradictions(tchecker::zone_container_t<
 
 void algorithm_return_value_t::add_to_contradictions(std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> to_add){
   this->add_to_contradictions(*to_add);
-}
-
-void algorithm_return_value_t::add_to_check(tchecker::zg::state_sptr_t first, tchecker::zg::state_sptr_t second)
-{
-  _check.emplace(first, second);
 }
 
 }

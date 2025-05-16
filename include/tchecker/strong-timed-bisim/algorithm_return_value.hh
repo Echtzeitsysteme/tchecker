@@ -37,11 +37,9 @@ public:
   /*!
    \brief Constructor
    \param contradictions : the set of contradictions
-   \param check : the check set
    */
   algorithm_return_value_t(
-    std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> contradictions,
-    std::shared_ptr<tchecker::strong_timed_bisim::visited_map_t> check);
+    std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> contradictions);
 
   /*!
    \brief checks whether the contradiction set is empty
@@ -55,13 +53,6 @@ public:
    */
   std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>
   get_contradictions();
-
-  /*!
-   \brief returns a copy of the check set
-   \return the contradiction set
-  */
-  std::shared_ptr<tchecker::strong_timed_bisim::visited_map_t>
-  get_check();
 
   /*!
    \brief adds an element to the set of contradictions
@@ -87,18 +78,9 @@ public:
   */
   void add_to_contradictions(std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> to_add);
 
-
-  /*!
-   \brief adds an element to the check set
-   \param to_add : the element to add
-  */
-  void add_to_check(tchecker::zg::state_sptr_t first, tchecker::zg::state_sptr_t second);
-
 private:
 
   std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> _contradictions;
-
-  tchecker::strong_timed_bisim::visited_map_t _check;
 };
     
 }

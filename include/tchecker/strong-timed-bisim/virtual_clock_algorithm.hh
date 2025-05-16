@@ -121,7 +121,7 @@ private:
   const std::shared_ptr<tchecker::vcg::vcg_t> _B;
 
   long _visited_pair_of_states;
-  non_bisim_cache_t non_bisim_cache;
+  non_bisim_cache_t _non_bisim_cache;
 
 
 };

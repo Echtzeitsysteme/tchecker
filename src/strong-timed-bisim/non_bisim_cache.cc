@@ -31,11 +31,6 @@ void non_bisim_cache_t::emplace(
     return;
   }
 
-  //std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> already_contained = (*_storage)[key];
-
-  //already_contained->append_container(con);
-  //already_contained->compress();
-  //(*_storage)[key] = tchecker::virtual_constraint::combine(*already_contained, _no_of_virtual_clocks);
   ((*_storage)[key])->append_container(con);
   ((*_storage)[key])->compress();
 
