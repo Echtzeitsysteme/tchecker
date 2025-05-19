@@ -24,7 +24,7 @@
 
 namespace tchecker {
 
-namespace tck_liveness {
+namespace counter_example {
 
 /*!
  \brief Check if a node is initial
@@ -63,8 +63,8 @@ template <class GRAPH> tchecker::zg::path::symbolic::lasso_path_t * symbolic_cou
   tchecker::algorithms::lasso_path_extraction_algorithm_t<GRAPH> algorithm;
 
   typename tchecker::algorithms::lasso_path_extraction_algorithm_t<GRAPH>::lasso_edges_t lasso_edges =
-      algorithm.run(g, &tchecker::tck_liveness::initial_node<GRAPH>, &tchecker::tck_liveness::final_node<GRAPH>,
-                    &tchecker::tck_liveness::actual_edge<GRAPH>);
+      algorithm.run(g, &tchecker::counter_example::initial_node<GRAPH>, &tchecker::counter_example::final_node<GRAPH>,
+                    &tchecker::counter_example::actual_edge<GRAPH>);
 
   if (lasso_edges.empty())
     return new tchecker::zg::path::symbolic::lasso_path_t{g.zg_ptr()};

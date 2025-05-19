@@ -2,10 +2,10 @@
 extern "C" {    
 #endif
 
-const char * tck_syntax_check_syntax(const char * filename);
-const char * tck_syntax_to_dot(const char * filename);
-const char * tck_syntax_to_json(const char * filename);
-const char * tck_syntax_create_synchronized_product(const char * filename, const char * process_name);
+const void tck_syntax_check_syntax(const char * output_filename, const char * sysdecl_filename);
+const void tck_syntax_to_dot(const char * output_filename, const char * sysdecl_filename);
+const void tck_syntax_to_json(const char * output_filename, const char * sysdecl_filename);
+const void tck_syntax_create_synchronized_product(const char * output_filename, const char * sysdecl_filename, const char * new_system_name);
 
 #ifdef __cplusplus
 }

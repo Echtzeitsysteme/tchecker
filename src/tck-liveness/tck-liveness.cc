@@ -15,8 +15,8 @@
 
 #include "tchecker/parsing/parsing.hh"
 #include "tchecker/utils/log.hh"
-#include "zg-couvscc.hh"
-#include "zg-ndfs.hh"
+#include "tchecker/algorithms/couvreur_scc/zg-couvscc.hh"
+#include "tchecker/algorithms/ndfs/zg-ndfs.hh" 
 
 /*!
  \file tck-liveness.cc
@@ -201,7 +201,7 @@ void ndfs(tchecker::parsing::system_declaration_t const & sysdecl)
         tchecker::tck_liveness::zg_ndfs::cex::symbolic_counter_example(state_space->graph())};
     if (cex->empty())
       throw std::runtime_error("*** tck_liveness: unable to compute a symbolic counter example for ndfs algorithm");
-    tchecker::tck_liveness::zg_ndfs::cex::dot_output(*os, *cex, sysdecl.name());
+    tchecker::algorithms::zg_ndfs::cex::dot_output(*os, *cex, sysdecl.name());
   }
 }
 
@@ -236,7 +236,7 @@ void couvscc(tchecker::parsing::system_declaration_t const & sysdecl)
         tchecker::tck_liveness::zg_couvscc::cex::symbolic_counter_example(state_space->graph())};
     if (cex->empty())
       throw std::runtime_error("*** tck_liveness: unable to compute a symbolic counter example for couvscc algorithm");
-    tchecker::tck_liveness::zg_couvscc::cex::dot_output(*os, *cex, sysdecl.name());
+    tchecker::algorithms::zg_couvscc::cex::dot_output(*os, *cex, sysdecl.name());
   }
 }
 

@@ -1,119 +1,87 @@
+#include <fstream>
+#include <iostream>
+
 #include "tchecker/parsing/parsing.hh"
 #include "tchecker/syncprod/system.hh"
+#include "tchecker/syntax-check/syntax-check.hh"
 #include "tchecker/system/output.hh"
 #include "tchecker/system/system.hh"
 #include "tchecker/ta/system.hh"
-#include "tchecker/syntax-check/syntax-check.hh"
 
 #include "tchecker/publicapi/tck_syntax.hh"
 
-const char * tck_syntax_check_syntax(const char * filename)
+std::ostream & create_output_stream(const char * output_filename)
+{
+  std::ostream * os = nullptr;
+  if (output_filename != "") {
+    os = new std::ofstream(output_filename, std::ios::out);
+  }
+  else
+    os = &std::cout;
+
+  return *os;
+}
+
+const void tck_syntax_check_syntax(const char * output_filename, const char * sysdecl_filename)
 {
   std::shared_ptr<tchecker::parsing::system_declaration_t> sysdecl{nullptr};
   try {
-    sysdecl = tchecker::parsing::parse_system_declaration(filename);
-    std::ostringstream oss;
-    tchecker::syntax_check::syntax_check_ta(oss, *sysdecl);
-    
-    std::string result = oss.str();
+    sysdecl = tchecker::parsing::parse_system_declaration(sysdecl_filename);
 
-    char * c_output = (char *)std::malloc(result.size() + 1);
-    if (c_output == nullptr) 
-    {
-      throw std::bad_alloc();
-    }
-      
+    std::ostream & os = create_output_stream(output_filename);
 
-    std::strcpy(c_output, result.c_str());
-    return c_output;
-    
+    tchecker::syntax_check::syntax_check_ta(os, *sysdecl);
   }
   catch (std::exception const & e) {
-    return e.what();
+    std::cerr << e.what() << std::endl;
   }
 }
 
-const char * tck_syntax_to_dot(const char * filename)
+const void tck_syntax_to_dot(const char * output_filename, const char * sysdecl_filename)
 {
   std::shared_ptr<tchecker::parsing::system_declaration_t> sysdecl{nullptr};
   try {
-    sysdecl = tchecker::parsing::parse_system_declaration(filename);
-    std::shared_ptr<tchecker::system::system_t> system(new tchecker::system::system_t(* sysdecl));
+    sysdecl = tchecker::parsing::parse_system_declaration(sysdecl_filename);
+    std::shared_ptr<tchecker::system::system_t> system(new tchecker::system::system_t(*sysdecl));
 
-    std::ostringstream oss;
+    std::ostream & os = create_output_stream(output_filename);
 
-    tchecker::system::output_dot(oss, *system, "_", tchecker::system::GRAPHVIZ_FULL);
-
-    std::string result = oss.str();
-
-    char * c_output = (char *)std::malloc(result.size() + 1);
-    if (c_output == nullptr) 
-    {
-      throw std::bad_alloc();  
-    }
-      
-
-    std::strcpy(c_output, result.c_str());
-    return c_output;
+    tchecker::system::output_dot(os, *system, "_", tchecker::system::GRAPHVIZ_FULL);
   }
   catch (std::exception const & e) {
-    return e.what();
+    std::cerr << e.what() << std::endl;
   }
 }
 
-const char * tck_syntax_to_json(const char * filename)
+const void tck_syntax_to_json(const char * output_filename, const char * sysdecl_filename)
 {
   std::shared_ptr<tchecker::parsing::system_declaration_t> sysdecl{nullptr};
   try {
-    sysdecl = tchecker::parsing::parse_system_declaration(filename);
-    std::shared_ptr<tchecker::system::system_t> system(new tchecker::system::system_t(* sysdecl));
+    sysdecl = tchecker::parsing::parse_system_declaration(sysdecl_filename);
+    std::shared_ptr<tchecker::system::system_t> system(new tchecker::system::system_t(*sysdecl));
 
-    std::ostringstream oss;
+    std::ostream & os = create_output_stream(output_filename);
 
-    tchecker::system::output_json(oss, *system, "_");
-
-    std::string result = oss.str();
-
-    char * c_output = (char *)std::malloc(result.size() + 1);
-    if (c_output == nullptr) 
-    {
-      throw std::bad_alloc();  
-    }
-      
-    std::strcpy(c_output, result.c_str());
-    return c_output;
+    tchecker::system::output_json(os, *system, "_");
   }
   catch (std::exception const & e) {
-    return e.what();
+    std::cerr << e.what() << std::endl;
   }
 }
 
-const char * tck_syntax_create_synchronized_product(const char * filename, const char * new_system_name)
+const void tck_syntax_create_synchronized_product(const char * output_filename, const char * sysdecl_filename, const char * new_system_name)
 {
   std::shared_ptr<tchecker::parsing::system_declaration_t> sysdecl{nullptr};
   try {
-    sysdecl = tchecker::parsing::parse_system_declaration(filename);
+    sysdecl = tchecker::parsing::parse_system_declaration(sysdecl_filename);
     std::shared_ptr<tchecker::syncprod::system_t> system(new tchecker::syncprod::system_t(*sysdecl));
 
-    std::ostringstream oss;
+    std::ostream & os = create_output_stream(output_filename);
 
     tchecker::system::system_t product = tchecker::syncprod::synchronized_product(system, new_system_name, "_");
-    tchecker::system::output_tck(oss, product);
-
-    std::string result = oss.str();
-
-    char * c_output = (char *)std::malloc(result.size() + 1);
-    if (c_output == nullptr) 
-    {
-        throw std::bad_alloc();
-    }
-      
-
-    std::strcpy(c_output, result.c_str());
-    return c_output;
+    tchecker::system::output_tck(os, product);
   }
   catch (std::exception const & e) {
-    return e.what();
+    std::cerr << e.what() << std::endl;
   }
-
 }

@@ -5,17 +5,17 @@
  *
  */
 
-#ifndef TCHECKER_ZG_COUVREUR_SCC_ALGORITHM_HH
-#define TCHECKER_ZG_COUVREUR_SCC_ALGORITHM_HH
+#ifndef TCHECKER_ZG_NDFS_ALGORITHM_HH
+#define TCHECKER_ZG_NDFS_ALGORITHM_HH
 
 #include <memory>
 #include <ostream>
 #include <string>
 #include <tuple>
 
-#include "tchecker/algorithms/couvreur_scc/algorithm.hh"
-#include "tchecker/algorithms/couvreur_scc/graph.hh"
-#include "tchecker/algorithms/couvreur_scc/stats.hh"
+#include "tchecker/algorithms/ndfs/algorithm.hh"
+#include "tchecker/algorithms/ndfs/graph.hh"
+#include "tchecker/algorithms/ndfs/stats.hh"
 #include "tchecker/graph/edge.hh"
 #include "tchecker/graph/node.hh"
 #include "tchecker/graph/reachability_graph.hh"
@@ -30,15 +30,15 @@
 
 namespace tchecker {
 
-namespace tck_liveness {
+namespace algorithms {
 
-namespace zg_couvscc {
+namespace zg_ndfs {
 
 /*!
  \class node_t
  \brief Node of the liveness graph of a zone graph
  */
-class node_t : public tchecker::algorithms::couvscc::node_t, public tchecker::graph::node_zg_state_t {
+class node_t : public tchecker::algorithms::ndfs::node_t, public tchecker::graph::node_zg_state_t {
 public:
   /*!
    \brief Constructor
@@ -66,7 +66,7 @@ public:
   \param n : a node
   \return hash value for n
   */
-  std::size_t operator()(tchecker::tck_liveness::zg_couvscc::node_t const & n) const;
+  std::size_t operator()(tchecker::algorithms::zg_ndfs::node_t const & n) const;
 };
 
 /*!
@@ -81,8 +81,7 @@ public:
   \param n2 : a node
   \return true if n1 and n2 are equal (i.e. have same zone graph state), false otherwise
   */
-  bool operator()(tchecker::tck_liveness::zg_couvscc::node_t const & n1,
-                  tchecker::tck_liveness::zg_couvscc::node_t const & n2) const;
+  bool operator()(tchecker::algorithms::zg_ndfs::node_t const & n1, tchecker::algorithms::zg_ndfs::node_t const & n2) const;
 };
 
 /*!
@@ -104,8 +103,8 @@ public:
  \brief Liveness graph over the zone graph
 */
 class graph_t : public tchecker::graph::reachability::graph_t<
-                    tchecker::tck_liveness::zg_couvscc::node_t, tchecker::tck_liveness::zg_couvscc::edge_t,
-                    tchecker::tck_liveness::zg_couvscc::node_hash_t, tchecker::tck_liveness::zg_couvscc::node_equal_to_t> {
+                    tchecker::algorithms::zg_ndfs::node_t, tchecker::algorithms::zg_ndfs::edge_t,
+                    tchecker::algorithms::zg_ndfs::node_hash_t, tchecker::algorithms::zg_ndfs::node_equal_to_t> {
 public:
   /*!
    \brief Constructor
@@ -120,9 +119,14 @@ public:
   */
   graph_t(std::shared_ptr<tchecker::zg::zg_t> const & zg, std::size_t block_size, std::size_t table_size);
 
-  using tchecker::graph::reachability::graph_t<
-      tchecker::tck_liveness::zg_couvscc::node_t, tchecker::tck_liveness::zg_couvscc::edge_t,
-      tchecker::tck_liveness::zg_couvscc::node_hash_t, tchecker::tck_liveness::zg_couvscc::node_equal_to_t>::attributes;
+  /*!
+   \brief Destructor
+  */
+  virtual ~graph_t();
+
+  using tchecker::graph::reachability::graph_t<tchecker::algorithms::zg_ndfs::node_t, tchecker::algorithms::zg_ndfs::edge_t,
+                                               tchecker::algorithms::zg_ndfs::node_hash_t,
+                                               tchecker::algorithms::zg_ndfs::node_equal_to_t>::attributes;
 
   /*!
    \brief Accessor
@@ -149,7 +153,7 @@ protected:
    \param m : a map (key, value) of attributes
    \post attributes of node n have been added to map m
   */
-  virtual void attributes(tchecker::tck_liveness::zg_couvscc::node_t const & n, std::map<std::string, std::string> & m) const;
+  virtual void attributes(tchecker::algorithms::zg_ndfs::node_t const & n, std::map<std::string, std::string> & m) const;
 
   /*!
    \brief Accessor to edge attributes
@@ -157,7 +161,7 @@ protected:
    \param m : a map (key, value) of attributes
    \post attributes of edge e have been added to map m
   */
-  virtual void attributes(tchecker::tck_liveness::zg_couvscc::edge_t const & e, std::map<std::string, std::string> & m) const;
+  virtual void attributes(tchecker::algorithms::zg_ndfs::edge_t const & e, std::map<std::string, std::string> & m) const;
 
 private:
   std::shared_ptr<tchecker::zg::zg_t> _zg; /*!< Zone graph */
@@ -170,7 +174,7 @@ private:
  \param name : graph name
  \post graph g with name has been output to os
 */
-std::ostream & dot_output(std::ostream & os, tchecker::tck_liveness::zg_couvscc::graph_t const & g, std::string const & name);
+std::ostream & dot_output(std::ostream & os, tchecker::algorithms::zg_ndfs::graph_t const & g, std::string const & name);
 
 /*!
  \class state_space_t
@@ -197,10 +201,10 @@ public:
    \brief Accessor
    \return The reachability graph representing the state-space
    */
-  tchecker::tck_liveness::zg_couvscc::graph_t & graph();
+  tchecker::tck_liveness::zg_ndfs::graph_t & graph();
 
 private:
-  tchecker::ts::state_space_t<tchecker::zg::zg_t, tchecker::tck_liveness::zg_couvscc::graph_t>
+  tchecker::ts::state_space_t<tchecker::zg::zg_t, tchecker::tck_liveness::zg_ndfs::graph_t>
       _ss; /*!< State-space representation */
 };
 
@@ -218,8 +222,8 @@ using symbolic_cex_t = tchecker::zg::path::symbolic::lasso_path_t;
  nullptr otherwise
  \note the returned pointer shall be deleted
 */
-tchecker::tck_liveness::zg_couvscc::cex::symbolic_cex_t *
-symbolic_counter_example(tchecker::tck_liveness::zg_couvscc::graph_t const & g);
+tchecker::algorithms::zg_ndfs::cex::symbolic_cex_t *
+symbolic_counter_example(tchecker::algorithms::zg_ndfs::graph_t const & g);
 
 /*!
  \brief Symbolic counter-example output
@@ -229,37 +233,23 @@ symbolic_counter_example(tchecker::tck_liveness::zg_couvscc::graph_t const & g);
  \post cex has been output to os
  \return os after output
  */
-std::ostream & dot_output(std::ostream & os, tchecker::tck_liveness::zg_couvscc::cex::symbolic_cex_t const & cex,
+std::ostream & dot_output(std::ostream & os, tchecker::algorithms::zg_ndfs::cex::symbolic_cex_t const & cex,
                           std::string const & name);
 
 } // namespace cex
 
 /*!
- \class generalized_algorithm_t
- \brief Couvreur's liveness algorithm over the zone graph woth generalized Büchi conditions
+ \class algorithm_t
+ \brief Nested DFS algorithm over the zone graph
 */
-class generalized_algorithm_t
-    : public tchecker::algorithms::couvscc::generalized_algorithm_t<tchecker::zg::zg_t,
-                                                                    tchecker::tck_liveness::zg_couvscc::graph_t> {
+class algorithm_t
+    : public tchecker::algorithms::ndfs::algorithm_t<tchecker::zg::zg_t, tchecker::algorithms::zg_ndfs::graph_t> {
 public:
-  using tchecker::algorithms::couvscc::generalized_algorithm_t<
-      tchecker::zg::zg_t, tchecker::tck_liveness::zg_couvscc::graph_t>::generalized_algorithm_t;
+  using tchecker::algorithms::ndfs::algorithm_t<tchecker::zg::zg_t, tchecker::algorithms::zg_ndfs::graph_t>::algorithm_t;
 };
 
 /*!
- \class single_algorithm_t
- \brief Couvreur's liveness algorithm over the zone graph woth single Büchi conditions
-*/
-class single_algorithm_t
-    : public tchecker::algorithms::couvscc::single_algorithm_t<tchecker::zg::zg_t,
-                                                               tchecker::tck_liveness::zg_couvscc::graph_t> {
-public:
-  using tchecker::algorithms::couvscc::single_algorithm_t<tchecker::zg::zg_t,
-                                                          tchecker::tck_liveness::zg_couvscc::graph_t>::single_algorithm_t;
-};
-
-/*!
- \brief Run Couvreur's algorithm on the zone graph of a system
+ \brief Run nested DFS algorithm on the zone graph of a system
  \param sysdecl : system declaration
  \param labels : comma-separated string of labels
  \param block_size : number of elements allocated in one block
@@ -268,14 +258,18 @@ public:
  \return statistics on the run and the liveness graph
  \throw std::runtime_error : if clock bounds cannot be computed for the system modeled by sysdecl
  */
-std::tuple<tchecker::algorithms::couvscc::stats_t, std::shared_ptr<tchecker::tck_liveness::zg_couvscc::state_space_t>>
+<<<<<<< HEAD:src/tck-liveness/zg-ndfs.hh
+std::tuple<tchecker::algorithms::ndfs::stats_t, std::shared_ptr<tchecker::tck_liveness::zg_ndfs::state_space_t>>
+=======
+std::tuple<tchecker::algorithms::ndfs::stats_t, std::shared_ptr<tchecker::algorithms::zg_ndfs::graph_t>>
+>>>>>>> b862d8f (moved liveness algorithms from executable to algorithms folder, reworked function results to output files instead of strings):include/tchecker/algorithms/ndfs/zg-ndfs.hh
 run(tchecker::parsing::system_declaration_t const & sysdecl, std::string const & labels = "", std::size_t block_size = 10000,
     std::size_t table_size = 65536);
 
-} // namespace zg_couvscc
+} // namespace zg_ndfs
 
 } // namespace tck_liveness
 
 } // end of namespace tchecker
 
-#endif // TCHECKER_ZG_COUVREUR_SCC_ALGORITHM_HH
+#endif // TCHECKER_ZG_NDFS_ALGORITHM_HH

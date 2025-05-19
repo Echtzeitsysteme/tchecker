@@ -1,3 +1,6 @@
+#include <fstream>
+#include <iostream>
+
 #include "tchecker/algorithms/concur19/concur19.hh"
 #include "tchecker/algorithms/covreach/zg-covreach.hh"
 #include "tchecker/algorithms/reach/zg-reach.hh"
@@ -14,9 +17,8 @@ static bool is_certificate_path(enum tck_reach_certificate_t ctype)
   return (ctype == CERTIFICATE_SYMBOLIC || ctype == CERTIFICATE_CONCRETE);
 }
 
-const void tck_reach_zg_reach(std::ostringstream & os, const tchecker::parsing::system_declaration_t & sysdecl,
-                              const char * labels, const char * search_order, int block_size, int table_size,
-                              tck_reach_certificate_t certificate)
+const void tck_reach_zg_reach(std::ostream & os, const tchecker::parsing::system_declaration_t & sysdecl, const char * labels,
+                              const char * search_order, int block_size, int table_size, tck_reach_certificate_t certificate)
 {
   auto && [stats, state_space] = tchecker::algorithms::zg_reach::run(sysdecl, labels, search_order, block_size, table_size);
 
@@ -45,7 +47,7 @@ const void tck_reach_zg_reach(std::ostringstream & os, const tchecker::parsing::
   }
 }
 
-const void tck_reach_zg_covreach(std::ostringstream & os, const tchecker::parsing::system_declaration_t & sysdecl,
+const void tck_reach_zg_covreach(std::ostream & os, const tchecker::parsing::system_declaration_t & sysdecl,
                                  const char * labels, const char * search_order, int block_size, int table_size,
                                  tck_reach_certificate_t certificate)
 {
@@ -80,9 +82,8 @@ const void tck_reach_zg_covreach(std::ostringstream & os, const tchecker::parsin
   }
 }
 
-const void tck_reack_concur19(std::ostringstream & os, const tchecker::parsing::system_declaration_t & sysdecl,
-                              const char * labels, const char * search_order, int block_size, int table_size,
-                              tck_reach_certificate_t certificate)
+const void tck_reack_concur19(std::ostream & os, const tchecker::parsing::system_declaration_t & sysdecl, const char * labels,
+                              const char * search_order, int block_size, int table_size, tck_reach_certificate_t certificate)
 {
   if (certificate == CERTIFICATE_CONCRETE)
     throw std::runtime_error("Concrete counter-example is not available for concur19 algorithm");
@@ -112,8 +113,9 @@ const void tck_reack_concur19(std::ostringstream & os, const tchecker::parsing::
   }
 }
 
-const char * tck_reach(const char * sysdecl_filename, tck_reach_algorithm_t algorithm, tck_reach_search_order_t search_order,
-                       tck_reach_certificate_t certificate, int * block_size, int * table_size)
+const void tck_reach(const char * output_filename, const char * sysdecl_filename, const char * labels, tck_reach_algorithm_t algorithm,
+                     tck_reach_search_order_t search_order, tck_reach_certificate_t certificate, int * block_size,
+                     int * table_size)
 {
   if (block_size == nullptr) {
     block_size = &tck_reach_default_block_size;
@@ -128,7 +130,14 @@ const char * tck_reach(const char * sysdecl_filename, tck_reach_algorithm_t algo
     sysdecl = tchecker::parsing::parse_system_declaration(sysdecl_filename);
     std::shared_ptr<tchecker::system::system_t> system(new tchecker::system::system_t(*sysdecl));
 
-    std::ostringstream oss;
+    // create output stream to output file
+
+    std::ostream * os = nullptr;
+    if (output_filename != "") {
+      os = new std::ofstream(output_filename, std::ios::out);
+    }
+    else
+      os = &std::cout;
 
     std::string search_order_str;
     if (search_order == BFS) {
@@ -142,29 +151,22 @@ const char * tck_reach(const char * sysdecl_filename, tck_reach_algorithm_t algo
     }
 
     if (algorithm == ALGO_REACH) {
-      tck_reach_zg_reach(oss, *sysdecl, "", search_order_str.c_str(), *block_size, *table_size, certificate);
+      tck_reach_zg_reach(*os, *sysdecl, labels, search_order_str.c_str(), *block_size, *table_size, certificate);
     }
     else if (algorithm == ALGO_CONCUR19) {
-      tck_reach_zg_covreach(oss, *sysdecl, "", search_order_str.c_str(), *block_size, *table_size, certificate);
+      tck_reach_zg_covreach(*os, *sysdecl, labels, search_order_str.c_str(), *block_size, *table_size, certificate);
     }
     else if (algorithm == ALGO_COVREACH) {
-      tck_reach_zg_covreach(oss, *sysdecl, "", search_order_str.c_str(), *block_size, *table_size, certificate);
+      tck_reach_zg_covreach(*os, *sysdecl, labels, search_order_str.c_str(), *block_size, *table_size, certificate);
     }
     else {
       throw std::runtime_error("Unknown algorithm");
     }
-
-    std::string result = oss.str();
-
-    char * c_output = (char *)std::malloc(result.size() + 1);
-    if (c_output == nullptr) {
-      throw std::bad_alloc();
-    }
-
-    std::strcpy(c_output, result.c_str());
-    return c_output;
   }
   catch (std::exception const & e) {
-    return e.what();
+    std::cout << "Error: " << e.what() << std::endl;
+  }
+  catch (...) {
+    std::cout << "Unknown error" << std::endl;
   }
 }

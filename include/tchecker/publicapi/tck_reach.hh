@@ -21,7 +21,14 @@ enum tck_reach_search_order_t {
 extern "C" {
 #endif
 
-const char * tck_reach(const char * sysdecl_filename, tck_reach_algorithm_t algorithm, tck_reach_search_order_t search_order, tck_reach_certificate_t certificate, int* block_size, int* table_size);
+const void tck_reach(const char * output_filename, 
+  const char * sysdecl_filename, 
+  const char * labels, 
+  tck_reach_algorithm_t algorithm, 
+  tck_reach_search_order_t search_order, 
+  tck_reach_certificate_t certificate, 
+  int* block_size, 
+  int* table_size);
 
 #ifdef __cplusplus
 }
