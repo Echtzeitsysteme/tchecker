@@ -363,6 +363,8 @@ Lieb_et_al::check_for_virt_bisim(tchecker::zg::const_state_sptr_t A_state, tchec
 
       if(!(return_from_transitions->contradiction_free())) {
 
+        _non_bisim_cache.emplace(A_cloned, B_cloned, return_from_transitions->get_contradictions());
+
         auto result = std::make_shared<algorithm_return_value_t>(_A->get_no_of_virtual_clocks());
 
         auto contradiction = return_from_transitions->get_contradictions();
@@ -551,7 +553,6 @@ Lieb_et_al::check_for_outgoing_transitions( tchecker::zg::zone_t const & zone_A,
         if(new_cont->contradiction_free()) {
           finished[idx_A][idx_B] = true;
         } else {
-          _non_bisim_cache.emplace(s_A_constrained, s_B_constrained, new_cont->get_contradictions());
           found_cont.get(idx_A, idx_B)->append_container(new_cont->get_contradictions());
           found_cont.get(idx_A, idx_B)->compress();
         }
