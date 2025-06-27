@@ -183,6 +183,9 @@ Lieb_et_al::check_for_virt_bisim(tchecker::zg::const_state_sptr_t A_state, tchec
     reset_to_value(B_cloned->zone().dbm(), B_cloned->zone_ptr()->dim(), _B->get_no_of_original_clocks() + _B->get_no_of_virtual_clocks(), 0);
   }
 
+  tchecker::zg::state_sptr_t A_copy_for_revert_sync = _A->clone_state(A_cloned);
+  tchecker::zg::state_sptr_t B_copy_for_revert_sync = _B->clone_state(B_cloned);
+
   tchecker::vcg::sync( A_cloned->zone(), B_cloned->zone(),
                        _A->get_no_of_original_clocks(), _B->get_no_of_original_clocks(),
                        A_trans->reset_container(), B_trans->reset_container());
@@ -236,7 +239,7 @@ Lieb_et_al::check_for_virt_bisim(tchecker::zg::const_state_sptr_t A_state, tchec
       = std::make_shared<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(_A->get_no_of_virtual_clocks() + 1);
 
     for(auto phi = contradiction->begin(); phi < contradiction->end(); phi++) {
-      auto pair = tchecker::vcg::revert_sync(A_cloned->zone(), B_cloned->zone(), _A->get_no_of_original_clocks(), _B->get_no_of_original_clocks(), **phi);
+      auto pair = tchecker::vcg::revert_sync(A_copy_for_revert_sync->zone(), B_copy_for_revert_sync->zone(), _A->get_no_of_original_clocks(), _B->get_no_of_original_clocks(), **phi);
       sync_reverted->append_zone(pair.first);
       sync_reverted->append_zone(pair.second);
     }
@@ -259,7 +262,12 @@ Lieb_et_al::check_for_virt_bisim(tchecker::zg::const_state_sptr_t A_state, tchec
 
     if(! cache->is_empty()) {
       auto result = std::make_shared<algorithm_return_value_t>(_A->get_no_of_virtual_clocks());
-      result->add_to_contradictions(cache);
+
+      for(auto phi = cache->begin(); phi < cache->end(); phi++) {
+        auto pair = tchecker::vcg::revert_sync(A_copy_for_revert_sync->zone(), B_copy_for_revert_sync->zone(), _A->get_no_of_original_clocks(), _B->get_no_of_original_clocks(), **phi);
+        result->add_to_contradictions(pair.first);
+        result->add_to_contradictions(pair.second);
+      }
       return result;
     }
 
@@ -287,9 +295,10 @@ Lieb_et_al::check_for_virt_bisim(tchecker::zg::const_state_sptr_t A_state, tchec
     tchecker::dbm::tighten(B_norm->zone().dbm(), B_norm->zone().dim());
 
     // checking whether normalized_pair is subset of visited
-    if (visited.contains_superset(A_norm, B_norm)) 
+    if (visited.contains_superset(A_norm, B_norm)) {
       return std::make_shared<algorithm_return_value_t>(_A->get_no_of_virtual_clocks());
- 
+    }
+
     auto check_set = std::make_shared<tchecker::strong_timed_bisim::visited_map_t>(_A->get_no_of_virtual_clocks());
 
     visited.emplace(A_norm, B_norm);
@@ -370,7 +379,7 @@ Lieb_et_al::check_for_virt_bisim(tchecker::zg::const_state_sptr_t A_state, tchec
         auto contradiction = return_from_transitions->get_contradictions();
 
         for(auto phi = contradiction->begin(); phi < contradiction->end(); phi++) {
-          auto pair = tchecker::vcg::revert_sync(A_cloned->zone(), B_cloned->zone(), _A->get_no_of_original_clocks(), _B->get_no_of_original_clocks(), **phi);
+          auto pair = tchecker::vcg::revert_sync(A_copy_for_revert_sync->zone(), B_copy_for_revert_sync->zone(), _A->get_no_of_original_clocks(), _B->get_no_of_original_clocks(), **phi);
           result->add_to_contradictions(pair.first);
           result->add_to_contradictions(pair.second);
         }
@@ -575,5 +584,5 @@ Lieb_et_al::check_for_outgoing_transitions( tchecker::zg::zone_t const & zone_A,
 
 } // end of namespace strong_timed_bisim
 
-} // end ofnamespace tchecker
+} // end of namespace tchecker
 

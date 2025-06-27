@@ -602,7 +602,8 @@ bool disjoint(tchecker::dbm::db_t * dbm_1, tchecker::dbm::db_t * dbm2, tchecker:
 /*!
  \brief revert-multiple-reset function (see the TR of Lieb et al.)
  \param result : where the result will be stored (must be allocated)
- \param orig_zone : the previous zone
+ \param orig_zone : the previous dbm
+ \param dim : the dimension of the used dbm
  \param zone_split : the split of reset(orig_zone)
  \param reset : the used reset set
  \return void

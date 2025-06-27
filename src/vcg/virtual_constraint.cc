@@ -42,8 +42,7 @@ void add_neg_single(tchecker::zone_container_t<virtual_constraint_t> *result, co
   }
 }
 
-void 
-add_neg(tchecker::zone_container_t<virtual_constraint_t> *result, const virtual_constraint_t & cur, 
+void add_neg(tchecker::zone_container_t<virtual_constraint_t> *result, const virtual_constraint_t & cur, 
         tchecker::clock_id_t i, tchecker::clock_id_t j, 
         tchecker::dbm::db_t *max_i_minus_j, tchecker::dbm::db_t *max_j_minus_i)
 {
