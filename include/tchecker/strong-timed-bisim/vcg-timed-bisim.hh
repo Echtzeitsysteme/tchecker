@@ -15,9 +15,7 @@
 
 namespace tchecker {
 
-namespace tck_compare {
-
-namespace vcg_timed_bisim {
+namespace strong_timed_bisim {
 
 
 /*!
@@ -33,10 +31,7 @@ tchecker::strong_timed_bisim::stats_t
 run(std::shared_ptr<tchecker::parsing::system_declaration_t> const & sysdecl_first, std::shared_ptr<tchecker::parsing::system_declaration_t> const & sysdecl_second,
     std::ostream * os, std::size_t block_size, std::size_t table_size);
 
-} // end of namespace vcg_timed_bisim
-
-} // end of namespace tck_compare
-
+} // end of namespace strong_timed_bisim
 } // end of namespace tchecker
 
 #endif // TCHECKER_TCK-COMPARE_VCG_TIMED_BISIM_HH

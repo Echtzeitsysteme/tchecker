@@ -16,7 +16,7 @@
 #include <string.h>
 
 
-#include "vcg-timed-bisim.hh"
+#include "tchecker/strong-timed-bisim/vcg-timed-bisim.hh"
 
 /*
  \file tck-compare.cc
@@ -140,7 +140,7 @@ std::shared_ptr<tchecker::parsing::system_declaration_t> load_system_declaration
 void strong_timed_bisim(std::shared_ptr<tchecker::parsing::system_declaration_t> const & sysdecl_first, std::shared_ptr<tchecker::parsing::system_declaration_t> const & sysdecl_second)
 {
 
-  auto stats = tchecker::tck_compare::vcg_timed_bisim::run(sysdecl_first, sysdecl_second, os, block_size, table_size);
+  auto stats = tchecker::strong_timed_bisim::run(sysdecl_first, sysdecl_second, os, block_size, table_size);
 
   // stats
   std::map<std::string, std::string> m;

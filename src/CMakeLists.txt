@@ -161,9 +161,7 @@ set_property(TARGET tck-simulate PROPERTY CXX_STANDARD_REQUIRED ON)
 
 # Build tck-compare executable
 add_executable(tck-compare
-  ${CMAKE_CURRENT_SOURCE_DIR}/tck-compare/tck-compare.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/tck-compare/vcg-timed-bisim.hh
-  ${CMAKE_CURRENT_SOURCE_DIR}/tck-compare/vcg-timed-bisim.cc)
+  ${CMAKE_CURRENT_SOURCE_DIR}/tck-compare/tck-compare.cc)
 target_link_libraries(tck-compare libtchecker_static ${Boost_LIBRARIES})
 set_property(TARGET tck-compare PROPERTY CXX_STANDARD 17)
 set_property(TARGET tck-compare PROPERTY CXX_STANDARD_REQUIRED ON)

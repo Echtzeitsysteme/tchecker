@@ -5,7 +5,7 @@
  *
  */
 
-#include "vcg-timed-bisim.hh"
+#include "tchecker/strong-timed-bisim/vcg-timed-bisim.hh"
 
 #include <string>
 #include <memory>
@@ -25,9 +25,8 @@
 
 namespace tchecker {
 
-namespace tck_compare {
 
-namespace vcg_timed_bisim {
+namespace strong_timed_bisim {
 
 void check_for_init(std::shared_ptr<tchecker::system::system_t> const system){
   auto init_loc = system->initial_locations(0);
@@ -106,8 +105,6 @@ run(std::shared_ptr<tchecker::parsing::system_declaration_t> const & sysdecl_fir
 
 }
 
-} // end of namespace vcg_timed_bisim
-
-} // end of namespace tck_compare
+} // end of namespace strong_timed_bisim
 
 } // end of namespace tchecker
