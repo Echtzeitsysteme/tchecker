@@ -24,7 +24,7 @@
 
 namespace tchecker {
 
-namespace tck_simulate {
+namespace simulate {
 
 /*!
  \brief Randomized simulation of timed automata
@@ -35,6 +35,7 @@ namespace tck_simulate {
  simulation steps of the system of timed processes sysdecl
  \note simulation starts from the initial state of sysdecl if starting_state_attributes is empty
 */
+
 std::shared_ptr<tchecker::tck_simulate::state_space_t>
 randomized_simulation(tchecker::parsing::system_declaration_t const & sysdecl, std::size_t nsteps,
                       std::map<std::string, std::string> const & starting_state_attributes);
@@ -50,7 +51,8 @@ randomized_simulation(tchecker::parsing::system_declaration_t const & sysdecl, s
 */
 std::shared_ptr<tchecker::tck_simulate::state_space_t>
 interactive_simulation(tchecker::parsing::system_declaration_t const & sysdecl,
-                       enum tchecker::tck_simulate::display_type_t display_type,
+                       enum tchecker::simulate::display_type_t display_type,
+                       std::ostream & os,
                        std::map<std::string, std::string> const & starting_state_attributes);
 
 /*!
@@ -61,7 +63,8 @@ interactive_simulation(tchecker::parsing::system_declaration_t const & sysdecl,
  \note simulation starts from the initial state of sysdecl if starting_state_attributes is empty
 */
 void onestep_simulation(tchecker::parsing::system_declaration_t const & sysdecl,
-                        enum tchecker::tck_simulate::display_type_t display_type,
+                        enum tchecker::simulate::display_type_t display_type,
+                        std::ostream & os,
                         std::map<std::string, std::string> const & starting_state_attributes);
 
 } // namespace tck_simulate

@@ -5,11 +5,11 @@
  *
  */
 
-#include "graph.hh"
+#include "tchecker/simulate/graph.hh"
 
 namespace tchecker {
 
-namespace tck_simulate {
+namespace simulate {
 
 /* node_t */
 
@@ -30,19 +30,24 @@ edge_t::edge_t(tchecker::zg::transition_t const & t) : tchecker::graph::edge_ved
 /* graph_t */
 
 graph_t::graph_t(std::shared_ptr<tchecker::zg::zg_t> const & zg, std::size_t block_size)
-    : tchecker::graph::reachability::multigraph_t<tchecker::tck_simulate::node_t, tchecker::tck_simulate::edge_t>::multigraph_t(
+    : tchecker::graph::reachability::multigraph_t<tchecker::simulate::node_t, tchecker::simulate::edge_t>::multigraph_t(
           block_size),
       _zg(zg)
 {
 }
 
-void graph_t::attributes(tchecker::tck_simulate::node_t const & n, std::map<std::string, std::string> & m) const
+graph_t::~graph_t()
+{
+  tchecker::graph::reachability::multigraph_t<tchecker::simulate::node_t, tchecker::simulate::edge_t>::clear();
+}
+
+void graph_t::attributes(tchecker::simulate::node_t const & n, std::map<std::string, std::string> & m) const
 {
   _zg->attributes(n.state_ptr(), m);
   tchecker::graph::attributes(static_cast<tchecker::graph::node_flags_t const &>(n), m);
 }
 
-void graph_t::attributes(tchecker::tck_simulate::edge_t const & e, std::map<std::string, std::string> & m) const
+void graph_t::attributes(tchecker::simulate::edge_t const & e, std::map<std::string, std::string> & m) const
 {
   m["vedge"] = tchecker::to_string(e.vedge(), _zg->system().as_system_system());
 }
@@ -62,8 +67,8 @@ public:
    \return true if n1 is less-than n2 w.r.t. lexical ordering over the states in
    the nodes
   */
-  bool operator()(tchecker::tck_simulate::graph_t::node_sptr_t const & n1,
-                  tchecker::tck_simulate::graph_t::node_sptr_t const & n2) const
+  bool operator()(tchecker::simulate::graph_t::node_sptr_t const & n1,
+                  tchecker::simulate::graph_t::node_sptr_t const & n2) const
   {
     int state_cmp = tchecker::zg::lexical_cmp(n1->state(), n2->state());
     if (state_cmp != 0)
@@ -85,17 +90,17 @@ public:
    \param e2 : an edge
    \return true if e1 is less-than  e2 w.r.t. the tuple of edges in e1 and e2
   */
-  bool operator()(tchecker::tck_simulate::graph_t::edge_sptr_t const & e1,
-                  tchecker::tck_simulate::graph_t::edge_sptr_t const & e2) const
+  bool operator()(tchecker::simulate::graph_t::edge_sptr_t const & e1,
+                  tchecker::simulate::graph_t::edge_sptr_t const & e2) const
   {
     return tchecker::lexical_cmp(e1->vedge(), e2->vedge()) < 0;
   }
 };
 
-std::ostream & dot_output(std::ostream & os, tchecker::tck_simulate::graph_t const & g, std::string const & name)
+std::ostream & dot_output(std::ostream & os, tchecker::simulate::graph_t const & g, std::string const & name)
 {
-  return tchecker::graph::reachability::dot_output<tchecker::tck_simulate::graph_t, tchecker::tck_simulate::node_lexical_less_t,
-                                                   tchecker::tck_simulate::edge_lexical_less_t>(os, g, name);
+  return tchecker::graph::reachability::dot_output<tchecker::simulate::graph_t, tchecker::simulate::node_lexical_less_t,
+                                                   tchecker::simulate::edge_lexical_less_t>(os, g, name);
 }
 
 /* state_space_t */

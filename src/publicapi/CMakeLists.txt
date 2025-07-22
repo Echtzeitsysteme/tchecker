@@ -3,8 +3,10 @@ ${CMAKE_CURRENT_SOURCE_DIR}/tck_syntax.cc
 ${CMAKE_CURRENT_SOURCE_DIR}/tck_reach.cc
 ${CMAKE_CURRENT_SOURCE_DIR}/tck_liveness.cc
 ${CMAKE_CURRENT_SOURCE_DIR}/tck_compare.cc
+${CMAKE_CURRENT_SOURCE_DIR}/tck_simulate.cc
 ${TCHECKER_INCLUDE_DIR}/tchecker/publicapi/tck_syntax.hh
 ${TCHECKER_INCLUDE_DIR}/tchecker/publicapi/tck_reach.hh
 ${TCHECKER_INCLUDE_DIR}/tchecker/publicapi/tck_liveness.hh
 ${TCHECKER_INCLUDE_DIR}/tchecker/publicapi/tck_compare.hh
+${TCHECKER_INCLUDE_DIR}/tchecker/publicapi/tck_simulate.hh
 PARENT_SCOPE)

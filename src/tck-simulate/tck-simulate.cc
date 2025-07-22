@@ -16,7 +16,7 @@
 #if USE_BOOST_JSON
 #include <boost/json.hpp>
 #endif
-#include "simulate.hh"
+#include "tchecker/simulate/simulate.hh"
 
 /*!
  \file tck-simulate.cc
@@ -69,7 +69,7 @@ enum simulation_type_t {
 };
 
 static enum simulation_type_t simulation_type = INTERACTIVE_SIMULATION;
-static enum tchecker::tck_simulate::display_type_t display_type = tchecker::tck_simulate::HUMAN_READABLE_DISPLAY;
+static enum tchecker::simulate::display_type_t display_type = tchecker::simulate::HUMAN_READABLE_DISPLAY;
 static bool help = false;
 static std::size_t nsteps = 0;
 static std::string output_filename = "";
@@ -133,7 +133,7 @@ int parse_command_line(int argc, char * argv[])
     else {
 #if USE_BOOST_JSON
       if (strcmp(long_options[long_option_index].name, "json") == 0)
-        display_type = tchecker::tck_simulate::JSON_DISPLAY;
+        display_type = tchecker::simulate::JSON_DISPLAY;
       else
 #endif
         throw std::runtime_error("This also should never be executed");
@@ -242,19 +242,20 @@ int main(int argc, char * argv[])
     if (starting_state_json != "")
       starting_state_attributes = parse_state_json(starting_state_json);
 #endif
-    std::shared_ptr<tchecker::tck_simulate::state_space_t> state_space{nullptr};
+
+    std::shared_ptr<tchecker::simulate::state_space_t> state_space{nullptr};
     if (simulation_type == INTERACTIVE_SIMULATION)
-      state_space = tchecker::tck_simulate::interactive_simulation(*sysdecl, display_type, starting_state_attributes);
+      state_space = tchecker::simulate::interactive_simulation(*sysdecl, display_type, starting_state_attributes);
     else if (simulation_type == RANDOMIZED_SIMULATION)
-      state_space = tchecker::tck_simulate::randomized_simulation(*sysdecl, nsteps, starting_state_attributes);
+      state_space = tchecker::simulate::randomized_simulation(*sysdecl, nsteps, starting_state_attributes);
     else if (simulation_type == ONESTEP_SIMULATION)
-      tchecker::tck_simulate::onestep_simulation(*sysdecl, display_type, starting_state_attributes);
+      tchecker::simulate::onestep_simulation(*sysdecl, display_type, std::cout, starting_state_attributes);
     else
       throw std::runtime_error("Select one of interactive, one-step or randomized simulation");
 
     if (output_trace) {
       assert(state_space.get() != nullptr);
-      tchecker::tck_simulate::dot_output(*os, state_space->graph(), sysdecl->name());
+      tchecker::simulate::dot_output(*os, state_space->graph(), sysdecl->name());
     }
 
     if (os != &std::cout)

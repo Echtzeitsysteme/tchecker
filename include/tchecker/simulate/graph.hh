@@ -29,7 +29,7 @@
 
 namespace tchecker {
 
-namespace tck_simulate {
+namespace simulate {
 
 /*!
 \class node_t
@@ -75,7 +75,7 @@ public:
  \brief Simulation graph over the zone graph
 */
 class graph_t
-    : public tchecker::graph::reachability::multigraph_t<tchecker::tck_simulate::node_t, tchecker::tck_simulate::edge_t> {
+    : public tchecker::graph::reachability::multigraph_t<tchecker::simulate::node_t, tchecker::simulate::edge_t> {
 public:
   /*!
    \brief Constructor
@@ -89,7 +89,12 @@ public:
   */
   graph_t(std::shared_ptr<tchecker::zg::zg_t> const & zg, std::size_t block_size);
 
-  using tchecker::graph::reachability::multigraph_t<tchecker::tck_simulate::node_t, tchecker::tck_simulate::edge_t>::attributes;
+  /*!
+   \brief Destructor
+  */
+  virtual ~graph_t();
+
+  using tchecker::graph::reachability::multigraph_t<tchecker::simulate::node_t, tchecker::simulate::edge_t>::attributes;
 
 protected:
   /*!
@@ -98,7 +103,7 @@ protected:
    \param m : a map (key, value) of attributes
    \post attributes of node n have been added to map m
   */
-  virtual void attributes(tchecker::tck_simulate::node_t const & n, std::map<std::string, std::string> & m) const;
+  virtual void attributes(tchecker::simulate::node_t const & n, std::map<std::string, std::string> & m) const;
 
   /*!
    \brief Accessor to edge attributes
@@ -106,7 +111,7 @@ protected:
    \param m : a map (key, value) of attributes
    \post attributes of edge e have been added to map m
   */
-  virtual void attributes(tchecker::tck_simulate::edge_t const & e, std::map<std::string, std::string> & m) const;
+  virtual void attributes(tchecker::simulate::edge_t const & e, std::map<std::string, std::string> & m) const;
 
 private:
   std::shared_ptr<tchecker::zg::zg_t> _zg; /*!< Zone graph */
@@ -119,7 +124,7 @@ private:
  \param name : graph name
  \post graph g with name has been output to os
 */
-std::ostream & dot_output(std::ostream & os, tchecker::tck_simulate::graph_t const & g, std::string const & name);
+std::ostream & dot_output(std::ostream & os, tchecker::simulate::graph_t const & g, std::string const & name);
 
 /*!
  \class state_space_t

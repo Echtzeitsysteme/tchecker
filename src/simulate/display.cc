@@ -9,11 +9,11 @@
 #include <boost/json.hpp>
 #endif
 
-#include "display.hh"
+#include "tchecker/simulate/display.hh"
 
 namespace tchecker {
 
-namespace tck_simulate {
+namespace simulate {
 
 hr_display_t::hr_display_t(std::ostream & os, std::shared_ptr<tchecker::zg::zg_t> const & zg) : _os(os), _zg(zg)
 {
@@ -104,8 +104,8 @@ static boost::json::value json_sst(tchecker::zg::zg_t & zg, tchecker::zg::zg_t::
   boost::json::object o;
   auto && [status, s, t] = sst;
   o.emplace("status", status);
-  o.emplace("state", tchecker::tck_simulate::json_state(zg, tchecker::zg::const_state_sptr_t{s}));
-  o.emplace("transition", tchecker::tck_simulate::json_transition(zg, tchecker::zg::const_transition_sptr_t{t}));
+  o.emplace("state", tchecker::simulate::json_state(zg, tchecker::zg::const_state_sptr_t{s}));
+  o.emplace("transition", tchecker::simulate::json_transition(zg, tchecker::zg::const_transition_sptr_t{t}));
   return o;
 }
 
@@ -119,7 +119,7 @@ static boost::json::value json_vsst(tchecker::zg::zg_t & zg, std::vector<tchecke
 {
   boost::json::array a;
   for (tchecker::zg::zg_t::sst_t const & sst : v)
-    a.emplace_back(tchecker::tck_simulate::json_sst(zg, sst));
+    a.emplace_back(tchecker::simulate::json_sst(zg, sst));
   return a;
 }
 
@@ -132,7 +132,7 @@ static boost::json::value json_vsst(tchecker::zg::zg_t & zg, std::vector<tchecke
 static boost::json::value json_initial(tchecker::zg::zg_t & zg, std::vector<tchecker::zg::zg_t::sst_t> const & v)
 {
   boost::json::object o;
-  o.emplace("initial", tchecker::tck_simulate::json_vsst(zg, v));
+  o.emplace("initial", tchecker::simulate::json_vsst(zg, v));
   return o;
 }
 
@@ -147,8 +147,8 @@ static boost::json::value json_next(tchecker::zg::zg_t & zg, tchecker::zg::const
                                     std::vector<tchecker::zg::zg_t::sst_t> const & v)
 {
   boost::json::object o;
-  o.emplace("current", tchecker::tck_simulate::json_state(zg, s));
-  o.emplace("next", tchecker::tck_simulate::json_vsst(zg, v));
+  o.emplace("current", tchecker::simulate::json_state(zg, s));
+  o.emplace("next", tchecker::simulate::json_vsst(zg, v));
   return o;
 }
 
@@ -160,26 +160,26 @@ json_display_t::json_display_t(std::ostream & os, std::shared_ptr<tchecker::zg::
 
 void json_display_t::output_initial(std::vector<tchecker::zg::zg_t::sst_t> const & v)
 {
-  _os << tchecker::tck_simulate::json_initial(*_zg, v) << std::endl;
+  _os << tchecker::simulate::json_initial(*_zg, v) << std::endl;
 }
 
 void json_display_t::output_next(tchecker::zg::const_state_sptr_t const & s, std::vector<tchecker::zg::zg_t::sst_t> const & v)
 {
-  _os << tchecker::tck_simulate::json_next(*_zg, s, v) << std::endl;
+  _os << tchecker::simulate::json_next(*_zg, s, v) << std::endl;
 }
 #endif
 
 /* factory */
 
-tchecker::tck_simulate::display_t * display_factory(enum tchecker::tck_simulate::display_type_t display_type, std::ostream & os,
+tchecker::simulate::display_t * display_factory(enum tchecker::simulate::display_type_t display_type, std::ostream & os,
                                                     std::shared_ptr<tchecker::zg::zg_t> zg)
 {
   switch (display_type) {
-  case tchecker::tck_simulate::HUMAN_READABLE_DISPLAY:
-    return new tchecker::tck_simulate::hr_display_t{os, zg};
+  case tchecker::simulate::HUMAN_READABLE_DISPLAY:
+    return new tchecker::simulate::hr_display_t{os, zg};
 #if USE_BOOST_JSON
-  case tchecker::tck_simulate::JSON_DISPLAY:
-    return new tchecker::tck_simulate::json_display_t{os, zg};
+  case tchecker::simulate::JSON_DISPLAY:
+    return new tchecker::simulate::json_display_t{os, zg};
 #endif
   default:
     throw std::runtime_error("This should never occur: switch statement is not complete");

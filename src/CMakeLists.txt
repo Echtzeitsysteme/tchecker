@@ -52,6 +52,7 @@ add_subdirectory(fsm)
 add_subdirectory(graph)
 add_subdirectory(parsing)
 add_subdirectory(refzg)
+add_subdirectory(simulate)
 add_subdirectory(statement)
 add_subdirectory(strong-timed-bisim)
 add_subdirectory(syncprod)
@@ -85,6 +86,7 @@ set(LIBTCHECKER_SRC
   ${OTHER_SRC}
   ${PARSING_SRC}
   ${REFZG_SRC}
+  ${SIMULATE_SRC}
   ${STATEMENT_SRC}
   ${STRONG_TIMED_BISIM_SRC}
   ${SYNCPROD_SRC}
@@ -148,12 +150,6 @@ set_property(TARGET tck-syntax PROPERTY CXX_STANDARD_REQUIRED ON)
 
 # Build tck-simulate executable
 add_executable(tck-simulate
-  ${CMAKE_CURRENT_SOURCE_DIR}/tck-simulate/display.hh
-  ${CMAKE_CURRENT_SOURCE_DIR}/tck-simulate/display.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/tck-simulate/graph.hh
-  ${CMAKE_CURRENT_SOURCE_DIR}/tck-simulate/graph.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/tck-simulate/simulate.hh
-  ${CMAKE_CURRENT_SOURCE_DIR}/tck-simulate/simulate.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/tck-simulate/tck-simulate.cc)
 target_link_libraries(tck-simulate libtchecker_static ${Boost_LIBRARIES})
 set_property(TARGET tck-simulate PROPERTY CXX_STANDARD 17)

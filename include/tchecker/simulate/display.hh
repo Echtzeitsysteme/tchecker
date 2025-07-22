@@ -24,7 +24,7 @@
 
 namespace tchecker {
 
-namespace tck_simulate {
+namespace simulate {
 
 /*!
  \class display_t
@@ -55,7 +55,7 @@ public:
  \class hr_display_t
  \brief Human-readable display
 */
-class hr_display_t : public tchecker::tck_simulate::display_t {
+class hr_display_t : public tchecker::simulate::display_t {
 public:
   /*!
    \brief Constructor
@@ -70,12 +70,12 @@ public:
   /*!
    \brief Copy constructor
   */
-  hr_display_t(tchecker::tck_simulate::hr_display_t const &) = default;
+  hr_display_t(tchecker::simulate::hr_display_t const &) = default;
 
   /*!
    \brief Move constructor
   */
-  hr_display_t(tchecker::tck_simulate::hr_display_t &&) = default;
+  hr_display_t(tchecker::simulate::hr_display_t &&) = default;
 
   /*!
    \brief Destructor
@@ -85,12 +85,12 @@ public:
   /*!
    \brief Assignment operator
   */
-  tchecker::tck_simulate::hr_display_t & operator=(tchecker::tck_simulate::hr_display_t const &) = delete;
+  tchecker::simulate::hr_display_t & operator=(tchecker::simulate::hr_display_t const &) = delete;
 
   /*!
    \brief Move-assignment operator
   */
-  tchecker::tck_simulate::hr_display_t & operator=(tchecker::tck_simulate::hr_display_t &&) = delete;
+  tchecker::simulate::hr_display_t & operator=(tchecker::simulate::hr_display_t &&) = delete;
 
   /*!
    \brief Display initial simulation step
@@ -131,7 +131,7 @@ private:
  \class json_display_t
  \brief JSON display
 */
-class json_display_t : public tchecker::tck_simulate::display_t {
+class json_display_t : public tchecker::simulate::display_t {
 public:
   /*!
    \brief Constructor
@@ -146,12 +146,12 @@ public:
   /*!
    \brief Copy constructor
   */
-  json_display_t(tchecker::tck_simulate::json_display_t const &) = default;
+  json_display_t(tchecker::simulate::json_display_t const &) = default;
 
   /*!
    \brief Move constructor
   */
-  json_display_t(tchecker::tck_simulate::json_display_t &&) = default;
+  json_display_t(tchecker::simulate::json_display_t &&) = default;
 
   /*!
    \brief Destructor
@@ -161,12 +161,12 @@ public:
   /*!
    \brief Assignment operator
   */
-  tchecker::tck_simulate::json_display_t & operator=(tchecker::tck_simulate::json_display_t const &) = delete;
+  tchecker::simulate::json_display_t & operator=(tchecker::simulate::json_display_t const &) = delete;
 
   /*!
    \brief Move-assignment operator
   */
-  tchecker::tck_simulate::json_display_t & operator=(tchecker::tck_simulate::json_display_t &&) = delete;
+  tchecker::simulate::json_display_t & operator=(tchecker::simulate::json_display_t &&) = delete;
 
   /*!
    \brief Display initial simulation step
@@ -206,7 +206,7 @@ enum display_type_t {
  \param zg : zone graph
  \return display of type display_type over output stream os using zone graph zg
 */
-tchecker::tck_simulate::display_t * display_factory(enum tchecker::tck_simulate::display_type_t display_type, std::ostream & os,
+tchecker::simulate::display_t * display_factory(enum tchecker::simulate::display_type_t display_type, std::ostream & os,
                                                     std::shared_ptr<tchecker::zg::zg_t> zg);
 
 } // namespace tck_simulate
