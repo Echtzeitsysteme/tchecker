@@ -444,7 +444,7 @@ public:
       auto row = get_row(i);
       for(size_t j = 0; j < row->size(); ++j) {
         os << "matrix element [" << i << ", " << j << "]:" << std::endl;
-        (*row)[i]->print_zone_container(os);
+        (*row)[j]->print_zone_container(os);
       }
     }
   }
