@@ -83,7 +83,7 @@ const void tck_simulate_onestep_simulation(const char * output_filename, const c
 
 
 
-    tchecker::simulate::onestep_simulation(*sysdecl, display_type, std::cout, starting_state_attributes);
+    tchecker::simulate::onestep_simulation(*sysdecl, display_type, *os, starting_state_attributes);
     
     if (os != &std::cout)
         delete os;
