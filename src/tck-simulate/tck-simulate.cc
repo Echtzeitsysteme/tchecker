@@ -176,7 +176,7 @@ std::shared_ptr<tchecker::parsing::system_declaration_t> load_system(std::string
 */
 std::map<std::string, std::string> parse_state_json(std::string const & state_json)
 {
-  boost::json::error_code ec;
+  boost::system::error_code ec;
   boost::json::value json_value = boost::json::parse(state_json, ec);
   if (ec)
     throw std::invalid_argument("Syntax error in JSON state description: " + state_json);

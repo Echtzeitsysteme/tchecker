@@ -11,9 +11,11 @@ find_package(Boost OPTIONAL_COMPONENTS json)
 
 if(boost_json_DIR)
   set(USE_BOOST_JSON 1)
+  add_compile_definitions(USE_BOOST_JSON=1)
 else()
   message(NOTICE "*** JSON-based features are disabled")
   set(USE_BOOST_JSON 0)
+  add_compile_definitions(USE_BOOST_JSON=0)
 endif()
 
 option(LIBTCHECKER_ENABLE_SHARED "Build TChecker shared library" OFF)
