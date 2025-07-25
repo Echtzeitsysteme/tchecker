@@ -2,11 +2,10 @@
 #
 # See files AUTHORS and LICENSE for copyright details.
 
-set(Boost_USE_STATIC_LIBS       OFF)  # only find static libs
+set(Boost_USE_STATIC_LIBS       ON)  # only find static libs
 set(Boost_USE_DEBUG_LIBS        OFF)  # ignore debug libs and
 set(Boost_USE_RELEASE_LIBS       ON)  # only find release libs
 set(Boost_USE_MULTITHREADED     OFF)
-set(Boost_USE_STATIC_RUNTIME    OFF)
 find_package(Boost OPTIONAL_COMPONENTS json)
 
 if(boost_json_DIR)
