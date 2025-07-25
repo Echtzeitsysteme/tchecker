@@ -68,7 +68,7 @@ const void tck_simulate_onestep_simulation(const char * output_filename, const c
   }
 
   std::ostream * os = nullptr;
-  if (output_filename != "") {
+  if (output_filename && std::strlen(output_filename) > 0) {
     os = new std::ofstream(output_filename, std::ios::out);
   }
   else
@@ -76,8 +76,9 @@ const void tck_simulate_onestep_simulation(const char * output_filename, const c
 
   std::map<std::string, std::string> starting_state_attributes;
 #if USE_BOOST_JSON
-  if (starting_state_json != "")
+  if (starting_state_json != nullptr && std::strlen(starting_state_json) > 0) {
     starting_state_attributes = parse_state_json(starting_state_json);
+  }
 #endif
 
 
