@@ -60,6 +60,9 @@ set(INPUTS
     strong_timed_bisim_system_tests_edge_case_urgent_non_urgent.sh:
     strong_timed_bisim_system_tests_edge_case_without_trans.sh:
     strong_timed_bisim_system_tests_edge_case_without_trans_changed_inv.sh:
+    strong_timed_bisim_system_tests_path_explosion_A1.sh:
+    strong_timed_bisim_system_tests_path_explosion_A2.sh:
+    strong_timed_bisim_system_tests_path_explosion_A3.sh:
     corsso.sh:2:2:10:1:2
     critical-region-async.sh:2:10
     csmacd.sh:3
@@ -108,6 +111,9 @@ list(GET TCK_COMPARE_INPUT_FILES 19 edge_case_urgent)
 list(GET TCK_COMPARE_INPUT_FILES 20 edge_case_urgent_non_urgent)
 list(GET TCK_COMPARE_INPUT_FILES 21 edge_case_without_trans)
 list(GET TCK_COMPARE_INPUT_FILES 22 edge_case_without_trans_changed_inv)
+list(GET TCK_COMPARE_INPUT_FILES 23 path_explosion_1)
+list(GET TCK_COMPARE_INPUT_FILES 24 path_explosion_2)
+list(GET TCK_COMPARE_INPUT_FILES 25 path_explosion_3)
 
 # check whether the no_initial_check works
 create_testcase(no_initial_first ${no_initial} ${ad} strong-timed-bisim)
@@ -189,6 +195,11 @@ create_testcase(edge-case-without-transitions-self ${edge_case_without_trans} ${
 create_testcase(edge-case-without-transitions-changed-inv-self ${edge_case_without_trans_changed_inv} ${edge_case_without_trans_changed_inv} strong-timed-bisim)
 create_testcase(edge-case-without-transitions ${edge_case_without_trans} ${edge_case_without_trans_changed_inv} strong-timed-bisim)
 create_testcase(edge-case-without-transitions-Lieb-et-al-1 ${edge_case_without_trans} ${Lieb1} strong-timed-bisim)
+
+## path explosion
+create_testcase(path-explosion-1-2 ${path_explosion_1} ${path_explosion_2} strong-timed-bisim)
+create_testcase(path-explosion-1-3 ${path_explosion_1} ${path_explosion_3} strong-timed-bisim)
+
 
 # some self test take to long
 #foreach(cur ${TCK_COMPARE_INPUT_FILES})

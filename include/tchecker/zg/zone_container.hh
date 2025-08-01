@@ -8,11 +8,9 @@
 #ifndef TCHECKER_ZG_ZONE_CONTAINER_HH
 #define TCHECKER_ZG_ZONE_CONTAINER_HH
 
-// exactly one of SUBSETS_WITH_NEG_AND, SUBSETS_WITH_INTERSECTIONS, SUBSETS_WITH_COMPRESS, SUBSETS_WITHOUT_COMPRESS and WITHOUT_SUBSETS must be defined
-#define WITHOUT_SUBSETS
-
 #include <iterator>
 #include <memory>
+#include "tchecker/config.hh"
 
 #include "tchecker/dbm/dbm.hh"
 
@@ -219,6 +217,8 @@ public:
       result = find_union_partner(*result);
       reduced = (result->size() < prev);
     } while (reduced);
+
+    this->remove_empty();
 
     assert(result->size() <= _storage->size());
 
@@ -444,7 +444,7 @@ public:
       auto row = get_row(i);
       for(size_t j = 0; j < row->size(); ++j) {
         os << "matrix element [" << i << ", " << j << "]:" << std::endl;
-        (*row)[i]->print_zone_container(os);
+        (*row)[j]->print_zone_container(os);
       }
     }
   }

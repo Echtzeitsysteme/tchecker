@@ -105,12 +105,22 @@ public:
     void emplace(tchecker::zg::state_sptr_t first, tchecker::zg::state_sptr_t second);
 
     /*!
+     \brief inserts another visited map into this
+     \param other : the map to insert
+    */
+    void emplace(visited_map_t &other);
+
+    /*!
     \brief checks whether the two given symbolic states form a subset of the symbolic states saved in visited map 
     \param first : first symbolic state
     \param second : second symbolic state
     \note only returns true if visited map contains superset but might return false incorrectly. Always returns true if the given pair of symbolic states form a subset of a single pair of symbolic states in visited map
     */
     bool contains_superset(tchecker::zg::state_sptr_t first, tchecker::zg::state_sptr_t second);
+
+private:
+
+    void emplace(visited_map_key_t key, std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> vc);
 
 };
 

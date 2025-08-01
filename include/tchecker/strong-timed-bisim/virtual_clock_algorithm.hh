@@ -20,13 +20,15 @@
 #include "tchecker/vcg/vcg.hh"
 #include "tchecker/zg/zone_container.hh"
 #include "tchecker/strong-timed-bisim/visited_map.hh"
+#include "tchecker/strong-timed-bisim/algorithm_return_value.hh"
+#include "tchecker/strong-timed-bisim/non_bisim_cache.hh"
 
 namespace tchecker {
 
 namespace strong_timed_bisim {
 
-/*
- \ class Lieb_et_al
+/*!
+ \class Lieb_et_al
  \brief Implements the on-the-fly algorithm to check strong timed bisimulation of Lieb et al.
  */
 class Lieb_et_al {
@@ -51,11 +53,13 @@ public:
 
 private:
 
+
+
   /*!
    \brief checks whether we need to do an epsilon transition
    \param A_state : first state
    \param B_state : second state
-   \Return true if the states are either not synced or the result of a delay is different than the original symbolic states
+   \return true if the states are either not synced or the result of a delay is different than the original symbolic states
   */
   bool do_an_epsilon_transition(tchecker::zg::state_sptr_t A_state, tchecker::zg::transition_sptr_t A_trans,
                                 tchecker::zg::state_sptr_t B_state, tchecker::zg::transition_sptr_t B_trans);
@@ -68,9 +72,9 @@ private:
    \param B_trans : the transition with which we reached the second symbolic state
    \param last_was_epsilon : whether the last transition was an epsilon transition
    \param visited : a set of assumptions
-   \return a list of virtual constraints that are not bisimilar
+   \return the same as the algorithm
    */
-  std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>
+  std::shared_ptr<algorithm_return_value_t>
   check_for_virt_bisim(tchecker::zg::const_state_sptr_t A_state, tchecker::zg::transition_sptr_t A_trans,
                        tchecker::zg::const_state_sptr_t B_state, tchecker::zg::transition_sptr_t B_trans,
                        visited_map_t & visited);
@@ -91,9 +95,9 @@ private:
    \param : zones_B : the splits of the target zones of trans_B
    \param : trans_B : the second transition
    \param : visted : the assumptions.
-   \return a contradiction if there is one. Otherwise an empty list of virtual constraints.
+   \return the same as the algorithm
    */
-  std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>
+  std::shared_ptr<algorithm_return_value_t>
   check_target_pair(tchecker::zg::state_sptr_t target_state_A, tchecker::zg::transition_sptr_t trans_A,
                     tchecker::zg::state_sptr_t target_state_B, tchecker::zg::transition_sptr_t trans_B,
                     std::shared_ptr<zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> already_found_contradictions,
@@ -106,10 +110,9 @@ private:
    \param trans_A : the list of transitions that belongs to the first vcg
    \param trans_B : the list of transitions that belongs to the second vcg
    \param visited : the assumptions
-   \return a list of virtual constraints that cannot be simulated.
-   \note the result is allocated at the heap and must be freed.
-   */
-  std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>
+   \return the same as the algorithm
+  */
+  std::shared_ptr<algorithm_return_value_t>
   check_for_outgoing_transitions( tchecker::zg::zone_t const & zone_A, tchecker::zg::zone_t const & zone_B,
                                   std::vector<tchecker::vcg::vcg_t::sst_t *> & trans_A, std::vector<tchecker::vcg::vcg_t::sst_t *> & trans_B,
                                   visited_map_t & visited);
@@ -118,6 +121,8 @@ private:
   const std::shared_ptr<tchecker::vcg::vcg_t> _B;
 
   long _visited_pair_of_states;
+  non_bisim_cache_t _non_bisim_cache;
+
 
 };
 

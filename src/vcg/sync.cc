@@ -170,10 +170,13 @@ revert_sync(tchecker::zg::zone_t const & zone_1, tchecker::zg::zone_t const & zo
             const tchecker::virtual_constraint::virtual_constraint_t & phi_e)
 {
 
-  auto dbm1 = zone_1.dbm();
   auto dim1 = zone_1.dim();
-  auto dbm2 = zone_2.dbm();
+  tchecker::dbm::db_t dbm1[dim1*dim1];
+  tchecker::dbm::copy(dbm1, zone_1.dbm(), zone_1.dim());
+
   auto dim2 = zone_2.dim();
+  tchecker::dbm::db_t dbm2[dim2*dim2];
+  tchecker::dbm::copy(dbm2, zone_2.dbm(), zone_2.dim());
 
   assert(tchecker::dbm::is_consistent(dbm1, dim1));
   assert(tchecker::dbm::is_consistent(dbm2, dim2));
@@ -189,13 +192,13 @@ revert_sync(tchecker::zg::zone_t const & zone_1, tchecker::zg::zone_t const & zo
   tchecker::clock_reset_container_t virt_reset_set_A;
   tchecker::clock_reset_container_t virt_reset_set_B;
 
-  for(tchecker::clock_id_t i = 0; i < no_of_orig_clocks_1; ++i) {
-    if(tchecker::dbm::LE_ZERO == *tchecker::dbm::access(dbm1, dim1, i+1, 0) && tchecker::dbm::LE_ZERO == *tchecker::dbm::access(dbm1, dim1, 0, i+1)) {
+  for(tchecker::clock_id_t i = 1; i <= no_of_orig_clocks_1; ++i) {
+    if(tchecker::dbm::LE_ZERO != *tchecker::dbm::access(dbm1, dim1, i, no_of_orig_clocks_1 + i) || tchecker::dbm::LE_ZERO != *tchecker::dbm::access(dbm1, dim1, no_of_orig_clocks_1 + i, i)) {
 
-        tchecker::clock_reset_t orig_tmp{i, tchecker::REFCLOCK_ID, 0};
+        tchecker::clock_reset_t orig_tmp{i-1, tchecker::REFCLOCK_ID, 0};
 
-        tchecker::clock_reset_t virt_tmp_A{i + no_of_orig_clocks_1, tchecker::REFCLOCK_ID, 0};
-        tchecker::clock_reset_t virt_tmp_B{i + no_of_orig_clocks_2, tchecker::REFCLOCK_ID, 0};
+        tchecker::clock_reset_t virt_tmp_A{i + no_of_orig_clocks_1 - 1, tchecker::REFCLOCK_ID, 0};
+        tchecker::clock_reset_t virt_tmp_B{i + no_of_orig_clocks_2 - 1, tchecker::REFCLOCK_ID, 0};
 
         orig_reset_set_A.emplace_back(orig_tmp);
 
@@ -204,13 +207,13 @@ revert_sync(tchecker::zg::zone_t const & zone_1, tchecker::zg::zone_t const & zo
     }
   }
 
-  for(tchecker::clock_id_t i = 0; i < no_of_orig_clocks_2; ++i) {
-    if(tchecker::dbm::LE_ZERO == *tchecker::dbm::access(dbm2, dim2, i+1, 0) && tchecker::dbm::LE_ZERO == *tchecker::dbm::access(dbm2, dim2, 0, i+1)) {
+  for(tchecker::clock_id_t i = 1; i <= no_of_orig_clocks_2; ++i) {
+    if(tchecker::dbm::LE_ZERO != *tchecker::dbm::access(dbm2, dim2, i, no_of_orig_clocks_1 + no_of_orig_clocks_2 + i) || tchecker::dbm::LE_ZERO != *tchecker::dbm::access(dbm2, dim2, no_of_orig_clocks_1 + no_of_orig_clocks_2 + i, i)) {
 
-        tchecker::clock_reset_t orig_tmp{i, tchecker::REFCLOCK_ID, 0};
+        tchecker::clock_reset_t orig_tmp{i -1, tchecker::REFCLOCK_ID, 0};
 
-        tchecker::clock_reset_t virt_tmp_A{i + no_of_orig_clocks_1 + no_of_orig_clocks_1, tchecker::REFCLOCK_ID, 0};
-        tchecker::clock_reset_t virt_tmp_B{i + no_of_orig_clocks_1 + no_of_orig_clocks_2, tchecker::REFCLOCK_ID, 0};
+        tchecker::clock_reset_t virt_tmp_A{i + no_of_orig_clocks_1 + no_of_orig_clocks_1 - 1, tchecker::REFCLOCK_ID, 0};
+        tchecker::clock_reset_t virt_tmp_B{i + no_of_orig_clocks_1 + no_of_orig_clocks_2 - 1, tchecker::REFCLOCK_ID, 0};
 
         orig_reset_set_B.emplace_back(orig_tmp);
 
@@ -227,14 +230,8 @@ revert_sync(tchecker::zg::zone_t const & zone_1, tchecker::zg::zone_t const & zo
   sync(dbm1_synced, dbm2_synced, dim1, dim2, no_of_orig_clocks_1, no_of_orig_clocks_2, orig_reset_set_A, orig_reset_set_B);
 
   assert(is_phi_subset_of_a_zone(dbm1_synced, dim1, no_of_orig_clocks_1, phi_e) && is_phi_subset_of_a_zone(dbm2_synced, dim2, no_of_orig_clocks_2, phi_e));
-
-  if(tchecker::dbm::status_t::EMPTY == tchecker::dbm::constrain(dbm1_synced, dim1, phi_e.get_vc(no_of_orig_clocks_1, true))) {
-    throw std::runtime_error("problems in _A while reverting the sync"); // should NEVER occur
-  }
-
-  if(tchecker::dbm::status_t::EMPTY == tchecker::dbm::constrain(dbm2_synced, dim2, phi_e.get_vc(no_of_orig_clocks_2, true))) {
-    throw std::runtime_error("problems in _B while reverting the sync"); // should NEVER occur
-  }
+  assert(tchecker::dbm::status_t::EMPTY != tchecker::dbm::constrain(dbm1_synced, dim1, phi_e.get_vc(no_of_orig_clocks_1, true)));  
+  assert(tchecker::dbm::status_t::EMPTY != tchecker::dbm::constrain(dbm2_synced, dim2, phi_e.get_vc(no_of_orig_clocks_2, true)));
 
   tchecker::dbm::db_t *multiple_reset = (tchecker::dbm::db_t *)malloc(dim1*dim1*sizeof(tchecker::dbm::db_t));
 

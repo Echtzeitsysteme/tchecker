@@ -4,6 +4,10 @@
 
 cmake_minimum_required(VERSION 3.13)
 
+if(POLICY CMP0167)
+   cmake_policy(SET CMP0167 OLD)
+endif()
+
 set(LOCAL_CONFIG "${CMAKE_SOURCE_DIR}/localconfig-${CMAKE_BUILD_TYPE}.cmake")
 
 if(EXISTS ${LOCAL_CONFIG})
@@ -32,6 +36,7 @@ if (USE_CPPCHECK)
                 "--cppcheck-build-dir=${CPPCHECK_BUILD_DIR}"
                 "--error-exitcode=1"
                 "--suppressions-list=${CMAKE_SOURCE_DIR}/CppCheckSuppressions.txt"
+                "--check-level=exhaustive"
         )
     else()
       message(FATAL_ERROR "wanted to use CPPCHECK, but not installed")
