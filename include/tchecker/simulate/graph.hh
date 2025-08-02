@@ -150,14 +150,14 @@ public:
    \brief Accessor
    \return The reachability graph representing the state-space
    */
-  tchecker::tck_simulate::graph_t & graph();
+  tchecker::simulate::graph_t & graph();
 
 private:
-  tchecker::ts::state_space_t<tchecker::zg::zg_t, tchecker::tck_simulate::graph_t> _ss; /*!< State-space representation */
+  tchecker::ts::state_space_t<tchecker::zg::zg_t, tchecker::simulate::graph_t> _ss; /*!< State-space representation */
 };
 
-} // namespace tck_simulate
+} // namespace simulate
 
 } // namespace tchecker
 
-#endif // TCHECKER_TCK_SIMULATE_GRAPH_HH
+#endif // TCHECKER_simulate_GRAPH_HH

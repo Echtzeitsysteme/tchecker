@@ -120,6 +120,11 @@ public:
   */
   graph_t(std::shared_ptr<tchecker::zg::zg_t> const & zg, std::size_t block_size, std::size_t table_size);
 
+  /*!
+   \brief Destructor
+  */
+  virtual ~graph_t();
+
   using tchecker::graph::reachability::graph_t<
       tchecker::algorithms::zg_couvscc::node_t, tchecker::algorithms::zg_couvscc::edge_t,
       tchecker::algorithms::zg_couvscc::node_hash_t, tchecker::algorithms::zg_couvscc::node_equal_to_t>::attributes;
@@ -197,10 +202,10 @@ public:
    \brief Accessor
    \return The reachability graph representing the state-space
    */
-  tchecker::tck_liveness::zg_couvscc::graph_t & graph();
+  tchecker::algorithms::zg_couvscc::graph_t & graph();
 
 private:
-  tchecker::ts::state_space_t<tchecker::zg::zg_t, tchecker::tck_liveness::zg_couvscc::graph_t>
+  tchecker::ts::state_space_t<tchecker::zg::zg_t, tchecker::algorithms::zg_couvscc::graph_t>
       _ss; /*!< State-space representation */
 };
 
@@ -268,13 +273,13 @@ public:
  \return statistics on the run and the liveness graph
  \throw std::runtime_error : if clock bounds cannot be computed for the system modeled by sysdecl
  */
-std::tuple<tchecker::algorithms::couvscc::stats_t, std::shared_ptr<tchecker::tck_liveness::zg_couvscc::state_space_t>>
+std::tuple<tchecker::algorithms::couvscc::stats_t, std::shared_ptr<tchecker::algorithms::zg_couvscc::state_space_t>>
 run(tchecker::parsing::system_declaration_t const & sysdecl, std::string const & labels = "", std::size_t block_size = 10000,
     std::size_t table_size = 65536);
 
 } // namespace zg_couvscc
 
-} // namespace tck_liveness
+} // namespace algorithms
 
 } // end of namespace tchecker
 

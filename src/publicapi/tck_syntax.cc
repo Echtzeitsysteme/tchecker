@@ -13,7 +13,7 @@
 std::ostream & create_output_stream(const char * output_filename)
 {
   std::ostream * os = nullptr;
-  if (output_filename != "") {
+  if (strcmp(output_filename, "")) { // strcmp returns 0 (which is interpreted as false) if output_filename is "". 
     os = new std::ofstream(output_filename, std::ios::out);
   }
   else

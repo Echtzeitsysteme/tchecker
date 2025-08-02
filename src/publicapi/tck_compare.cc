@@ -34,7 +34,7 @@ const void tck_compare(const char * output_filename, const char * first_sysdecl_
     // create output stream to output file
 
     std::ostream * os = nullptr;
-    if (output_filename != "") {
+    if (strcmp(output_filename, "")) { // strcmp returns 0 (which is interpreted as false) if output_filename is "".
       os = new std::ofstream(output_filename, std::ios::out);
     }
     else

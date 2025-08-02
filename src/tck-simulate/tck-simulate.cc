@@ -245,11 +245,11 @@ int main(int argc, char * argv[])
 
     std::shared_ptr<tchecker::simulate::state_space_t> state_space{nullptr};
     if (simulation_type == INTERACTIVE_SIMULATION)
-      state_space = tchecker::simulate::interactive_simulation(*sysdecl, display_type, starting_state_attributes);
+      state_space = tchecker::simulate::interactive_simulation(*sysdecl, display_type, *os, starting_state_attributes);
     else if (simulation_type == RANDOMIZED_SIMULATION)
       state_space = tchecker::simulate::randomized_simulation(*sysdecl, nsteps, starting_state_attributes);
     else if (simulation_type == ONESTEP_SIMULATION)
-      tchecker::simulate::onestep_simulation(*sysdecl, display_type, std::cout, starting_state_attributes);
+      tchecker::simulate::onestep_simulation(*sysdecl, display_type, *os, starting_state_attributes);
     else
       throw std::runtime_error("Select one of interactive, one-step or randomized simulation");
 

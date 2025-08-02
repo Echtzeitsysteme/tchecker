@@ -44,7 +44,7 @@ static std::size_t randomized_select(std::vector<tchecker::zg::zg_t::sst_t> cons
   return std::rand() % v.size();
 }
 
-std::shared_ptr<tchecker::tck_simulate::state_space_t>
+std::shared_ptr<tchecker::simulate::state_space_t>
 randomized_simulation(tchecker::parsing::system_declaration_t const & sysdecl, std::size_t nsteps,
                       std::map<std::string, std::string> const & starting_state_attributes)
 {
@@ -55,10 +55,10 @@ randomized_simulation(tchecker::parsing::system_declaration_t const & sysdecl, s
   std::shared_ptr<tchecker::zg::zg_t> zg{tchecker::zg::factory(system, tchecker::ts::NO_SHARING,
                                                                tchecker::zg::STANDARD_SEMANTICS, tchecker::zg::NO_EXTRAPOLATION,
                                                                block_size, table_size)};
-  std::shared_ptr<tchecker::tck_simulate::state_space_t> state_space =
-      std::make_shared<tchecker::tck_simulate::state_space_t>(zg, block_size);
+  std::shared_ptr<tchecker::simulate::state_space_t> state_space =
+      std::make_shared<tchecker::simulate::state_space_t>(zg, block_size);
 
-  tchecker::tck_simulate::graph_t & g = state_space->graph();
+  tchecker::simulate::graph_t & g = state_space->graph();
 
   std::vector<tchecker::zg::zg_t::sst_t> v;
 
@@ -70,7 +70,7 @@ randomized_simulation(tchecker::parsing::system_declaration_t const & sysdecl, s
     zg->build(starting_state_attributes, v);
 
   std::size_t k = tchecker::simulate::randomized_select(v);
-  if (k == tchecker::tck_simulate::NO_SELECTION)
+  if (k == tchecker::simulate::NO_SELECTION)
     return state_space;
   tchecker::simulate::graph_t::node_sptr_t previous_node = g.add_node(zg->state(v[k]));
   previous_node->initial(true);
@@ -142,7 +142,7 @@ static std::size_t interactive_select(tchecker::simulate::display_t & display, t
   } while (1);
 }
 
-std::shared_ptr<tchecker::tck_simulate::state_space_t>
+std::shared_ptr<tchecker::simulate::state_space_t>
 interactive_simulation(tchecker::parsing::system_declaration_t const & sysdecl,
                        enum tchecker::simulate::display_type_t display_type,
                        std::ostream & os,
@@ -156,10 +156,10 @@ interactive_simulation(tchecker::parsing::system_declaration_t const & sysdecl,
                                                                tchecker::zg::STANDARD_SEMANTICS, tchecker::zg::NO_EXTRAPOLATION,
                                                                block_size, table_size)};
 
-  std::shared_ptr<tchecker::tck_simulate::state_space_t> state_space =
-      std::make_shared<tchecker::tck_simulate::state_space_t>(zg, block_size);
+  std::shared_ptr<tchecker::simulate::state_space_t> state_space =
+      std::make_shared<tchecker::simulate::state_space_t>(zg, block_size);
 
-  tchecker::tck_simulate::graph_t & g = state_space->graph();
+  tchecker::simulate::graph_t & g = state_space->graph();
 
   std::vector<tchecker::zg::zg_t::sst_t> v;
 
@@ -198,7 +198,7 @@ interactive_simulation(tchecker::parsing::system_declaration_t const & sysdecl,
     if (k == tchecker::simulate::NO_SELECTION)
       break;
 
-    tchecker::tck_simulate::graph_t::node_sptr_t node = g.add_node(zg->state(v[k]));
+    tchecker::simulate::graph_t::node_sptr_t node = g.add_node(zg->state(v[k]));
     g.add_edge(previous_node, node, *zg->transition(v[k]));
 
     v.clear();
@@ -252,6 +252,6 @@ void onestep_simulation(tchecker::parsing::system_declaration_t const & sysdecl,
   }
 }
 
-} // namespace tck_simulate
+} // namespace simulate
 
 } // namespace tchecker

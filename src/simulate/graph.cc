@@ -111,8 +111,8 @@ state_space_t::state_space_t(std::shared_ptr<tchecker::zg::zg_t> const & zg, std
 
 tchecker::zg::zg_t & state_space_t::zg() { return _ss.ts(); }
 
-tchecker::tck_simulate::graph_t & state_space_t::graph() { return _ss.state_space(); }
+tchecker::simulate::graph_t & state_space_t::graph() { return _ss.state_space(); }
 
-} // namespace tck_simulate
+} // namespace simulate
 
 } // namespace tchecker

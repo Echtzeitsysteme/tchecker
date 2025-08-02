@@ -201,10 +201,10 @@ public:
    \brief Accessor
    \return The reachability graph representing the state-space
    */
-  tchecker::tck_liveness::zg_ndfs::graph_t & graph();
+  tchecker::algorithms::zg_ndfs::graph_t & graph();
 
 private:
-  tchecker::ts::state_space_t<tchecker::zg::zg_t, tchecker::tck_liveness::zg_ndfs::graph_t>
+  tchecker::ts::state_space_t<tchecker::zg::zg_t, tchecker::algorithms::zg_ndfs::graph_t>
       _ss; /*!< State-space representation */
 };
 
@@ -258,17 +258,13 @@ public:
  \return statistics on the run and the liveness graph
  \throw std::runtime_error : if clock bounds cannot be computed for the system modeled by sysdecl
  */
-<<<<<<< HEAD:src/tck-liveness/zg-ndfs.hh
-std::tuple<tchecker::algorithms::ndfs::stats_t, std::shared_ptr<tchecker::tck_liveness::zg_ndfs::state_space_t>>
-=======
-std::tuple<tchecker::algorithms::ndfs::stats_t, std::shared_ptr<tchecker::algorithms::zg_ndfs::graph_t>>
->>>>>>> b862d8f (moved liveness algorithms from executable to algorithms folder, reworked function results to output files instead of strings):include/tchecker/algorithms/ndfs/zg-ndfs.hh
+std::tuple<tchecker::algorithms::ndfs::stats_t, std::shared_ptr<tchecker::algorithms::zg_ndfs::state_space_t>>
 run(tchecker::parsing::system_declaration_t const & sysdecl, std::string const & labels = "", std::size_t block_size = 10000,
     std::size_t table_size = 65536);
 
 } // namespace zg_ndfs
 
-} // namespace tck_liveness
+} // namespace algorithms
 
 } // end of namespace tchecker
 

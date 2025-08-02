@@ -135,7 +135,7 @@ state_space_t::state_space_t(std::shared_ptr<tchecker::zg::zg_t> const & zg, std
 
 tchecker::zg::zg_t & state_space_t::zg() { return _ss.ts(); }
 
-tchecker::tck_liveness::zg_couvscc::graph_t & state_space_t::graph() { return _ss.state_space(); }
+tchecker::algorithms::zg_couvscc::graph_t & state_space_t::graph() { return _ss.state_space(); }
 
 /* counter example */
 namespace cex {
@@ -156,7 +156,7 @@ std::ostream & dot_output(std::ostream & os, tchecker::algorithms::zg_couvscc::c
 
 /* run */
 
-std::tuple<tchecker::algorithms::couvscc::stats_t, std::shared_ptr<tchecker::tck_liveness::zg_couvscc::state_space_t>>
+std::tuple<tchecker::algorithms::couvscc::stats_t, std::shared_ptr<tchecker::algorithms::zg_couvscc::state_space_t>>
 run(tchecker::parsing::system_declaration_t const & sysdecl, std::string const & labels, std::size_t block_size,
     std::size_t table_size)
 {
@@ -167,20 +167,19 @@ run(tchecker::parsing::system_declaration_t const & sysdecl, std::string const &
   std::shared_ptr<tchecker::zg::zg_t> zg{tchecker::zg::factory(system, tchecker::ts::SHARING, tchecker::zg::ELAPSED_SEMANTICS,
                                                                tchecker::zg::EXTRA_LU_PLUS_LOCAL, block_size, table_size)};
 
-  std::shared_ptr<tchecker::tck_liveness::zg_couvscc::state_space_t> state_space =
-      std::make_shared<tchecker::tck_liveness::zg_couvscc::state_space_t>(zg, block_size, table_size);
+  std::shared_ptr<tchecker::algorithms::zg_couvscc::state_space_t> state_space =
+      std::make_shared<tchecker::algorithms::zg_couvscc::state_space_t>(zg, block_size, table_size);
 
   boost::dynamic_bitset<> accepting_labels = system->as_syncprod_system().labels(labels);
 
   tchecker::algorithms::couvscc::stats_t stats;
 
   if (accepting_labels.count() > 1) {
-<<<<<<< HEAD:src/tck-liveness/zg-couvscc.cc
-    tchecker::tck_liveness::zg_couvscc::generalized_algorithm_t algorithm;
+    tchecker::algorithms::zg_couvscc::generalized_algorithm_t algorithm;
     stats = algorithm.run(state_space->zg(), state_space->graph(), accepting_labels);
   }
   else {
-    tchecker::tck_liveness::zg_couvscc::single_algorithm_t algorithm;
+    tchecker::algorithms::zg_couvscc::single_algorithm_t algorithm;
     stats = algorithm.run(state_space->zg(), state_space->graph(), accepting_labels);
   }
 
@@ -189,6 +188,6 @@ run(tchecker::parsing::system_declaration_t const & sysdecl, std::string const &
 
 } // namespace zg_couvscc
 
-} // namespace tck_liveness
+} // namespace algorithms
 
 } // end of namespace tchecker
