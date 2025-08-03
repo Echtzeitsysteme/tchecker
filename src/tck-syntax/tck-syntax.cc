@@ -22,13 +22,14 @@
 #include <boost/container_hash/hash.hpp>
 #endif
 
-#include "tchecker/syntax-check/syntax-check.hh"
+#include "tchecker/publicapi/tck_syntax.hh"
+//#include "tchecker/syntax-check/syntax-check.hh"
 #include "tchecker/parsing/parsing.hh"
-#include "tchecker/syncprod/system.hh"
-#include "tchecker/system/output.hh"
-#include "tchecker/system/system.hh"
-#include "tchecker/ta/system.hh"
-#include "tchecker/utils/log.hh"
+//#include "tchecker/syncprod/system.hh"
+//#include "tchecker/system/output.hh"
+//#include "tchecker/system/system.hh"
+//#include "tchecker/ta/system.hh"
+//#include "tchecker/utils/log.hh"
 
 /*!
  \file tck-syntax.cc
@@ -157,123 +158,6 @@ std::shared_ptr<tchecker::parsing::system_declaration_t> load_system(std::string
 }
 
 /*!
- \brief Type of pair (process identifier, event identifier)
-*/
-using process_event_t = std::tuple<tchecker::process_id_t, tchecker::event_id_t>;
-
-/*!
- \brief Hash functor on process events
-*/
-class hash_process_event_t {
-public:
-  /*!
-   \brief Hash function
-   \param process_event : process event
-   \return hash code for process_event
-  */
-  std::size_t operator()(process_event_t const & process_event) const
-  {
-    std::size_t h = boost::hash_value(std::get<0>(process_event));
-    boost::hash_combine(h, std::get<1>(process_event));
-    return h;
-  }
-};
-
-/*!
- \brief Report asynchronous events from a declaration
- \param sysdecl : system declaration
- \post all asynchronous events in sysdecl have been reported to std::cout
-*/
-void do_report_asynchronous_events(tchecker::parsing::system_declaration_t const & sysdecl)
-{
-  std::unordered_set<process_event_t, hash_process_event_t> reported_asynchronous_events;
-
-  try {
-    tchecker::syncprod::system_t system(sysdecl);
-
-    std::cout << "Asynchronous events in model " << system.name() << std::endl;
-    for (tchecker::system::edge_const_shared_ptr_t const & edge : system.edges())
-      if (system.is_asynchronous(*edge)) {
-        process_event_t process_event = std::make_tuple(edge->pid(), edge->event_id());
-        if (reported_asynchronous_events.find(process_event) == reported_asynchronous_events.end()) {
-          std::cout << "    event " << system.event_name(edge->event_id()) << " in process " << system.process_name(edge->pid())
-                    << std::endl;
-          reported_asynchronous_events.insert(process_event);
-        }
-      }
-    std::cout << "Found " << reported_asynchronous_events.size() << " asynchronous event(s)" << std::endl;
-  }
-  catch (...) {
-    std::cerr << tchecker::log_error << "Syntax error in TChecker file (run tck-syntax with option -c)" << std::endl;
-  }
-}
-
-/*!
- \brief Check timed automaton syntax from a declaration
- \param sysdecl : system declaration
- \post error and warnings have been reported to std::cerr
-*/
-void do_syntax_check_ta(tchecker::parsing::system_declaration_t const & sysdecl)
-{
-  if (tchecker::syntax_check::syntax_check_ta(std::cerr, sysdecl))
-    std::cout << "Syntax OK" << std::endl;
-}
-
-/*!
- \brief Flatten a system of processes into a single process
- \param sysdecl : system declaration
- \param process_name : name of the resulting process
- \param delimiter : delimiter used in names of the resulting process
- \param os : output stream
- \post The synchronized product of the system in sysdecl has been output to os.
- The resulting process has name process_name. The names of locations and events
- are list of location/event names in the original process, seperated by
- delimiter
- */
-void do_synchronized_product(tchecker::parsing::system_declaration_t const & sysdecl, std::string const & process_name,
-                             std::string const & delimiter, std::ostream & os)
-{
-  std::shared_ptr<tchecker::syncprod::system_t> system(new tchecker::syncprod::system_t(sysdecl));
-  tchecker::system::system_t product = tchecker::syncprod::synchronized_product(system, process_name, delimiter);
-  tchecker::system::output_tck(os, product);
-  os << std::endl;
-}
-
-/*!
- \brief Output a system of processes following the dot graphviz format
- \param sysdecl : system declaration
- \param delimiter : delimiter used in node names
- \param os : output stream
- \post The system of processes in sysdecl has been output to os following the
- dot graphviz format, using delimiter as a separator between process name and
- location name for node names.
-*/
-void do_output_dot(tchecker::parsing::system_declaration_t const & sysdecl, std::string const & delimiter, std::ostream & os)
-{
-  std::shared_ptr<tchecker::system::system_t> system(new tchecker::system::system_t(sysdecl));
-  tchecker::system::graphviz_output_t output_type =
-      (only_processes ? tchecker::system::GRAPHVIZ_ONLY_PROCESSES : tchecker::system::GRAPHVIZ_FULL);
-  tchecker::system::output_dot(os, *system, delimiter, output_type);
-  os << std::endl;
-}
-
-/*!
- \brief Output a system of processes following the JSON format
- \param sysdecl : system declaration
- \param delimiter : delimiter used in node names
- \param os : output stream
- \post The system of processes in sysdecl has been output to os following the
- JSON format, using delimiter as a separator between process name and
- location name for node names.
-*/
-void do_output_json(tchecker::parsing::system_declaration_t const & sysdecl, std::string const & delimiter, std::ostream & os)
-{
-  std::shared_ptr<tchecker::system::system_t> system(new tchecker::system::system_t(sysdecl));
-  tchecker::system::output_json(os, *system, delimiter);
-  os << std::endl;
-}
-
-/*!
  \brief Main function
 */
 int main(int argc, char * argv[])
@@ -300,30 +184,23 @@ int main(int argc, char * argv[])
 
     std::string input_file = (optindex == argc ? "" : argv[optindex]);
 
-    std::ostream * os = nullptr;
-    if (output_file != "") {
-      os = new std::ofstream(output_file, std::ios::out);
-    }
-    else
-      os = &std::cout;
-
     std::shared_ptr<tchecker::parsing::system_declaration_t> sysdecl{load_system(input_file)};
     if (sysdecl.get() == nullptr)
       return EXIT_FAILURE;
 
     if (check_syntax)
-      do_syntax_check_ta(*sysdecl);
+      tchecker::publicapi::tck_syntax_check_syntax(output_file, input_file);
 
     if (report_asynchronous_events)
-      do_report_asynchronous_events(*sysdecl);
+      tchecker::publicapi::do_report_asynchronous_events(input_file);
 
     if (synchronized_product)
-      do_synchronized_product(*sysdecl, process_name, delimiter, *os);
+      tchecker::publicapi::tck_syntax_create_synchronized_product(output_file, input_file, process_name, delimiter);
 
     if (transform)
-      do_output_dot(*sysdecl, delimiter, *os);
+      tchecker::publicapi::tck_syntax_to_dot(output_file, input_file, delimiter);
     else if (json)
-      do_output_json(*sysdecl, delimiter, *os);
+      tchecker::publicapi::tck_syntax_to_json(output_file, input_file, delimiter);
   }
   catch (std::exception & e) {
     std::cerr << tchecker::log_error << e.what() << std::endl;

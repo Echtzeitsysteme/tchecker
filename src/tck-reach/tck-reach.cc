@@ -11,14 +11,10 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <cstring>
 
-#include "tchecker/algorithms/concur19/concur19.hh"
-#include "tchecker/algorithms/reach/algorithm.hh"
-#include "tchecker/parsing/parsing.hh"
+#include "tchecker/publicapi/tck_reach.hh"
 #include "tchecker/utils/log.hh"
-#include "zg-aLU-covreach.hh"
-#include "tchecker/algorithms/covreach/zg-covreach.hh"
-#include "tchecker/algorithms/reach/zg-reach.hh"
 
 /*!
  \file tck-reach.cc
@@ -65,40 +61,14 @@ void usage(char * progname)
   std::cerr << "reads from standard input if file is not provided" << std::endl;
 }
 
-enum algorithm_t {
-  ALGO_REACH,        /*!< Reachability algorithm */
-  ALGO_CONCUR19,     /*!< Covering reachability algorithm over the local-time zone graph */
-  ALGO_COVREACH,     /*!< Covering reachability algorithm */
-  ALGO_ALU_COVREACH, /*!< Covering reachability algorithm with aLU subsumption*/
-  ALGO_NONE,         /*!< No algorithm */
-};
-
-enum certificate_t {
-  CERTIFICATE_GRAPH,    /*!< Graph of state-space */
-  CERTIFICATE_SYMBOLIC, /*!< Symbolic counter-example */
-  CERTIFICATE_CONCRETE, /*!< Concrete counter-example */
-  CERTIFICATE_NONE,     /*!< No certificate */
-};
-
-static enum algorithm_t algorithm = ALGO_NONE;            /*!< Selected algorithm */
+static enum tck_reach_algorithm_t algorithm = ALGO_NONE;            /*!< Selected algorithm */
 static bool help = false;                                 /*!< Help flag */
-static enum certificate_t certificate = CERTIFICATE_NONE; /*!< Type of certificate */
+static enum tck_reach_certificate_t certificate = CERTIFICATE_NONE; /*!< Type of certificate */
 static std::string search_order = "bfs";                  /*!< Search order */
 static std::string labels = "";                           /*!< Searched labels */
 static std::string output_file = "";                      /*!< Output file name (empty means standard output) */
-static std::ostream * os = &std::cout;                    /*!< Default output stream */
-static std::size_t block_size = 10000;                    /*!< Size of allocated blocks */
-static std::size_t table_size = 65536;                    /*!< Size of hash tables */
-
-/*!
- \brief Check if expected certificate is a path
- \param ctype : certificate type
- \return true if ctype is a path, false otherwise
- */
-static bool is_certificate_path(enum certificate_t ctype)
-{
-  return (ctype == CERTIFICATE_SYMBOLIC || ctype == CERTIFICATE_CONCRETE);
-}
+static std::size_t block_size = TCK_REACH_INIT_BLOCK_SIZE;                    /*!< Size of allocated blocks */
+static std::size_t table_size = TCK_REACH_INIT_TABLE_SIZE;                    /*!< Size of hash tables */
 
 /*!
  \brief Parse command-line arguments
@@ -178,183 +148,6 @@ int parse_command_line(int argc, char * argv[])
 }
 
 /*!
- \brief Load a system declaration from a file
- \param filename : file name
- \return pointer to a system declaration loaded from filename, nullptr in case
- of errors
- \post all errors have been reported to std::cerr
-*/
-std::shared_ptr<tchecker::parsing::system_declaration_t> load_system_declaration(std::string const & filename)
-{
-  std::shared_ptr<tchecker::parsing::system_declaration_t> sysdecl{nullptr};
-  try {
-    sysdecl = tchecker::parsing::parse_system_declaration(filename);
-    if (sysdecl == nullptr)
-      throw std::runtime_error("nullptr system declaration");
-  }
-  catch (std::exception const & e) {
-    std::cerr << tchecker::log_error << e.what() << std::endl;
-  }
-  return sysdecl;
-}
-
-/*!
- \brief Perform reachability analysis
- \param sysdecl : system declaration
- \post statistics on reachability analysis of command-line specified labels in
- the system declared by sysdecl have been output to standard output.
- A certification has been output if required.
-*/
-void reach(tchecker::parsing::system_declaration_t const & sysdecl)
-{
-  auto && [stats, state_space] = tchecker::algorithms::zg_reach::run(sysdecl, labels, search_order, block_size, table_size);
-
-  // stats
-  std::map<std::string, std::string> m;
-  stats.attributes(m);
-  for (auto && [key, value] : m)
-    std::cout << key << " " << value << std::endl;
-
-  // certificate
-  if (certificate == CERTIFICATE_GRAPH)
-    tchecker::algorithms::zg_reach::dot_output(*os, state_space->graph(), sysdecl.name());
-  else if ((certificate == CERTIFICATE_CONCRETE) && stats.reachable()) {
-    std::unique_ptr<tchecker::algorithms::zg_reach::cex::concrete_cex_t> cex{
-        tchecker::algorithms::zg_reach::cex::concrete_counter_example(state_space->graph())};
-    if (cex->empty())
-      throw std::runtime_error("Unable to compute a concrete counter example");
-    tchecker::algorithms::zg_reach::cex::dot_output(*os, *cex, sysdecl.name());
-  }
-  else if ((certificate == CERTIFICATE_SYMBOLIC) && stats.reachable()) {
-    std::unique_ptr<tchecker::algorithms::zg_reach::cex::symbolic_cex_t> cex{
-        tchecker::algorithms::zg_reach::cex::symbolic_counter_example(state_space->graph())};
-    if (cex->empty())
-      throw std::runtime_error("Unable to compute a symbolic counter example");
-    tchecker::algorithms::zg_reach::cex::dot_output(*os, *cex, sysdecl.name());
-  }
-}
-
-/*!
- \brief Perform covering reachability analysis over the local-time zone graph
- \param sysdecl : system declaration
- \post statistics on covering reachability analysis of command-line specified
- labels in the system declared by sysdecl have been output to standard output.
- A certification has been output if required.
- \note This is the algorithm presented in R. Govind, Frédéric Herbreteau, B.
- Srivathsan, Igor Walukiewicz: "Revisiting Local Time Semantics for Networks of
- Timed Automata". CONCUR 2019: 16:1-16:15
-*/
-void concur19(tchecker::parsing::system_declaration_t const & sysdecl)
-{
-  if (certificate == CERTIFICATE_CONCRETE)
-    throw std::runtime_error("Concrete counter-example is not available for concur19 algorithm");
-
-  tchecker::algorithms::covreach::covering_t covering =
-      (is_certificate_path(certificate) ? tchecker::algorithms::covreach::COVERING_LEAF_NODES
-                                        : tchecker::algorithms::covreach::COVERING_FULL);
-
-  auto && [stats, state_space] =
-      tchecker::algorithms::concur19::run(sysdecl, labels, search_order, covering, block_size, table_size);
-
-  // stats
-  std::map<std::string, std::string> m;
-  stats.attributes(m);
-  for (auto && [key, value] : m)
-    std::cout << key << " " << value << std::endl;
-
-  // certificate
-  if (certificate == CERTIFICATE_GRAPH)
-    tchecker::algorithms::concur19::dot_output(*os, state_space->graph(), sysdecl.name());
-  else if ((certificate == CERTIFICATE_SYMBOLIC) && stats.reachable()) {
-    std::unique_ptr<tchecker::algorithms::concur19::cex::symbolic::cex_t> cex{
-        tchecker::algorithms::concur19::cex::symbolic::counter_example(state_space->graph())};
-    if (cex->empty())
-      throw std::runtime_error("Unable to compute a symbolic counter example");
-    tchecker::algorithms::concur19::cex::symbolic::dot_output(*os, *cex, sysdecl.name());
-  }
-}
-
-/*!
- \brief Perform covering reachability analysis
- \param sysdecl : system declaration
- \post statistics on covering reachability analysis of command-line specified
- labels in the system declared by sysdecl have been output to standard output.
- A certification has been output if required.
-*/
-void covreach(tchecker::parsing::system_declaration_t const & sysdecl)
-{
-  tchecker::algorithms::covreach::covering_t covering =
-      (is_certificate_path(certificate) ? tchecker::algorithms::covreach::COVERING_LEAF_NODES
-                                        : tchecker::algorithms::covreach::COVERING_FULL);
-  auto && [stats, state_space] =
-      tchecker::algorithms::zg_covreach::run(sysdecl, labels, search_order, covering, block_size, table_size);
-
-  // stats
-  std::map<std::string, std::string> m;
-  stats.attributes(m);
-  for (auto && [key, value] : m)
-    std::cout << key << " " << value << std::endl;
-
-  // certificate
-  if (certificate == CERTIFICATE_GRAPH)
-    tchecker::algorithms::zg_covreach::dot_output(*os, state_space->graph(), sysdecl.name());
-  else if ((certificate == CERTIFICATE_CONCRETE) && stats.reachable()) {
-    std::unique_ptr<tchecker::algorithms::zg_covreach::cex::concrete_cex_t> cex{
-        tchecker::algorithms::zg_covreach::cex::concrete_counter_example(state_space->graph())};
-    if (cex->empty())
-      throw std::runtime_error("Unable to compute a concrete counter example");
-    tchecker::algorithms::zg_covreach::cex::dot_output(*os, *cex, sysdecl.name());
-  }
-  else if ((certificate == CERTIFICATE_SYMBOLIC) && stats.reachable()) {
-    std::unique_ptr<tchecker::algorithms::zg_covreach::cex::symbolic_cex_t> cex{
-        tchecker::algorithms::zg_covreach::cex::symbolic_counter_example(state_space->graph())};
-    if (cex->empty())
-      throw std::runtime_error("Unable to compute a symbolic counter example");
-    tchecker::algorithms::zg_covreach::cex::dot_output(*os, *cex, sysdecl.name());
-  }
-}
-
-/*!
- \brief Perform covering reachability analysis with aLU subsumption
- \param sysdecl : system declaration
- \post statistics on aLU covering reachability analysis of command-line specified
- labels in the system declared by sysdecl have been output to standard output.
- A certification has been output if required.
-*/
-void alu_covreach(std::shared_ptr<tchecker::parsing::system_declaration_t> const & sysdecl)
-{
-  tchecker::algorithms::covreach::covering_t covering =
-      (is_certificate_path(certificate) ? tchecker::algorithms::covreach::COVERING_LEAF_NODES
-                                        : tchecker::algorithms::covreach::COVERING_FULL);
-  auto && [stats, state_space] =
-      tchecker::tck_reach::zg_alu_covreach::run(sysdecl, labels, search_order, covering, block_size, table_size);
-
-  // stats
-  std::map<std::string, std::string> m;
-  stats.attributes(m);
-  for (auto && [key, value] : m)
-    std::cout << key << " " << value << std::endl;
-
-  // certificate
-  if (certificate == CERTIFICATE_GRAPH)
-    tchecker::tck_reach::zg_alu_covreach::dot_output(*os, state_space->graph(), sysdecl->name());
-  else if ((certificate == CERTIFICATE_CONCRETE) && stats.reachable()) {
-    std::unique_ptr<tchecker::tck_reach::zg_alu_covreach::cex::concrete_cex_t> cex{
-        tchecker::tck_reach::zg_alu_covreach::cex::concrete_counter_example(state_space->graph())};
-    if (cex->empty())
-      throw std::runtime_error("Unable to compute a concrete counter example");
-    tchecker::tck_reach::zg_alu_covreach::cex::dot_output(*os, *cex, sysdecl->name());
-  }
-  else if ((certificate == CERTIFICATE_SYMBOLIC) && stats.reachable()) {
-    std::unique_ptr<tchecker::tck_reach::zg_alu_covreach::cex::symbolic_cex_t> cex{
-        tchecker::tck_reach::zg_alu_covreach::cex::symbolic_counter_example(state_space->graph())};
-    if (cex->empty())
-      throw std::runtime_error("Unable to compute a symbolic counter example");
-    tchecker::tck_reach::zg_alu_covreach::cex::dot_output(*os, *cex, sysdecl->name());
-  }
-}
-
-/*!
  \brief Main function
 */
 int main(int argc, char * argv[])
@@ -380,45 +173,18 @@ int main(int argc, char * argv[])
 
     std::string input_file = (optindex == argc ? "" : argv[optindex]);
 
-    std::shared_ptr<tchecker::parsing::system_declaration_t> sysdecl{load_system_declaration(input_file)};
+    tchecker::publicapi::tck_reach(output_file, input_file, labels, algorithm, search_order, certificate, block_size, table_size);
+
 
     if (tchecker::log_error_count() > 0)
       return EXIT_FAILURE;
-
-    std::shared_ptr<std::ofstream> os_ptr{nullptr};
-
-    if (certificate != CERTIFICATE_NONE && output_file != "") {
-      try {
-        os_ptr = std::make_shared<std::ofstream>(output_file);
-        os = os_ptr.get();
-      }
-      catch (std::exception & e) {
-        std::cerr << tchecker::log_error << e.what() << std::endl;
-        return EXIT_FAILURE;
-      }
+    else {
+      return EXIT_SUCCESS;
     }
 
-    switch (algorithm) {
-    case ALGO_REACH:
-      reach(*sysdecl);
-      break;
-    case ALGO_CONCUR19:
-      concur19(*sysdecl);
-      break;
-    case ALGO_COVREACH:
-      covreach(*sysdecl);
-      break;
-    case ALGO_ALU_COVREACH:
-      alu_covreach(sysdecl);
-      break;
-    default:
-      throw std::runtime_error("No algorithm specified");
-    }
   }
   catch (std::exception & e) {
     std::cerr << tchecker::log_error << e.what() << std::endl;
     return EXIT_FAILURE;
   }
-
-  return EXIT_SUCCESS;
 }
