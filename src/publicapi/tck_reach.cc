@@ -259,6 +259,10 @@ void tck_reach(std::string output_filename, std::string sysdecl_filename, std::s
     else {
       throw std::runtime_error("Unknown algorithm");
     }
+
+    if (output_filename != "") { 
+      delete os;
+    }
   }
   catch (std::runtime_error & e) {
     std::cerr << tchecker::log_error << e.what() << std::endl;
