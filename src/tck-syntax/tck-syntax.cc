@@ -23,13 +23,8 @@
 #endif
 
 #include "tchecker/publicapi/tck_syntax.hh"
-//#include "tchecker/syntax-check/syntax-check.hh"
 #include "tchecker/parsing/parsing.hh"
-//#include "tchecker/syncprod/system.hh"
-//#include "tchecker/system/output.hh"
-//#include "tchecker/system/system.hh"
-//#include "tchecker/ta/system.hh"
-//#include "tchecker/utils/log.hh"
+
 
 /*!
  \file tck-syntax.cc

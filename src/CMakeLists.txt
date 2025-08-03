@@ -135,8 +135,6 @@ set_property(TARGET tck-liveness PROPERTY CXX_STANDARD_REQUIRED ON)
 
 # Build tck-reach executable
 add_executable(tck-reach
-  ${CMAKE_CURRENT_SOURCE_DIR}/tck-reach/zg-aLU-covreach.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/tck-reach/zg-aLU-covreach.hh
   ${CMAKE_CURRENT_SOURCE_DIR}/tck-reach/tck-reach.cc)
 
 target_link_libraries(tck-reach libtchecker_static ${Boost_LIBRARIES})

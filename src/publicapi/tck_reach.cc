@@ -12,11 +12,11 @@
 
 #include "tchecker/algorithms/concur19/concur19.hh"
 #include "tchecker/algorithms/covreach/zg-covreach.hh"
+#include "tchecker/algorithms/alu_covreach/zg-aLU-covreach.hh"
+
 #include "tchecker/algorithms/reach/zg-reach.hh"
 #include "tchecker/parsing/parsing.hh"
 #include "tchecker/system/system.hh"
-
-#include "../src/tck-reach/zg-aLU-covreach.hh" // TODO: to be moved to algorithms.
 
 void tck_reach(const char * output_filename, 
                const char * sysdecl_filename, 
@@ -63,7 +63,7 @@ static bool is_certificate_path(enum tck_reach_certificate_t ctype)
  A certification has been output if required.
 */
 void tck_reach_zg_reach(std::ostream & os, const tchecker::parsing::system_declaration_t & sysdecl, std::string labels,
-                              const char * search_order, int block_size, int table_size, tck_reach_certificate_t certificate)
+                              std::string search_order, int block_size, int table_size, tck_reach_certificate_t certificate)
 {
   auto && [stats, state_space] = tchecker::algorithms::zg_reach::run(sysdecl, labels, search_order, block_size, table_size);
 
@@ -141,7 +141,7 @@ void tck_reach_concur19(std::ostream & os, const tchecker::parsing::system_decla
  A certification has been output if required.
 */
 void tck_reach_zg_covreach(std::ostream & os, const tchecker::parsing::system_declaration_t & sysdecl,
-                           std::string labels, const char * search_order, int block_size, int table_size,
+                           std::string labels, std::string search_order, int block_size, int table_size,
                            tck_reach_certificate_t certificate)
 {
   tchecker::algorithms::covreach::covering_t covering =
@@ -183,7 +183,7 @@ void tck_reach_zg_covreach(std::ostream & os, const tchecker::parsing::system_de
  A certification has been output if required.
 */
 void tck_reach_zg_alu_covreach(std::ostream & os, const tchecker::parsing::system_declaration_t & sysdecl,
-                               std::string labels, const char * search_order, int block_size, int table_size,
+                               std::string labels, std::string search_order, int block_size, int table_size,
                                tck_reach_certificate_t certificate)
 {
   tchecker::algorithms::covreach::covering_t covering =
@@ -222,7 +222,6 @@ void tck_reach_zg_alu_covreach(std::ostream & os, const tchecker::parsing::syste
 void tck_reach(std::string output_filename, std::string sysdecl_filename, std::string labels, tck_reach_algorithm_t algorithm,
                std::string search_order, tck_reach_certificate_t certificate, std::size_t  block_size, std::size_t table_size)
 {
-
   try {
     std::shared_ptr<tchecker::parsing::system_declaration_t> sysdecl{nullptr};
     sysdecl = tchecker::parsing::parse_system_declaration(sysdecl_filename);
@@ -246,16 +245,16 @@ void tck_reach(std::string output_filename, std::string sysdecl_filename, std::s
     }
 
     if (algorithm == ALGO_REACH) {
-      tck_reach_zg_reach(*os, *sysdecl, labels, search_order.c_str(), block_size, table_size, certificate);
+      tck_reach_zg_reach(*os, *sysdecl, labels, search_order, block_size, table_size, certificate);
     }
     else if (algorithm == ALGO_CONCUR19) {
-      tck_reach_concur19(*os, *sysdecl, labels, search_order.c_str(), block_size, table_size, certificate);
+      tck_reach_concur19(*os, *sysdecl, labels, search_order, block_size, table_size, certificate);
     }
     else if (algorithm == ALGO_COVREACH) {
-      tck_reach_zg_covreach(*os, *sysdecl, labels, search_order.c_str(), block_size, table_size, certificate);
+      tck_reach_zg_covreach(*os, *sysdecl, labels, search_order, block_size, table_size, certificate);
     }
     else if (algorithm == ALGO_ALU_COVREACH) {
-      tck_reach_zg_alu_covreach(*os, *sysdecl, labels, search_order.c_str(), block_size, table_size, certificate);
+      tck_reach_zg_alu_covreach(*os, *sysdecl, labels, search_order, block_size, table_size, certificate);
     }
     else {
       throw std::runtime_error("Unknown algorithm");

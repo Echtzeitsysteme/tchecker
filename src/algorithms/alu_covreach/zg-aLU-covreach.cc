@@ -13,7 +13,7 @@
 #include "tchecker/system/static_analysis.hh"
 #include "tchecker/ta/state.hh"
 #include "tchecker/utils/log.hh"
-#include "zg-aLU-covreach.hh"
+#include "tchecker/algorithms/alu_covreach/zg-aLU-covreach.hh"
 
 namespace tchecker {
 
