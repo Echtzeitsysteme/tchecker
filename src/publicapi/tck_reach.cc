@@ -228,7 +228,7 @@ void tck_reach(std::string output_filename, std::string sysdecl_filename, std::s
     if (sysdecl == nullptr) {
       throw std::runtime_error("nullptr system declaration");
     }
-    std::shared_ptr<tchecker::system::system_t> system(new tchecker::system::system_t(*sysdecl));
+    std::shared_ptr<tchecker::system::system_t> system = std::make_shared<tchecker::system::system_t>(*sysdecl);
 
     // create output stream to output file
 
