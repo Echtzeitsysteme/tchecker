@@ -22,7 +22,7 @@
 #include <boost/container_hash/hash.hpp>
 #endif
 
-#include "tchecker/publicapi/tck_syntax.hh"
+#include "tchecker/publicapi/syntax_api.hh"
 #include "tchecker/parsing/parsing.hh"
 
 

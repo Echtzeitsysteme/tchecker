@@ -8,7 +8,7 @@
 
 #include <tchecker/simulate/simulate.hh>
 
-#include <tchecker/publicapi/tck_simulate.hh>
+#include <tchecker/publicapi/simulate_api.hh>
 
 #if USE_BOOST_JSON
 /*!

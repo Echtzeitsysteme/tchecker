@@ -7,7 +7,7 @@
 #include "tchecker/parsing/parsing.hh"
 #include "tchecker/system/system.hh"
 
-#include "tchecker/publicapi/tck_liveness.hh"
+#include "tchecker/publicapi/liveness_api.hh"
 
 int tck_liveness_default_block_size = 10000;
 int tck_liveness_default_table_size = 65536;

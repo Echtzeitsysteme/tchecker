@@ -6,7 +6,7 @@
 #include "tchecker/strong-timed-bisim/vcg-timed-bisim.hh"
 #include "tchecker/system/system.hh"
 
-#include "tchecker/publicapi/tck_compare.hh"
+#include "tchecker/publicapi/compare_api.hh"
 
 int tck_compare_default_block_size = 10000;
 int tck_compare_default_table_size = 65536;

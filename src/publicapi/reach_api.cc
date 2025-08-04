@@ -5,7 +5,7 @@
  *
  */
 
-#include "tchecker/publicapi/tck_reach.hh"
+#include "tchecker/publicapi/reach_api.hh"
 
 #include <fstream>
 #include <iostream>

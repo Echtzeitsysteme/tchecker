@@ -13,7 +13,7 @@
 #include <string>
 #include <cstring>
 
-#include "tchecker/publicapi/tck_reach.hh"
+#include "tchecker/publicapi/reach_api.hh"
 #include "tchecker/utils/log.hh"
 
 /*!

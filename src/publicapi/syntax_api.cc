@@ -5,7 +5,7 @@
  *
  */
 
-#include "tchecker/publicapi/tck_syntax.hh"
+#include "tchecker/publicapi/syntax_api.hh"
 
 #include <fstream>
 #include <iostream>
