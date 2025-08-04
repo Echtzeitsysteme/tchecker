@@ -233,8 +233,14 @@ void tck_reach(std::string output_filename, std::string sysdecl_filename, std::s
     // create output stream to output file
 
     std::ostream * os = nullptr;
+    std::ofstream ofs;
+
     if (output_filename != "") { 
-      os = new std::ofstream(output_filename, std::ios::out);
+      ofs.open(output_filename, std::ios::out);
+        if (!ofs) {
+            throw std::runtime_error("Failed to open file: " + output_filename);
+        }
+        os = &ofs;
     }
     else {
       os = &std::cout;
@@ -259,10 +265,7 @@ void tck_reach(std::string output_filename, std::string sysdecl_filename, std::s
     else {
       throw std::runtime_error("Unknown algorithm");
     }
-
-    if (output_filename != "") { 
-      delete os;
-    }
+    
   }
   catch (std::runtime_error & e) {
     std::cerr << tchecker::log_error << e.what() << std::endl;
