@@ -1,3 +1,13 @@
+/*
+ * This file is a part of the TChecker project.
+ *
+ * See files AUTHORS and LICENSE for copyright details.
+ *
+ */
+
+#ifndef TCHECKER_PUBLICAPI_COMPARE_API_HH
+#define TCHECKER_PUBLICAPI_COMPARE_API_HH
+
 enum tck_compare_relationship_t {
   STRONG_TIMED_BISIM, /*!< Strong Timed Bisimilarity */
 };
@@ -15,4 +25,6 @@ const void tck_compare(const char * output_filename,
 
 #ifdef __cplusplus
 }
+#endif
+
 #endif

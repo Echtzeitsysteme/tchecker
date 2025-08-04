@@ -1,3 +1,13 @@
+/*
+ * This file is a part of the TChecker project.
+ *
+ * See files AUTHORS and LICENSE for copyright details.
+ *
+ */
+
+#ifndef TCHECKER_PUBLICAPI_LIVENESS_API_HH
+#define TCHECKER_PUBLICAPI_LIVENESS_API_HH
+
 enum tck_liveness_algorithm_t {
   ALGO_COUVSCC, /*!< Couvreur's SCC algorithm */
   ALGO_NDFS,    /*!< Nested DFS algorithm */
@@ -31,4 +41,6 @@ const void tck_liveness(const char * output_filename,
 
 #ifdef __cplusplus
 }
+#endif
+
 #endif
