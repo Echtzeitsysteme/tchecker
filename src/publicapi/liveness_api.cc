@@ -16,9 +16,6 @@
 
 #include "tchecker/publicapi/liveness_api.hh"
 
-int tck_liveness_default_block_size = 10000;
-int tck_liveness_default_table_size = 65536;
-
 static bool is_certificate_path(enum tck_liveness_certificate_t ctype) { return (ctype == CERTIFICATE_SYMBOLIC); }
 
 const void tck_liveness_zg_ndfs(std::ostream & os, const tchecker::parsing::system_declaration_t & sysdecl, const char * labels,
@@ -80,12 +77,14 @@ const void tck_liveness(const char * output_filename, const char * sysdecl_filen
                         tck_liveness_algorithm_t algorithm, tck_liveness_search_order_t search_order,
                         tck_liveness_certificate_t certificate, int * block_size, int * table_size)
 {
-  if (block_size == nullptr) {
-    block_size = &tck_liveness_default_block_size;
+  std::size_t block = TCK_LIVENESS_INIT_BLOCK_SIZE;
+  if (nullptr != block_size) {
+    block = *block_size;
   }
 
-  if (table_size == nullptr) {
-    table_size = &tck_liveness_default_table_size;
+  std::size_t table = TCK_LIVENESS_INIT_TABLE_SIZE;
+  if (nullptr != table_size) {
+    table = *table_size;
   }
 
   try {

@@ -8,6 +8,10 @@
 #ifndef TCHECKER_PUBLICAPI_LIVENESS_API_HH
 #define TCHECKER_PUBLICAPI_LIVENESS_API_HH
 
+
+#define TCK_LIVENESS_INIT_BLOCK_SIZE 10000;
+#define TCK_LIVENESS_INIT_TABLE_SIZE 65536;
+
 enum tck_liveness_algorithm_t {
   ALGO_COUVSCC, /*!< Couvreur's SCC algorithm */
   ALGO_NDFS,    /*!< Nested DFS algorithm */
