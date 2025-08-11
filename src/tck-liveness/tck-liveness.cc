@@ -6,6 +6,7 @@
  */
 
 #include <algorithm>
+#include <cstring>
 #include <fstream>
 #include <getopt.h>
 #include <iostream>
@@ -13,10 +14,8 @@
 #include <memory>
 #include <string>
 
-#include "tchecker/parsing/parsing.hh"
+#include "tchecker/publicapi/liveness_api.hh"
 #include "tchecker/utils/log.hh"
-#include "tchecker/algorithms/couvreur_scc/zg-couvscc.hh"
-#include "tchecker/algorithms/ndfs/zg-ndfs.hh" 
 
 /*!
  \file tck-liveness.cc
@@ -59,33 +58,14 @@ void usage(char * progname)
   std::cerr << "reads from standard input if file is not provided" << std::endl;
 }
 
-enum algorithm_t {
-  ALGO_COUVSCC, /*!< Couvreur's SCC algorithm */
-  ALGO_NDFS,    /*!< Nested DFS algorithm */
-  ALGO_NONE,    /*!< No algorithm */
-};
-
-enum certificate_t {
-  CERTIFICATE_GRAPH,    /*!< Graph of state-space */
-  CERTIFICATE_SYMBOLIC, /*!< Symbolic counter-example */
-  CERTIFICATE_NONE,     /*!< No certificate */
-};
-
-static enum algorithm_t algorithm = ALGO_NONE;            /*!< Selected algorithm */
-static enum certificate_t certificate = CERTIFICATE_NONE; /*!< Type of certificate */
-static bool help = false;                                 /*!< Help flag */
-static std::string labels = "";                           /*!< Searched labels */
-static std::string output_file = "";                      /*!< Output file name (empty means standard output) */
-static std::ostream * os = &std::cout;                    /*!< Default output stream */
-static std::size_t block_size = 10000;                    /*!< Size of allocated blocks */
-static std::size_t table_size = 65536;                    /*!< Size of hash tables */
-
-/*!
- \brief Check if expected certificate is a path
- \param ctype : certificate type
- \return true if ctype is a path, false otherwise
- */
-static bool is_certificate_path(enum certificate_t ctype) { return (ctype == CERTIFICATE_SYMBOLIC); }
+static enum tck_liveness_algorithm_t algorithm = ALGO_NONE;            /*!< Selected algorithm */
+static bool help = false;                                              /*!< Help flag */
+static enum tck_liveness_certificate_t certificate = CERTIFICATE_NONE; /*!< Type of certificate */
+static std::string labels = "";                                        /*!< Searched labels */
+static std::string output_file = "";                                   /*!< Output file name (empty means standard output) */
+static std::ostream * os = &std::cout;                                 /*!< Default output stream */
+static std::size_t block_size = 10000;                                 /*!< Size of allocated blocks */
+static std::size_t table_size = 65536;                                 /*!< Size of hash tables */
 
 /*!
  \brief Parse command-line arguments
@@ -156,91 +136,6 @@ int parse_command_line(int argc, char * argv[])
 }
 
 /*!
- \brief Load a system declaration from a file
- \param filename : file name
- \return pointer to a system declaration loaded from filename, nullptr in case
- of errors
- \post all errors have been reported to std::cerr
-*/
-std::shared_ptr<tchecker::parsing::system_declaration_t> load_system_declaration(std::string const & filename)
-{
-  std::shared_ptr<tchecker::parsing::system_declaration_t> sysdecl{nullptr};
-  try {
-    sysdecl = tchecker::parsing::parse_system_declaration(filename);
-    if (sysdecl == nullptr)
-      throw std::runtime_error("nullptr system declaration");
-  }
-  catch (std::exception const & e) {
-    std::cerr << tchecker::log_error << e.what() << std::endl;
-  }
-  return sysdecl;
-}
-
-/*!
- \brief Run nested DFS algorithm
- \param sysdecl : system declaration
- \post statistics on accepting run w.r.t. command-line specified labels in
- the system declared by sysdecl have been output to standard output.
- A certificate has been output if required.
-*/
-void ndfs(tchecker::parsing::system_declaration_t const & sysdecl)
-{
-  auto && [stats, state_space] = tchecker::algorithms::zg_ndfs::run(sysdecl, labels, block_size, table_size);
-
-  // stats
-  std::map<std::string, std::string> m;
-  stats.attributes(m);
-  for (auto && [key, value] : m)
-    std::cout << key << " " << value << std::endl;
-
-  // certificate
-  if (certificate == CERTIFICATE_GRAPH)
-    tchecker::algorithms::zg_ndfs::dot_output(*os, state_space->graph(), sysdecl.name());
-  else if ((certificate == CERTIFICATE_SYMBOLIC) && stats.cycle()) {
-    std::unique_ptr<tchecker::algorithms::zg_ndfs::cex::symbolic_cex_t> cex{
-        tchecker::algorithms::zg_ndfs::cex::symbolic_counter_example(state_space->graph())};
-    if (cex->empty())
-      throw std::runtime_error("*** tck_liveness: unable to compute a symbolic counter example for ndfs algorithm");
-    tchecker::algorithms::zg_ndfs::cex::dot_output(*os, *cex, sysdecl.name());
-  }
-}
-
-/*!
- \brief Run Couvreur's algorithm
- \param sysdecl : system declaration
- \post statistics on accepting run w.r.t. command-line specified labels in
- the system declared by sysdecl have been output to standard output.
- A certificate has been output if required.
-*/
-void couvscc(tchecker::parsing::system_declaration_t const & sysdecl)
-{
-  std::string::difference_type labels_count = std::count(labels.begin(), labels.end(), ',') + 1;
-
-  if (is_certificate_path(certificate) && labels_count > 1)
-    throw std::runtime_error(
-        "*** tck_liveness: cannot compute symbolic counter example with more than 1 label (use graph instead)");
-
-  auto && [stats, state_space] = tchecker::algorithms::zg_couvscc::run(sysdecl, labels, block_size, table_size);
-
-  // stats
-  std::map<std::string, std::string> m;
-  stats.attributes(m);
-  for (auto && [key, value] : m)
-    std::cout << key << " " << value << std::endl;
-
-  // certificate
-  if (certificate == CERTIFICATE_GRAPH)
-    tchecker::algorithms::zg_couvscc::dot_output(*os, state_space->graph(), sysdecl.name());
-  else if ((certificate == CERTIFICATE_SYMBOLIC) && stats.cycle()) {
-    std::unique_ptr<tchecker::algorithms::zg_couvscc::cex::symbolic_cex_t> cex{
-        tchecker::algorithms::zg_couvscc::cex::symbolic_counter_example(state_space->graph())};
-    if (cex->empty())
-      throw std::runtime_error("*** tck_liveness: unable to compute a symbolic counter example for couvscc algorithm");
-    tchecker::algorithms::zg_couvscc::cex::dot_output(*os, *cex, sysdecl.name());
-  }
-}
-
-/*!
  \brief Main function
 */
 int main(int argc, char * argv[])
@@ -261,39 +156,16 @@ int main(int argc, char * argv[])
 
     std::string input_file = (optindex == argc ? "" : argv[optindex]);
 
-    std::shared_ptr<tchecker::parsing::system_declaration_t const> sysdecl{load_system_declaration(input_file)};
+    tchecker::publicapi::tck_liveness(output_file, input_file, labels, algorithm, certificate, block_size, table_size);
 
     if (tchecker::log_error_count() > 0)
       return EXIT_FAILURE;
-
-    std::shared_ptr<std::ofstream> os_ptr{nullptr};
-
-    if (certificate != CERTIFICATE_NONE && output_file != "") {
-      try {
-        os_ptr = std::make_shared<std::ofstream>(output_file);
-        os = os_ptr.get();
-      }
-      catch (std::exception & e) {
-        std::cerr << tchecker::log_error << e.what() << std::endl;
-        return EXIT_FAILURE;
-      }
-    }
-
-    switch (algorithm) {
-    case ALGO_NDFS:
-      ndfs(*sysdecl);
-      break;
-    case ALGO_COUVSCC:
-      couvscc(*sysdecl);
-      break;
-    default:
-      throw std::runtime_error("No algorithm specified");
+    else {
+      return EXIT_SUCCESS;
     }
   }
   catch (std::exception & e) {
     std::cerr << tchecker::log_error << e.what() << std::endl;
     return EXIT_FAILURE;
   }
-
-  return EXIT_SUCCESS;
 }

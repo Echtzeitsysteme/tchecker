@@ -8,6 +8,8 @@
 #ifndef TCHECKER_PUBLICAPI_LIVENESS_API_HH
 #define TCHECKER_PUBLICAPI_LIVENESS_API_HH
 
+#include <string>
+
 
 #define TCK_LIVENESS_INIT_BLOCK_SIZE 10000;
 #define TCK_LIVENESS_INIT_TABLE_SIZE 65536;
@@ -24,20 +26,17 @@ enum tck_liveness_certificate_t {
   CERTIFICATE_NONE,     /*!< No certificate */
 };
 
-enum tck_liveness_search_order_t {
-  BFS,
-  DFS
-};
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-const void tck_liveness(const char * output_filename, 
+/*!
+   \brief C++ function to be called from python TODO: doc
+  */
+void tck_liveness(const char * output_filename, 
     const char * sysdecl_filename, 
     const char * labels, 
     tck_liveness_algorithm_t algorithm, 
-    tck_liveness_search_order_t search_order, 
     tck_liveness_certificate_t 
     certificate, 
     int* block_size, 
@@ -47,4 +46,23 @@ const void tck_liveness(const char * output_filename,
 }
 #endif
 
+namespace tchecker {
+
+namespace publicapi {
+
+  /*!
+  * TODO: doc
+  */
+  void tck_liveness(std::string output_filename, 
+                   std::string sysdecl_filename, 
+                   std::string labels, 
+                   tck_liveness_algorithm_t algorithm, 
+                   tck_liveness_certificate_t certificate, 
+                   std::size_t block_size, 
+                   std::size_t table_size);
+} // end of namespace publicapi
+
+} // end of namespace tchecker
+
 #endif
+
