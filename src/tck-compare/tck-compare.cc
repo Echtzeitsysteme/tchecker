@@ -16,7 +16,8 @@
 #include <string.h>
 
 
-#include "tchecker/strong-timed-bisim/vcg-timed-bisim.hh"
+#include "tchecker/publicapi/compare_api.hh"
+#include "tchecker/utils/log.hh"
 
 /*
  \file tck-compare.cc
@@ -45,11 +46,7 @@ void usage(char * progname)
   std::cerr << "                strong-timed-bisim  strong timed bisimilarity" << std::endl;
 }
 
-enum relationship_t {
-  STRONG_TIMED_BISIM, /*!< Strong Timed Bisimilarity */
-};
-
-enum relationship_t relationship = STRONG_TIMED_BISIM;   /*!< Selected relationship */
+enum tck_compare_relationship_t relationship = STRONG_TIMED_BISIM;   /*!< Selected relationship */
 bool help = false;                                 /*!< Help flag */
 std::string output_file = "";                      /*!< Output file name (empty means standard output) */
 std::ostream * os = &std::cout;                    /*!< Default output stream */
@@ -110,46 +107,6 @@ int parse_command_line(int argc, char * argv[])
 }
 
 /*!
- \brief Load a system declaration from a file
- \param filename : file name
- \return pointer to a system declaration loaded from filename, nullptr in case
- of errors
- \post all errors have been reported to std::cerr
- */
-std::shared_ptr<tchecker::parsing::system_declaration_t> load_system_declaration(std::string const & filename)
-{
-  std::shared_ptr<tchecker::parsing::system_declaration_t> sysdecl = nullptr;
-  try {
-    sysdecl = tchecker::parsing::parse_system_declaration(filename);
-    if (sysdecl == nullptr)
-      throw std::runtime_error("nullptr system declaration");
-  }
-  catch (std::exception const & e) {
-    std::cerr << tchecker::log_error << e.what() << std::endl;
-  }
-  return sysdecl;
-}
-
-
-/*!
- \brief Perform strong timed bisimilarity check
- \param sysdecl_first : system declaration of the first TA
- \param sysdecl_first : system declaration of the second TA
- \post statistics on strong timed bisimilarity analysis of the system declared by sysdecl have been output to standard output.
- */
-void strong_timed_bisim(std::shared_ptr<tchecker::parsing::system_declaration_t> const & sysdecl_first, std::shared_ptr<tchecker::parsing::system_declaration_t> const & sysdecl_second)
-{
-
-  auto stats = tchecker::strong_timed_bisim::run(sysdecl_first, sysdecl_second, os, block_size, table_size);
-
-  // stats
-  std::map<std::string, std::string> m;
-  stats.attributes(m);
-  for (auto && [key, value] : m)
-    std::cout << key << " " << value << std::endl;
-}
-
-/*
  \brief Main function
  */
 int main(int argc, char * argv[]) {
@@ -167,31 +124,17 @@ int main(int argc, char * argv[]) {
     }
 
     std::string first_input = argv[argc - 2];
-    std::shared_ptr<tchecker::parsing::system_declaration_t> sysdecl_first_TA{load_system_declaration(first_input)};
-
     std::string second_input = argv[argc - 1];
-    std::shared_ptr<tchecker::parsing::system_declaration_t> sysdecl_second_TA{load_system_declaration(second_input)};
+
+    
+    std::shared_ptr<std::ofstream> os_ptr{nullptr};
+
+    tchecker::publicapi::tck_compare(output_file, first_input, second_input, relationship, block_size, table_size);
 
     if (tchecker::log_error_count() > 0)
       return EXIT_FAILURE;
-
-    std::shared_ptr<std::ofstream> os_ptr{nullptr};
-
-    if (output_file != "") {
-      try {
-        os_ptr = std::make_shared<std::ofstream>(output_file);
-        os = os_ptr.get();
-      }
-      catch (std::exception & e) {
-        std::cerr << tchecker::log_error << e.what() << std::endl;
-        return EXIT_FAILURE;
-      }
-    }
-
-    if(STRONG_TIMED_BISIM == relationship) {
-      strong_timed_bisim(sysdecl_first_TA, sysdecl_second_TA);
-    } else {
-      throw std::runtime_error("Unknown relationship");
+    else {
+      return EXIT_SUCCESS;
     }
 
   }
@@ -199,8 +142,6 @@ int main(int argc, char * argv[]) {
     std::cerr << tchecker::log_error << e.what() << std::endl;
     return EXIT_FAILURE;
   }
-
-  return EXIT_SUCCESS;
 }
 
 

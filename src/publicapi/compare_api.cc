@@ -5,65 +5,110 @@
  *
  */
 
+#include "tchecker/publicapi/compare_api.hh"
+
 #include <fstream>
 #include <iostream>
 
-#include "tchecker/parsing/parsing.hh"
 #include "tchecker/strong-timed-bisim/stats.hh"
 #include "tchecker/strong-timed-bisim/vcg-timed-bisim.hh"
+
+#include "tchecker/parsing/parsing.hh"
 #include "tchecker/system/system.hh"
 
-#include "tchecker/publicapi/compare_api.hh"
-
-int tck_compare_default_block_size = 10000;
-int tck_compare_default_table_size = 65536;
-
-const void tck_compare(const char * output_filename, const char * first_sysdecl_filename, const char * second_sysdecl_filename,
-                       tck_compare_relationship_t relationship, int * block_size, int * table_size)
+void tck_compare(const char * output_filename, const char * first_sysdecl_filename, const char * second_sysdecl_filename,
+                 tck_compare_relationship_t relationship, int * block_size, int * table_size)
 {
-  if (block_size == nullptr) {
-    block_size = &tck_compare_default_block_size;
+  std::size_t block = TCK_COMPARE_INIT_BLOCK_SIZE;
+  if (nullptr != block_size) {
+    block = *block_size;
   }
 
-  if (table_size == nullptr) {
-    table_size = &tck_compare_default_table_size;
+  std::size_t table = TCK_COMPARE_INIT_TABLE_SIZE;
+  if (nullptr != table_size) {
+    table = *table_size;
   }
 
+  tchecker::publicapi::tck_compare(std::string(output_filename), std::string(first_sysdecl_filename),
+                                   std::string(second_sysdecl_filename), relationship, block, table);
+}
+
+namespace tchecker {
+
+namespace publicapi {
+
+/*!
+ \brief Perform strong timed bisimilarity check
+ \param sysdecl_first : system declaration of the first TA
+ \param sysdecl_first : system declaration of the second TA
+ \post statistics on strong timed bisimilarity analysis of the system declared by sysdecl have been output to standard output.
+ */
+void strong_timed_bisim(std::ostream & os, std::shared_ptr<tchecker::parsing::system_declaration_t> const & sysdecl_first,
+                        std::shared_ptr<tchecker::parsing::system_declaration_t> const & sysdecl_second, std::size_t block_size,
+                        std::size_t table_size)
+{
+
+  auto stats = tchecker::strong_timed_bisim::run(sysdecl_first, sysdecl_second, &os, block_size, table_size);
+
+  // stats
+  std::map<std::string, std::string> m;
+  stats.attributes(m);
+  for (auto && [key, value] : m)
+    std::cout << key << " " << value << std::endl;
+}
+
+void tck_compare(std::string output_filename, std::string first_sysdecl_filename, std::string second_sysdecl_filename,
+                 tck_compare_relationship_t relationship, std::size_t block_size, std::size_t table_size)
+{
   try {
     std::shared_ptr<tchecker::parsing::system_declaration_t> first_sysdecl{nullptr};
     first_sysdecl = tchecker::parsing::parse_system_declaration(first_sysdecl_filename);
-    std::shared_ptr<tchecker::system::system_t> first_system(new tchecker::system::system_t(*first_sysdecl));
+    if (first_sysdecl == nullptr) {
+      throw std::runtime_error("nullptr first system declaration");
+    }
+    std::shared_ptr<tchecker::system::system_t> first_system = std::make_shared<tchecker::system::system_t>(*first_sysdecl);
 
     std::shared_ptr<tchecker::parsing::system_declaration_t> second_sysdecl{nullptr};
     second_sysdecl = tchecker::parsing::parse_system_declaration(second_sysdecl_filename);
-    std::shared_ptr<tchecker::system::system_t> second_system(new tchecker::system::system_t(*second_sysdecl));
+    if (second_sysdecl == nullptr) {
+      throw std::runtime_error("nullptr system declaration");
+    }
+    std::shared_ptr<tchecker::system::system_t> second_system = std::make_shared<tchecker::system::system_t>(*second_sysdecl);
 
     // create output stream to output file
 
     std::ostream * os = nullptr;
-    if (strcmp(output_filename, "")) { // strcmp returns 0 (which is interpreted as false) if output_filename is "".
-      os = new std::ofstream(output_filename, std::ios::out);
+    std::ofstream ofs;
+
+    if (output_filename != "") {
+      ofs.open(output_filename, std::ios::out);
+      if (!ofs) {
+        throw std::runtime_error("Failed to open file: " + output_filename);
+      }
+      os = &ofs;
     }
-    else
+    else {
       os = &std::cout;
+    }
 
     if (relationship == STRONG_TIMED_BISIM) {
-      tchecker::strong_timed_bisim::stats_t stats =
-          tchecker::strong_timed_bisim::run(first_sysdecl, second_sysdecl, os, *block_size, *table_size);
-
-      std::map<std::string, std::string> m;
-      stats.attributes(m);
-      for (auto && [key, value] : m)
-        std::cout << key << " " << value << std::endl;
+      strong_timed_bisim(*os, first_sysdecl, second_sysdecl, block_size, table_size);
     }
     else {
       throw std::runtime_error("Unknown relationship");
     }
   }
+  catch (std::runtime_error & e) {
+    std::cerr << tchecker::log_error << e.what() << std::endl;
+  }
   catch (std::exception const & e) {
-    std::cout << "Error: " << e.what() << std::endl;
+    std::cerr << tchecker::log_error << e.what() << std::endl;
   }
   catch (...) {
-    std::cout << "Unknown error" << std::endl;
+    std::cerr << tchecker::log_error << "Unknown error" << std::endl;
   }
 }
+
+} // end of namespace publicapi
+
+} // end of namespace tchecker
