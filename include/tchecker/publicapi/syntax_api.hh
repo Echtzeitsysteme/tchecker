@@ -5,6 +5,11 @@
  *
  */
 
+/*!
+  \file syntax_api.hh
+  \brief API for syntax checking and system declaration manipulation
+*/
+
 #ifndef TCHECKER_PUBLICAPI_SYNTAX_API_HH
 #define TCHECKER_PUBLICAPI_SYNTAX_API_HH
 
@@ -14,12 +19,95 @@
 extern "C" {    
 #endif
 
-/*! 
- * TODO: doc
- */
+/*!
+  \brief Checks the syntax of a TChecker system declaration
+
+  This function is intended to be called from FFI libraries (e.g., Python via ctypes).
+  It checks the syntax of the system described in \p sysdecl_filename and writes the result to \p output_filename.
+
+  \param output_filename Path to the output file (syntax check results)
+  \param sysdecl_filename Path to the system declaration file
+
+  \note This function is C-compatible and can be called from Python using ctypes.
+
+  \code{.py}
+  import ctypes
+  lib = ctypes.CDLL("libtchecker.so")
+  lib.tck_syntax_check_syntax.argtypes = [ctypes.c_char_p, ctypes.c_char_p]
+  output_filename = b"syntax.txt"
+  sysdecl_filename = b"system.tck"
+  lib.tck_syntax_check_syntax(output_filename, sysdecl_filename)
+  \endcode
+*/
 void tck_syntax_check_syntax(const char * output_filename, const char * sysdecl_filename);
+
+/*!
+  \brief Outputs a TChecker system declaration in DOT (Graphviz) format
+
+  This function is intended to be called from FFI libraries (e.g., Python via ctypes).
+  It outputs the system described in \p sysdecl_filename to \p output_filename in DOT format.
+
+  \param output_filename Path to the output file (DOT format)
+  \param sysdecl_filename Path to the system declaration file
+
+  \note This function is C-compatible and can be called from Python using ctypes.
+
+  \code{.py}
+  import ctypes
+  lib = ctypes.CDLL("libtchecker.so")
+  lib.tck_syntax_to_dot.argtypes = [ctypes.c_char_p, ctypes.c_char_p]
+  output_filename = b"system.dot"
+  sysdecl_filename = b"system.tck"
+  lib.tck_syntax_to_dot(output_filename, sysdecl_filename)
+  \endcode
+*/
 void tck_syntax_to_dot(const char * output_filename, const char * sysdecl_filename);
+
+/*!
+  \brief Outputs a TChecker system declaration in JSON format
+
+  This function is intended to be called from FFI libraries (e.g., Python via ctypes).
+  It outputs the system described in \p sysdecl_filename to \p output_filename in JSON format.
+
+  \param output_filename Path to the output file (JSON format)
+  \param sysdecl_filename Path to the system declaration file
+
+  \note This function is C-compatible and can be called from Python using ctypes.
+
+  \code{.py}
+  import ctypes
+  lib = ctypes.CDLL("libtchecker.so")
+  lib.tck_syntax_to_json.argtypes = [ctypes.c_char_p, ctypes.c_char_p]
+  output_filename = b"system.json"
+  sysdecl_filename = b"system.tck"
+  lib.tck_syntax_to_json(output_filename, sysdecl_filename)
+  \endcode
+*/
 void tck_syntax_to_json(const char * output_filename, const char * sysdecl_filename);
+
+/*!
+  \brief Creates a synchronized product from a TChecker system declaration
+
+  This function is intended to be called from FFI libraries (e.g., Python via ctypes).
+  It creates a synchronized product from the system described in \p sysdecl_filename, names the new system \p new_system_name,
+  and writes the result to \p output_filename.
+
+  \param output_filename Path to the output file (synchronized product)
+  \param sysdecl_filename Path to the system declaration file
+  \param new_system_name Name of the resulting synchronized product system
+
+  \note This function is C-compatible and can be called from Python using ctypes.
+
+  \code{.py}
+  import ctypes
+  lib = ctypes.CDLL("libtchecker.so")
+  lib.tck_syntax_create_synchronized_product.argtypes = [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_char_p]
+  output_filename = b"product.tck"
+  sysdecl_filename = b"system.tck"
+  new_system_name = b"product_system"
+  lib.tck_syntax_create_synchronized_product(output_filename, sysdecl_filename, new_system_name)
+  \endcode
+*/
 void tck_syntax_create_synchronized_product(const char * output_filename, const char * sysdecl_filename, const char * new_system_name);
 
 #ifdef __cplusplus
