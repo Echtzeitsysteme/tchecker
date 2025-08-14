@@ -80,7 +80,8 @@ namespace publicapi {
   */
   void do_report_asynchronous_events(std::string sysdecl_filename);
 
-}
-}
+} // end of namespace publicapi
+
+} // end of namespace tchecker
 
 #endif

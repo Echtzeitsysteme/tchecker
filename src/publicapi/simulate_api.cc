@@ -5,6 +5,8 @@
  *
  */
 
+#include <tchecker/publicapi/simulate_api.hh>
+
 #include <fstream>
 #include <iostream>
 #include <map>
@@ -15,7 +17,21 @@
 
 #include <tchecker/simulate/simulate.hh>
 
-#include <tchecker/publicapi/simulate_api.hh>
+void tck_simulate(const char * output_filename, const char * sysdecl_filename, simulation_type_t simulation_type,
+                  const tchecker::simulate::display_type_t display_type, const char * starting_state_json, int * nsteps,
+                  bool output_trace)
+{
+  int nsteps_value = 0;
+  if(nullptr != nsteps) {
+    nsteps_value = *nsteps;
+  }
+
+  tchecker::publicapi::tck_simulate(output_filename, sysdecl_filename, simulation_type, display_type, starting_state_json,
+                                    nsteps_value, output_trace);
+}
+
+namespace tchecker {
+namespace publicapi {
 
 #if USE_BOOST_JSON
 /*!
@@ -54,44 +70,72 @@ std::map<std::string, std::string> parse_state_json(std::string const & state_js
 }
 #endif
 
-
-const void tck_simulate_onestep_simulation(const char * output_filename, const char * sysdecl_filename,
-                                           const tchecker::simulate::display_type_t display_type,
-                                           const char * starting_state_json)
+void tck_simulate(std::string output_filename, std::string sysdecl_filename, simulation_type_t simulation_type,
+                  tchecker::simulate::display_type_t display_type, std::string starting_state_json, std::size_t nsteps,
+                  bool output_trace)
 {
-  std::shared_ptr<tchecker::parsing::system_declaration_t> sysdecl{nullptr};
-  sysdecl = tchecker::parsing::parse_system_declaration(sysdecl_filename);
+  try {
+    std::shared_ptr<tchecker::parsing::system_declaration_t> sysdecl{nullptr};
+    sysdecl = tchecker::parsing::parse_system_declaration(sysdecl_filename);
+    if (sysdecl == nullptr) {
+      throw std::runtime_error("nullptr system declaration");
+    }
+    std::shared_ptr<tchecker::system::system_t> system = std::make_shared<tchecker::system::system_t>(*sysdecl);
 
-  if (sysdecl == nullptr) {
-    tchecker::log_output_count(std::cout);
-    return;
-  }
-
-  if (display_type != tchecker::simulate::HUMAN_READABLE_DISPLAY) {
+    if (display_type != tchecker::simulate::HUMAN_READABLE_DISPLAY) {
 #if !USE_BOOST_JSON
-    std::cerr << "JSON display is not enabled in this build" << std::endl;
-    return;
+      std::cerr << "JSON display is not enabled in this build" << std::endl;
+      return;
 #endif
-  }
+    }
 
-  std::ostream * os = nullptr;
-  if (output_filename && std::strlen(output_filename) > 0) {
-    os = new std::ofstream(output_filename, std::ios::out);
-  }
-  else
-    os = &std::cout;
+    std::ostream * os = nullptr;
+    std::ofstream ofs;
 
-  std::map<std::string, std::string> starting_state_attributes;
+    if (output_filename != "") {
+      ofs.open(output_filename, std::ios::out);
+      if (!ofs) {
+        throw std::runtime_error("Failed to open file: " + output_filename);
+      }
+      os = &ofs;
+    }
+    else {
+      os = &std::cout;
+    }
+
+    std::map<std::string, std::string> starting_state_attributes;
 #if USE_BOOST_JSON
-  if (starting_state_json != nullptr && std::strlen(starting_state_json) > 0) {
-    starting_state_attributes = parse_state_json(starting_state_json);
-  }
+    if (!starting_state_json.empty()) {
+      starting_state_attributes = parse_state_json(starting_state_json);
+    }
 #endif
 
+    std::shared_ptr<tchecker::simulate::state_space_t> state_space{nullptr};
+    if (simulation_type == INTERACTIVE_SIMULATION)
+      state_space = tchecker::simulate::interactive_simulation(*sysdecl, display_type, *os, starting_state_attributes);
+    else if (simulation_type == RANDOMIZED_SIMULATION)
+      state_space = tchecker::simulate::randomized_simulation(*sysdecl, nsteps, starting_state_attributes);
+    else if (simulation_type == ONESTEP_SIMULATION)
+      tchecker::simulate::onestep_simulation(*sysdecl, display_type, *os, starting_state_attributes);
+    else
+      throw std::runtime_error("Select one of interactive, one-step or randomized simulation");
 
-
-    tchecker::simulate::onestep_simulation(*sysdecl, display_type, *os, starting_state_attributes);
-    
-    if (os != &std::cout)
-        delete os;
+    if (output_trace) {
+      assert(state_space.get() != nullptr);
+      tchecker::simulate::dot_output(*os, state_space->graph(), sysdecl->name());
+    }
+  }
+  catch (std::runtime_error & e) {
+    std::cerr << tchecker::log_error << e.what() << std::endl;
+  }
+  catch (std::exception const & e) {
+    std::cerr << tchecker::log_error << e.what() << std::endl;
+  }
+  catch (...) {
+    std::cerr << tchecker::log_error << "Unknown error" << std::endl;
+  }
 }
+
+} // namespace publicapi
+
+} // namespace tchecker
