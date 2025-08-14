@@ -23,9 +23,9 @@ enum simulation_type_t {
 extern "C" {
 #endif
 
-void tck_simulate(const char * output_filename, const char * sysdecl_filename, simulation_type_t simulation_type,
-                  const tchecker::simulate::display_type_t display_type, const char * starting_state_attributes, int nsteps,
-                  bool output_trace);
+void tck_simulate(const char * output_filename, const char * sysdecl_filename, const simulation_type_t simulation_type,
+                  const tchecker::simulate::display_type_t display_type, const char * starting_state_attributes,
+                  const int * nsteps, const bool output_trace);
 
 #ifdef __cplusplus
 }
@@ -36,8 +36,8 @@ namespace tchecker {
 namespace publicapi {
 
 void tck_simulate(std::string output_filename, std::string sysdecl_filename, simulation_type_t simulation_type,
-                  tchecker::simulate::display_type_t display_type, std::string starting_state_attributes,
-                  std::size_t nsteps, bool output_trace);
+                  tchecker::simulate::display_type_t display_type, std::string starting_state_attributes, std::size_t nsteps,
+                  bool output_trace);
 
 } // end of namespace publicapi
 

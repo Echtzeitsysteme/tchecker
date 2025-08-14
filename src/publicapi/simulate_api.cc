@@ -17,9 +17,9 @@
 
 #include <tchecker/simulate/simulate.hh>
 
-void tck_simulate(const char * output_filename, const char * sysdecl_filename, simulation_type_t simulation_type,
-                  const tchecker::simulate::display_type_t display_type, const char * starting_state_json, int * nsteps,
-                  bool output_trace)
+void tck_simulate(const char * output_filename, const char * sysdecl_filename, const simulation_type_t simulation_type,
+                  const tchecker::simulate::display_type_t display_type, const char * starting_state_json, const int * nsteps,
+                  const bool output_trace)
 {
   int nsteps_value = 0;
   if(nullptr != nsteps) {
