@@ -110,6 +110,7 @@ namespace publicapi {
   \param relationship Type of relationship to check (see tck_compare_relationship_t)
   \param block_size Block size for internal computation
   \param table_size Table size for internal computation
+  \param generate_witness Whether a witness/Contradiction DAG shall be generated
 
   \note This is the C++ API. For C/FFI usage, see the C-compatible version above.
 */
@@ -118,7 +119,8 @@ namespace publicapi {
                   std::string second_sysdecl_filename,
                   tck_compare_relationship_t relationship,
                   std::size_t block_size, 
-                  std::size_t table_size);
+                  std::size_t table_size,
+                  bool generate_witness);
 
 } // end of namespace publicapi
 

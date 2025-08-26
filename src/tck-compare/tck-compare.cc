@@ -29,6 +29,7 @@ static struct option long_options[] = {{"relationship", required_argument, 0, 'r
                                        {"help", no_argument, 0, 'h'},
                                        {"block-size", required_argument, 0, 0},
                                        {"table-size", required_argument, 0, 0},
+                                       {"witness", no_argument, 0, 'W'},
                                        {0, 0, 0, 0}};
 
 static char const * const options = (char *)"hr:n:";
@@ -41,13 +42,15 @@ void usage(char * progname)
 {
   std::cerr << "Usage: " << progname << " [options] [file1] [file2]" << std::endl;
   std::cerr << "   -h                 help" << std::endl;
-  std::cerr << "   -o out_file        output file for certificate (default is standard output)" << std::endl;
+  std::cerr << "   -o output file for witness/contradiction DAG (default is standard output)" << std::endl;
   std::cerr << "   -r relationship    relationship to check" << std::endl;
   std::cerr << "                strong-timed-bisim  strong timed bisimilarity" << std::endl;
+  std::cerr << "   -W generate a witness/contradiction DAG" << std::endl;
 }
 
 enum tck_compare_relationship_t relationship = STRONG_TIMED_BISIM;   /*!< Selected relationship */
 bool help = false;                                 /*!< Help flag */
+bool witness = false;                              /*!< Witness Flag */
 std::string output_file = "";                      /*!< Output file name (empty means standard output) */
 std::ostream * os = &std::cout;                    /*!< Default output stream */
 std::size_t block_size = 10000;                    /*!< Size of allocated blocks */
@@ -76,6 +79,9 @@ int parse_command_line(int argc, char * argv[])
       throw std::runtime_error("Unknown command-line option");
     else if (c != 0) {
       switch (c) {
+      case 'W':
+        witness = true;
+        break;
       case 'r':
         if (strcmp(optarg, "strong-timed-bisim") == 0)
           relationship = STRONG_TIMED_BISIM;
@@ -129,7 +135,7 @@ int main(int argc, char * argv[]) {
     
     std::shared_ptr<std::ofstream> os_ptr{nullptr};
 
-    tchecker::publicapi::tck_compare(output_file, first_input, second_input, relationship, block_size, table_size);
+    tchecker::publicapi::tck_compare(output_file, first_input, second_input, relationship, block_size, table_size, witness);
 
     if (tchecker::log_error_count() > 0)
       return EXIT_FAILURE;

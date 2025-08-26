@@ -296,6 +296,19 @@ public:
     #endif
   }
 
+  /*!
+  \brief Hash function
+  \return hash value of this container
+  */
+  std::size_t hash() const
+  {
+    size_t h = _dim;
+    for (auto cur : *_storage) {
+      boost::hash_combine(h, cur->hash());
+    }
+    return h;
+  }
+
 private:
 
   std::shared_ptr<std::vector<std::shared_ptr<T>>> find_union_partner(std::vector<std::shared_ptr<T>> const cur)

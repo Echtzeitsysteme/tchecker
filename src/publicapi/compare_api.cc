@@ -12,12 +12,13 @@
 
 #include "tchecker/strong-timed-bisim/stats.hh"
 #include "tchecker/strong-timed-bisim/vcg-timed-bisim.hh"
+#include "tchecker/strong-timed-bisim/witness/witness_graph.hh"
 
 #include "tchecker/parsing/parsing.hh"
 #include "tchecker/system/system.hh"
 
 void tck_compare(const char * output_filename, const char * first_sysdecl_filename, const char * second_sysdecl_filename,
-                 tck_compare_relationship_t relationship, int * block_size, int * table_size)
+                 tck_compare_relationship_t relationship, int * block_size, int * table_size, bool generate_witness)
 {
   std::size_t block = TCK_COMPARE_INIT_BLOCK_SIZE;
   if (nullptr != block_size) {
@@ -30,7 +31,7 @@ void tck_compare(const char * output_filename, const char * first_sysdecl_filena
   }
 
   tchecker::publicapi::tck_compare(std::string(output_filename), std::string(first_sysdecl_filename),
-                                   std::string(second_sysdecl_filename), relationship, block, table);
+                                   std::string(second_sysdecl_filename), relationship, block, table, generate_witness);
 }
 
 namespace tchecker {
@@ -45,11 +46,19 @@ namespace publicapi {
  */
 void strong_timed_bisim(std::ostream & os, std::shared_ptr<tchecker::parsing::system_declaration_t> const & sysdecl_first,
                         std::shared_ptr<tchecker::parsing::system_declaration_t> const & sysdecl_second, std::size_t block_size,
-                        std::size_t table_size)
+                        std::size_t table_size, bool generate_witness)
 {
 
-  auto stats = tchecker::strong_timed_bisim::run(sysdecl_first, sysdecl_second, &os, block_size, table_size);
+  auto stats = tchecker::strong_timed_bisim::run(sysdecl_first, sysdecl_second, &os, block_size, table_size, generate_witness);
 
+  if(generate_witness) {
+    if(stats.relationship_fulfilled()) {
+      std::string name = sysdecl_first->name() + "_" + sysdecl_second->name();
+      tchecker::strong_timed_bisim::witness::dot_output(os, *(stats.witness()), name);
+    } else {
+      throw std::runtime_error("ToDo: Implement Contradiction DAG!");
+    }
+  }
   // stats
   std::map<std::string, std::string> m;
   stats.attributes(m);
@@ -58,7 +67,7 @@ void strong_timed_bisim(std::ostream & os, std::shared_ptr<tchecker::parsing::sy
 }
 
 void tck_compare(std::string output_filename, std::string first_sysdecl_filename, std::string second_sysdecl_filename,
-                 tck_compare_relationship_t relationship, std::size_t block_size, std::size_t table_size)
+                 tck_compare_relationship_t relationship, std::size_t block_size, std::size_t table_size, bool generate_witnesss)
 {
   try {
     std::shared_ptr<tchecker::parsing::system_declaration_t> first_sysdecl{nullptr};
@@ -92,7 +101,7 @@ void tck_compare(std::string output_filename, std::string first_sysdecl_filename
     }
 
     if (relationship == STRONG_TIMED_BISIM) {
-      strong_timed_bisim(*os, first_sysdecl, second_sysdecl, block_size, table_size);
+      strong_timed_bisim(*os, first_sysdecl, second_sysdecl, block_size, table_size, generate_witnesss);
     }
     else {
       throw std::runtime_error("Unknown relationship");

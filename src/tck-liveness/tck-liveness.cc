@@ -63,7 +63,6 @@ static bool help = false;                                              /*!< Help
 static enum tck_liveness_certificate_t certificate = CERTIFICATE_NONE; /*!< Type of certificate */
 static std::string labels = "";                                        /*!< Searched labels */
 static std::string output_file = "";                                   /*!< Output file name (empty means standard output) */
-static std::ostream * os = &std::cout;                                 /*!< Default output stream */
 static std::size_t block_size = 10000;                                 /*!< Size of allocated blocks */
 static std::size_t table_size = 65536;                                 /*!< Size of hash tables */
 

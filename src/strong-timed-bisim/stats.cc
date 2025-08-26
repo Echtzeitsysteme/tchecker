@@ -34,6 +34,17 @@ void stats_t::set_relationship_fulfilled(bool relationship_fulfilled)
   _relationship_fulfilled = relationship_fulfilled;
 }
 
+std::shared_ptr<tchecker::strong_timed_bisim::witness::graph_t> stats_t::witness() const
+{
+  return _witness;
+}
+
+void stats_t::init_witness(std::shared_ptr<tchecker::vcg::vcg_t> const & vcg1, 
+                           std::shared_ptr<tchecker::vcg::vcg_t> const & vcg2)
+{
+  _witness = std::make_shared<tchecker::strong_timed_bisim::witness::graph_t>(vcg1, vcg2);
+}
+
 void stats_t::attributes(std::map<std::string, std::string> & m) const {
   tchecker::algorithms::stats_t::attributes(m);
 

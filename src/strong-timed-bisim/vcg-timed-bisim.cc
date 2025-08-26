@@ -64,8 +64,9 @@ tchecker::clock_id_t clocks_check(std::shared_ptr<tchecker::ta::system_t> const 
 }
 
 tchecker::strong_timed_bisim::stats_t
-run(std::shared_ptr<tchecker::parsing::system_declaration_t> const & sysdecl_first, std::shared_ptr<tchecker::parsing::system_declaration_t> const & sysdecl_second,
-    std::ostream * os, std::size_t block_size, std::size_t table_size) {
+run(std::shared_ptr<tchecker::parsing::system_declaration_t> const & sysdecl_first, 
+    std::shared_ptr<tchecker::parsing::system_declaration_t> const & sysdecl_second,
+    std::ostream * os, std::size_t block_size, std::size_t table_size, bool generate_witness) {
 
   std::vector<std::shared_ptr<tchecker::ta::system_t>> systems;
 
@@ -99,7 +100,7 @@ run(std::shared_ptr<tchecker::parsing::system_declaration_t> const & sysdecl_fir
 
 //  std::cout << __FILE__ << ": " << __LINE__ << ": created vcgs" << std::endl;
 
-  auto algorithm = new tchecker::strong_timed_bisim::Lieb_et_al(vcgs[0], vcgs[1]);
+  auto algorithm = new tchecker::strong_timed_bisim::Lieb_et_al(vcgs[0], vcgs[1], generate_witness);
 
   return algorithm->run();
 

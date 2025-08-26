@@ -28,8 +28,9 @@ namespace strong_timed_bisim {
  \return statistics on the run and the reachability graph
  */
 tchecker::strong_timed_bisim::stats_t
-run(std::shared_ptr<tchecker::parsing::system_declaration_t> const & sysdecl_first, std::shared_ptr<tchecker::parsing::system_declaration_t> const & sysdecl_second,
-    std::ostream * os, std::size_t block_size, std::size_t table_size);
+run(std::shared_ptr<tchecker::parsing::system_declaration_t> const & sysdecl_first, 
+    std::shared_ptr<tchecker::parsing::system_declaration_t> const & sysdecl_second,
+    std::ostream * os, std::size_t block_size, std::size_t table_size, bool generate_witness);
 
 } // end of namespace strong_timed_bisim
 } // end of namespace tchecker

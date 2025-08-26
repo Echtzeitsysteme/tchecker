@@ -6,14 +6,28 @@
  */
 
 #include "tchecker/strong-timed-bisim/visited_map.hh"
+#include "tchecker/vcg/sync.hh"
 
 namespace tchecker {
 
 namespace strong_timed_bisim {
 
-visited_map_t::visited_map_t(tchecker::clock_id_t no_of_virtual_clocks) :  _no_of_virtual_clocks(no_of_virtual_clocks), _storage(std::make_shared<visited_map_storage_t>()) {}
+visited_map_t::visited_map_t(tchecker::clock_id_t no_of_virtual_clocks, 
+                             std::shared_ptr<tchecker::vcg::vcg_t> A, 
+                             std::shared_ptr<tchecker::vcg::vcg_t> B) :  
+                             _no_of_virtual_clocks(no_of_virtual_clocks), 
+                             _storage(std::make_shared<visited_map_storage_t>()), 
+                             _A(A), _B(B)
+{
 
-visited_map_t::visited_map_t(visited_map_t &t) : _no_of_virtual_clocks(t.no_of_virtual_clocks()), _storage(std::make_shared<visited_map_storage_t>()) 
+}
+
+visited_map_t::visited_map_t(visited_map_t &t,
+                             std::shared_ptr<tchecker::vcg::vcg_t> A, 
+                             std::shared_ptr<tchecker::vcg::vcg_t> B) : 
+                             _no_of_virtual_clocks(t.no_of_virtual_clocks()), 
+                             _storage(std::make_shared<visited_map_storage_t>()),
+                             _A(A), _B(B) 
 {   
     for(auto iter = t.begin(); iter != t.end(); iter++) {
         auto zone_container_copy = std::make_shared<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(*iter->second);
@@ -30,6 +44,8 @@ tchecker::strong_timed_bisim::visited_map_t::visited_map_storage_t::iterator vis
 void visited_map_t::emplace(tchecker::zg::state_sptr_t first, tchecker::zg::state_sptr_t second)
 {
   assert(first->zone().is_virtual_equivalent(second->zone(), _no_of_virtual_clocks));
+
+  assert(tchecker::vcg::are_zones_synced(first->zone(), second->zone(), first->zone().dim() - _no_of_virtual_clocks - 1, second->zone().dim() - _no_of_virtual_clocks - 1));
 
   visited_map_key_t key = std::make_pair(std::make_pair(first->intval_ptr(), first->vloc_ptr()), std::make_pair(second->intval_ptr(), second->vloc_ptr()));
   auto common_virtual_constraint = tchecker::virtual_constraint::factory(first->zone(), _no_of_virtual_clocks);
@@ -58,6 +74,41 @@ void visited_map_t::emplace(visited_map_key_t key, std::shared_ptr<tchecker::vir
     #if defined(SUBSETS_WITH_NEG_AND) || defined(SUBSETS_WITH_INTERSECTIONS) || defined(SUBSETS_WITH_COMPRESS) // in zone_container.hh
         (*_storage)[key]->compress();
     #endif
+  }
+}
+
+bool visited_map_t::check_and_add_pair(tchecker::zg::state_sptr_t first, tchecker::zg::state_sptr_t second)
+{
+  auto A_norm = _A->clone_state(first);
+  auto B_norm = _B->clone_state(second);
+
+  // normalizing, to check whether we have already seen this pair.
+  tchecker::vloc_t * extrapolation_vloc =
+      tchecker::vloc_allocate_and_construct((*(A_norm->vloc_ptr())).size() + (*(B_norm->vloc_ptr())).size(),
+                                            (*(A_norm->vloc_ptr())).size() + (*(B_norm->vloc_ptr())).size());
+
+  // get location maps for clocks of first TA for locations of first TA
+  for (size_t i = 0; i < (*(A_norm->vloc_ptr())).size(); ++i) {
+    (*extrapolation_vloc)[i] = (*(A_norm->vloc_ptr()))[i];
+  }
+  // get location maps for clocks of second TA for locations of second TA
+  for (size_t i = 0; i < (*(B_norm->vloc_ptr())).size(); ++i) {
+    (*extrapolation_vloc)[(*(A_norm->vloc_ptr())).size() + i] = _A->get_no_of_locations() + (*(B_norm->vloc_ptr()))[i];
+  }
+
+  _A->run_extrapolation(A_norm->zone().dbm(), A_norm->zone().dim(), *extrapolation_vloc);
+  _B->run_extrapolation(B_norm->zone().dbm(), B_norm->zone().dim(), *extrapolation_vloc);
+
+  vloc_destruct_and_deallocate(extrapolation_vloc);
+
+  tchecker::dbm::tighten(A_norm->zone().dbm(), A_norm->zone().dim());
+  tchecker::dbm::tighten(B_norm->zone().dbm(), B_norm->zone().dim());
+
+  if(contains_superset(A_norm, B_norm)) {
+      return true;
+  } else {
+      emplace(A_norm, B_norm);
+      return false;
   }
 }
 

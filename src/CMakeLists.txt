@@ -86,6 +86,7 @@ set(LIBTCHECKER_SRC
   ${GRAPH_SRC}
   ${OTHER_SRC}
   ${PARSING_SRC}
+  ${PUBLICAPI_SRC}
   ${REFZG_SRC}
   ${SIMULATE_SRC}
   ${STATEMENT_SRC}
@@ -100,8 +101,7 @@ set(LIBTCHECKER_SRC
   ${WAITING_SRC}
   ${VCG_SRC}
   ${VM_SRC}
-  ${ZG_SRC}
-  ${PUBLICAPI_SRC})
+  ${ZG_SRC})
 
 # Build TChecker static library
 add_library(libtchecker_static STATIC ${LIBTCHECKER_SRC}

@@ -41,8 +41,11 @@ public:
   \brief Constructor
   \param input_first : the vcg of the first TA
   \param input_second : the vcg of the second TA
+  \param generate_witness : whether a witness/contradiction DAG should be generated
    */
-  Lieb_et_al(std::shared_ptr<tchecker::vcg::vcg_t> input_first, std::shared_ptr<tchecker::vcg::vcg_t> input_second);
+  Lieb_et_al(std::shared_ptr<tchecker::vcg::vcg_t> input_first, 
+             std::shared_ptr<tchecker::vcg::vcg_t> input_second, 
+             bool generate_witness);
 
   /*!
    \brief running the algorithm of Lieb et al.
@@ -122,6 +125,8 @@ private:
 
   long _visited_pair_of_states;
   non_bisim_cache_t _non_bisim_cache;
+
+  const bool _witness;
 
 
 };

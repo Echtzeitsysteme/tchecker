@@ -150,7 +150,6 @@ zone_t::get_virtual_overhang_in_both_directions(tchecker::zg::zone_t const & oth
 {
   auto result = this->get_virtual_overhang(other, no_of_virtual_clocks);
   result->append_container(other.get_virtual_overhang(*this, no_of_virtual_clocks));
-  result->compress();
 
   assert(
     std::all_of(result->begin(), result->end(),
@@ -161,6 +160,19 @@ zone_t::get_virtual_overhang_in_both_directions(tchecker::zg::zone_t const & oth
     )
   );
 
+  auto vc_A = tchecker::virtual_constraint::factory(*this, no_of_virtual_clocks);
+  auto vc_B = tchecker::virtual_constraint::factory(other, no_of_virtual_clocks);
+  assert(
+    std::all_of(
+      result->begin(),
+      result->end(),
+      [vc_A, vc_B](std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> cur_con) {
+        return *cur_con <= *vc_A || *cur_con <= *vc_B;
+      }
+    )
+  );
+
+  result->compress();
   return result;
 }
 

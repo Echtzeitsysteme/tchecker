@@ -13,6 +13,8 @@
 #include "tchecker/algorithms/stats.hh"
 #include "tchecker/zg/state.hh"
 
+#include "tchecker/strong-timed-bisim/witness/witness_graph.hh"
+
 /*!
  \file stats.hh
  \brief Statistics for comparison algorithm
@@ -59,6 +61,18 @@ public:
   void set_relationship_fulfilled(bool relationship_fulfilled);
 
   /*!
+   \brief Accessor
+   \return Reference to the witness
+  */
+  std::shared_ptr<tchecker::strong_timed_bisim::witness::graph_t> witness() const;
+
+  /*!
+   \brief Init witness
+   \post _witness is an empty graph
+  */
+  void init_witness(std::shared_ptr<tchecker::vcg::vcg_t> const & vcg1, 
+                           std::shared_ptr<tchecker::vcg::vcg_t> const & vcg2);
+  /*!
    \brief Extract statistics as attributes (key, value)
    \param m : attributes map
    \post every statistics has been added to m
@@ -67,7 +81,8 @@ public:
 
 private:
   long _visited_pair_of_states;  /*!< Number of visited pairs of states */
-  bool _relationship_fulfilled;  /*< Whether the relationship is fulfilled */
+  bool _relationship_fulfilled;  /*!< Whether the relationship is fulfilled */
+  std::shared_ptr<tchecker::strong_timed_bisim::witness::graph_t> _witness; /*!< If relationship_fulfilled, then it contains the witness */
 };
 
 } // end of namespace strong_timed_bisim
