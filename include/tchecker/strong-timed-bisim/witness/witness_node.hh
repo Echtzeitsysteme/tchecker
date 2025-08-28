@@ -31,7 +31,34 @@ class node_t {
   \param id : the id of this node within the witness graph
   \post this node keeps a shared pointer to s, and has initial node flag as specified
   */
-  node_t(tchecker::zg::state_sptr_t const & s_1, tchecker::zg::state_sptr_t const & s_2, std::size_t id, tchecker::clock_id_t no_of_virt_clks);
+  node_t(tchecker::zg::state_sptr_t const & s_1, tchecker::zg::state_sptr_t const & s_2, std::size_t id, tchecker::clock_id_t no_of_virt_clks, bool initial);
+
+  /*!
+   \brief Constructor
+   \param location_pair : the pair of locations to add
+   \param vc : the virtual constraints of the synchronized symbolic states to add
+   \param id : the id of this node within the witness graph
+  */
+  node_t(std::pair<tchecker::ta::state_t, tchecker::ta::state_t> & location_pair, tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t> & vc, std::size_t id);
+
+  /*!
+   \brief Constructor
+   \param first_loc : the first location
+   \param second_loc : the second location
+   \param vc : the virtual constraints of the synchronized symbolic states to add
+   \param id : the id of this node within the witness graph
+  */
+  node_t(tchecker::ta::state_t &first_loc, tchecker::ta::state_t & second_loc, tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t> & vc, std::size_t id);
+
+  /*!
+   \brief Constructor
+   \param first_loc : the first location
+   \param second_loc : the second location
+   \param no_of_virt_clks : the number of virtual clocks
+   \param id : the id of this node within the witness graph
+  */
+  node_t(tchecker::ta::state_t &first_loc, tchecker::ta::state_t & second_loc, 
+         tchecker::clock_id_t no_of_virt_clks, std::size_t id);
 
   /*!
   \brief Accessor
@@ -50,6 +77,12 @@ class node_t {
   \return id in this node
   */
   inline std::size_t id() const { return _id; }
+
+   /*!
+  \brief Accessor
+  \return whether this node is initial
+  */
+  inline bool initial() const { return _initial; }
 
  /*!
    \brief Less-than order on nodes based on lexical ordering
@@ -78,10 +111,17 @@ class node_t {
   */ 
   void add_zone(std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> vc);
 
+  /*!
+  \brief adds many conditions to _zones
+  \post vc is added to _zones
+  */ 
+  void add_zones(tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t> &vcs);
+
  private:
   const std::shared_ptr<const std::pair<tchecker::ta::state_t, tchecker::ta::state_t>> _location_pair;
   tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t> _zones;
   const std::size_t _id;
+  const bool _initial;
 };
 
 } // end of namespace witness

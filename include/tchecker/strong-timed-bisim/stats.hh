@@ -82,7 +82,7 @@ public:
 private:
   long _visited_pair_of_states;  /*!< Number of visited pairs of states */
   bool _relationship_fulfilled;  /*!< Whether the relationship is fulfilled */
-  std::shared_ptr<tchecker::strong_timed_bisim::witness::graph_t> _witness; /*!< If relationship_fulfilled, then it contains the witness */
+  std::shared_ptr<tchecker::strong_timed_bisim::witness::graph_t> _witness; /*!< If a witness shall be produced, then it contains it */
 };
 
 } // end of namespace strong_timed_bisim

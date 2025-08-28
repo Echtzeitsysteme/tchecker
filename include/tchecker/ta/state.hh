@@ -50,9 +50,9 @@ public:
           tchecker::intrusive_shared_ptr_t<tchecker::shared_intval_t> const & intval);
 
   /*!
-   \brief Copy constructor (deleted)
+   \brief Copy constructor
    */
-  state_t(tchecker::ta::state_t const &) = delete;
+  state_t(tchecker::ta::state_t const &) = default;
 
   /*!
    \brief Move constructor
@@ -95,7 +95,7 @@ public:
     return tchecker::intrusive_shared_ptr_t<tchecker::shared_intval_t const>(_intval.ptr());
   }
 
-private:
+protected:
   tchecker::intrusive_shared_ptr_t<tchecker::shared_intval_t> _intval; /*!< Valuation of bounded integer variables */
 };
 

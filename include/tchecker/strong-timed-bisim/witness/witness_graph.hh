@@ -12,6 +12,8 @@
 #include "tchecker/strong-timed-bisim/witness/witness_edge.hh"
 
 #include "tchecker/vcg/vcg.hh"
+#include "tchecker/vcg/virtual_constraint.hh"
+#include "tchecker/strong-timed-bisim/visited_map.hh"
 
 
 namespace tchecker {
@@ -71,9 +73,11 @@ public:
    \brief Add a node
    \param A_node : the node of the first vcg
    \param B_node : the node of the second vcg
+   \param initial : whether this node is the initial node
    \post the new node was added to the graph
+   \note In case there already exists a node with these locations, initial is not used
   */
-  void add_node(tchecker::zg::state_sptr_t A_node, tchecker::zg::state_sptr_t B_node);
+  void add_node(tchecker::zg::state_sptr_t A_node, tchecker::zg::state_sptr_t B_node, bool initial);
 
  /*!
    \brief Accessor
@@ -91,8 +95,8 @@ public:
    \param B_transition : the transition of the second vcg
    \post the new transition is added to _edges
   */
-  void add_edge(tchecker::zg::state_sptr_t A_source, tchecker::zg::state_sptr_t A_target, tchecker::zg::transition_t & A_transition, 
-                tchecker::zg::state_sptr_t B_source, tchecker::zg::state_sptr_t B_target, tchecker::zg::transition_t & B_transition,
+  void add_edge(tchecker::zg::state_sptr_t A_source, tchecker::ta::state_t &A_target, tchecker::zg::transition_t & A_transition, 
+                tchecker::zg::state_sptr_t B_source, tchecker::ta::state_t &B_target, tchecker::zg::transition_t & B_transition,
                 std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> condition);
 
   /*!
@@ -112,6 +116,16 @@ public:
   void attributes(tchecker::strong_timed_bisim::witness::edge_t const & e, std::map<std::string, std::string> & m) const;
 
   /*!
+   \brief Creates a witness graph from a given visited_map in case the given NTA are timed bisimilar
+   \param visited : the visited map
+   \param first : the initial symbolic state of the first vcg
+   \param second : the initial symbolic state of the second vcg
+   \post The graph contains a valid witness
+  */
+  void create_witness_from_visited(tchecker::strong_timed_bisim::visited_map_t &visited, 
+                                   tchecker::zg::state_sptr_t first_init, tchecker::zg::state_sptr_t second_init);
+
+  /*!
    \brief removes redundant edges
   */
   void edge_cleanup();
@@ -119,10 +133,26 @@ public:
 
 private:
 
+  void add_node(tchecker::ta::state_t &first, tchecker::ta::state_t &second,
+                tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t> &vcs);
+
+  void add_node(std::pair<tchecker::ta::state_t, tchecker::ta::state_t> &loc_pair,
+                tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t> &vcs);
+
+  tchecker::zg::state_sptr_t create_symbolic_state(tchecker::ta::state_t &ta_state, 
+                                                   tchecker::virtual_constraint::virtual_constraint_t &vc,
+                                                   tchecker::zg::state_sptr_t &init,
+                                                   bool first_not_second);
+
   /*!
    \brief returns the node corresponding to this pair of symb. states. Nullptr in case there exists none.
   */
   std::shared_ptr<node_t> find_node(tchecker::zg::state_sptr_t A_node, tchecker::zg::state_sptr_t B_node);
+
+  /*!
+   \brief returns the node corresponding to this pair of symb. states. Nullptr in case there exists none.
+  */
+  std::shared_ptr<node_t> find_node(tchecker::ta::state_t &first, tchecker::ta::state_t &second);
 
   /*!
    \brief returns a set that contains all types of edges, i.e. all available combinations of edge_pair, src, and target.

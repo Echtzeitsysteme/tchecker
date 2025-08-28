@@ -75,22 +75,18 @@ public:
   */
   bool contains_superset(tchecker::zg::state_sptr_t first, tchecker::zg::state_sptr_t second);
 
-private:
   /*
    \brief key type for visited map. A key is a pair of two pairs consisting of one intval and one vloc each
    \note due to mismodeling we were unable to use a pair of tchecker::ta::state_t.
   */
-  using visited_map_key_t = std::pair<std::pair<tchecker::intval_sptr_t, tchecker::vloc_sptr_t>,
-                                      std::pair<tchecker::intval_sptr_t, tchecker::vloc_sptr_t>>;
+  using visited_map_key_t = std::pair<tchecker::ta::state_t, tchecker::ta::state_t>;
 
   struct custom_hash {
     size_t operator()(const visited_map_key_t & to_hash) const
     {
       size_t h = TCHECKER_STRONG_TIMED_BISIM_VIRTUAL_CLOCK_ALGORITHM_HH_SEED;
-      boost::hash_combine(h, *to_hash.first.first);
-      boost::hash_combine(h, *to_hash.first.second);
-      boost::hash_combine(h, *to_hash.second.first);
-      boost::hash_combine(h, *to_hash.second.second);
+      boost::hash_combine(h, to_hash.first);
+      boost::hash_combine(h, to_hash.second);
       return h;
     }
   };
@@ -98,8 +94,7 @@ private:
   struct custom_equal {
     bool operator()(const visited_map_key_t & p1, const visited_map_key_t & p2) const
     {
-      return *p1.first.first == *p2.first.first && *p1.first.second == *p2.first.second &&
-             *p1.second.first == *p2.second.first && *p1.second.second == *p2.second.second;
+      return p1.first == p2.first && p1.second == p2.second;
     }
   };
 
@@ -110,8 +105,6 @@ private:
       std::unordered_map<visited_map_key_t,
                          std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>,
                          custom_hash, custom_equal>;
-
-  void emplace(visited_map_key_t key, std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> vc);
 
   /*!
    \brief returns an iterator, starting the beginning, iterating over pairs of one visited_map_key_t and one zone container ptr
@@ -124,6 +117,10 @@ private:
    each
   */
   visited_map_storage_t::iterator end();
+
+private:
+
+  void emplace(const visited_map_key_t key, std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> vc);
 
   const tchecker::clock_id_t _no_of_virtual_clocks;
   std::shared_ptr<visited_map_storage_t> _storage;

@@ -16,15 +16,53 @@ namespace strong_timed_bisim {
 
 namespace witness {
 
-node_t::node_t(tchecker::zg::state_sptr_t const & s_1, tchecker::zg::state_sptr_t const & s_2, std::size_t id, tchecker::clock_id_t no_of_virt_clks)
+node_t::node_t(tchecker::zg::state_sptr_t const & s_1, tchecker::zg::state_sptr_t const & s_2, std::size_t id, 
+               tchecker::clock_id_t no_of_virt_clks, bool initial)
     : _location_pair(std::make_shared<const std::pair<tchecker::ta::state_t, tchecker::ta::state_t>>(
                       tchecker::ta::state_t(s_1->vloc_ptr(), s_1->intval_ptr()), 
                       tchecker::ta::state_t(s_2->vloc_ptr(), s_2->intval_ptr()))),
       _zones(no_of_virt_clks),
-      _id(id)
+      _id(id),
+      _initial(initial)
 {
   add_zone(tchecker::virtual_constraint::factory(s_1->zone(), no_of_virt_clks));
 }
+
+node_t::node_t(std::pair<tchecker::ta::state_t, tchecker::ta::state_t> & location_pair,
+               tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t> & vc,
+               std::size_t id)
+    : _location_pair(std::make_shared<const std::pair<tchecker::ta::state_t, tchecker::ta::state_t>>(
+                      tchecker::ta::state_t(location_pair.first.vloc_ptr(), location_pair.first.intval_ptr()), 
+                      tchecker::ta::state_t(location_pair.second.vloc_ptr(), location_pair.second.intval_ptr()))),
+      _zones(vc),
+      _id(id),
+      _initial(false)
+{
+}
+
+node_t::node_t(tchecker::ta::state_t &first_loc, tchecker::ta::state_t & second_loc,
+               tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t> & vc,
+               std::size_t id)
+    : _location_pair(std::make_shared<const std::pair<tchecker::ta::state_t, tchecker::ta::state_t>>(
+                     tchecker::ta::state_t(first_loc.vloc_ptr(), first_loc.intval_ptr()), 
+                     tchecker::ta::state_t(second_loc.vloc_ptr(), second_loc.intval_ptr()))),
+      _zones(vc),
+      _id(id),
+      _initial(false)
+{
+}
+
+node_t::node_t(tchecker::ta::state_t &first_loc, tchecker::ta::state_t & second_loc, 
+         tchecker::clock_id_t no_of_virt_clks, std::size_t id)
+         : _location_pair(std::make_shared<const std::pair<tchecker::ta::state_t, tchecker::ta::state_t>>(
+                      tchecker::ta::state_t(first_loc.vloc_ptr(), first_loc.intval_ptr()), 
+                      tchecker::ta::state_t(second_loc.vloc_ptr(), second_loc.intval_ptr()))),
+           _zones(no_of_virt_clks),
+           _id(id),
+           _initial(false)
+{
+}
+
 
 bool node_t::smaller_location_pair(tchecker::strong_timed_bisim::witness::node_t const & other) const
 {
@@ -58,6 +96,13 @@ void node_t::add_zone(std::shared_ptr<tchecker::virtual_constraint::virtual_cons
 {
   _zones.append_zone(vc);
   _zones.compress();
+}
+
+void node_t::add_zones(tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t> &vcs)
+{
+  for (auto& cur : vcs) {
+    add_zone(cur);
+  }
 }
 
 

@@ -26,6 +26,13 @@
 
 namespace tchecker {
 
+// forward declaration
+namespace strong_timed_bisim {
+namespace witness {
+class graph_t;
+}
+}
+
 namespace zg {
 
 /*!
@@ -133,6 +140,7 @@ public:
     tchecker::dbm::copy(_zone->dbm(), zone.dbm(), zone.dim());
   }
 
+  friend class tchecker::strong_timed_bisim::witness::graph_t;
 private:
   tchecker::intrusive_shared_ptr_t<tchecker::zg::shared_zone_t> _zone; /*!< Zone over clock valuations */
 };

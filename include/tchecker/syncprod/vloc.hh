@@ -84,7 +84,6 @@ public:
     vloc->~vloc_t();
   }
 
-protected:
   /*!
    \brief Constructor
    \param size : size of vector of locations

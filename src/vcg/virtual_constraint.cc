@@ -164,6 +164,31 @@ void virtual_constraint_t::logic_and(std::shared_ptr<tchecker::zone_container_t<
   }
 }
 
+std::pair<std::shared_ptr<tchecker::zg::zone_t>, std::shared_ptr<tchecker::zg::zone_t>> 
+virtual_constraint_t::generate_synchronized_zones(tchecker::clock_id_t no_of_orig_clocks_first, 
+                                                  tchecker::clock_id_t no_of_orig_clocks_second)
+{
+  tchecker::clock_id_t dim_first = no_of_orig_clocks_first + this->dim();
+  auto first = tchecker::zg::factory(dim_first);
+  first->make_universal();
+  this->logic_and(first, *first);
+
+  for(tchecker::clock_id_t i = 1; i <= no_of_orig_clocks_first; ++i) {
+    tchecker::dbm::reset_to_clock(first->dbm(), dim_first, i, i+no_of_orig_clocks_first);
+  }
+
+  tchecker::clock_id_t dim_second = no_of_orig_clocks_second + this->dim();
+  auto second = tchecker::zg::factory(dim_second);
+  second->make_universal();
+  this->logic_and(second, *second);
+
+  for(tchecker::clock_id_t i = 1; i <= no_of_orig_clocks_second; ++i) {
+    tchecker::dbm::reset_to_clock(second->dbm(), dim_second, i, i+no_of_orig_clocks_second + no_of_orig_clocks_first);
+  }
+
+  return std::pair<std::shared_ptr<tchecker::zg::zone_t>, std::shared_ptr<tchecker::zg::zone_t>>(first, second);
+}                                                                                    
+
 std::shared_ptr<virtual_constraint_t> factory(tchecker::clock_id_t number_of_virtual_clocks)
 {
   return static_pointer_cast<tchecker::virtual_constraint::virtual_constraint_t>(
