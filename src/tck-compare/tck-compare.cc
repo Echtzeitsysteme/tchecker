@@ -27,12 +27,12 @@
 static struct option long_options[] = {{"relationship", required_argument, 0, 'r'},
                                        {"output", required_argument, 0, 'o'},
                                        {"help", no_argument, 0, 'h'},
-                                       {"block-size", required_argument, 0, 0},
-                                       {"table-size", required_argument, 0, 0},
+//                                       {"block-size", required_argument, 0, 0},
+//                                       {"table-size", required_argument, 0, 0},
                                        {"witness", no_argument, 0, 'W'},
                                        {0, 0, 0, 0}};
 
-static char const * const options = (char *)"hr:n:";
+static char const * const options = (char *)"hr:n:o:W";
 
 /*!
   \brief Display usage
@@ -149,17 +149,3 @@ int main(int argc, char * argv[]) {
     return EXIT_FAILURE;
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-

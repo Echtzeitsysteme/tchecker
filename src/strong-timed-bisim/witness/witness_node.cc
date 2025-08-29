@@ -21,15 +21,15 @@ node_t::node_t(tchecker::zg::state_sptr_t const & s_1, tchecker::zg::state_sptr_
     : _location_pair(std::make_shared<const std::pair<tchecker::ta::state_t, tchecker::ta::state_t>>(
                       tchecker::ta::state_t(s_1->vloc_ptr(), s_1->intval_ptr()), 
                       tchecker::ta::state_t(s_2->vloc_ptr(), s_2->intval_ptr()))),
-      _zones(no_of_virt_clks),
       _id(id),
       _initial(initial)
 {
+  _zones = std::make_shared<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(no_of_virt_clks + 1);
   add_zone(tchecker::virtual_constraint::factory(s_1->zone(), no_of_virt_clks));
 }
 
 node_t::node_t(std::pair<tchecker::ta::state_t, tchecker::ta::state_t> & location_pair,
-               tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t> & vc,
+               std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> vc,
                std::size_t id)
     : _location_pair(std::make_shared<const std::pair<tchecker::ta::state_t, tchecker::ta::state_t>>(
                       tchecker::ta::state_t(location_pair.first.vloc_ptr(), location_pair.first.intval_ptr()), 
@@ -40,8 +40,8 @@ node_t::node_t(std::pair<tchecker::ta::state_t, tchecker::ta::state_t> & locatio
 {
 }
 
-node_t::node_t(tchecker::ta::state_t &first_loc, tchecker::ta::state_t & second_loc,
-               tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t> & vc,
+node_t::node_t(tchecker::ta::state_t &first_loc, tchecker::ta::state_t & second_loc, 
+               std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> vc, 
                std::size_t id)
     : _location_pair(std::make_shared<const std::pair<tchecker::ta::state_t, tchecker::ta::state_t>>(
                      tchecker::ta::state_t(first_loc.vloc_ptr(), first_loc.intval_ptr()), 
@@ -57,10 +57,10 @@ node_t::node_t(tchecker::ta::state_t &first_loc, tchecker::ta::state_t & second_
          : _location_pair(std::make_shared<const std::pair<tchecker::ta::state_t, tchecker::ta::state_t>>(
                       tchecker::ta::state_t(first_loc.vloc_ptr(), first_loc.intval_ptr()), 
                       tchecker::ta::state_t(second_loc.vloc_ptr(), second_loc.intval_ptr()))),
-           _zones(no_of_virt_clks),
            _id(id),
            _initial(false)
 {
+  _zones = std::make_shared<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(no_of_virt_clks + 1);
 }
 
 
@@ -86,7 +86,7 @@ std::size_t node_t::hash() const
 
   boost::hash_combine(h, tchecker::ta::hash_value(_location_pair->first));
   boost::hash_combine(h, tchecker::ta::hash_value(_location_pair->second));
-  boost::hash_combine(h, _zones.hash());
+  boost::hash_combine(h, _zones->hash());
   boost::hash_combine(h, _id);
 
   return h;
@@ -94,8 +94,8 @@ std::size_t node_t::hash() const
 
 void node_t::add_zone(std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> vc)
 {
-  _zones.append_zone(vc);
-  _zones.compress();
+  _zones->append_zone(vc);
+  _zones->compress();
 }
 
 void node_t::add_zones(tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t> &vcs)
@@ -105,6 +105,13 @@ void node_t::add_zones(tchecker::zone_container_t<tchecker::virtual_constraint::
   }
 }
 
+bool node_t::empty() const {
+  return std::all_of(_zones->begin(), _zones->end(), [](const auto& vc){ return vc->is_empty(); });
+}
+
+void node_t::compress() {
+  _zones->compress();
+}
 
 } // end of namespace witness
 

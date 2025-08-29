@@ -57,8 +57,16 @@ public:
   /*!
    \brief return the virtual constraint as list of clock constraints
    \param no_of_orig_clocks : the number of orig clocks, used as offset
+   \param system_clocks : whether ref_clock is the first or last clock
    */
   clock_constraint_container_t get_vc(tchecker::clock_id_t no_of_orig_clocks, bool system_clocks) const;
+
+  /*!
+   \brief return the virtual constraint as a constraint over the original clocks
+   \param no_of_orig_clocks : the number of orig clocks, used as offset
+   \param system_clocks : whether ref_clock is the first or last clock
+   */
+  clock_constraint_container_t convert_to_original_constraint(bool system_clocks) const;
 
   /*!
    \brief returns (not this and other)

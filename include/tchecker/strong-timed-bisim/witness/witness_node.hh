@@ -39,7 +39,8 @@ class node_t {
    \param vc : the virtual constraints of the synchronized symbolic states to add
    \param id : the id of this node within the witness graph
   */
-  node_t(std::pair<tchecker::ta::state_t, tchecker::ta::state_t> & location_pair, tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t> & vc, std::size_t id);
+  node_t(std::pair<tchecker::ta::state_t, tchecker::ta::state_t> & location_pair,
+         std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> vc, std::size_t id);
 
   /*!
    \brief Constructor
@@ -48,7 +49,8 @@ class node_t {
    \param vc : the virtual constraints of the synchronized symbolic states to add
    \param id : the id of this node within the witness graph
   */
-  node_t(tchecker::ta::state_t &first_loc, tchecker::ta::state_t & second_loc, tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t> & vc, std::size_t id);
+  node_t(tchecker::ta::state_t &first_loc, tchecker::ta::state_t & second_loc, 
+         std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> vc, std::size_t id);
 
   /*!
    \brief Constructor
@@ -84,6 +86,13 @@ class node_t {
   */
   inline bool initial() const { return _initial; }
 
+   /*!
+  \brief Accessor
+  \return a pointer to zones
+  */
+  inline const std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>
+  zones() const { return _zones; }
+
  /*!
    \brief Less-than order on nodes based on lexical ordering
    \param other : a node
@@ -117,9 +126,20 @@ class node_t {
   */ 
   void add_zones(tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t> &vcs);
 
+  /*!
+   \brief checks whether this node is fulfillable
+   \return true if and only if there is no fulfillable zone in _zones.
+   */
+  bool empty() const;
+
+  /*!
+   \brief compresses the zones of this node
+   */
+  void compress();
+
  private:
   const std::shared_ptr<const std::pair<tchecker::ta::state_t, tchecker::ta::state_t>> _location_pair;
-  tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t> _zones;
+  std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> _zones;
   const std::size_t _id;
   const bool _initial;
 };

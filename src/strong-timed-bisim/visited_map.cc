@@ -67,10 +67,20 @@ void visited_map_t::emplace(const visited_map_key_t key,
     _storage->emplace(key, new_zone_container);
   }
   else {
-    (*_storage)[key]->append_zone(*vc);
+#if !defined(SUBSETS_WITH_NEG_AND) && !defined(SUBSETS_WITH_INTERSECTIONS) && !defined(SUBSETS_WITH_COMPRESS) // in zone_container.hh
+    auto find = std::find_if((*_storage)[key]->begin(), (*_storage)[key]->end(), 
+                    [vc](std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> const & p){
+                        return *p == *vc;
+                    }
+                );
+    if(find == (*_storage)[key]->end()) {
+      (*_storage)[key]->append_zone(*vc);
+    }
+#else
+      (*_storage)[key]->append_zone(*vc);
+#endif
 
-#if defined(SUBSETS_WITH_NEG_AND) || defined(SUBSETS_WITH_INTERSECTIONS) ||                                                    \
-    defined(SUBSETS_WITH_COMPRESS) // in zone_container.hh
+#if defined(SUBSETS_WITH_NEG_AND) || defined(SUBSETS_WITH_INTERSECTIONS) || defined(SUBSETS_WITH_COMPRESS) // in zone_container.hh
     (*_storage)[key]->compress();
 #endif
   }

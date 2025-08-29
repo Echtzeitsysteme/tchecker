@@ -69,35 +69,11 @@ public:
   */
   std::shared_ptr<std::vector<std::shared_ptr<node_t>>> nodes() const { return _nodes; }
 
-  /*!
-   \brief Add a node
-   \param A_node : the node of the first vcg
-   \param B_node : the node of the second vcg
-   \param initial : whether this node is the initial node
-   \post the new node was added to the graph
-   \note In case there already exists a node with these locations, initial is not used
-  */
-  void add_node(tchecker::zg::state_sptr_t A_node, tchecker::zg::state_sptr_t B_node, bool initial);
-
  /*!
    \brief Accessor
    \return the vector of all contained edges
   */
   std::shared_ptr<std::vector<std::shared_ptr<edge_t>>> edges() const { return _edges; }
-
-  /*!
-   \brief Add an edge
-   \param A_source : the source node of the first vcg
-   \param A_target : the target node of the first vcg
-   \param A_transition : the transition of the first vcg
-   \param B_source : the source node of the second vcg
-   \param B_target : the target node of the second vcg
-   \param B_transition : the transition of the second vcg
-   \post the new transition is added to _edges
-  */
-  void add_edge(tchecker::zg::state_sptr_t A_source, tchecker::ta::state_t &A_target, tchecker::zg::transition_t & A_transition, 
-                tchecker::zg::state_sptr_t B_source, tchecker::ta::state_t &B_target, tchecker::zg::transition_t & B_transition,
-                std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> condition);
 
   /*!
    \brief Accessor to node attributes
@@ -130,12 +106,29 @@ public:
   */
   void edge_cleanup();
 
+  /*!
+   \brief removes unused nodes
+  */
+  void node_cleanup();
+
 
 private:
 
+ /*!
+   \brief Add a node
+   \param A_node : the node of the first vcg
+   \param B_node : the node of the second vcg
+   \param initial : whether this node is the initial node
+   \post the new node was added to the graph
+   \note In case there already exists a node with these locations, initial is not used
+  */
+  void add_node(tchecker::zg::state_sptr_t A_node, tchecker::zg::state_sptr_t B_node, bool initial = false);
+
+  // initial = false
   void add_node(tchecker::ta::state_t &first, tchecker::ta::state_t &second,
                 tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t> &vcs);
 
+  // initial = false
   void add_node(std::pair<tchecker::ta::state_t, tchecker::ta::state_t> &loc_pair,
                 tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t> &vcs);
 
@@ -155,6 +148,20 @@ private:
   std::shared_ptr<node_t> find_node(tchecker::ta::state_t &first, tchecker::ta::state_t &second);
 
   /*!
+   \brief Add an edge
+   \param A_source : the source node of the first vcg
+   \param A_target : the target node of the first vcg
+   \param A_transition : the transition of the first vcg
+   \param B_source : the source node of the second vcg
+   \param B_target : the target node of the second vcg
+   \param B_transition : the transition of the second vcg
+   \post the new transition is added to _edges
+  */
+  void add_edge(tchecker::zg::state_sptr_t A_source, tchecker::ta::state_t &A_target, tchecker::zg::transition_t & A_transition, 
+                tchecker::zg::state_sptr_t B_source, tchecker::ta::state_t &B_target, tchecker::zg::transition_t & B_transition,
+                std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> condition);
+
+  /*!
    \brief returns a set that contains all types of edges, i.e. all available combinations of edge_pair, src, and target.
    \return a set of all edge types available in _edges
    */
@@ -168,7 +175,18 @@ private:
 
   // any added nodes gets an unique id. This is the corresponding counter.
   std::size_t _nodes_id_counter;
+
+  // no of orig. clocks in the first system
+  const tchecker::clock_id_t _no_orig_clks1;
+
+  // no of orig. clocks in the second system
+  const tchecker::clock_id_t _no_orig_clks2;
+
 };
+
+std::function<std::string (tchecker::clock_id_t)> 
+clock_names(tchecker::clock_id_t no_orig_clks1, tchecker::clock_id_t no_orig_clks2, 
+            const std::shared_ptr<tchecker::vcg::vcg_t> vcg1, const std::shared_ptr<tchecker::vcg::vcg_t> vcg2);
 
 /*!
  \brief Graph output

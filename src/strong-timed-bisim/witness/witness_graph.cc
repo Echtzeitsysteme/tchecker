@@ -19,7 +19,8 @@ namespace witness {
 
 graph_t::graph_t(std::shared_ptr<tchecker::vcg::vcg_t> vcg1, std::shared_ptr<tchecker::vcg::vcg_t> vcg2)
     : _vcg1(vcg1), _vcg2(vcg2), _nodes(std::make_shared<std::vector<std::shared_ptr<node_t>>>()),
-      _edges(std::make_shared<std::vector<std::shared_ptr<edge_t>>>()), _nodes_id_counter(0)
+      _edges(std::make_shared<std::vector<std::shared_ptr<edge_t>>>()), _nodes_id_counter(0),
+      _no_orig_clks1(vcg1->get_no_of_original_clocks()), _no_orig_clks2(vcg2->get_no_of_original_clocks())
 {
 }
 
@@ -56,7 +57,7 @@ void graph_t::add_edge(tchecker::zg::state_sptr_t A_source, tchecker::ta::state_
   assert(nullptr != src);
 
   auto empty_target =
-      tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>(condition->get_no_of_virtual_clocks());
+      tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>(condition->get_no_of_virtual_clocks() + 1);
   add_node(A_target, B_target, empty_target);
 
   std::shared_ptr<node_t> target = find_node(A_target, B_target);
@@ -68,19 +69,34 @@ void graph_t::add_edge(tchecker::zg::state_sptr_t A_source, tchecker::ta::state_
 
 void graph_t::attributes(tchecker::strong_timed_bisim::witness::node_t const & n, std::map<std::string, std::string> & m) const
 {
+  m["initial"] = n.initial() ? "true" : "false";
+  bool first = true;
+
+  std::ostringstream dbm_grep;
+  for(auto cur : *(n.zones())) {
+    if(!first) {
+      dbm_grep << ", ";
+    }
+    tchecker::dbm::output(dbm_grep, cur->dbm(), cur->dim(), clock_names(_no_orig_clks1, _no_orig_clks2, _vcg1, _vcg2));
+    first = false;
+  }
+
+  m["zones"] = dbm_grep.str();
+
   std::map<std::string, std::string> first_map;
   tchecker::ta::attributes(_vcg1->system(), n.location_pair_ptr()->first, first_map);
 
+  for (auto key : {std::string("intval"), std::string("vloc")}) {
+    m["first_" + key] = first_map[key];
+  }
+
   std::map<std::string, std::string> second_map;
-  tchecker::ta::attributes(_vcg2->system(), n.location_pair_ptr()->second, first_map);
+  tchecker::ta::attributes(_vcg2->system(), n.location_pair_ptr()->second, second_map);
 
-  for (const auto & [key, value] : first_map) {
-    m["first_" + key] = value;
+  for (auto key : {std::string("intval"), std::string("vloc")}) {
+    m["second_" + key] = second_map[key];
   }
 
-  for (const auto & [key, value] : second_map) {
-    m["second_" + key] = value;
-  }
 }
 
 void graph_t::attributes(tchecker::strong_timed_bisim::witness::edge_t const & e, std::map<std::string, std::string> & m) const
@@ -88,42 +104,58 @@ void graph_t::attributes(tchecker::strong_timed_bisim::witness::edge_t const & e
   m["first_vedge"] = tchecker::to_string(e.type()->edge_pair_ptr()->first.vedge(), _vcg1->system().as_system_system());
   m["second_vedge"] = tchecker::to_string(e.type()->edge_pair_ptr()->second.vedge(), _vcg2->system().as_system_system());
 
-  // find maximum clock id of first system
-  tchecker::clock_id_t max = 0;
+  auto generate_edge_attr = [&m](std::shared_ptr<tchecker::vcg::vcg_t> vcg, tchecker::graph::edge_vedge_t & edge,
+                                std::string prefix) {
+    m[prefix + "_vedge"] = tchecker::to_string(edge.vedge(), vcg->system().as_system_system());
+    bool first = true;
 
-  for (const auto & [key, value] : _vcg1->system().clock_variables().flattened().index()) {
-    if (key > max) {
-      max = key;
-    }
-  }
+    std::string do_attr = prefix + "_vedge_do";
+    std::string prov_attr = prefix + "_vedge_prov";
 
-  // adding the "0" clock.
-  max++;
+    for (auto cur_edge : edge.vedge()) {
+      if (!first) {
+        m[do_attr] += ";";
+        m[prov_attr] += ";";
+      }
 
-  auto find_clock_name = [&](tchecker::clock_id_t id) {
-    if (0 == id) {
-      return std::string("0");
-    }
+      bool second_first = true;
+      for (auto cur_do : vcg->system().as_system_system().edge(cur_edge)->attributes().range("do")) {
+        if (!second_first) {
+          m[do_attr] += ";";
+        }
+        m[do_attr] += cur_do.value();
 
-    if (id < max) {
-      return _vcg1->system().clock_variables().flattened().index().value(id - 1);
-    }
-    else {
-      return _vcg2->system().clock_variables().flattened().index().value(id - max - 1);
+        second_first = false;
+      }
+
+      second_first = true;
+      for (auto cur_prov : vcg->system().as_system_system().edge(cur_edge)->attributes().range("provided")) {
+        if (!second_first) {
+          m[prov_attr] += ";";
+        }
+        m[prov_attr] += cur_prov.value();
+
+        second_first = false;
+      }
+
+      first = false;
     }
   };
 
-  std::stringstream sstream;
-  tchecker::dbm::output(sstream, e.condition()->dbm(), e.condition()->dim(), find_clock_name);
+  generate_edge_attr(_vcg1, e.type()->edge_pair_ptr()->first, "first");
+  generate_edge_attr(_vcg2, e.type()->edge_pair_ptr()->second, "second");
 
-  //  tchecker::dbm::output_matrix(sstream, e.condition()->dbm(), e.condition()->dim());
-  m["condition"] = sstream.str();
+
+  //std::stringstream sstream;
+  //tchecker::dbm::output(sstream, e.condition()->dbm(), e.condition()->dim(), clock_names(_no_orig_clks1, _no_orig_clks2, _vcg1, _vcg2));
+  //m["condition"] = sstream.str();
 }
 
 std::shared_ptr<node_t> graph_t::find_node(tchecker::zg::state_sptr_t A_node, tchecker::zg::state_sptr_t B_node)
 {
+  // random node_id. Just for searching
   std::shared_ptr<node_t> to_add =
-      std::make_shared<node_t>(A_node, B_node, _nodes_id_counter++, _vcg1->get_no_of_virtual_clocks(), false);
+      std::make_shared<node_t>(A_node, B_node, 42, _vcg1->get_no_of_virtual_clocks(), false);
 
   for (auto cur : *_nodes) {
     if (cur->equal_location_pair(*to_add)) {
@@ -136,8 +168,9 @@ std::shared_ptr<node_t> graph_t::find_node(tchecker::zg::state_sptr_t A_node, tc
 
 std::shared_ptr<node_t> graph_t::find_node(tchecker::ta::state_t & first, tchecker::ta::state_t & second)
 {
+  // random node_id. Just for searching
   std::shared_ptr<node_t> to_add =
-      std::make_shared<node_t>(first, second, _vcg1->get_no_of_virtual_clocks(), _nodes_id_counter++);
+      std::make_shared<node_t>(first, second, _vcg1->get_no_of_virtual_clocks(), 42);
 
   for (auto cur : *_nodes) {
     if (cur->equal_location_pair(*to_add)) {
@@ -205,12 +238,22 @@ void graph_t::create_witness_from_visited(tchecker::strong_timed_bisim::visited_
 
         for (auto cur_1 : trans_1) {
           auto && [status_1, s_1, t_1] = *cur_1;
+          auto tgt_loc_1 = tchecker::ta::state_t(s_1->vloc_ptr(), s_1->intval_ptr());
+          auto cond_1 = tchecker::virtual_constraint::factory(s_1->zone(), _vcg1->get_no_of_virtual_clocks());
+
           for (auto cur_2 : trans_2) {
             auto && [status_2, s_2, t_2] = *cur_2;
-            auto node = find_node(s_1, s_2);
-            if(nullptr == node) {
-              //add_node(s_1, s_2)
-            }
+            auto tgt_loc_2 = tchecker::ta::state_t(s_2->vloc_ptr(), s_2->intval_ptr());
+            auto cond_2 = tchecker::virtual_constraint::factory(s_2->zone(), _vcg2->get_no_of_virtual_clocks());
+
+            std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> cond
+              = tchecker::virtual_constraint::factory(_vcg1->get_no_of_virtual_clocks());
+
+            cond_2->logic_and(cond, *cond_1);
+                        
+            add_edge(first, tgt_loc_1, *t_1, 
+                    second, tgt_loc_2, *t_2, cond);
+
           }
         }
       }
@@ -223,6 +266,10 @@ void graph_t::edge_cleanup()
   std::map<edge_type_t, std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>> map;
 
   for (auto cur : *_edges) {
+    if(cur->type()->src()->empty() || cur->type()->tgt()->empty()) {
+      continue;
+    }
+
     if (0 == map.count(*(cur->type()))) {
       map[*(cur->type())] = std::make_shared<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(
           _vcg1->get_no_of_virtual_clocks() + 1);
@@ -244,13 +291,32 @@ void graph_t::edge_cleanup()
   _edges = new_edges;
 }
 
+void graph_t::node_cleanup() {
+
+  // run compress on each node
+  std::for_each(_nodes->begin(), _nodes->end(), 
+    [](const std::shared_ptr<node_t>& ptr) {
+      ptr->compress();
+    });
+
+  edge_cleanup();
+  
+  // delete nodes if they are empty
+  _nodes->erase(std::remove_if(_nodes->begin(), _nodes->end(),
+                              [](const std::shared_ptr<node_t>& node) {
+                                return node->empty();
+                              }),
+                _nodes->end());
+}
+
 void graph_t::add_node(tchecker::ta::state_t & first, tchecker::ta::state_t & second,
                        tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t> & vcs)
 {
   std::shared_ptr<node_t> found = find_node(first, second);
 
   if (nullptr == found) {
-    auto to_add = std::make_shared<node_t>(first, second, vcs, _nodes_id_counter++);
+    auto ptr_to_vcs = std::make_shared<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(vcs);
+    auto to_add = std::make_shared<node_t>(first, second, ptr_to_vcs, _nodes_id_counter++);
     _nodes->push_back(to_add);
   }
   else {
@@ -295,26 +361,52 @@ tchecker::zg::state_sptr_t graph_t::create_symbolic_state(tchecker::ta::state_t 
   return result;
 }
 
+std::function<std::string (tchecker::clock_id_t)> 
+clock_names(tchecker::clock_id_t no_orig_clks1, tchecker::clock_id_t no_orig_clks2, 
+            const std::shared_ptr<tchecker::vcg::vcg_t> vcg1, const std::shared_ptr<tchecker::vcg::vcg_t> vcg2)
+{
+
+  std::function<std::string (tchecker::clock_id_t)> result =
+    [no_orig_clks1, no_orig_clks2, vcg1, vcg2](tchecker::clock_id_t id) {
+
+
+    if (id <= no_orig_clks1) {
+      return vcg1->system().clock_name(id - 1) + "_1";
+    }
+
+    id -= no_orig_clks1;
+
+    if (id <= no_orig_clks2) {
+      return vcg2->system().clock_name(id - 1) + "_2";
+    }
+    throw std::runtime_error(std::string(__FILE__) + std::string(": ") + std::to_string(__LINE__) + std::string(": ") +
+                             std::string("strange clock id"));
+  };
+
+  return result;
+}
+
 std::ostream & dot_output(std::ostream & os, graph_t & g, std::string const & name)
 {
 
   g.edge_cleanup();
+  g.node_cleanup();
 
   std::map<std::string, std::string> attr;
-
+  
   tchecker::graph::dot_output_header(os, name);
 
   for (std::shared_ptr<node_t> node : *(g.nodes())) {
     attr.clear();
     g.attributes(*node, attr);
-    tchecker::graph::dot_output_node(os, std::to_string(node->id()), attr); // ToDo: check again!
+    tchecker::graph::dot_output_node(os, std::to_string(node->id()), attr);
   }
 
   for (std::shared_ptr<edge_t> edge : *(g.edges())) {
     attr.clear();
     g.attributes(*edge, attr);
     tchecker::graph::dot_output_edge(os, std::to_string(edge->type()->src()->id()), std::to_string(edge->type()->tgt()->id()),
-                                     attr); // ToDo: check again!
+                                     attr);
   }
 
   tchecker::graph::dot_output_footer(os);
