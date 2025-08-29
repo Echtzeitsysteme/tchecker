@@ -57,17 +57,25 @@ public:
   /*!
    \brief return the virtual constraint as list of clock constraints
    \param no_of_orig_clocks : the number of orig clocks, used as offset
+   \param system_clocks : whether ref_clock is the first or last clock
    */
   clock_constraint_container_t get_vc(tchecker::clock_id_t no_of_orig_clocks, bool system_clocks) const;
 
-  /*
+  /*!
+   \brief return the virtual constraint as a constraint over the original clocks
+   \param no_of_orig_clocks : the number of orig clocks, used as offset
+   \param system_clocks : whether ref_clock is the first or last clock
+   */
+  clock_constraint_container_t convert_to_original_constraint(bool system_clocks) const;
+
+  /*!
    \brief returns (not this and other)
    \param result : the pointer in which the result will be stored. Has to be allocated!
    \param other : the other vc not this shall be anded with
    */
   void neg_logic_and(std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> result, const virtual_constraint_t & other) const;
 
- /*
+ /*!
   \brief returns (this and zone)
   \param result : the pointer in which the result will be stored. Has to be allocated!
   \param zone : the zone this shall be anded with
@@ -75,7 +83,7 @@ public:
   */
   enum tchecker::dbm::status_t logic_and(std::shared_ptr<virtual_constraint_t> result, const virtual_constraint_t & other) const;
 
- /*
+ /*!
   \brief returns (this and zone)
   \param result : the pointer in which the result will be stored. Has to be allocated!
   \param zone : the zone this shall be anded with
@@ -83,7 +91,7 @@ public:
   */
   enum tchecker::dbm::status_t logic_and(std::shared_ptr<tchecker::zg::zone_t> result, const tchecker::zg::zone_t & zone) const;
 
- /*
+ /*!
   \brief returns (this and zone)
   \param result : the ref in which the result will be stored.
   \param zone : the zone this shall be anded with
@@ -91,7 +99,7 @@ public:
   */
   enum tchecker::dbm::status_t logic_and(tchecker::zg::zone_t & result, const tchecker::zg::zone_t & zone) const;
 
- /*
+ /*!
   \brief iterates through the container and logically ands each element with this
   \param result : the pointer in which the result will be stored. Has to be allocated!
   \param container : the container to and with
@@ -100,11 +108,21 @@ public:
   void logic_and(std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> result,
                  std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> const container) const;
 
- /*
+ /*!
   \brief returns, whether there exists any clock valuation that fulfills this
   \return false, if no clock valuation exists that fulfills this
   */
   bool is_fulfillable() {return !this->is_empty();}
+
+ /*!
+  \brief generates the corresponding synchronized zones
+  \param no_of_orig_clocks_first : the number of original clocks of the first TA
+  \param no_of_orig_clocks_second : the number of original clocks of the second TA
+  \return a pair of synchronized zones such that the first has no_of_orig_clocks_first + number of virtual clocks clocks and analog for the second
+  */
+  std::pair<std::shared_ptr<tchecker::zg::zone_t>, std::shared_ptr<tchecker::zg::zone_t>> 
+  generate_synchronized_zones(tchecker::clock_id_t no_of_orig_clocks_first, 
+                              tchecker::clock_id_t no_of_orig_clocks_second);
 
 private:
 

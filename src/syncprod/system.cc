@@ -44,6 +44,7 @@ tchecker::system::attribute_keys_map_t const & system_t::known_attributes()
     tchecker::system::attribute_keys_map_t attr(tchecker::system::system_t::known_attributes());
     attr[tchecker::system::ATTR_LOCATION].insert("committed");
     attr[tchecker::system::ATTR_LOCATION].insert("labels");
+    attr[tchecker::system::ATTR_LOCATION].insert("layout");
     return attr;
   }()};
   return known_attr;

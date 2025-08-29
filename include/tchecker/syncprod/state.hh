@@ -47,9 +47,9 @@ public:
   state_t(tchecker::syncprod::state_t const & s, tchecker::intrusive_shared_ptr_t<tchecker::shared_vloc_t> const & vloc);
 
   /*!
-   \brief Copy constructor (deleted)
+   \brief Copy constructor
    */
-  state_t(tchecker::syncprod::state_t const &) = delete;
+  state_t(tchecker::syncprod::state_t const &) = default;
 
   /*!
    \brief Move constructor

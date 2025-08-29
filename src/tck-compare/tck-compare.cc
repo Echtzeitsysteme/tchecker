@@ -16,7 +16,8 @@
 #include <string.h>
 
 
-#include "vcg-timed-bisim.hh"
+#include "tchecker/publicapi/compare_api.hh"
+#include "tchecker/utils/log.hh"
 
 /*
  \file tck-compare.cc
@@ -26,11 +27,12 @@
 static struct option long_options[] = {{"relationship", required_argument, 0, 'r'},
                                        {"output", required_argument, 0, 'o'},
                                        {"help", no_argument, 0, 'h'},
-                                       {"block-size", required_argument, 0, 0},
-                                       {"table-size", required_argument, 0, 0},
+//                                       {"block-size", required_argument, 0, 0},
+//                                       {"table-size", required_argument, 0, 0},
+                                       {"witness", no_argument, 0, 'W'},
                                        {0, 0, 0, 0}};
 
-static char const * const options = (char *)"hr:n:";
+static char const * const options = (char *)"hr:n:o:W";
 
 /*!
   \brief Display usage
@@ -40,17 +42,15 @@ void usage(char * progname)
 {
   std::cerr << "Usage: " << progname << " [options] [file1] [file2]" << std::endl;
   std::cerr << "   -h                 help" << std::endl;
-  std::cerr << "   -o out_file        output file for certificate (default is standard output)" << std::endl;
+  std::cerr << "   -o output file for witness/contradiction DAG (default is standard output)" << std::endl;
   std::cerr << "   -r relationship    relationship to check" << std::endl;
   std::cerr << "                strong-timed-bisim  strong timed bisimilarity" << std::endl;
+  std::cerr << "   -W generate a witness/contradiction DAG" << std::endl;
 }
 
-enum relationship_t {
-  STRONG_TIMED_BISIM, /*!< Strong Timed Bisimilarity */
-};
-
-enum relationship_t relationship = STRONG_TIMED_BISIM;   /*!< Selected relationship */
+enum tck_compare_relationship_t relationship = STRONG_TIMED_BISIM;   /*!< Selected relationship */
 bool help = false;                                 /*!< Help flag */
+bool witness = false;                              /*!< Witness Flag */
 std::string output_file = "";                      /*!< Output file name (empty means standard output) */
 std::ostream * os = &std::cout;                    /*!< Default output stream */
 std::size_t block_size = 10000;                    /*!< Size of allocated blocks */
@@ -79,6 +79,9 @@ int parse_command_line(int argc, char * argv[])
       throw std::runtime_error("Unknown command-line option");
     else if (c != 0) {
       switch (c) {
+      case 'W':
+        witness = true;
+        break;
       case 'r':
         if (strcmp(optarg, "strong-timed-bisim") == 0)
           relationship = STRONG_TIMED_BISIM;
@@ -110,46 +113,6 @@ int parse_command_line(int argc, char * argv[])
 }
 
 /*!
- \brief Load a system declaration from a file
- \param filename : file name
- \return pointer to a system declaration loaded from filename, nullptr in case
- of errors
- \post all errors have been reported to std::cerr
- */
-std::shared_ptr<tchecker::parsing::system_declaration_t> load_system_declaration(std::string const & filename)
-{
-  std::shared_ptr<tchecker::parsing::system_declaration_t> sysdecl = nullptr;
-  try {
-    sysdecl = tchecker::parsing::parse_system_declaration(filename);
-    if (sysdecl == nullptr)
-      throw std::runtime_error("nullptr system declaration");
-  }
-  catch (std::exception const & e) {
-    std::cerr << tchecker::log_error << e.what() << std::endl;
-  }
-  return sysdecl;
-}
-
-
-/*!
- \brief Perform strong timed bisimilarity check
- \param sysdecl_first : system declaration of the first TA
- \param sysdecl_first : system declaration of the second TA
- \post statistics on strong timed bisimilarity analysis of the system declared by sysdecl have been output to standard output.
- */
-void strong_timed_bisim(std::shared_ptr<tchecker::parsing::system_declaration_t> const & sysdecl_first, std::shared_ptr<tchecker::parsing::system_declaration_t> const & sysdecl_second)
-{
-
-  auto stats = tchecker::tck_compare::vcg_timed_bisim::run(sysdecl_first, sysdecl_second, os, block_size, table_size);
-
-  // stats
-  std::map<std::string, std::string> m;
-  stats.attributes(m);
-  for (auto && [key, value] : m)
-    std::cout << key << " " << value << std::endl;
-}
-
-/*
  \brief Main function
  */
 int main(int argc, char * argv[]) {
@@ -167,31 +130,17 @@ int main(int argc, char * argv[]) {
     }
 
     std::string first_input = argv[argc - 2];
-    std::shared_ptr<tchecker::parsing::system_declaration_t> sysdecl_first_TA{load_system_declaration(first_input)};
-
     std::string second_input = argv[argc - 1];
-    std::shared_ptr<tchecker::parsing::system_declaration_t> sysdecl_second_TA{load_system_declaration(second_input)};
+
+    
+    std::shared_ptr<std::ofstream> os_ptr{nullptr};
+
+    tchecker::publicapi::tck_compare(output_file, first_input, second_input, relationship, block_size, table_size, witness);
 
     if (tchecker::log_error_count() > 0)
       return EXIT_FAILURE;
-
-    std::shared_ptr<std::ofstream> os_ptr{nullptr};
-
-    if (output_file != "") {
-      try {
-        os_ptr = std::make_shared<std::ofstream>(output_file);
-        os = os_ptr.get();
-      }
-      catch (std::exception & e) {
-        std::cerr << tchecker::log_error << e.what() << std::endl;
-        return EXIT_FAILURE;
-      }
-    }
-
-    if(STRONG_TIMED_BISIM == relationship) {
-      strong_timed_bisim(sysdecl_first_TA, sysdecl_second_TA);
-    } else {
-      throw std::runtime_error("Unknown relationship");
+    else {
+      return EXIT_SUCCESS;
     }
 
   }
@@ -199,20 +148,4 @@ int main(int argc, char * argv[]) {
     std::cerr << tchecker::log_error << e.what() << std::endl;
     return EXIT_FAILURE;
   }
-
-  return EXIT_SUCCESS;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-

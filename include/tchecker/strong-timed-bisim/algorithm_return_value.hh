@@ -27,7 +27,16 @@ public:
   /*!
    \brief Default Constructor, initiates the data structure with empty contradictions and empty check set
   */
-  algorithm_return_value_t(tchecker::clock_id_t no_of_virt_clocks);
+  algorithm_return_value_t(tchecker::clock_id_t no_of_virt_clocks, 
+                           tchecker::zg::const_state_sptr_t A_state, 
+                           tchecker::zg::const_state_sptr_t B_state);
+
+  /*!
+   \brief Default Constructor, initiates the data structure with empty contradictions and empty check set
+  */
+  algorithm_return_value_t(tchecker::clock_id_t no_of_virt_clocks, 
+                           tchecker::zg::zone_t const & A_zone, 
+                           tchecker::zg::zone_t const & B_zone);
 
   /*!
    \brief Copy Constructor
@@ -39,7 +48,18 @@ public:
    \param contradictions : the set of contradictions
    */
   algorithm_return_value_t(
-    std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> contradictions);
+    std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> contradictions,
+    tchecker::zg::const_state_sptr_t A_state, 
+    tchecker::zg::const_state_sptr_t B_state);
+
+  /*!
+   \brief Constructor
+   \param contradictions : the set of contradictions
+   */
+  algorithm_return_value_t(
+    std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> contradictions,
+    tchecker::zg::zone_t const & A_zone, 
+    tchecker::zg::zone_t const & B_zone);
 
   /*!
    \brief checks whether the contradiction set is empty
@@ -51,7 +71,7 @@ public:
    \brief returns a copy of the set of contradictions
    \return the contradiction set
    */
-  std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>
+  std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> const
   get_contradictions();
 
   /*!
@@ -81,6 +101,9 @@ public:
 private:
 
   std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> _contradictions;
+
+  const std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> _A_state_vc;
+  const std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> _B_state_vc;
 };
     
 }

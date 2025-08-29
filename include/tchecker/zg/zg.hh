@@ -983,7 +983,7 @@ public:
 
   /*!
    \brief clones a state of this zg
-   \param the state to clone
+   \param to_clone : the state to clone
    \brief the cloned state
    */
   inline tchecker::zg::state_sptr_t clone_state(tchecker::zg::state_sptr_t const & to_clone) {return _state_allocator.clone(*to_clone);}
