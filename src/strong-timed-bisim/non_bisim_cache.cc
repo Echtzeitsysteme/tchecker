@@ -57,7 +57,7 @@ non_bisim_cache_t::already_cached(tchecker::zg::state_sptr_t first, tchecker::zg
   for(auto iter = already_found->begin(); iter != already_found->end(); ++iter) {
     vc->logic_and(intersection, **iter);
     if(intersection->is_fulfillable()) {
-      result->append_zone(intersection);
+      result->append_zone(*intersection);
     }
   }
 
