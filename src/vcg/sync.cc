@@ -25,10 +25,9 @@ void sync_vc_t::sync_with_urgent(tchecker::zg::state_sptr_t & A_state, tchecker:
                                tchecker::clock_reset_container_t const & orig_reset2)
 {
   // if there is an urgent or committed location, there is an extra virtual clock that must be reset
-  if(_A->get_urgent_or_committed() && 
-                   (!tchecker::ta::delay_allowed(_A->system(), A_state->vloc()) || 
-                    !tchecker::ta::delay_allowed(_B->system(), B_state->vloc()))
-    ) {
+  if(
+      (_A->get_urgent_or_committed() || _B->get_urgent_or_committed()) && 
+      (!tchecker::ta::delay_allowed(_A->system(), A_state->vloc()) || !tchecker::ta::delay_allowed(_B->system(), B_state->vloc()))) {
     reset_to_value(A_state->zone().dbm(), A_state->zone_ptr()->dim(), _A->get_no_of_original_clocks() + _A->get_no_of_virtual_clocks(), 0);
     reset_to_value(B_state->zone().dbm(), B_state->zone_ptr()->dim(), _B->get_no_of_original_clocks() + _B->get_no_of_virtual_clocks(), 0);
   }

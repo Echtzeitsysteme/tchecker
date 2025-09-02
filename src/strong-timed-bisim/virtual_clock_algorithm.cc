@@ -96,6 +96,7 @@ std::shared_ptr<algorithm_return_value_t> Lieb_et_al::check_for_virt_bisim(tchec
 
   // std::cout << __FILE__ << ": " << __LINE__ << ": _visited_pair_of_states: " << _visited_pair_of_states << std::endl;
   // std::cout << __FILE__ << ": " << __LINE__ << ": check-for-virt-bisim" << std::endl;
+
   // std::cout << __FILE__ << ": " << __LINE__ << ": " << tchecker::to_string(A_state->vloc(), _A->system()) << std::endl;
   // tchecker::dbm::output_matrix(std::cout, A_state->zone().dbm(), A_state->zone().dim());
 

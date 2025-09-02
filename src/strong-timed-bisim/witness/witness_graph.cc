@@ -203,7 +203,7 @@ void graph_t::create_witness_from_visited(tchecker::strong_timed_bisim::visited_
 
       std::vector<tchecker::vcg::vcg_t::sst_t> v_1, v_2;
       _vcg1->next(first_const, v_1);
-      _vcg2->next(first_const, v_2);
+      _vcg2->next(second_const, v_2);
 
       auto add_to_avail_events = [](std::set<std::set<std::string>> & avail_events,
                                     std::vector<tchecker::vcg::vcg_t::sst_t> & v, const tchecker::ta::system_t & system) {
@@ -379,8 +379,12 @@ clock_names(tchecker::clock_id_t no_orig_clks1, tchecker::clock_id_t no_orig_clk
     if (id <= no_orig_clks2) {
       return vcg2->system().clock_name(id - 1) + "_2";
     }
+
+    if (id == (no_orig_clks2 + 1)) {
+      return std::string("Urgent_Clock");
+    }
     throw std::runtime_error(std::string(__FILE__) + std::string(": ") + std::to_string(__LINE__) + std::string(": ") +
-                             std::string("strange clock id"));
+                             std::string("strange clock id: ") + std::to_string(id));
   };
 
   return result;
