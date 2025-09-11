@@ -19,6 +19,18 @@ global_m_extrapolation_t::global_m_extrapolation_t(
 {
 }
 
+tchecker::clockbounds::bound_t global_m_extrapolation_t::max_value() const
+{
+  tchecker::clockbounds::bound_t result = 0;
+
+  for(tchecker::clockbounds::bound_t cur : this->_clock_bounds->M()) {
+    if(cur > result) {
+      result = cur;
+    }
+  }
+  return result;
+}
+
 } // end of namespace details
 
 

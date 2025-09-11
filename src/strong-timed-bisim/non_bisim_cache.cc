@@ -21,7 +21,7 @@ void non_bisim_cache_t::emplace(
   std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> con)
 {
   assert(first->zone().is_virtual_equivalent(second->zone(), _no_of_virtual_clocks));
-  map_key_t key = std::make_pair(std::make_pair(first->intval_ptr(), first->vloc_ptr()), std::make_pair(second->intval_ptr(), second->vloc_ptr()));
+  map_key_t key = std::make_pair(tchecker::ta::state_t(first->vloc_ptr(), first->intval_ptr()), tchecker::ta::state_t(second->vloc_ptr(), second->intval_ptr()));
 
   con->compress();
 
@@ -39,12 +39,12 @@ void non_bisim_cache_t::emplace(
 }
 
 std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>
-non_bisim_cache_t::already_cached(tchecker::zg::state_sptr_t first, tchecker::zg::state_sptr_t second)
+non_bisim_cache_t::already_cached(tchecker::zg::state_sptr_t first, tchecker::zg::state_sptr_t second) const
 {
   assert(first->zone().is_virtual_equivalent(second->zone(), _no_of_virtual_clocks));
   auto vc = tchecker::virtual_constraint::factory(first->zone(), _no_of_virtual_clocks);
 
-  map_key_t key = std::make_pair(std::make_pair(first->intval_ptr(), first->vloc_ptr()), std::make_pair(second->intval_ptr(), second->vloc_ptr()));
+  map_key_t key = std::make_pair(tchecker::ta::state_t(first->vloc_ptr(), first->intval_ptr()), tchecker::ta::state_t(second->vloc_ptr(), second->intval_ptr()));
   if((*_storage)[key] == nullptr || (*_storage)[key]->is_empty()) {
     return std::make_shared<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(_no_of_virtual_clocks + 1);
   }
@@ -63,6 +63,35 @@ non_bisim_cache_t::already_cached(tchecker::zg::state_sptr_t first, tchecker::zg
 
   return result;
 }
+
+std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>
+non_bisim_cache_t::entry(tchecker::ta::state_t & first, tchecker::ta::state_t & second) const
+{
+  map_key_t key = std::make_pair(first, second);
+  return entry(key);
+}
+
+std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>
+non_bisim_cache_t::entry(std::pair<tchecker::ta::state_t, tchecker::ta::state_t> & loc_pair) const
+{
+  if((*_storage)[loc_pair] == nullptr || (*_storage)[loc_pair]->is_empty()) {
+    return std::make_shared<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(_no_of_virtual_clocks + 1);
+  }
+  return (*_storage)[loc_pair];
+}
+
+bool non_bisim_cache_t::is_cached(std::pair<tchecker::ta::state_t, tchecker::ta::state_t> & loc_pair, std::shared_ptr<tchecker::clockval_t> clockval) const
+{
+  std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>
+    vcs = entry(loc_pair);
+  for(auto cur : *vcs) {
+    if(cur->belongs(*clockval)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 
 
 } // end of namespace strong_timed_bisim

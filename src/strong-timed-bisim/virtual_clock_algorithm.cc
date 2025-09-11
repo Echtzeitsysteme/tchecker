@@ -52,6 +52,13 @@ tchecker::strong_timed_bisim::stats_t Lieb_et_al::run()
   if (_witness && result->contradiction_free()) {
     stats.init_witness(_A, _B);
     stats.witness()->create_witness_from_visited(visited, std::get<1>(sst_first[0]), std::get<1>(sst_second[0]));
+  } else if (_witness) {
+    tchecker::clockbounds::bound_t max_delay = std::max(_A->extrapolation_max(), _B->extrapolation_max());
+    stats.init_counterexample(_A, _B, std::get<1>(sst_first[0]), std::get<1>(sst_second[0]), clock_rational_value_t(max_delay, 1));
+    stats.counterexample()->create_cont_from_non_bisim_cache(
+                              _non_bisim_cache, 
+                              std::make_shared<tchecker::clock_constraint_container_t>(std::get<2>(sst_first[0])->tgt_invariant_container()), 
+                              std::make_shared<tchecker::clock_constraint_container_t>(std::get<2>(sst_second[0])->tgt_invariant_container()));
   }
 
   stats.set_end_time();
@@ -169,58 +176,23 @@ std::shared_ptr<algorithm_return_value_t> Lieb_et_al::check_for_virt_bisim(tchec
   }
 
   // Since neither an epsilon transition is needed nor the pair is cached, we have to check the action transitions
-  std::vector<tchecker::vcg::vcg_t::sst_t> v_A, v_B;
+  // first, find all events for which any of the symbolic states have outgoing transitions
+  auto avail_events = std::make_shared<std::set<std::set<std::string>>>();
 
-  tchecker::zg::const_state_sptr_t A_synced_const{A_synced};
-  tchecker::zg::const_state_sptr_t B_synced_const{B_synced};
+  _A->avail_events(avail_events, A_synced);
+  _B->avail_events(avail_events, B_synced);
 
-  _A->next(A_synced_const, v_A);
-  _B->next(B_synced_const, v_B);
 
-  // find all events for which any of the symbolic states have outgoing transitions
-  std::set<std::set<std::string>> avail_events;
+  for (auto & symbol : *avail_events) {
 
-  auto add_to_avail_events = [](std::set<std::set<std::string>> & avail_events, std::vector<tchecker::vcg::vcg_t::sst_t> & v,
-                                const tchecker::ta::system_t & system) {
-    for (auto && [status, s, t] : v) {
-      avail_events.insert(t->vedge().event_names(system));
-    }
-  };
+    std::shared_ptr<std::vector<tchecker::vcg::vcg_t::sst_t>> trans_A
+      = std::make_shared<std::vector<tchecker::vcg::vcg_t::sst_t>>();
+    std::shared_ptr<std::vector<tchecker::vcg::vcg_t::sst_t>> trans_B
+      = std::make_shared<std::vector<tchecker::vcg::vcg_t::sst_t>>();
 
-  add_to_avail_events(avail_events, v_A, _A->system());
-  add_to_avail_events(avail_events, v_B, _B->system());
+    _A->next_with_symbol(trans_A, A_synced, symbol);
+    _B->next_with_symbol(trans_B, B_synced, symbol);
 
-  for (auto & symbol : avail_events) {
-    auto add_to_transition_list = [](std::vector<tchecker::vcg::vcg_t::sst_t *> & trans_list,
-                                     std::vector<tchecker::vcg::vcg_t::sst_t> & v, const tchecker::ta::system_t & system,
-                                     std::set<std::string> symbol) {
-      for (auto & cur_trans : v) {
-        assert(tchecker::dbm::is_tight(std::get<1>(cur_trans)->zone().dbm(), std::get<1>(cur_trans)->zone().dim()));
-        if (std::get<2>(cur_trans)->vedge().event_equal(system, symbol)) {
-          trans_list.emplace_back(&cur_trans);
-        }
-      }
-    };
-
-    std::vector<tchecker::vcg::vcg_t::sst_t *> trans_A;
-    std::vector<tchecker::vcg::vcg_t::sst_t *> trans_B;
-
-    add_to_transition_list(trans_A, v_A, _A->system(), symbol);
-    add_to_transition_list(trans_B, v_B, _B->system(), symbol);
-
-    //      std::cout << __FILE__ << ": " << __LINE__ << ":" << trans_A.size() << std::endl;
-
-    //      if(trans_A.size() > 1 && trans_B.size() > 1) {
-    //        std::cout << __FILE__ << ": " << __LINE__ << ": non-determ detected." << std::endl;
-    //        std::cout << __FILE__ << ": " << __LINE__ << ": Symbol: " << std::endl;
-    //        for(auto cur = symbol.begin(); cur != symbol.end(); cur++) {
-    //          std::cout << __FILE__ << ": " << __LINE__ << ":" << *cur << std::endl;
-    //        }
-    //        std::cout << __FILE__ << ": " << __LINE__ << ": " << tchecker::to_string(A_state->vloc(), _A->system()) <<
-    //        std::endl; std::cout << __FILE__ << ": " << __LINE__ << ": " << tchecker::to_string(B_state->vloc(), _B->system())
-    //        << std::endl; std::cout << __FILE__ << ": " << __LINE__ << ": This can have a negative impact on your runtime. We
-    //        recommend to avoid non-deterministics whenever possible." << std::endl;
-    //      }
     std::shared_ptr<algorithm_return_value_t> return_from_transitions = check_for_outgoing_transitions(A_synced->zone(), B_synced->zone(), trans_A, trans_B, visited);
 
     if (!(return_from_transitions->contradiction_free())) {
@@ -364,30 +336,28 @@ std::shared_ptr<algorithm_return_value_t> Lieb_et_al::check_target_pair(
 
 std::shared_ptr<algorithm_return_value_t>
 Lieb_et_al::check_for_outgoing_transitions(tchecker::zg::zone_t const & zone_A, tchecker::zg::zone_t const & zone_B,
-                                           std::vector<tchecker::vcg::vcg_t::sst_t *> & trans_A,
-                                           std::vector<tchecker::vcg::vcg_t::sst_t *> & trans_B, visited_map_t & visited)
+                                           std::shared_ptr<std::vector<tchecker::vcg::vcg_t::sst_t>> trans_A,
+                                           std::shared_ptr<std::vector<tchecker::vcg::vcg_t::sst_t>> trans_B, visited_map_t & visited)
 {
 
   assert(tchecker::dbm::is_tight(zone_A.dbm(), zone_A.dim()));
   assert(tchecker::dbm::is_tight(zone_B.dbm(), zone_B.dim()));
 
-  if (0 == trans_A.size() && 0 == trans_B.size()) {
+  if (0 == trans_A->size() && 0 == trans_B->size()) {
     return std::make_shared<algorithm_return_value_t>(_A->get_no_of_virtual_clocks(), zone_A, zone_B);
   }
 
-  if (0 == trans_A.size() || 0 == trans_B.size()) {
+  if (0 == trans_A->size() || 0 == trans_B->size()) {
     auto result = std::make_shared<algorithm_return_value_t>(_A->get_no_of_virtual_clocks(), zone_A, zone_B);
 
-    for (auto cur : trans_A) {
-      auto && [status_A, s_A, t_A] = *cur;
+    for (auto && [status_A, s_A, t_A] : *trans_A) {
       auto target = tchecker::virtual_constraint::factory(s_A->zone(), _A->get_no_of_virtual_clocks());
       auto to_append = tchecker::vcg::revert_action_trans(zone_A, t_A->guard_container(), t_A->reset_container(),
                                                           t_A->tgt_invariant_container(), *target);
       result->add_to_contradictions(to_append);
     }
 
-    for (auto cur : trans_B) {
-      auto && [status_B, s_B, t_B] = *cur;
+    for (auto && [status_B, s_B, t_B] : *trans_B) {
       auto target = tchecker::virtual_constraint::factory(s_B->zone(), _B->get_no_of_virtual_clocks());
       auto to_append = tchecker::vcg::revert_action_trans(zone_B, t_B->guard_container(), t_B->reset_container(),
                                                           t_B->tgt_invariant_container(), *target);
@@ -397,10 +367,10 @@ Lieb_et_al::check_for_outgoing_transitions(tchecker::zg::zone_t const & zone_A, 
     return result;
   }
 
-  tchecker::zone_matrix_t<tchecker::virtual_constraint::virtual_constraint_t> found_cont{trans_A.size(), trans_B.size(),
+  tchecker::zone_matrix_t<tchecker::virtual_constraint::virtual_constraint_t> found_cont{trans_A->size(), trans_B->size(),
                                                                                          _A->get_no_of_virtual_clocks() + 1};
-  std::vector<std::vector<bool>> finished(trans_A.size(),
-                                          std::vector<bool>(trans_B.size(), false)); // init the finished matrix with false
+  std::vector<std::vector<bool>> finished(trans_A->size(),
+                                          std::vector<bool>(trans_B->size(), false)); // init the finished matrix with false
 
   contradiction_searcher_t con_searcher{trans_A, trans_B, _A->get_no_of_virtual_clocks()};
 
@@ -415,15 +385,15 @@ Lieb_et_al::check_for_outgoing_transitions(tchecker::zg::zone_t const & zone_A, 
   }
 
   do {
-    for (size_t idx_A = 0; idx_A < trans_A.size(); idx_A++) {
-      auto && [status_A, s_A, t_A] = *(trans_A[idx_A]);
+    for (size_t idx_A = 0; idx_A < trans_A->size(); idx_A++) {
+      auto && [status_A, s_A, t_A] = (*trans_A)[idx_A];
       assert(tchecker::dbm::is_tight(s_A->zone().dbm(), s_A->zone().dim()));
 
-      for (size_t idx_B = 0; idx_B < trans_B.size(); idx_B++) {
+      for (size_t idx_B = 0; idx_B < trans_B->size(); idx_B++) {
         if (finished[idx_A][idx_B]) {
           continue;
         }
-        auto && [status_B, s_B, t_B] = *(trans_B[idx_B]);
+        auto && [status_B, s_B, t_B] = (*trans_B)[idx_B];
         assert(tchecker::dbm::is_tight(s_B->zone().dbm(), s_B->zone().dim()));
 
         tchecker::zg::state_sptr_t s_A_constrained = _A->clone_state(s_A);
@@ -439,7 +409,7 @@ Lieb_et_al::check_for_outgoing_transitions(tchecker::zg::zone_t const & zone_A, 
         }
 
         auto new_cont = check_target_pair(s_A_constrained, t_A, s_B_constrained, t_B, 
-                                          found_cont.get(idx_A, idx_B), visited, trans_A.size() > 1 && trans_B.size() > 1);
+                                          found_cont.get(idx_A, idx_B), visited, trans_A->size() > 1 && trans_B->size() > 1);
 
         if (new_cont->contradiction_free()) {
           finished[idx_A][idx_B] = true;

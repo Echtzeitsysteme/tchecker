@@ -117,7 +117,8 @@ private:
   */
   std::shared_ptr<algorithm_return_value_t>
   check_for_outgoing_transitions( tchecker::zg::zone_t const & zone_A, tchecker::zg::zone_t const & zone_B,
-                                  std::vector<tchecker::vcg::vcg_t::sst_t *> & trans_A, std::vector<tchecker::vcg::vcg_t::sst_t *> & trans_B,
+                                  std::shared_ptr<std::vector<tchecker::vcg::vcg_t::sst_t>> trans_A, 
+                                  std::shared_ptr<std::vector<tchecker::vcg::vcg_t::sst_t>> trans_B,
                                   visited_map_t & visited);
 
   const std::shared_ptr<tchecker::vcg::vcg_t> _A;

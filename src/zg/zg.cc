@@ -351,6 +351,11 @@ void zg_t::split(tchecker::zg::const_state_sptr_t const & s, tchecker::clock_con
     v.push_back(todo.front());
 }
 
+tchecker::clockbounds::bound_t zg_t::extrapolation_max()
+{
+  return _non_enabled_extrapolation->max_value();
+}
+
 // Inspector
 
 boost::dynamic_bitset<> zg_t::labels(tchecker::zg::const_state_sptr_t const & s) const

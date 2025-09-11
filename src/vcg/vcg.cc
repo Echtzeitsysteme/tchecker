@@ -52,6 +52,33 @@ tchecker::vcg::vcg_t * factory(std::shared_ptr<tchecker::strong_timed_bisim::sys
   return new tchecker::vcg::vcg_t(extended_system, sharing_type, semantics, vc, urgent_or_committed, extrapolation, block_size, table_size);
 }
 
+void vcg_t::avail_events(std::shared_ptr<std::set<std::set<std::string>>> result, tchecker::zg::state_sptr_t state)
+{
+  std::vector<tchecker::vcg::vcg_t::sst_t> v;
+  tchecker::zg::const_state_sptr_t state_const{state};
+  next(state_const, v);
+
+  for (auto && [status, s, t] : v) {
+    result->insert(t->vedge().event_names(system()));
+  }
+}
+
+void vcg_t::next_with_symbol(std::shared_ptr<std::vector<tchecker::vcg::vcg_t::sst_t>> result,
+                             tchecker::zg::state_sptr_t state, std::set<std::string> symbol)
+{
+
+  std::vector<tchecker::vcg::vcg_t::sst_t> v;
+  tchecker::zg::const_state_sptr_t state_const{state};
+  next(state_const, v);
+
+  for (tchecker::vcg::vcg_t::sst_t cur_trans : v) {
+    assert(tchecker::dbm::is_tight(std::get<1>(cur_trans)->zone().dbm(), std::get<1>(cur_trans)->zone().dim()));
+    if (std::get<2>(cur_trans)->vedge().event_equal(system(), symbol)) {
+      result->emplace_back(cur_trans);
+    }
+  }
+}
+
 } // end of namespace vcg
 
 } // end of namespace tchecker

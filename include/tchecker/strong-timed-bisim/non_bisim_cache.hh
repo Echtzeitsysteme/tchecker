@@ -42,7 +42,31 @@ class non_bisim_cache_t {
    \return a cached contradiction
   */  
   std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>
-  already_cached(tchecker::zg::state_sptr_t first, tchecker::zg::state_sptr_t second);
+  already_cached(tchecker::zg::state_sptr_t first, tchecker::zg::state_sptr_t second) const;
+
+  /*!
+   \brief Accessor
+   \param first : the first TA state
+   \param second : the second TA state;
+   \return The entry corresponding to the given key
+   */
+  std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>
+  entry(tchecker::ta::state_t & first, tchecker::ta::state_t & second) const;
+
+  /*!
+   \brief Accessor
+   \param loc_pair : the pair of TA states
+   \return The entry corresponding to the given key
+   */
+  std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>
+  entry(std::pair<tchecker::ta::state_t, tchecker::ta::state_t> & loc_pair) const;
+
+  /*!
+   \brief checks whether the location pair with this valuation for the virtual clock is element of a cached entry
+   \param loc_pair : the pair of TA states
+   \param clockval : the valuation of the virtual clocks
+   */
+  bool is_cached(std::pair<tchecker::ta::state_t, tchecker::ta::state_t> & loc_pair, std::shared_ptr<tchecker::clockval_t> clockval) const;
 
   /*!
    \brief getter
@@ -54,26 +78,22 @@ class non_bisim_cache_t {
 
  private:
   
-  // we would like to use a pair of ta states but we are unable to extract them from symbolic states :(
-  using map_key_t = std::pair<std::pair<tchecker::intval_sptr_t, tchecker::vloc_sptr_t>, std::pair<tchecker::intval_sptr_t, tchecker::vloc_sptr_t>>;
+  using map_key_t = std::pair<tchecker::ta::state_t, tchecker::ta::state_t>;
 
   struct custom_hash {
-    size_t operator()(const map_key_t &to_hash) const {
-        size_t h = TCHECKER_STRONG_TIMED_BISIM_NON_BISIM_CACHE_HH_SEED;
-        boost::hash_combine(h, *to_hash.first.first);
-        boost::hash_combine(h, *to_hash.first.second);
-        boost::hash_combine(h, *to_hash.second.first);
-        boost::hash_combine(h, *to_hash.second.second);
-        return h;
+    size_t operator()(const map_key_t & to_hash) const
+    {
+      size_t h = TCHECKER_STRONG_TIMED_BISIM_NON_BISIM_CACHE_HH_SEED;
+      boost::hash_combine(h, to_hash.first);
+      boost::hash_combine(h, to_hash.second);
+      return h;
     }
   };
 
   struct custom_equal {
-    bool operator() (const map_key_t &p1, const map_key_t &p2) const {
-      return *p1.first.first == *p2.first.first
-              && *p1.first.second == *p2.first.second
-              && *p1.second.first == *p2.second.first
-              && *p1.second.second == *p2.second.second;
+    bool operator()(const map_key_t & p1, const map_key_t & p2) const
+    {
+      return p1.first == p2.first && p1.second == p2.second;
     }
   };
 

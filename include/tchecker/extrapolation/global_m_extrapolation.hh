@@ -54,6 +54,8 @@ public:
   */
   tchecker::zg::details::global_m_extrapolation_t & operator=(tchecker::zg::details::global_m_extrapolation_t && e) = default;
 
+  virtual tchecker::clockbounds::bound_t max_value() const override;
+
 protected:
   std::shared_ptr<tchecker::clockbounds::global_m_map_t const> _clock_bounds; /*!< global LU clock bounds map */
 };

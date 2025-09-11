@@ -2,7 +2,7 @@
 #
 # See files AUTHORS and LICENSE for copyright details.
 
-add_subdirectory(witness)
+add_subdirectory(certificate)
 
 set(STRONG_TIMED_BISIM_SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/stats.cc
@@ -21,5 +21,5 @@ set(STRONG_TIMED_BISIM_SRC
     ${TCHECKER_INCLUDE_DIR}/tchecker/strong-timed-bisim/contradiction_searcher.hh
     ${TCHECKER_INCLUDE_DIR}/tchecker/strong-timed-bisim/visited_map.hh
     ${TCHECKER_INCLUDE_DIR}/tchecker/strong-timed-bisim/vcg-timed-bisim.hh
-    ${STRONG_TIMED_BISIM_WITNESS_SRC}
+    ${STRONG_TIMED_BISIM_CERT_SRC}
     PARENT_SCOPE)

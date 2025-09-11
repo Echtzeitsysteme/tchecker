@@ -39,6 +39,12 @@ public:
    \post dbm has been extrapolated using clocks bounds in vloc
    */
   virtual void extrapolate(tchecker::dbm::db_t * dbm, tchecker::clock_id_t dim, tchecker::vloc_t const & vloc) = 0;
+
+  /*!
+   \brief Accessor for the maximum value
+   \return the maximum value used
+   */
+  virtual tchecker::clockbounds::bound_t max_value() const = 0;
 };
 
 /*!
@@ -60,6 +66,8 @@ public:
    \post dbm has not been modified
    */
   virtual void extrapolate(tchecker::dbm::db_t * dbm, tchecker::clock_id_t dim, tchecker::vloc_t const & vloc);
+
+  virtual tchecker::clockbounds::bound_t max_value() const override;
 };
 
 } // end of namespace zg

@@ -60,6 +60,21 @@ local_m_extrapolation_t::operator=(tchecker::zg::details::local_m_extrapolation_
   return *this;
 }
 
+tchecker::clockbounds::bound_t local_m_extrapolation_t::max_value() const
+{
+  tchecker::clockbounds::bound_t result = 0;
+
+  for (tchecker::loc_id_t loc = 0; loc < this->_clock_bounds->loc_number(); loc++) {
+    for (tchecker::clockbounds::bound_t cur : this->_clock_bounds->M(loc)) {
+      if (cur > result) {
+        result = cur;
+      }
+    }
+  }
+
+  return result;
+}
+
 } // end of namespace details
 
 /* local_extra_m_t */

@@ -58,9 +58,34 @@ public:
    */
   bool get_urgent_or_committed() const;
 
+  /*!
+    \brief Accessor
+    \return the number of clocks defined in the TA (so-called original clocks)
+   */
   inline tchecker::clock_id_t get_no_of_original_clocks() const { return _system->clocks_count(tchecker::variable_kind_t::VK_FLATTENED) - _no_of_virtual_clocks;}
 
+  /*!
+   \brief Accessor
+   \return the number of locations
+   */
   inline std::size_t get_no_of_locations() const { return _system->locations_count();}
+
+  /*!
+   \brief adds a set of available events for this symbolic state
+   \param result : where the events will be stored
+   \param state : a state of this vcg
+   \post all available events are added to result
+   */
+  void avail_events(std::shared_ptr<std::set<std::set<std::string>>> result, tchecker::zg::state_sptr_t state);
+
+  /*!
+   \brief extracts the outgoing transitions regarding a given symbol to result
+   \param result : where the outgoing transitions will be stored
+   \param state : the state for which the outgoing transitions shall be stored
+   \param symbol : the symbol for which the outgoing transitions shall be stored
+   */
+  void next_with_symbol(std::shared_ptr<std::vector<tchecker::vcg::vcg_t::sst_t>> result, 
+                        tchecker::zg::state_sptr_t state, std::set<std::string>  symbol);
 
 private:
 

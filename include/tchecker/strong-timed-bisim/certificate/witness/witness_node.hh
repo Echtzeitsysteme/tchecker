@@ -8,9 +8,7 @@
 #ifndef TCHECKER_STRONG_TIMED_BISIM_WITNESS_WITNESS_NODE_HH
 #define TCHECKER_STRONG_TIMED_BISIM_WITNESS_WITNESS_NODE_HH
 
-#include "tchecker/graph/node.hh"
-#include "tchecker/vcg/virtual_constraint.hh"
-#include "tchecker/zg/zone_container.hh"
+#include "tchecker/strong-timed-bisim/certificate/certificate_node.hh"
 
 namespace tchecker {
 
@@ -22,7 +20,7 @@ namespace witness {
  \class node_t
  \brief Node of the witness graph of a strong timed bisimulation check
  */
-class node_t {
+class node_t : public tchecker::strong_timed_bisim::certificate::node_t {
  public:
   /*!
   \brief Constructor
@@ -31,7 +29,8 @@ class node_t {
   \param id : the id of this node within the witness graph
   \post this node keeps a shared pointer to s, and has initial node flag as specified
   */
-  node_t(tchecker::zg::state_sptr_t const & s_1, tchecker::zg::state_sptr_t const & s_2, std::size_t id, tchecker::clock_id_t no_of_virt_clks, bool initial);
+  node_t(tchecker::zg::state_sptr_t const & s_1, tchecker::zg::state_sptr_t const & s_2, 
+         tchecker::clock_id_t no_of_virt_clks, std::size_t id=0, bool initial = false);
 
   /*!
    \brief Constructor
@@ -40,7 +39,8 @@ class node_t {
    \param id : the id of this node within the witness graph
   */
   node_t(std::pair<tchecker::ta::state_t, tchecker::ta::state_t> & location_pair,
-         std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> vc, std::size_t id);
+         std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> vc, 
+         std::size_t id=0, bool initial = false);
 
   /*!
    \brief Constructor
@@ -50,7 +50,8 @@ class node_t {
    \param id : the id of this node within the witness graph
   */
   node_t(tchecker::ta::state_t &first_loc, tchecker::ta::state_t & second_loc, 
-         std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> vc, std::size_t id);
+         std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> vc, 
+         std::size_t id=0, bool initial = false);
 
   /*!
    \brief Constructor
@@ -59,32 +60,8 @@ class node_t {
    \param no_of_virt_clks : the number of virtual clocks
    \param id : the id of this node within the witness graph
   */
-  node_t(tchecker::ta::state_t &first_loc, tchecker::ta::state_t & second_loc, 
-         tchecker::clock_id_t no_of_virt_clks, std::size_t id);
-
-  /*!
-  \brief Accessor
-  \return shared pointer to zone graph state in this node
-  */
-  inline std::shared_ptr<const std::pair<tchecker::ta::state_t, tchecker::ta::state_t>> location_pair_ptr() const { return _location_pair; }
-
-  /*!
-  \brief Accessor
-  \return zone graph state in this node
-  */
-  inline const std::pair<tchecker::ta::state_t, tchecker::ta::state_t> & location_pair() const { return *_location_pair; }
-
- /*!
-  \brief Accessor
-  \return id in this node
-  */
-  inline std::size_t id() const { return _id; }
-
-   /*!
-  \brief Accessor
-  \return whether this node is initial
-  */
-  inline bool initial() const { return _initial; }
+  node_t(tchecker::ta::state_t &first_loc, tchecker::ta::state_t & second_loc, tchecker::clock_id_t no_of_virt_clks, 
+         std::size_t id=0, bool initial = false);
 
    /*!
   \brief Accessor
@@ -92,21 +69,6 @@ class node_t {
   */
   inline const std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>
   zones() const { return _zones; }
-
- /*!
-   \brief Less-than order on nodes based on lexical ordering
-   \param other : a node
-   \return true if lhs is less-than rhs w.r.t. lexical ordering over the location pairs in
-   the nodes
-  */
- bool smaller_location_pair(const node_t& other) const;
-
- /*!
-  \brief Equality predicate
-  \param other : a node
-  \return true if lhs and rhs have the same location pair, false otherwise
-  */
-  bool equal_location_pair(const node_t& other) const;
 
  /*!
   \brief Hash function
@@ -137,11 +99,19 @@ class node_t {
    */
   void compress();
 
- private:
-  const std::shared_ptr<const std::pair<tchecker::ta::state_t, tchecker::ta::state_t>> _location_pair;
+  /*!
+  \brief Accessor to node attributes
+  \param m : the map to add the attributes
+  \param vcg1: the first vcg
+  \param vcg2 : the second vcg
+  \post The attributes of this node are added to m
+  */
+  void attributes(std::map<std::string, std::string> & m, 
+                  const std::shared_ptr<tchecker::vcg::vcg_t> vcg1,
+                  const std::shared_ptr<tchecker::vcg::vcg_t> vcg2) const override;
+
+private:
   std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> _zones;
-  const std::size_t _id;
-  const bool _initial;
 };
 
 } // end of namespace witness

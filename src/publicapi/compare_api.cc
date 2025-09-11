@@ -12,7 +12,7 @@
 
 #include "tchecker/strong-timed-bisim/stats.hh"
 #include "tchecker/strong-timed-bisim/vcg-timed-bisim.hh"
-#include "tchecker/strong-timed-bisim/witness/witness_graph.hh"
+#include "tchecker/strong-timed-bisim/certificate/witness/witness_graph.hh"
 
 #include "tchecker/parsing/parsing.hh"
 #include "tchecker/system/system.hh"
@@ -54,9 +54,10 @@ void strong_timed_bisim(std::ostream & os, std::shared_ptr<tchecker::parsing::sy
   if(generate_witness) {
     if(stats.relationship_fulfilled()) {
       std::string name = sysdecl_first->name() + "_" + sysdecl_second->name();
-      tchecker::strong_timed_bisim::witness::dot_output(os, *(stats.witness()), name);
+      stats.witness()->dot_output(os, name);
     } else {
-      throw std::runtime_error("ToDo: Implement Contradiction DAG!");
+      std::string name = sysdecl_first->name() + "_" + sysdecl_second->name();
+      stats.counterexample()->dot_output(os, name);
     }
   }
   // stats

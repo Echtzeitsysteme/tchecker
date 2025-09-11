@@ -879,6 +879,24 @@ bool admits_integer_value(tchecker::dbm::db_t const * dbm, tchecker::clock_id_t 
 bool is_single_valuation(tchecker::dbm::db_t const * dbm, tchecker::clock_id_t dim);
 
 /*!
+ \brief reduce to valuation
+ \param dbm : a dbm
+ \param valuation : a valuation contained by the dbm
+ \param dim : dimension of dbm and valuation
+ \pre dbm is not nullptr (checked by assertion)
+ dbm is a dim*dim arrays of difference bounds
+ valuation has size dim
+ valuation is contained by dbm
+ dbm is consistent (checked by assertion)
+ dbm is tight (checked by assertion)
+ dim >= 1 (checked by assertion).
+ \post dbm contains the nearest boundd s.t. valuation is contained.
+ dbm is consistent
+ dbm is tight
+ */
+void reduce_to_valuation(tchecker::dbm::db_t * dbm, tchecker::clockval_t & valuation, tchecker::clock_id_t dim);
+
+/*!
  \brief Constrains a DBM to a single valuation
  \param dbm : a dbm
  \param dim : dimension of dbm

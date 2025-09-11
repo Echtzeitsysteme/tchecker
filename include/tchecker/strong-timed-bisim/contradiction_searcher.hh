@@ -22,7 +22,8 @@ class contradiction_searcher_t {
     /*!
     \brief Constructor
     */
-   contradiction_searcher_t(std::vector<tchecker::vcg::vcg_t::sst_t *> & trans_A, std::vector<tchecker::vcg::vcg_t::sst_t *> & trans_B,
+   contradiction_searcher_t(std::shared_ptr<std::vector<tchecker::vcg::vcg_t::sst_t>> trans_A, 
+                            std::shared_ptr<std::vector<tchecker::vcg::vcg_t::sst_t>> trans_B,
                             tchecker::clock_id_t no_of_virt_clks);
 
     /*!
@@ -35,7 +36,8 @@ class contradiction_searcher_t {
      */
     std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>
     search_contradiction(tchecker::zg::zone_t const & zone_A, tchecker::zg::zone_t const & zone_B,
-                         std::vector<tchecker::vcg::vcg_t::sst_t *> & trans_A, std::vector<tchecker::vcg::vcg_t::sst_t *> & trans_B,
+                         std::shared_ptr<std::vector<tchecker::vcg::vcg_t::sst_t>> trans_A, 
+                         std::shared_ptr<std::vector<tchecker::vcg::vcg_t::sst_t>> trans_B,
                          tchecker::zone_matrix_t<tchecker::virtual_constraint::virtual_constraint_t> found_cont);
 
     /*!
@@ -49,10 +51,10 @@ class contradiction_searcher_t {
     */
     bool 
     contradiction_still_possible(tchecker::zg::zone_t const & zone_A, tchecker::zg::zone_t const & zone_B,
-                                                           std::vector<tchecker::vcg::vcg_t::sst_t *> & trans_A,
-                                                           std::vector<tchecker::vcg::vcg_t::sst_t *> & trans_B,
-                                                           tchecker::zone_matrix_t<tchecker::virtual_constraint::virtual_constraint_t> & found_cont,
-                                                           std::vector< std::vector<bool> > finished);
+                                 std::shared_ptr<std::vector<tchecker::vcg::vcg_t::sst_t>> trans_A,
+                                 std::shared_ptr<std::vector<tchecker::vcg::vcg_t::sst_t>> trans_B,
+                                 tchecker::zone_matrix_t<tchecker::virtual_constraint::virtual_constraint_t> & found_cont,
+                                 std::vector< std::vector<bool> > finished);
   private:
 
     tchecker::zone_matrix_t<tchecker::virtual_constraint::virtual_constraint_t> overhangs;
@@ -61,7 +63,7 @@ class contradiction_searcher_t {
     contradiction_searcher_t();
 
     std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> 
-    find_contradiction(tchecker::zg::zone_t const & zone, std::vector<tchecker::vcg::vcg_t::sst_t *> & trans,
+    find_contradiction(tchecker::zg::zone_t const & zone, std::shared_ptr<std::vector<tchecker::vcg::vcg_t::sst_t>> trans,
                        std::vector<std::shared_ptr<zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>> & found_con,
                        std::vector<std::shared_ptr<zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>> & cur_overhang);
 

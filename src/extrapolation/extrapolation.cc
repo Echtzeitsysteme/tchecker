@@ -17,6 +17,8 @@ namespace zg {
 
 void no_extrapolation_t::extrapolate(tchecker::dbm::db_t * dbm, tchecker::clock_id_t dim, tchecker::vloc_t const & vloc) {}
 
+tchecker::clockbounds::bound_t no_extrapolation_t::max_value() const {return 0;}
+
 } // end of namespace zg
 
 } // end of namespace tchecker
