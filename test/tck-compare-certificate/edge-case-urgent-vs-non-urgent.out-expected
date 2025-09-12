@@ -1,0 +1,11 @@
+digraph urgent_urgent_non_urgent {
+  0 [clockval_1="Ref Clock=0,x_1=0", clockval_2="Ref Clock=0,x_2=0", first_intval="", first_vloc="<A>", initial="true", second_intval="", second_vloc="<A>"]
+  1 [clockval_1="Ref Clock=0,x_1=4", clockval_2="Ref Clock=0,x_2=4", first_intval="", first_vloc="<A>", initial="false", second_intval="", second_vloc="<A>"]
+  2 [clockval_1="Ref Clock=0,x_1=4", clockval_2="Ref Clock=0,x_2=4", final="second", final_symbol="4", first_intval="", first_vloc="<B>", initial="false", second_intval="", second_vloc="<B>"]
+  1 -> 2 [first_vedge="<P@a>", second_vedge="<P@a>"]
+  0 -> 1 [delay="4"]
+}
+MEMORY_MAX_RSS  xxxx
+RELATIONSHIP_FULFILLED false
+RUNNING_TIME_SECONDS  xxxx
+VISITED_PAIR_OF_STATES 2

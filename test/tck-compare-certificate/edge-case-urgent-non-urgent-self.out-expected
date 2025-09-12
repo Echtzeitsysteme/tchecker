@@ -1,0 +1,12 @@
+digraph urgent_non_urgent_urgent_non_urgent {
+  0 [first_intval="", first_vloc="<A>", initial="true", second_intval="", second_vloc="<A>", zones="(0<=x_1 && 0<=x_2 && x_1==x_2)"]
+  1 [first_intval="", first_vloc="<B>", initial="false", second_intval="", second_vloc="<B>", zones="(0<=x_1 && 0<=x_2 && x_1==x_2)"]
+  2 [first_intval="", first_vloc="<C>", initial="false", second_intval="", second_vloc="<C>", zones="(0<=x_1 && 0<=x_2 && x_1==x_2)"]
+  0 -> 1 [first_vedge="<P@a>", second_vedge="<P@a>"]
+  1 -> 2 [first_vedge="<P@b>", second_vedge="<P@b>"]
+  2 -> 0 [first_vedge="<P@c>", first_vedge_do="x=0", first_vedge_prov="x>3", second_vedge="<P@c>", second_vedge_do="x=0", second_vedge_prov="x>3"]
+}
+MEMORY_MAX_RSS  xxxx
+RELATIONSHIP_FULFILLED true
+RUNNING_TIME_SECONDS  xxxx
+VISITED_PAIR_OF_STATES 4

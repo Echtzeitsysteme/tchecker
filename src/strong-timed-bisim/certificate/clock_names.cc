@@ -23,11 +23,11 @@ clock_names(const std::shared_ptr<tchecker::vcg::vcg_t> vcg1, const std::shared_
 
   std::function<std::string (tchecker::clock_id_t)> result =
     [no_orig_clks1, no_orig_clks2, vcg1, vcg2, urgent_clk](tchecker::clock_id_t id) {
-      if (id <= (no_orig_clks1 + urgent_clk)) {
+      if (id <= (no_orig_clks1)) {
         return clock_names(vcg1, "_1")(id);
       }
 
-      id -= (no_orig_clks1 + urgent_clk + 1);
+      id -= no_orig_clks1;
       return clock_names(vcg2, "_2")(id);
     };
 

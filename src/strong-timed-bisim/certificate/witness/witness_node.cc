@@ -16,7 +16,7 @@ namespace witness {
 
 node_t::node_t(tchecker::zg::state_sptr_t const & s_1, tchecker::zg::state_sptr_t const & s_2,
                tchecker::clock_id_t no_of_virt_clks, std::size_t id, bool initial)
-    : tchecker::strong_timed_bisim::certificate::node_t(s_1, s_2, initial)
+    : tchecker::strong_timed_bisim::certificate::node_t(s_1, s_2, id, initial)
 {
   _zones = std::make_shared<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(no_of_virt_clks + 1);
   add_zone(tchecker::virtual_constraint::factory(s_1->zone(), no_of_virt_clks));
@@ -25,7 +25,7 @@ node_t::node_t(tchecker::zg::state_sptr_t const & s_1, tchecker::zg::state_sptr_
 node_t::node_t(std::pair<tchecker::ta::state_t, tchecker::ta::state_t> & location_pair,
                std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> vc,
                std::size_t id, bool initial)
-    : tchecker::strong_timed_bisim::certificate::node_t(location_pair, initial),
+    : tchecker::strong_timed_bisim::certificate::node_t(location_pair, id, initial),
       _zones(vc)
 {
 }
@@ -33,14 +33,14 @@ node_t::node_t(std::pair<tchecker::ta::state_t, tchecker::ta::state_t> & locatio
 node_t::node_t(tchecker::ta::state_t &first_loc, tchecker::ta::state_t & second_loc, 
                std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> vc, 
                std::size_t id, bool initial)
-    : tchecker::strong_timed_bisim::certificate::node_t(first_loc, second_loc, initial),
+    : tchecker::strong_timed_bisim::certificate::node_t(first_loc, second_loc, id, initial),
       _zones(vc)
 {
 }
 
 node_t::node_t(tchecker::ta::state_t &first_loc, tchecker::ta::state_t & second_loc, 
          tchecker::clock_id_t no_of_virt_clks, std::size_t id, bool initial)
-         : tchecker::strong_timed_bisim::certificate::node_t(first_loc, second_loc, initial)
+         : tchecker::strong_timed_bisim::certificate::node_t(first_loc, second_loc, id, initial)
 {
   _zones = std::make_shared<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(no_of_virt_clks + 1);
 }

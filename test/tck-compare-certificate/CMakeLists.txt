@@ -2,11 +2,11 @@
 #
 # See files AUTHORS and LICENSE for copyright details.
 
-# writing special register testcases function for tck-compare
+# writing special register testcases function for tck-compare certificates
 # this is neccessary since the original register testcases function accepts a single
 # input model only
 
-function(create_cert_testcase TEST_NAME first_input second_input relationship)
+function(create_testcase TEST_NAME first_input second_input relationship)
     tck_add_test (${TEST_NAME} ${TEST_NAME} savelist)
 
     set_tests_properties(${TEST_NAME}
@@ -18,13 +18,12 @@ function(create_cert_testcase TEST_NAME first_input second_input relationship)
     tck_add_test_envvar(testenv DOT_MAX_SIZE "${DOT_MAX_SIZE}")
     tck_set_test_env(${TEST_NAME} testenv)
     unset(testenv)
-endfunction(create_cert_testcase)
+endfunction(create_testcase)
 
-
-option(TCK_ENABLE_COMPARE_CERT_TESTS "enable tests related to tck_compare certificate" ON)
+option(TCK_ENABLE_COMPARE_CERT_TESTS "enable tests related to tck_compare_cert" ON)
 
 if(NOT TCK_ENABLE_COMPARE_CERT_TESTS)
-    message(STATUS "tck_compare tests are disabled.")
+    message(STATUS "tck_compare_cert tests are disabled.")
     return()
 endif()
 
@@ -37,24 +36,20 @@ set(DOT_MAX_SIZE 20000)
 # contains arguments passed to the generator script.
 # only append to the tail of this list!
 set(INPUTS
-    missing_initial.sh:
-    
+    strong_timed_bisim_system_tests_edge_case_urgent.sh:
+    strong_timed_bisim_system_tests_edge_case_urgent_non_urgent.sh:
     )
-
-if(NOT USEINT16)
-    list(APPEND INPUTS
-         ad94_mid.sh:)
-endif()
-
-if(USEINT64)
-    list(APPEND INPUTS
-         ad94_Long.sh:)
-endif()
 
 file(RELATIVE_PATH here ${CMAKE_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 message(STATUS "Generating '${here}' tests. This may take a long time.")
 tck_register_testcases("tck-compare-cert-" CHECK_TESTCASES_ savelist TCK_COMPARE_INPUT_FILES ${INPUTS})
 
+list(GET TCK_COMPARE_INPUT_FILES 0 edge_case_urgent)
+list(GET TCK_COMPARE_INPUT_FILES 1 edge_case_urgent_non_urgent)
 
+## urgent
+create_testcase(edge-case-urgent-self ${edge_case_urgent} ${edge_case_urgent} strong-timed-bisim)
+create_testcase(edge-case-urgent-non-urgent-self ${edge_case_urgent_non_urgent} ${edge_case_urgent_non_urgent} strong-timed-bisim)
+create_testcase(edge-case-urgent-vs-non-urgent ${edge_case_urgent} ${edge_case_urgent_non_urgent} strong-timed-bisim)
 
-tck_add_savelist(save-compare ${savelist})
+tck_add_savelist(save-compare-certificate ${savelist})
