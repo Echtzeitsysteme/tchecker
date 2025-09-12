@@ -1029,7 +1029,7 @@ tchecker::clock_rational_value_t delay(tchecker::clockval_t const & src,
  \param base : the clock valuation to which the delay is added
  \param delay : the delay
  \note result and base must have the same size
- \post result[i] = base[i] + delay
+ \post result[i] = base[i] + delay, except for i = 0.
  */
 void add_delay(tchecker::clockval_t *result, tchecker::clockval_t & base, tchecker::clock_rational_value_t delay);
 

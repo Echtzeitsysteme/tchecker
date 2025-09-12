@@ -32,7 +32,7 @@ node_t::node_t(tchecker::zg::state_sptr_t s_1, tchecker::zg::state_sptr_t s_2,
                std::size_t id, bool urgent_clk_exists, bool initial) :
                tchecker::strong_timed_bisim::certificate::node_t(s_1, s_2, id, initial),
                _invariant(std::make_pair(invariant_1, invariant_2)),
-               _urgent_clk_exists(urgent_clk_exists)
+               _urgent_clk_exists(urgent_clk_exists), _final(false)
 {
   auto raw_1 = clockval_allocate_and_construct(2*no_of_orig_clks_1 + no_of_orig_clks_2 + 1 + (_urgent_clk_exists ? 1 : 0)); // +1 due to the ref clock
   auto valuation_1 = std::shared_ptr<tchecker::clockval_t>(raw_1, &clockval_destruct_and_deallocate);
@@ -51,7 +51,9 @@ node_t::node_t(tchecker::zg::state_sptr_t s_1, tchecker::zg::state_sptr_t s_2,
 }
 
 node_t::node_t(const node_t & other) 
-  : tchecker::strong_timed_bisim::certificate::node_t(*(other._location_pair), 0, false), _invariant(other._invariant), _urgent_clk_exists(other._urgent_clk_exists)
+  : tchecker::strong_timed_bisim::certificate::node_t(*(other._location_pair), 0, other._initial), 
+    _invariant(other._invariant), _urgent_clk_exists(other._urgent_clk_exists), _final(other._final),
+    _final_symbol(other._final_symbol), _final_first_has_transition(other._final_first_has_transition)
 {
   auto raw_1 = clockval_allocate_and_construct(other._valuation.first->size());
   auto valuation_1 = std::shared_ptr<tchecker::clockval_t>(raw_1, &clockval_destruct_and_deallocate);
@@ -99,6 +101,20 @@ void node_t::attributes(std::map<std::string, std::string> & m, const std::share
 
   m["clockval_1"] = to_string(*valuation_1, tchecker::strong_timed_bisim::certificate::clock_names(vcg1, "_1"));
   m["clockval_2"] = to_string(*valuation_2, tchecker::strong_timed_bisim::certificate::clock_names(vcg2, "_2"));
+
+  if(_final) {
+    m["final"] = _final_first_has_transition ? "first" : "second";
+    std::string symbol = "";
+    bool first = true;
+    for (auto const& cur : _final_symbol) {
+      if(!first) {
+        symbol += ", ";
+      }
+      symbol += cur;
+      first = false;
+    }
+    m["final_symbol"] = symbol;
+  }
 
   tchecker::strong_timed_bisim::certificate::node_t::attributes(m, vcg1, vcg2);
 }
@@ -175,7 +191,8 @@ bool node_t::is_element_of(tchecker::zg::state_sptr_t symb_state_1, tchecker::zg
 
 
 bool node_t::is_leaf(tchecker::zg::state_sptr_t & init_1, tchecker::zg::state_sptr_t & init_2, 
-                     std::shared_ptr<tchecker::vcg::vcg_t> vcg1, std::shared_ptr<tchecker::vcg::vcg_t> vcg2) const
+                     std::shared_ptr<tchecker::vcg::vcg_t> vcg1, std::shared_ptr<tchecker::vcg::vcg_t> vcg2, 
+                     clock_rational_value_t max_possible_delay)
 {
   auto add_urgent = _urgent_clk_exists ? 1 : 0;
   assert(vcg1->get_no_of_virtual_clocks() == vcg2->get_no_of_virtual_clocks());
@@ -205,6 +222,15 @@ bool node_t::is_leaf(tchecker::zg::state_sptr_t & init_1, tchecker::zg::state_sp
   }
 
   if(!state_1->zone().is_virtual_equivalent(state_2->zone(), vcg1->get_no_of_virtual_clocks())) {
+    auto first = max_delay(state_1->zone(), max_possible_delay, tchecker::clock_rational_value_t(0, 1), true);
+    auto second = max_delay(state_2->zone(), max_possible_delay, tchecker::clock_rational_value_t(0, 1), false);
+    _final = true;
+    _final_first_has_transition = (first > second);
+    double symbol = _final_first_has_transition ? static_cast<double>(first.numerator()) / first.denominator() : static_cast<double>(second.numerator()) / second.denominator();
+    std::ostringstream oss;
+    oss << std::setprecision(1) << symbol;
+
+    _final_symbol.emplace(oss.str());
     return true;
   }
 
@@ -214,7 +240,31 @@ bool node_t::is_leaf(tchecker::zg::state_sptr_t & init_1, tchecker::zg::state_sp
   vcg1->avail_events(avail_events_1, state_1);
   vcg2->avail_events(avail_events_2, state_2);
 
-  return avail_events_1 != avail_events_2;
+  if(*avail_events_1 != *avail_events_2) {
+    _final = true;
+    std::set<std::set<std::string>> diff;
+
+    std::set_difference(
+        avail_events_1->begin(), avail_events_1->end(),
+        avail_events_2->begin(), avail_events_2->end(),
+        std::inserter(diff, diff.begin())
+    );
+
+    _final_first_has_transition = !diff.empty();
+
+    if(diff.empty()) {
+      std::set_difference(
+        avail_events_2->begin(), avail_events_2->end(),
+        avail_events_1->begin(), avail_events_1->end(),
+        std::inserter(diff, diff.begin())
+      );
+    }
+
+    _final_symbol.insert(diff.begin()->begin(), diff.begin()->end());
+    return true;
+  }
+
+  return false;
 }
 
 
@@ -233,14 +283,16 @@ node_t::generate_zones(std::shared_ptr<tchecker::vcg::vcg_t> vcg1, std::shared_p
 }
 
 std::pair<clock_rational_value_t, std::shared_ptr<node_t>>
-node_t::max_delay(std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> vcs, clock_rational_value_t max_delay, 
+node_t::max_delay(std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> vcs, 
+                  clock_rational_value_t max_delay_value, 
                   std::shared_ptr<tchecker::vcg::vcg_t> vcg1, std::shared_ptr<tchecker::vcg::vcg_t> vcg2)
 {
-  std::pair<clock_rational_value_t, std::shared_ptr<node_t>> max = std::make_pair(clock_rational_value_t{0, 1}, std::shared_ptr<node_t>(this));
+  std::pair<clock_rational_value_t, std::shared_ptr<node_t>> max = std::make_pair(clock_rational_value_t{0, 1}, nullptr);
   for(auto vc : *vcs) {
-    std::pair<clock_rational_value_t, std::shared_ptr<node_t>> cur = this->max_delay(vc, max_delay, vcg1, vcg2);
+    std::pair<clock_rational_value_t, std::shared_ptr<node_t>> cur = this->max_delay(vc, max_delay_value, vcg1, vcg2);
     if(cur.first > max.first) {
-      max = cur;
+      max.first = cur.first;
+      max.second = cur.second;
     }
   }
 
@@ -249,7 +301,7 @@ node_t::max_delay(std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_c
 
 std::pair<clock_rational_value_t, std::shared_ptr<node_t>>
 node_t::max_delay(std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> vc, 
-                  clock_rational_value_t max_delay, 
+                  clock_rational_value_t max_delay_value, 
                   std::shared_ptr<tchecker::vcg::vcg_t> vcg1,
                   std::shared_ptr<tchecker::vcg::vcg_t> vcg2)
 {
@@ -258,7 +310,7 @@ node_t::max_delay(std::shared_ptr<tchecker::virtual_constraint::virtual_constrai
   std::pair<std::shared_ptr<tchecker::zg::zone_t>, std::shared_ptr<tchecker::zg::zone_t>> zones =
       vc->generate_synchronized_zones(vcg1->get_no_of_original_clocks(), vcg2->get_no_of_original_clocks());
   
-  clock_rational_value_t delay = this->max_delay(zones.first, max_delay, 0);
+  clock_rational_value_t delay = this->max_delay(*zones.first, max_delay_value, 0);
 
   auto clone_1 = tchecker::clockval_clone(*_valuation.first);
   add_delay(clone_1, *_valuation.first, delay);
@@ -268,8 +320,9 @@ node_t::max_delay(std::shared_ptr<tchecker::virtual_constraint::virtual_constrai
   add_delay(clone_2, *_valuation.second, delay);
   auto new_valuation_2 = std::shared_ptr<tchecker::clockval_t>(clone_2, &clockval_destruct_and_deallocate);
 
-  std::shared_ptr<node_t> result = std::make_shared<node_t>(this->location_pair(), new_valuation_1, new_valuation_2, 
-                                                            this->invariant().first, this->invariant().second);
+  std::shared_ptr<node_t> result = std::make_shared<node_t>(*this);
+  result->set_initial(false);
+  result->set_valuation(std::make_pair(new_valuation_1, new_valuation_2));
 
   return std::make_pair(delay, result);
 }
@@ -279,11 +332,11 @@ void node_t::set_valuation(std::pair<std::shared_ptr<tchecker::clockval_t>, std:
   assert(new_val.first->size() == _valuation.first->size());
   assert(new_val.second->size() == _valuation.second->size());
 
-  for(unsigned short i = 1; i <= new_val.first->size(); ++i) {
+  for(unsigned short i = 0; i < new_val.first->size(); ++i) {
     (*_valuation.first)[i] = (*new_val.first)[i];
   }
 
-  for(unsigned short i = 1; i <= new_val.second->size(); ++i) {
+  for(unsigned short i = 0; i < new_val.second->size(); ++i) {
     (*_valuation.second)[i] = (*new_val.second)[i];
   }
 }
@@ -300,28 +353,29 @@ void node_t::set_valuation(std::pair<std::shared_ptr<tchecker::clockval_t>, std:
 
 
 clock_rational_value_t
-node_t::max_delay(std::shared_ptr<tchecker::zg::zone_t> zone, clock_rational_value_t max_delay, clock_rational_value_t min_delay)
+node_t::max_delay(tchecker::zg::zone_t & zone, clock_rational_value_t max_delay_value, clock_rational_value_t min_delay, bool first_not_second)
 {
-  auto clone = tchecker::clockval_clone(*_valuation.first);
-  add_delay(clone, *_valuation.first, max_delay);
+  auto used_valuation = (first_not_second) ? _valuation.first : _valuation.second;
+  auto clone = tchecker::clockval_clone(*used_valuation);
+  add_delay(clone, *used_valuation, max_delay_value);
 
-  if(zone->belongs(*clone)) { // if the maximum delay applied is still within zone, this is the maximum delay
-    return max_delay;
+  if(zone.belongs(*clone)) { // if the maximum delay applied is still within zone, this is the maximum delay
+    return max_delay_value;
   }
 
-  add_delay(clone, *_valuation.first, min_delay);
+  add_delay(clone, *used_valuation, min_delay);
 
-  if(!zone->belongs(*clone)) { // if the minimum delay applied is not within zone, this is not a valid range of delays. So return 0.
+  if(!zone.belongs(*clone)) { // if the minimum delay applied is not within zone, this is not a valid range of delays. So return 0.
     return 0;
   }
 
-  if(min_delay + 1 == max_delay) { // if the min_delay is within the zone but max_delay is not, we have to check the value in the center
+  if(min_delay + 1 == max_delay_value) { // if the min_delay is within the zone but max_delay is not, we have to check the value in the center
     
     auto zero_five = min_delay + clock_rational_value_t(1, 2); // clock_rational_value_t(1, 2) = 1/2 = 0.5
     
-    add_delay(clone, *_valuation.first, zero_five);
+    add_delay(clone, *used_valuation, zero_five);
 
-    if(zone->belongs(*clone)) {
+    if(zone.belongs(*clone)) {
       return zero_five;
     } else {
       return min_delay;
@@ -329,11 +383,11 @@ node_t::max_delay(std::shared_ptr<tchecker::zg::zone_t> zone, clock_rational_val
   }
 
   // binary search
-  auto center = (max_delay + min_delay)/2;
+  auto center = (max_delay_value + min_delay)/2;
 
-  auto upper_result = this->max_delay(zone, max_delay, center);
+  auto upper_result = this->max_delay(zone, max_delay_value, center, first_not_second);
 
-  auto lower_result = this->max_delay(zone, center, min_delay);
+  auto lower_result = this->max_delay(zone, center, min_delay, first_not_second);
 
   return std::max(upper_result, lower_result);
 }

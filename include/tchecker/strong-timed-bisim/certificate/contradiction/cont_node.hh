@@ -70,6 +70,12 @@ public:
   inline std::pair<std::shared_ptr<tchecker::clock_constraint_container_t>, std::shared_ptr<tchecker::clock_constraint_container_t>> invariant() const { return _invariant; }
 
   /*!
+   \brief Accessor
+   \return _invariant
+   */
+  inline bool final() const { return _final; }
+
+  /*!
    \brief Equality Operator
    \return whether this is semantically equivalent to other
    */
@@ -114,10 +120,11 @@ public:
    \param vcg2 : the second vcg
   */
   bool is_leaf(tchecker::zg::state_sptr_t & init_1, tchecker::zg::state_sptr_t & init_2, 
-               std::shared_ptr<tchecker::vcg::vcg_t> vcg1, std::shared_ptr<tchecker::vcg::vcg_t> vcg2) const;
+               std::shared_ptr<tchecker::vcg::vcg_t> vcg1, std::shared_ptr<tchecker::vcg::vcg_t> vcg2,
+               clock_rational_value_t max_possible_delay);
 
   /*!
-   \brief generate two zones that contain only this node
+   \brief generate two zones that contain the valuations of this node
    \param vcg1 : the first vcg
    \param vcg2 : the second vcg
    \return a pair. The first zone is the narrowst zone of a symbolic state of the first vcg that only contains _valuation_1 of this node and analogously for the second
@@ -135,7 +142,7 @@ public:
    \note In case no maximum delay exists as there is a non-included upper bound, .5 is used. In case there exists no upper bound, max_delay is used as delay.
    */
   std::pair<clock_rational_value_t, std::shared_ptr<node_t>>
-  max_delay(std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> vcs, clock_rational_value_t max_delay, 
+  max_delay(std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> vcs, clock_rational_value_t max_delay_value, 
             std::shared_ptr<tchecker::vcg::vcg_t> vcg1, std::shared_ptr<tchecker::vcg::vcg_t> vcg2);
 
   /*!
@@ -148,7 +155,7 @@ public:
    \note In case no maximum delay exists as there is a non-included upper bound, .5 is used. In case there exists no upper bound, max_delay is used as delay.
    */
   std::pair<clock_rational_value_t, std::shared_ptr<node_t>>
-  max_delay(std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> vc, clock_rational_value_t max_delay, 
+  max_delay(std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> vc, clock_rational_value_t max_delay_value, 
             std::shared_ptr<tchecker::vcg::vcg_t> vcg1, std::shared_ptr<tchecker::vcg::vcg_t> vcg2);
 
   /*!
@@ -172,13 +179,17 @@ private:
    \brief Helper for max_delay
    */
   clock_rational_value_t
-  max_delay(std::shared_ptr<tchecker::zg::zone_t> zone, clock_rational_value_t max_delay, clock_rational_value_t min_delay);
+  max_delay(tchecker::zg::zone_t & zone, clock_rational_value_t max_delay_value, clock_rational_value_t min_delay, bool first_not_second = true);
 
   std::pair<std::shared_ptr<tchecker::clockval_t>, std::shared_ptr<tchecker::clockval_t>> _valuation;
   // I do not understand how I can access the invariant of a state of a TA. Therefore: Ugly hack.
   const std::pair<std::shared_ptr<tchecker::clock_constraint_container_t>, std::shared_ptr<tchecker::clock_constraint_container_t>> _invariant;
 
   const bool _urgent_clk_exists;
+
+  bool _final;
+  std::set<std::string> _final_symbol;
+  bool _final_first_has_transition;
 
 };
 

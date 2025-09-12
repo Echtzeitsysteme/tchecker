@@ -839,7 +839,7 @@ void add_delay(tchecker::clockval_t *result, tchecker::clockval_t & base, tcheck
 {
   assert(result->size() == base.size());
 
-  for(auto i = 0; i < result->size(); ++i) {
+  for(auto i = 1; i < result->size(); ++i) {
     (*result)[i] = base[i] + delay;
   }
 }

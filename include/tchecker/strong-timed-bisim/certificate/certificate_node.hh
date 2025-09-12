@@ -66,7 +66,7 @@ class node_t {
   */
   inline std::pair<tchecker::ta::state_t, tchecker::ta::state_t> & location_pair() const { return *_location_pair; }
 
- /*!
+  /*!
   \brief Accessor
   \return id in this node
   */
@@ -79,11 +79,19 @@ class node_t {
   */
   void set_id(std::size_t id) { _id = id; }
 
-   /*!
+  /*!
   \brief Accessor
   \return whether this node is initial
   */
   inline bool initial() const { return _initial; }
+
+  /*!
+  \brief Setter
+  \param initial : new initial value of this node
+  \post _initial = initial
+  */
+  void set_initial(bool initial) { _initial = initial; }
+
 
   /*!
   \brief Hash function
@@ -121,7 +129,7 @@ class node_t {
  protected:
   const std::shared_ptr<std::pair<tchecker::ta::state_t, tchecker::ta::state_t>> _location_pair;
   std::size_t _id;
-  const bool _initial;
+  bool _initial;
 };
 
 } // end of namespace certificate

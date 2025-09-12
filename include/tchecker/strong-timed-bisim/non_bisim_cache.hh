@@ -66,7 +66,8 @@ class non_bisim_cache_t {
    \param loc_pair : the pair of TA states
    \param clockval : the valuation of the virtual clocks
    */
-  bool is_cached(std::pair<tchecker::ta::state_t, tchecker::ta::state_t> & loc_pair, std::shared_ptr<tchecker::clockval_t> clockval) const;
+  bool is_cached(std::pair<tchecker::ta::state_t, tchecker::ta::state_t> & loc_pair, std::shared_ptr<tchecker::clockval_t> clockval, 
+                 tchecker::clock_id_t no_of_orig_clks, tchecker::clock_id_t no_of_orig_clks_2, bool first_not_second = true) const;
 
   /*!
    \brief getter

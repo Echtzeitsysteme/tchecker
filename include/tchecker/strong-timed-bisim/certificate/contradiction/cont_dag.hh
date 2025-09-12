@@ -111,17 +111,21 @@ private:
    \param src : the src of the action transition to find
    \return whether the search was successfull
    */
-  bool add_non_bisim_action_transition(tchecker::strong_timed_bisim::non_bisim_cache_t &non_bisim_cache, node_t &src);
+  bool add_non_bisim_action_transition(tchecker::strong_timed_bisim::non_bisim_cache_t &non_bisim_cache, std::shared_ptr<node_t> src);
 
 
   /*!
    \brief adds nodes and edges of other
    \param other : the other dag
+   \param src : where other shall be appended
+   \param trans_1 : where the first vedge between src and the initial of other comes from
+   \param trans_2 : where the second vedge between src and the initial of other comes from
    \post all nodes and edges of other are added to this
    */
-  void add_nodes_and_edges_of(cont_dag_t & other);
+  void add_nodes_and_edges_of(cont_dag_t & other, std::shared_ptr<node_t> src, tchecker::zg::zg_t::sst_t trans_1, tchecker::zg::zg_t::sst_t trans_2);
 
   std::pair<tchecker::zg::state_sptr_t, tchecker::zg::state_sptr_t> _init_states; 
+  std::shared_ptr<node_t> _root;
 
   const std::shared_ptr<std::vector<std::shared_ptr<delay_edge_t>>> _delays;
   const clock_rational_value_t _max_delay;

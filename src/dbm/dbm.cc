@@ -1167,16 +1167,20 @@ void reduce_to_valuation(tchecker::dbm::db_t * dbm, tchecker::clockval_t & valua
   assert(dim == valuation.size());
   assert(tchecker::dbm::satisfies(dbm, dim, valuation));
 
-  for(tchecker::clock_id_t x = 1; x < dim; ++x)
+  for(tchecker::clock_id_t x = 0; x < dim; ++x)
   {
     for(tchecker::clock_id_t y = 0; y < dim; ++y) {
+
+      if(x == y) {
+        continue;
+      }
 
       // we first calculate x - y
       boost::multiprecision::int128_t numerator 
        = valuation[x].numerator()*valuation[y].denominator() - valuation[y].numerator()*valuation[x].denominator();
 
       boost::multiprecision::int128_t denominator
-        = valuation[x].denominator() + valuation[y].denominator();
+        = valuation[x].denominator() * valuation[y].denominator();
         
       if(std::numeric_limits<int64_t>::min() > numerator || std::numeric_limits<int64_t>::max() < numerator ||
           std::numeric_limits<int64_t>::min() > denominator || std::numeric_limits<int64_t>::max() < denominator) {
@@ -1185,15 +1189,18 @@ void reduce_to_valuation(tchecker::dbm::db_t * dbm, tchecker::clockval_t & valua
       }
 
       auto sub = tchecker::clock_rational_value_t(static_cast<int64_t>(numerator), static_cast<int64_t>(denominator));
+
+      assert(0 < sub.denominator()); // should be fulfilled by design
       
-      if(1 == sub.denominator() || -1 == sub.denominator()) { // if the difference is an integer,
+      if(1 == sub.denominator()) { // if the difference is an integer,
         constrain(dbm, dim, x, y, ineq_cmp_t::LE, sub.numerator());
-        constrain(dbm, dim, y, x, ineq_cmp_t::LE, sub.numerator());
+        constrain(dbm, dim, y, x, ineq_cmp_t::LE, -1*sub.numerator());
       } else { // else get the integer such that a < valuation[x] < a+1 and add these constraints to the DBM
         tchecker::integer_t a = valuation[x].numerator() / valuation[x].denominator();
         constrain(dbm, dim, x, 0, ineq_cmp_t::LT, a+1);
         constrain(dbm, dim, 0, x, ineq_cmp_t::LT, -1*a);
       }
+      tchecker::dbm::tighten(dbm, dim);
     }
   }
 

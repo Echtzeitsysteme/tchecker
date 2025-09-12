@@ -56,9 +56,9 @@ tchecker::strong_timed_bisim::stats_t Lieb_et_al::run()
     tchecker::clockbounds::bound_t max_delay = std::max(_A->extrapolation_max(), _B->extrapolation_max());
     stats.init_counterexample(_A, _B, std::get<1>(sst_first[0]), std::get<1>(sst_second[0]), clock_rational_value_t(max_delay, 1));
     stats.counterexample()->create_cont_from_non_bisim_cache(
-                              _non_bisim_cache, 
-                              std::make_shared<tchecker::clock_constraint_container_t>(std::get<2>(sst_first[0])->tgt_invariant_container()), 
-                              std::make_shared<tchecker::clock_constraint_container_t>(std::get<2>(sst_second[0])->tgt_invariant_container()));
+                               _non_bisim_cache, 
+                               std::make_shared<tchecker::clock_constraint_container_t>(std::get<2>(sst_first[0])->tgt_invariant_container()), 
+                               std::make_shared<tchecker::clock_constraint_container_t>(std::get<2>(sst_second[0])->tgt_invariant_container()));
   }
 
   stats.set_end_time();
@@ -158,6 +158,8 @@ std::shared_ptr<algorithm_return_value_t> Lieb_et_al::check_for_virt_bisim(tchec
     }
 
     contradiction->compress();
+
+    _non_bisim_cache.emplace(A_synced, B_synced, contradiction);
 
     auto result = std::make_shared<algorithm_return_value_t>(syncer.revert_sync_with_urgent(A_state, B_state, contradiction), A_state, B_state);
     return result;

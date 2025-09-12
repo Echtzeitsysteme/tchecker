@@ -575,6 +575,7 @@ public:
     /*!
      \brief Default constructor
      */
+    // cppcheck-suppress uninitMemberVar
     values_iterator_t() = default;
 
     /*!
