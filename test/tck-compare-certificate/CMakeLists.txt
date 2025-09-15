@@ -36,20 +36,20 @@ set(DOT_MAX_SIZE 20000)
 # contains arguments passed to the generator script.
 # only append to the tail of this list!
 set(INPUTS
-    strong_timed_bisim_system_tests_edge_case_urgent.sh:
-    strong_timed_bisim_system_tests_edge_case_urgent_non_urgent.sh:
+    strong_timed_bisim_system_tests_edge_case_urgent_cert.sh:
+    strong_timed_bisim_system_tests_edge_case_urgent_non_urgent_cert.sh:
     )
 
 file(RELATIVE_PATH here ${CMAKE_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 message(STATUS "Generating '${here}' tests. This may take a long time.")
 tck_register_testcases("tck-compare-cert-" CHECK_TESTCASES_ savelist TCK_COMPARE_INPUT_FILES ${INPUTS})
 
-list(GET TCK_COMPARE_INPUT_FILES 0 edge_case_urgent)
-list(GET TCK_COMPARE_INPUT_FILES 1 edge_case_urgent_non_urgent)
+list(GET TCK_COMPARE_INPUT_FILES 0 edge_case_urgent_cert)
+list(GET TCK_COMPARE_INPUT_FILES 1 edge_case_urgent_non_urgent_cert)
 
 ## urgent
-create_testcase(edge-case-urgent-self ${edge_case_urgent} ${edge_case_urgent} strong-timed-bisim)
-create_testcase(edge-case-urgent-non-urgent-self ${edge_case_urgent_non_urgent} ${edge_case_urgent_non_urgent} strong-timed-bisim)
-create_testcase(edge-case-urgent-vs-non-urgent ${edge_case_urgent} ${edge_case_urgent_non_urgent} strong-timed-bisim)
+create_testcase(edge-case-urgent-self-cert ${edge_case_urgent_cert} ${edge_case_urgent_cert} strong-timed-bisim)
+create_testcase(edge-case-urgent-non-urgent-self-cert ${edge_case_urgent_non_urgent_cert} ${edge_case_urgent_non_urgent_cert} strong-timed-bisim)
+create_testcase(edge-case-urgent-vs-non-urgent-cert ${edge_case_urgent_cert} ${edge_case_urgent_non_urgent_cert} strong-timed-bisim)
 
 tck_add_savelist(save-compare-certificate ${savelist})
