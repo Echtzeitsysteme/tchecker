@@ -6,14 +6,15 @@ set(Boost_USE_STATIC_LIBS       OFF)  # only find static libs
 set(Boost_USE_DEBUG_LIBS        OFF)  # ignore debug libs and
 set(Boost_USE_RELEASE_LIBS       ON)  # only find release libs
 set(Boost_USE_MULTITHREADED     OFF)
-set(Boost_USE_STATIC_RUNTIME    OFF)
 find_package(Boost OPTIONAL_COMPONENTS json)
 
 if(boost_json_DIR)
   set(USE_BOOST_JSON 1)
+  add_compile_definitions(USE_BOOST_JSON=1)
 else()
   message(NOTICE "*** JSON-based features are disabled")
   set(USE_BOOST_JSON 0)
+  add_compile_definitions(USE_BOOST_JSON=0)
 endif()
 
 option(LIBTCHECKER_ENABLE_SHARED "Build TChecker shared library" OFF)
@@ -44,6 +45,7 @@ link_directories(${Boost_LIBRARY_DIRS})
 
 add_subdirectory(algorithms)
 add_subdirectory(clockbounds)
+add_subdirectory(counter-example)
 add_subdirectory(dbm)
 add_subdirectory(expression)
 add_subdirectory(extrapolation)
@@ -51,9 +53,11 @@ add_subdirectory(fsm)
 add_subdirectory(graph)
 add_subdirectory(parsing)
 add_subdirectory(refzg)
+add_subdirectory(simulate)
 add_subdirectory(statement)
 add_subdirectory(strong-timed-bisim)
 add_subdirectory(syncprod)
+add_subdirectory(syntax-check)
 add_subdirectory(system)
 add_subdirectory(ta)
 add_subdirectory(ts)
@@ -64,6 +68,8 @@ add_subdirectory(vm)
 add_subdirectory(waiting)
 add_subdirectory(zg)
 
+add_subdirectory(publicapi)
+
 set(OTHER_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/basictypes.cc
   ${TCHECKER_INCLUDE_DIR}/tchecker/basictypes.hh
@@ -72,6 +78,7 @@ set(OTHER_SRC
 set(LIBTCHECKER_SRC
   ${ALGORITHMS_SRC}
   ${CLOCKBOUNDS_SRC}
+  ${COUNTER_EXAMPLE_SRC}
   ${DBM_SRC}
   ${EXPRESSION_SRC}
   ${EXTRAPOLATION_SRC}
@@ -79,10 +86,13 @@ set(LIBTCHECKER_SRC
   ${GRAPH_SRC}
   ${OTHER_SRC}
   ${PARSING_SRC}
+  ${PUBLICAPI_SRC}
   ${REFZG_SRC}
+  ${SIMULATE_SRC}
   ${STATEMENT_SRC}
   ${STRONG_TIMED_BISIM_SRC}
   ${SYNCPROD_SRC}
+  ${SYNTAX_CHECK_SRC}
   ${SYSTEM_SRC}
   ${TA_SRC}
   ${TS_SRC}
@@ -106,6 +116,7 @@ if(LIBTCHECKER_ENABLE_SHARED)
   add_library(libtchecker_shared SHARED ${LIBTCHECKER_SRC}
     $<TARGET_OBJECTS:program_parsing_shared>
     $<TARGET_OBJECTS:system_parsing_shared>)
+  target_link_libraries(libtchecker_shared ${Boost_LIBRARIES})
   set_property(TARGET libtchecker_shared PROPERTY OUTPUT_NAME tchecker)
   set_property(TARGET libtchecker_shared PROPERTY CXX_STANDARD 17)
   set_property(TARGET libtchecker_shared PROPERTY CXX_STANDARD_REQUIRED ON)
@@ -117,36 +128,21 @@ endif()
 
 # Build tck-liveness executable
 add_executable(tck-liveness
-  ${CMAKE_CURRENT_SOURCE_DIR}/tck-liveness/counter_example.hh
-  ${CMAKE_CURRENT_SOURCE_DIR}/tck-liveness/tck-liveness.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/tck-liveness/zg-couvscc.hh
-  ${CMAKE_CURRENT_SOURCE_DIR}/tck-liveness/zg-couvscc.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/tck-liveness/zg-ndfs.hh
-  ${CMAKE_CURRENT_SOURCE_DIR}/tck-liveness/zg-ndfs.cc)
+  ${CMAKE_CURRENT_SOURCE_DIR}/tck-liveness/tck-liveness.cc)
 target_link_libraries(tck-liveness libtchecker_static ${Boost_LIBRARIES})
 set_property(TARGET tck-liveness PROPERTY CXX_STANDARD 17)
 set_property(TARGET tck-liveness PROPERTY CXX_STANDARD_REQUIRED ON)
 
 # Build tck-reach executable
 add_executable(tck-reach
-  ${CMAKE_CURRENT_SOURCE_DIR}/tck-reach/concur19.hh
-  ${CMAKE_CURRENT_SOURCE_DIR}/tck-reach/concur19.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/tck-reach/counter_example.hh
-  ${CMAKE_CURRENT_SOURCE_DIR}/tck-reach/tck-reach.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/tck-reach/zg-aLU-covreach.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/tck-reach/zg-aLU-covreach.hh
-  ${CMAKE_CURRENT_SOURCE_DIR}/tck-reach/zg-covreach.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/tck-reach/zg-covreach.hh
-  ${CMAKE_CURRENT_SOURCE_DIR}/tck-reach/zg-reach.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/tck-reach/zg-reach.hh)
+  ${CMAKE_CURRENT_SOURCE_DIR}/tck-reach/tck-reach.cc)
+
 target_link_libraries(tck-reach libtchecker_static ${Boost_LIBRARIES})
 set_property(TARGET tck-reach PROPERTY CXX_STANDARD 17)
 set_property(TARGET tck-reach PROPERTY CXX_STANDARD_REQUIRED ON)
 
 # Build tck-syntax executable
 add_executable(tck-syntax
-  ${CMAKE_CURRENT_SOURCE_DIR}/tck-syntax/syntax-check.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/tck-syntax/syntax-check.hh
   ${CMAKE_CURRENT_SOURCE_DIR}/tck-syntax/tck-syntax.cc)
 target_link_libraries(tck-syntax libtchecker_static ${Boost_LIBRARIES})
 set_property(TARGET tck-syntax PROPERTY CXX_STANDARD 17)
@@ -154,12 +150,6 @@ set_property(TARGET tck-syntax PROPERTY CXX_STANDARD_REQUIRED ON)
 
 # Build tck-simulate executable
 add_executable(tck-simulate
-  ${CMAKE_CURRENT_SOURCE_DIR}/tck-simulate/display.hh
-  ${CMAKE_CURRENT_SOURCE_DIR}/tck-simulate/display.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/tck-simulate/graph.hh
-  ${CMAKE_CURRENT_SOURCE_DIR}/tck-simulate/graph.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/tck-simulate/simulate.hh
-  ${CMAKE_CURRENT_SOURCE_DIR}/tck-simulate/simulate.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/tck-simulate/tck-simulate.cc)
 target_link_libraries(tck-simulate libtchecker_static ${Boost_LIBRARIES})
 set_property(TARGET tck-simulate PROPERTY CXX_STANDARD 17)
@@ -167,9 +157,7 @@ set_property(TARGET tck-simulate PROPERTY CXX_STANDARD_REQUIRED ON)
 
 # Build tck-compare executable
 add_executable(tck-compare
-  ${CMAKE_CURRENT_SOURCE_DIR}/tck-compare/tck-compare.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/tck-compare/vcg-timed-bisim.hh
-  ${CMAKE_CURRENT_SOURCE_DIR}/tck-compare/vcg-timed-bisim.cc)
+  ${CMAKE_CURRENT_SOURCE_DIR}/tck-compare/tck-compare.cc)
 target_link_libraries(tck-compare libtchecker_static ${Boost_LIBRARIES})
 set_property(TARGET tck-compare PROPERTY CXX_STANDARD 17)
 set_property(TARGET tck-compare PROPERTY CXX_STANDARD_REQUIRED ON)

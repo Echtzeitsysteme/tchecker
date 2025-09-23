@@ -13,6 +13,7 @@
 #else
 #include <boost/container_hash/hash.hpp>
 #endif
+#include <boost/multiprecision/cpp_int.hpp>
 
 #include "tchecker/dbm/dbm.hh"
 #include "tchecker/utils/ordering.hh"
@@ -1155,6 +1156,57 @@ bool is_single_valuation(tchecker::dbm::db_t const * dbm, tchecker::clock_id_t d
       return false;
 
   return true;
+}
+
+void reduce_to_valuation(tchecker::dbm::db_t * dbm, tchecker::clockval_t & valuation, tchecker::clock_id_t dim)
+{
+  assert(dbm != nullptr);
+  assert(dim >= 1);
+  assert(tchecker::dbm::is_consistent(dbm, dim));
+  assert(tchecker::dbm::is_tight(dbm, dim));
+  assert(dim == valuation.size());
+  assert(tchecker::dbm::satisfies(dbm, dim, valuation));
+
+  for(tchecker::clock_id_t x = 0; x < dim; ++x)
+  {
+    for(tchecker::clock_id_t y = 0; y < dim; ++y) {
+
+      if(x == y) {
+        continue;
+      }
+
+      // we first calculate x - y
+      boost::multiprecision::int128_t numerator 
+       = valuation[x].numerator()*valuation[y].denominator() - valuation[y].numerator()*valuation[x].denominator();
+
+      boost::multiprecision::int128_t denominator
+        = valuation[x].denominator() * valuation[y].denominator();
+        
+      if(std::numeric_limits<int64_t>::min() > numerator || std::numeric_limits<int64_t>::max() < numerator ||
+          std::numeric_limits<int64_t>::min() > denominator || std::numeric_limits<int64_t>::max() < denominator) {
+        throw std::overflow_error(std::string(__FILE__) + std::string(": ") + std::to_string(__LINE__) + std::string(": ") 
+                                    + "rational subtraction overflow");
+      }
+
+      auto sub = tchecker::clock_rational_value_t(static_cast<int64_t>(numerator), static_cast<int64_t>(denominator));
+
+      assert(0 < sub.denominator()); // should be fulfilled by design
+      
+      if(1 == sub.denominator()) { // if the difference is an integer,
+        constrain(dbm, dim, x, y, ineq_cmp_t::LE, sub.numerator());
+        constrain(dbm, dim, y, x, ineq_cmp_t::LE, -1*sub.numerator());
+      } else { // else get the integer such that a < valuation[x] < a+1 and add these constraints to the DBM
+        tchecker::integer_t a = valuation[x].numerator() / valuation[x].denominator();
+        constrain(dbm, dim, x, 0, ineq_cmp_t::LT, a+1);
+        constrain(dbm, dim, 0, x, ineq_cmp_t::LT, -1*a);
+      }
+      tchecker::dbm::tighten(dbm, dim);
+    }
+  }
+
+  assert(!tchecker::dbm::is_empty_0(dbm, dim));
+  assert(tchecker::dbm::is_tight(dbm, dim));
+  assert(tchecker::dbm::satisfies(dbm, dim, valuation));
 }
 
 /* NB: first implementation provided by Ocan Sankur, several modifications (FH)

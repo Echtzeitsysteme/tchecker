@@ -50,6 +50,8 @@ public:
   */
   tchecker::zg::details::local_m_extrapolation_t & operator=(tchecker::zg::details::local_m_extrapolation_t && e);
 
+  virtual tchecker::clockbounds::bound_t max_value() const override;
+
 protected:
   tchecker::clockbounds::map_t * _m;                                         /*!< clock bounds M map */
   std::shared_ptr<tchecker::clockbounds::local_m_map_t const> _clock_bounds; /*!< local M clock bounds map */

@@ -34,6 +34,31 @@ void stats_t::set_relationship_fulfilled(bool relationship_fulfilled)
   _relationship_fulfilled = relationship_fulfilled;
 }
 
+std::shared_ptr<tchecker::strong_timed_bisim::witness::graph_t> stats_t::witness() const
+{
+  return _witness;
+}
+
+void stats_t::init_witness(std::shared_ptr<tchecker::vcg::vcg_t> const & vcg1, 
+                           std::shared_ptr<tchecker::vcg::vcg_t> const & vcg2)
+{
+  _witness = std::make_shared<tchecker::strong_timed_bisim::witness::graph_t>(vcg1, vcg2);
+}
+
+std::shared_ptr<tchecker::strong_timed_bisim::contra::cont_dag_t> stats_t::counterexample() const
+{
+  return _counterexample;
+}
+
+
+void stats_t::init_counterexample(std::shared_ptr<tchecker::vcg::vcg_t> const & vcg1, 
+                         std::shared_ptr<tchecker::vcg::vcg_t> const & vcg2,
+                         tchecker::zg::state_sptr_t first_init, tchecker::zg::state_sptr_t second_init,
+                         clock_rational_value_t max_delay)
+{
+  _counterexample = std::make_shared<tchecker::strong_timed_bisim::contra::cont_dag_t>(vcg1, vcg2, first_init, second_init, max_delay);
+}
+
 void stats_t::attributes(std::map<std::string, std::string> & m) const {
   tchecker::algorithms::stats_t::attributes(m);
 

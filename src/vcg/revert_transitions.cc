@@ -113,6 +113,9 @@ revert_action_trans(const tchecker::zg::zone_t & zone,
 std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t>
 revert_epsilon_trans(const tchecker::zg::zone_t & zone, const tchecker::zg::zone_t & zone_eps, const tchecker::virtual_constraint::virtual_constraint_t & phi_split)
 {
+  assert(zone <= zone_eps);
+  
+  // result = extract_vc(zone \cap (zone_eps && phi_split)^down)
 
   std::shared_ptr<tchecker::zg::zone_t> zone_eps_copy = tchecker::zg::factory(zone_eps);
 
@@ -130,7 +133,7 @@ revert_epsilon_trans(const tchecker::zg::zone_t & zone, const tchecker::zg::zone
 
   std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> result
     = tchecker::virtual_constraint::factory(zone_copy, phi_split.get_no_of_virtual_clocks());
-
+  
   return result;
 }
 

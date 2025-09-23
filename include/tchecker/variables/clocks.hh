@@ -1023,6 +1023,16 @@ tchecker::clock_rational_value_t delay(tchecker::clockval_t const & src,
                                        tchecker::clock_constraint_container_t const & guard,
                                        tchecker::clock_reset_container_t const & reset, tchecker::clockval_t const & tgt);
 
+/*!
+ \brief add a delay to a clock valuation
+ \param result : the result will be stored here. MUST BE ALLOCATED!
+ \param base : the clock valuation to which the delay is added
+ \param delay : the delay
+ \note result and base must have the same size
+ \post result[i] = base[i] + delay, except for i = 0.
+ */
+void add_delay(tchecker::clockval_t *result, tchecker::clockval_t & base, tchecker::clock_rational_value_t delay);
+
 } // end of namespace tchecker
 
 #endif // TCHECKER_CLOCKS_HH

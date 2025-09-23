@@ -241,7 +241,6 @@ public:
     v->~intval_t();
   }
 
-protected:
   /*!
    \brief Constructor
    \param size : intvars valuation size

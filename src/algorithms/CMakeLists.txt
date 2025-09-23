@@ -2,19 +2,23 @@
 #
 # See files AUTHORS and LICENSE for copyright details.
 
+add_subdirectory(concur19)
 add_subdirectory(couvreur_scc)
 add_subdirectory(covreach)
 add_subdirectory(ndfs)
 add_subdirectory(path)
 add_subdirectory(reach)
+add_subdirectory(alu_covreach)
 
 set(ALGORITHMS_SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/search_order.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/stats.cc
     ${TCHECKER_INCLUDE_DIR}/tchecker/algorithms/search_order.hh
     ${TCHECKER_INCLUDE_DIR}/tchecker/algorithms/stats.hh
+    ${CONCUR19_SRC}
     ${COUVREUR_SCC_SRC}
     ${COVREACH_SRC}
     ${NDFS_SRC}
     ${REACH_SRC}
+    ${ALU_COVREACH_SRC}
     PARENT_SCOPE)

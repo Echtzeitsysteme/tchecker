@@ -19,6 +19,25 @@ global_lu_extrapolation_t::global_lu_extrapolation_t(
 {
 }
 
+tchecker::clockbounds::bound_t global_lu_extrapolation_t::max_value() const
+{
+  tchecker::clockbounds::bound_t result = 0;
+
+  for(tchecker::clockbounds::bound_t cur : this->_clock_bounds->L()) {
+    if(cur > result) {
+      result = cur;
+    }
+  }
+
+  for(tchecker::clockbounds::bound_t cur : this->_clock_bounds->U()) {
+    if(cur > result) {
+      result = cur;
+    }
+  }
+
+  return result;
+}
+
 } // end of namespace details
 
 /* global_extra_lu_t */

@@ -887,6 +887,12 @@ public:
    */
   inline void run_extrapolation(tchecker::dbm::db_t *dbm, tchecker::clock_id_t dim, tchecker::vloc_t const & vloc) const { _non_enabled_extrapolation->extrapolate(dbm, dim, vloc); }
 
+  /*!
+   \brief returns the maximum value of the extrapolation
+   \return max_value
+   */
+  tchecker::clockbounds::bound_t extrapolation_max();
+
   // Inspector
 
   /*!
@@ -983,7 +989,7 @@ public:
 
   /*!
    \brief clones a state of this zg
-   \param the state to clone
+   \param to_clone : the state to clone
    \brief the cloned state
    */
   inline tchecker::zg::state_sptr_t clone_state(tchecker::zg::state_sptr_t const & to_clone) {return _state_allocator.clone(*to_clone);}
@@ -1001,7 +1007,7 @@ protected:
   std::shared_ptr<tchecker::ta::system_t const> _system;                        /*!< System of timed processes */
   enum tchecker::ts::sharing_type_t _sharing_type;                              /*!< Sharing of state/transition components */
   std::shared_ptr<tchecker::zg::semantics_t> _semantics;                        /*!< Zone semantics */
-  std::shared_ptr<tchecker::zg::extrapolation_t> _extrapolation;                /*!< Zone extrapolation. Is "no_extrapolation if enable_extrapolation is set to false in the constructor*/
+  std::shared_ptr<tchecker::zg::extrapolation_t> _extrapolation;                /*!< Zone extrapolation. Is "no_extrapolation" if enable_extrapolation is set to false in the constructor*/
   std::shared_ptr<tchecker::zg::extrapolation_t> _non_enabled_extrapolation;    /*!< if enabled_extrapolation, its the same as _extrapolation. Otherwise it is the actual used extrapolation*/
   tchecker::zg::state_pool_allocator_t _state_allocator;                        /*!< Pool allocator of states */
   tchecker::zg::transition_pool_allocator_t _transition_allocator;              /*! Pool allocator of transitions */

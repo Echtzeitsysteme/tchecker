@@ -13,6 +13,9 @@
 #include "tchecker/algorithms/stats.hh"
 #include "tchecker/zg/state.hh"
 
+#include "tchecker/strong-timed-bisim/certificate/witness/witness_graph.hh"
+#include "tchecker/strong-timed-bisim/certificate/contradiction/cont_dag.hh"
+
 /*!
  \file stats.hh
  \brief Statistics for comparison algorithm
@@ -59,6 +62,34 @@ public:
   void set_relationship_fulfilled(bool relationship_fulfilled);
 
   /*!
+   \brief Accessor
+   \return Reference to the witness
+  */
+  std::shared_ptr<tchecker::strong_timed_bisim::witness::graph_t> witness() const;
+
+  /*!
+   \brief Init witness
+   \post _witness is an empty graph
+  */
+  void init_witness(std::shared_ptr<tchecker::vcg::vcg_t> const & vcg1, 
+                    std::shared_ptr<tchecker::vcg::vcg_t> const & vcg2);
+
+  /*!
+   \brief Accessor
+   \return Reference to the counterexample
+  */
+  std::shared_ptr<tchecker::strong_timed_bisim::contra::cont_dag_t> counterexample() const;
+
+  /*!
+   \brief Init Counterexample
+   \post _counterexample is an empty dag
+   */
+  void init_counterexample(std::shared_ptr<tchecker::vcg::vcg_t> const & vcg1, 
+                           std::shared_ptr<tchecker::vcg::vcg_t> const & vcg2,
+                           tchecker::zg::state_sptr_t first_init, tchecker::zg::state_sptr_t second_init,
+                           clock_rational_value_t max_delay);
+
+  /*!
    \brief Extract statistics as attributes (key, value)
    \param m : attributes map
    \post every statistics has been added to m
@@ -67,7 +98,9 @@ public:
 
 private:
   long _visited_pair_of_states;  /*!< Number of visited pairs of states */
-  bool _relationship_fulfilled;  /*< Whether the relationship is fulfilled */
+  bool _relationship_fulfilled;  /*!< Whether the relationship is fulfilled */
+  std::shared_ptr<tchecker::strong_timed_bisim::witness::graph_t> _witness; /*!< If a witness shall be produced, then it contains it */
+  std::shared_ptr<tchecker::strong_timed_bisim::contra::cont_dag_t> _counterexample; /*!< If a counterexample shall be produced, then it contains it */
 };
 
 } // end of namespace strong_timed_bisim

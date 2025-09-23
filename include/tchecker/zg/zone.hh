@@ -42,8 +42,6 @@ namespace zg {
 class zone_t : public tchecker::cached_object_t {
 public:
 
-  
-
   /*!
    \brief Assignment operator
    \param zone : a DBM zone

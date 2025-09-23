@@ -53,6 +53,8 @@ public:
   */
   tchecker::zg::details::local_lu_extrapolation_t & operator=(tchecker::zg::details::local_lu_extrapolation_t && e);
 
+  virtual tchecker::clockbounds::bound_t max_value() const override;
+
 protected:
   tchecker::clockbounds::map_t * _l;                                          /*!< clock bounds L map */
   tchecker::clockbounds::map_t * _u;                                          /*!< clock bounds U map */
