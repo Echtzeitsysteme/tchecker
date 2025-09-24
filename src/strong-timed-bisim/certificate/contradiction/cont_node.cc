@@ -355,6 +355,11 @@ void node_t::set_valuation(std::pair<std::shared_ptr<tchecker::clockval_t>, std:
 clock_rational_value_t
 node_t::max_delay(tchecker::zg::zone_t & zone, clock_rational_value_t max_delay_value, clock_rational_value_t min_delay, bool first_not_second)
 {
+  assert(min_delay >= 0);
+  assert(max_delay_value >= 0);
+  assert(max_delay_value >= min_delay);
+  assert(min_delay.denominator() == 1 || min_delay.denominator() == -1);
+  assert(max_delay_value.denominator() == 1 || max_delay_value.denominator() == -1);
   auto used_valuation = (first_not_second) ? _valuation.first : _valuation.second;
   auto clone = tchecker::clockval_clone(*used_valuation);
   add_delay(clone, *used_valuation, max_delay_value);
@@ -384,6 +389,10 @@ node_t::max_delay(tchecker::zg::zone_t & zone, clock_rational_value_t max_delay_
 
   // binary search
   auto center = (max_delay_value + min_delay)/2;
+
+  if(center.denominator() != 1 && center.denominator() != -1) {
+    center = (max_delay_value + min_delay + 1)/2;
+  }
 
   auto upper_result = this->max_delay(zone, max_delay_value, center, first_not_second);
 
