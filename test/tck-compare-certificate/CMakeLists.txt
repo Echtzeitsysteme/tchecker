@@ -82,12 +82,14 @@ create_testcase(edge-case-urgent-self-cert ${edge_case_urgent_cert} ${edge_case_
 create_testcase(edge-case-urgent-non-urgent-self-cert ${edge_case_urgent_non_urgent_cert} ${edge_case_urgent_non_urgent_cert} strong-timed-bisim)
 create_testcase(edge-case-urgent-vs-non-urgent-cert ${edge_case_urgent_cert} ${edge_case_urgent_non_urgent_cert} strong-timed-bisim)
 
-# av-protocol
-create_testcase(av-protocol-self-cert ${benchmark_determ_av-protocol_cert} ${benchmark_determ_av-protocol_cert} strong-timed-bisim)
-create_testcase(av-protocol-av-protocol-bisim-cert ${benchmark_determ_av-protocol_cert} ${benchmark_determ_av-protocol-mutant-bisim_cert} strong-timed-bisim)
-create_testcase(av-protocol-av-protocol-non-bisim-changed-guard-cert ${benchmark_determ_av-protocol_cert} ${benchmark_determ_av-protocol-mutant-non-bisim-changed-guard_cert} strong-timed-bisim)
-create_testcase(av-protocol-av-protocol-non-bisim-changed-invariant-cert ${benchmark_determ_av-protocol_cert} ${benchmark_determ_av-protocol-mutant-non-bisim-changed-inv_cert} strong-timed-bisim)
-create_testcase(av-protocol-av-protocol-non-bisim-removed-reset-cert ${benchmark_determ_av-protocol_cert} ${benchmark_determ_av-protocol-mutant-non-bisim-rm-reset_cert} strong-timed-bisim)
+# av-protocol (can only be used for int size > 16, since the largest occuring number, 50000, is too large)
+if(NOT USEINT16)
+    create_testcase(av-protocol-self-cert ${benchmark_determ_av-protocol_cert} ${benchmark_determ_av-protocol_cert} strong-timed-bisim)
+    create_testcase(av-protocol-av-protocol-bisim-cert ${benchmark_determ_av-protocol_cert} ${benchmark_determ_av-protocol-mutant-bisim_cert} strong-timed-bisim)
+    create_testcase(av-protocol-av-protocol-non-bisim-changed-guard-cert ${benchmark_determ_av-protocol_cert} ${benchmark_determ_av-protocol-mutant-non-bisim-changed-guard_cert} strong-timed-bisim)
+    create_testcase(av-protocol-av-protocol-non-bisim-changed-invariant-cert ${benchmark_determ_av-protocol_cert} ${benchmark_determ_av-protocol-mutant-non-bisim-changed-inv_cert} strong-timed-bisim)
+    create_testcase(av-protocol-av-protocol-non-bisim-removed-reset-cert ${benchmark_determ_av-protocol_cert} ${benchmark_determ_av-protocol-mutant-non-bisim-rm-reset_cert} strong-timed-bisim)
+endif()
 
 # CA
 create_testcase(ca-self-cert ${benchmark_determ_collision-avoidance_cert} ${benchmark_determ_collision-avoidance_cert} strong-timed-bisim)
