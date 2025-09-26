@@ -199,8 +199,12 @@ bool cont_dag_t::add_non_bisim_action_transition(tchecker::strong_timed_bisim::n
 
         std::shared_ptr<node_t> synced_init_node 
           = std::make_shared<node_t>(*cur_init_node);
-        
-        synced_init_node->synchronize();
+
+        synced_init_node->synchronize(); 
+          
+        if (nullptr != find_node(synced_init_node)) { // cycle detected?
+          continue;
+        }
 
         if(non_bisim_cache.is_cached(synced_init_node->location_pair(), synced_init_node->valuation().first, _vcg1->get_no_of_original_clocks(), _vcg2->get_no_of_original_clocks())) {
           return_values[idx_1][idx_2] = cur_sub_dag->create_cont_from_non_bisim_cache(non_bisim_cache, *cur_init_node);
