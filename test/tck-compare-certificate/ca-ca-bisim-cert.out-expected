@@ -1,0 +1,26 @@
+digraph collision_avoidance.xml_collision_avoidance.xml {
+  0 [first_intval="", first_vloc="<s2_0>", initial="true", second_intval="", second_vloc="<s2_0>", zones="(0<=Process_clock_c3_1 && 0<=Process_clock_c3_2 && Process_clock_c3_1==Process_clock_c3_2), (2<=Process_clock_c3_1 && 0<=Process_clock_c3_2 && 2<=Process_clock_c3_1-Process_clock_c3_2)"]
+  1 [first_intval="", first_vloc="<s2_5>", initial="false", second_intval="", second_vloc="<s2_5>", zones="(2<=Process_clock_c3_1 && 2<=Process_clock_c3_2 && Process_clock_c3_1==Process_clock_c3_2)"]
+  2 [first_intval="", first_vloc="<s2_4>", initial="false", second_intval="", second_vloc="<s2_4>", zones="(1<=Process_clock_c3_1 && 1<=Process_clock_c3_2 && Process_clock_c3_1==Process_clock_c3_2)"]
+  3 [first_intval="", first_vloc="<s2_1>", initial="false", second_intval="", second_vloc="<s2_1>", zones="(0<=Process_clock_c3_1 && 0<=Process_clock_c3_2 && Process_clock_c3_1==Process_clock_c3_2)"]
+  4 [first_intval="", first_vloc="<s2_2>", initial="false", second_intval="", second_vloc="<s2_2>", zones="(0<=Process_clock_c3_1 && 0<=Process_clock_c3_2 && Process_clock_c3_1==Process_clock_c3_2)"]
+  5 [first_intval="", first_vloc="<s2_3>", initial="false", second_intval="", second_vloc="<s2_3>", zones="(0<=Process_clock_c3_1 && 0<=Process_clock_c3_2 && Process_clock_c3_1==Process_clock_c3_2)"]
+  2 -> 2 [first_vedge="<Process@Process__from_medium_slave_recv>", first_vedge_prov="(Process_clock_c3 <= 2)", second_vedge="<Process@Process__from_medium_slave_recv>", second_vedge_prov="(Process_clock_c3 <= 2)"]
+  1 -> 0 [first_vedge="<Process@Process__empty_slave_recv>", second_vedge="<Process@Process__empty_slave_recv>", second_vedge_do="Process_clock_c3=0"]
+  2 -> 1 [first_vedge="<Process@Process__to_medium_slave_emit>", first_vedge_prov="(Process_clock_c3 == 2)", second_vedge="<Process@Process__to_medium_slave_emit>", second_vedge_prov="(Process_clock_c3 == 2)"]
+  5 -> 2 [first_vedge="<Process@Process__in_2_recv>", first_vedge_prov="(Process_clock_c3 == 1)", second_vedge="<Process@Process__in_2_recv>", second_vedge_prov="(Process_clock_c3 == 1)"]
+  3 -> 5 [first_vedge="<Process@Process_a_emit>", first_vedge_prov="(Process_clock_c3 == 0)", second_vedge="<Process@Process_a_emit>", second_vedge_prov="(Process_clock_c3 == 0)"]
+  4 -> 4 [first_vedge="<Process@Process__from_medium_slave_recv>", first_vedge_prov="(Process_clock_c3 <= 2)", second_vedge="<Process@Process__from_medium_slave_recv>", second_vedge_prov="(Process_clock_c3 <= 2)"]
+  4 -> 0 [first_vedge="<Process@Process_a_emit>", first_vedge_prov="(Process_clock_c3 == 2)", second_vedge="<Process@Process_a_emit>", second_vedge_prov="(Process_clock_c3 == 2)"]
+  3 -> 4 [first_vedge="<Process@Process__out_2_emit>", first_vedge_prov="(Process_clock_c3 == 0)", second_vedge="<Process@Process__out_2_emit>", second_vedge_prov="(Process_clock_c3 == 0)"]
+  3 -> 0 [first_vedge="<Process@Process__data1_recv>", first_vedge_prov="(Process_clock_c3 == 0)", second_vedge="<Process@Process__data1_recv>", second_vedge_prov="(Process_clock_c3 == 0)"]
+  3 -> 0 [first_vedge="<Process@Process__data2_recv>", first_vedge_prov="(Process_clock_c3 == 0)", second_vedge="<Process@Process__data2_recv>", second_vedge_prov="(Process_clock_c3 == 0)"]
+  3 -> 0 [first_vedge="<Process@Process__data3_recv>", first_vedge_prov="(Process_clock_c3 == 0)", second_vedge="<Process@Process__data3_recv>", second_vedge_prov="(Process_clock_c3 == 0)"]
+  3 -> 0 [first_vedge="<Process@Process__data0_recv>", first_vedge_prov="(Process_clock_c3 == 0)", second_vedge="<Process@Process__data0_recv>", second_vedge_prov="(Process_clock_c3 == 0)"]
+  0 -> 3 [first_vedge="<Process@Process__from_medium_slave_recv>", first_vedge_do="Process_clock_c3=0", second_vedge="<Process@Process__from_medium_slave_recv>", second_vedge_do="Process_clock_c3=0"]
+  0 -> 3 [first_vedge="<Process@Process__from_medium_slave_recv>", first_vedge_do="Process_clock_c3=0", second_vedge="<Process@Process__from_medium_slave_recv>", second_vedge_do="Process_clock_c3=0"]
+}
+MEMORY_MAX_RSS  xxxx
+RELATIONSHIP_FULFILLED true
+RUNNING_TIME_SECONDS  xxxx
+VISITED_PAIR_OF_STATES 16

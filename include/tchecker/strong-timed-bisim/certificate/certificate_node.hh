@@ -102,7 +102,7 @@ class node_t {
   /*!
    \brief Less-than ordering on nodes based on lexical ordering
    \param other : an edge
-   \return true if lhs is less-than rhs w.r.t. the tuple of edges in e1 and e2
+   \return true if lhs is less-than rhs w.r.t. the tuple of locs
    \note id and initial are not part of this comparison!
   */
   bool operator<(const node_t & other) const;
@@ -110,7 +110,7 @@ class node_t {
   /*!
    \brief equal operator
    \param other : an edge type
-   \return true if lhs is less-than rhs w.r.t. the tuple of edges in e1 and e2
+   \return true if lhs is less-than rhs w.r.t. the tuple of locs
    \note id and initial are not part of this comparison!
   */
   bool operator==(const node_t & other) const;

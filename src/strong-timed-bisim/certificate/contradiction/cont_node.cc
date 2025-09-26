@@ -231,8 +231,11 @@ bool node_t::is_leaf(tchecker::zg::state_sptr_t & init_1, tchecker::zg::state_sp
     _final = true;
     _final_first_has_transition = (first > second);
     double symbol = _final_first_has_transition ? static_cast<double>(first.numerator()) / first.denominator() : static_cast<double>(second.numerator()) / second.denominator();
+    symbol *= 10;
+    int symbol_cut = std::round(symbol);
+    
     std::ostringstream oss;
-    oss << std::setprecision(1) << symbol;
+    oss << (symbol_cut/10);
 
     _final_symbol.emplace(oss.str());
     return true;

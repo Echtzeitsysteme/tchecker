@@ -38,6 +38,21 @@ set(DOT_MAX_SIZE 20000)
 set(INPUTS
     strong_timed_bisim_system_tests_edge_case_urgent_cert.sh:
     strong_timed_bisim_system_tests_edge_case_urgent_non_urgent_cert.sh:
+    strong_timed_bisim_benchmarks/deterministic/av-protocol.sh:
+    strong_timed_bisim_benchmarks/deterministic/av-protocol-mutants/av-protocol-bisim.sh:
+    strong_timed_bisim_benchmarks/deterministic/av-protocol-mutants/av-protocol-non-bisim-changed-guard.sh:
+    strong_timed_bisim_benchmarks/deterministic/av-protocol-mutants/av-protocol-non-bisim-changed-invariant.sh:
+    strong_timed_bisim_benchmarks/deterministic/av-protocol-mutants/av-protocol-non-bisim-removed-reset.sh:
+    strong_timed_bisim_benchmarks/deterministic/collision-avoidance.sh:
+    strong_timed_bisim_benchmarks/deterministic/collision-avoidance-mutants/collision-avoidance-bisim.sh:
+    strong_timed_bisim_benchmarks/deterministic/collision-avoidance-mutants/collision-avoidance-non-bisim-changed-guard.sh:
+    strong_timed_bisim_benchmarks/deterministic/collision-avoidance-mutants/collision-avoidance-non-bisim-changed-invariant.sh:
+    strong_timed_bisim_benchmarks/deterministic/collision-avoidance-mutants/collision-avoidance-non-bisim-removed-reset.sh:
+    strong_timed_bisim_benchmarks/deterministic/ieee-rcp.sh:
+    strong_timed_bisim_benchmarks/deterministic/ieee-rcp-mutants/ieee-rcp-bisim.sh:
+    strong_timed_bisim_benchmarks/deterministic/ieee-rcp-mutants/ieee-rcp-non-bisim-changed-guard.sh:
+    strong_timed_bisim_benchmarks/deterministic/ieee-rcp-mutants/ieee-rcp-non-bisim-changed-invariant.sh:
+    strong_timed_bisim_benchmarks/deterministic/ieee-rcp-mutants/ieee-rcp-non-bisim-removed-reset.sh:
     )
 
 file(RELATIVE_PATH here ${CMAKE_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR})
@@ -46,10 +61,46 @@ tck_register_testcases("tck-compare-cert-" CHECK_TESTCASES_ savelist TCK_COMPARE
 
 list(GET TCK_COMPARE_INPUT_FILES 0 edge_case_urgent_cert)
 list(GET TCK_COMPARE_INPUT_FILES 1 edge_case_urgent_non_urgent_cert)
+list(GET TCK_COMPARE_INPUT_FILES 2 benchmark_determ_av-protocol_cert)
+list(GET TCK_COMPARE_INPUT_FILES 3 benchmark_determ_av-protocol-mutant-bisim_cert)
+list(GET TCK_COMPARE_INPUT_FILES 4 benchmark_determ_av-protocol-mutant-non-bisim-changed-guard_cert)
+list(GET TCK_COMPARE_INPUT_FILES 5 benchmark_determ_av-protocol-mutant-non-bisim-changed-inv_cert)
+list(GET TCK_COMPARE_INPUT_FILES 6 benchmark_determ_av-protocol-mutant-non-bisim-rm-reset_cert)
+list(GET TCK_COMPARE_INPUT_FILES 7 benchmark_determ_collision-avoidance_cert)
+list(GET TCK_COMPARE_INPUT_FILES 8 benchmark_determ_collision-avoidance-mutant-bisim_cert)
+list(GET TCK_COMPARE_INPUT_FILES 9 benchmark_determ_collision-avoidance-mutant-non-bisim-changed-guard_cert)
+list(GET TCK_COMPARE_INPUT_FILES 10 benchmark_determ_collision-avoidance-mutant-non-bisim-changed-inv_cert)
+list(GET TCK_COMPARE_INPUT_FILES 11 benchmark_determ_collision-avoidance-mutant-non-bisim-rm-reset_cert)
+list(GET TCK_COMPARE_INPUT_FILES 12 benchmark_determ_ieee-rcp_cert)
+list(GET TCK_COMPARE_INPUT_FILES 13 benchmark_determ_ieee-rcp-mutant-bisim_cert)
+list(GET TCK_COMPARE_INPUT_FILES 14 benchmark_determ_ieee-rcp-mutant-non-bisim-changed-guard_cert)
+list(GET TCK_COMPARE_INPUT_FILES 15 benchmark_determ_ieee-rcp-mutant-non-bisim-changed-inv_cert)
+list(GET TCK_COMPARE_INPUT_FILES 16 benchmark_determ_ieee-rcp-mutant-non-bisim-rm-reset_cert)
 
 ## urgent
 create_testcase(edge-case-urgent-self-cert ${edge_case_urgent_cert} ${edge_case_urgent_cert} strong-timed-bisim)
 create_testcase(edge-case-urgent-non-urgent-self-cert ${edge_case_urgent_non_urgent_cert} ${edge_case_urgent_non_urgent_cert} strong-timed-bisim)
 create_testcase(edge-case-urgent-vs-non-urgent-cert ${edge_case_urgent_cert} ${edge_case_urgent_non_urgent_cert} strong-timed-bisim)
+
+# av-protocol
+create_testcase(av-protocol-self-cert ${benchmark_determ_av-protocol_cert} ${benchmark_determ_av-protocol_cert} strong-timed-bisim)
+create_testcase(av-protocol-av-protocol-bisim-cert ${benchmark_determ_av-protocol_cert} ${benchmark_determ_av-protocol-mutant-bisim_cert} strong-timed-bisim)
+create_testcase(av-protocol-av-protocol-non-bisim-changed-guard-cert ${benchmark_determ_av-protocol_cert} ${benchmark_determ_av-protocol-mutant-non-bisim-changed-guard_cert} strong-timed-bisim)
+create_testcase(av-protocol-av-protocol-non-bisim-changed-invariant-cert ${benchmark_determ_av-protocol_cert} ${benchmark_determ_av-protocol-mutant-non-bisim-changed-inv_cert} strong-timed-bisim)
+create_testcase(av-protocol-av-protocol-non-bisim-removed-reset-cert ${benchmark_determ_av-protocol_cert} ${benchmark_determ_av-protocol-mutant-non-bisim-rm-reset_cert} strong-timed-bisim)
+
+# CA
+create_testcase(ca-self-cert ${benchmark_determ_collision-avoidance_cert} ${benchmark_determ_collision-avoidance_cert} strong-timed-bisim)
+create_testcase(ca-ca-bisim-cert ${benchmark_determ_collision-avoidance_cert} ${benchmark_determ_collision-avoidance-mutant-bisim_cert} strong-timed-bisim)
+create_testcase(ca-ca-non-bisim-changed-guard-cert ${benchmark_determ_collision-avoidance_cert} ${benchmark_determ_collision-avoidance-mutant-non-bisim-changed-guard_cert} strong-timed-bisim)
+create_testcase(ca-ca-non-bisim-changed-invariant-cert ${benchmark_determ_collision-avoidance_cert} ${benchmark_determ_collision-avoidance-mutant-non-bisim-changed-inv_cert} strong-timed-bisim)
+create_testcase(ca-ca-non-bisim-removed-reset-cert ${benchmark_determ_collision-avoidance_cert} ${benchmark_determ_collision-avoidance-mutant-non-bisim-rm-reset_cert} strong-timed-bisim)
+
+# ieee-rcp
+create_testcase(ieee-rcp-self-cert ${benchmark_determ_ieee-rcp_cert} ${benchmark_determ_ieee-rcp_cert} strong-timed-bisim)
+create_testcase(ieee-rcp-ieee-rcp-bisim-cert ${benchmark_determ_ieee-rcp_cert} ${benchmark_determ_ieee-rcp-mutant-bisim_cert} strong-timed-bisim)
+create_testcase(ieee-rcp-ieee-rcp-non-bisim-changed-guard-cert ${benchmark_determ_ieee-rcp_cert} ${benchmark_determ_ieee-rcp-mutant-non-bisim-changed-guard_cert} strong-timed-bisim)
+create_testcase(ieee-rcp-ieee-rcp-non-bisim-changed-invariant-cert ${benchmark_determ_ieee-rcp_cert} ${benchmark_determ_ieee-rcp-mutant-non-bisim-changed-inv_cert} strong-timed-bisim)
+create_testcase(ieee-rcp-ieee-rcp-non-bisim-removed-reset-cert ${benchmark_determ_ieee-rcp_cert} ${benchmark_determ_ieee-rcp-mutant-non-bisim-rm-reset_cert} strong-timed-bisim)
 
 tck_add_savelist(save-compare-certificate ${savelist})
