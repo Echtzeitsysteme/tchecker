@@ -4,19 +4,30 @@
 #
 # See files AUTHORS and LICENSE for copyright details.
 
-function usage() {
-    echo "Usage: width";
-    echo "       depth (max 26)";
-    echo "       no of clocks";
+usage() {
+    echo "Usage: $0 <width> <depth (max 26)> <no_of_clocks> [-c]"
+    echo "  -c    mutate the last transition"
 }
 
-if [ $# -eq 3 ]; then
-    width=$1
-    depth=$2
-    clk=$3
-else
+# Need 3 or 4 arguments
+if [[ $# -lt 3 || $# -gt 4 ]]; then
     usage
     exit 1
+fi
+
+width=$1
+depth=$2
+clk=$3
+mutate=false
+
+if [[ $# -eq 4 ]]; then
+    if [[ $4 == "-c" ]]; then
+        mutate=true
+    else
+        echo "Unknown option: $4"
+        usage
+        exit 1
+    fi
 fi
 
 if [ $depth -ge 27 ]; then
@@ -81,13 +92,18 @@ for ((i=1; i < depth; i++)); do
     ord=$(printf "%d" "'$char")
     ((ord++))
     new_char=$(printf \\$(printf "%03o" "$ord"))
-    for((j=0; j < width**(i-1); j++)); do
+    for ((j=0; j < width**(i-1); j++)); do
         random=$(( RANDOM % clk ))
         target=$(( ${j} * ${width} ))
         low=${char,,}
-        for ((k=0; k < width; k++)); do
-          echo "edge:artificial_process_${width}_${depth}_${clk}:loc_${char}_${j}:loc_${new_char}_${target}:${low}_${j}{provided:x[${random}]<=$i}"
-          target=$(( target + 1 ))
+        for ((k=0; k < width; k++)); do          
+            if (( depth - 1 == i && (width**(i-1)) - 1 == j && width-1 == k )) && [[ true == $mutate ]]; then
+                iplusone=$(( i+1 ))
+                echo "edge:artificial_process_${width}_${depth}_${clk}:loc_${char}_${j}:loc_${new_char}_${target}:${low}_${j}{provided:x[${random}]<=${iplusone}}"
+            else
+                echo "edge:artificial_process_${width}_${depth}_${clk}:loc_${char}_${j}:loc_${new_char}_${target}:${low}_${j}{provided:x[${random}]<=${i}}"
+                target=$(( target + 1 ))
+            fi
         done  
     done
     char=${new_char}
