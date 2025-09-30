@@ -92,12 +92,13 @@ for ((i=1; i < depth; i++)); do
     ord=$(printf "%d" "'$char")
     ((ord++))
     new_char=$(printf \\$(printf "%03o" "$ord"))
-    for ((j=0; j < width**(i-1); j++)); do
+    pow=$(( width**(i-1) ))
+    for ((j=0; j < pow; j++)); do
         random=$(( RANDOM % clk ))
         target=$(( ${j} * ${width} ))
         low=${char,,}
         for ((k=0; k < width; k++)); do          
-            if (( depth - 1 == i && (width**(i-1)) - 1 == j && width-1 == k )) && [[ true == $mutate ]]; then
+            if (( depth - 1 == i && pow - 1 == j && width-1 == k )) && [[ true == $mutate ]]; then
                 iplusone=$(( i+1 ))
                 echo "edge:artificial_process_${width}_${depth}_${clk}:loc_${char}_${j}:loc_${new_char}_${target}:${low}_${j}{provided:x[${random}]<=${iplusone}}"
             else
