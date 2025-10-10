@@ -83,7 +83,7 @@ bool algorithm_return_value_t::contradiction_free()
 std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> const
 algorithm_return_value_t::get_contradictions()
 {
-  return std::make_shared<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(*_contradictions);
+  return _contradictions;
 }
 
 void algorithm_return_value_t::add_to_contradictions(tchecker::virtual_constraint::virtual_constraint_t& to_add)

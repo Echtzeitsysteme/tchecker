@@ -159,6 +159,14 @@ std::shared_ptr<algorithm_return_value_t> Lieb_et_al::check_for_virt_bisim(tchec
 
     contradiction->compress();
 
+    // std::cout << __FILE__ << ": " << __LINE__ << ": emplace into non_bisim_cache (eps): " << std::endl;
+    // std::cout << __FILE__ << ": " << __LINE__ << ": (" << _A->system().as_system_system().location(A_synced->vloc()[0])->name() << ", ";
+    // std::cout << _B->system().as_system_system().location(B_synced->vloc()[0])->name() << ")" << std::endl;
+
+    // for(auto vc : *contradiction) {
+    //   tchecker::dbm::output_matrix(std::cout, vc->dbm(), vc->dim());
+    // }
+
     _non_bisim_cache.emplace(A_synced, B_synced, contradiction);
 
     auto result = std::make_shared<algorithm_return_value_t>(syncer.revert_sync_with_urgent(A_state, B_state, contradiction), A_state, B_state);
@@ -199,10 +207,28 @@ std::shared_ptr<algorithm_return_value_t> Lieb_et_al::check_for_virt_bisim(tchec
 
     if (!(return_from_transitions->contradiction_free())) {
 
-      _non_bisim_cache.emplace(A_synced, B_synced, return_from_transitions->get_contradictions());
+      // performance improvement. We add all pairs of states that have an outgoing delay transition to one of the contradictions to the contradiction.
+      auto enhanced_cont = std::make_shared<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(return_from_transitions->get_contradictions()->dim());
+
+      for(auto cur : *return_from_transitions->get_contradictions()) {
+        std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> past = tchecker::virtual_constraint::factory(*cur);
+        tchecker::dbm::open_down(past->dbm(), past->dim());
+        std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> to_add = tchecker::virtual_constraint::factory(A_synced->zone(), _A->get_no_of_virtual_clocks());
+        past->logic_and(to_add, *to_add);
+        enhanced_cont->append_zone(to_add);        
+      }
+
+      // std::cout << __FILE__ << ": " << __LINE__ << ": emplace into non_bisim_cache (action): " << std::endl;
+      // std::cout << __FILE__ << ": " << __LINE__ << ": (" << _A->system().as_system_system().location(A_synced->vloc()[0])->name() << ", ";
+      // std::cout << _B->system().as_system_system().location(B_synced->vloc()[0])->name() << ")" << std::endl;
+
+      // for(std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> vc : *enhanced_cont) {
+      //    tchecker::dbm::output_matrix(std::cout, vc->dbm(), vc->dim());
+      // }
+      _non_bisim_cache.emplace(A_synced, B_synced, enhanced_cont);
 
       auto result = std::make_shared<algorithm_return_value_t>(
-                      syncer.revert_sync_with_urgent(A_state, B_state, return_from_transitions->get_contradictions()), A_state, B_state);
+                      syncer.revert_sync_with_urgent(A_state, B_state, enhanced_cont), A_state, B_state);
 
       return result;
     }

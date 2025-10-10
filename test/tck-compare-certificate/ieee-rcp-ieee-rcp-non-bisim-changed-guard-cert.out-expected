@@ -1,0 +1,15 @@
+digraph ieee_rcp.xml_ieee_rcp.xml {
+  0 [clockval_1="Ref Clock=0,Process_xr_1=0,Process_yr_1=0", clockval_2="Ref Clock=0,Process_xr_2=0,Process_yr_2=0", first_intval="", first_vloc="<REC_IDLE_ACK>", initial="true", second_intval="", second_vloc="<REC_IDLE_ACK>"]
+  1 [clockval_1="Ref Clock=0,Process_xr_1=42,Process_yr_1=42", clockval_2="Ref Clock=0,Process_xr_2=42,Process_yr_2=42", first_intval="", first_vloc="<REC_IDLE_ACK>", initial="false", second_intval="", second_vloc="<REC_IDLE_ACK>"]
+  2 [clockval_1="Ref Clock=0,Process_xr_1=42,Process_yr_1=42", clockval_2="Ref Clock=0,Process_xr_2=42,Process_yr_2=42", first_intval="", first_vloc="<REC_ACK>", initial="false", second_intval="", second_vloc="<REC_ACK>"]
+  3 [clockval_1="Ref Clock=0,Process_xr_1=42,Process_yr_1=42", clockval_2="Ref Clock=0,Process_xr_2=42,Process_yr_2=42", first_intval="", first_vloc="<EMPTY>", initial="false", second_intval="", second_vloc="<EMPTY>"]
+  4 [clockval_1="Ref Clock=0,Process_xr_1=42,Process_yr_1=42", clockval_2="Ref Clock=0,Process_xr_2=42,Process_yr_2=42", final="first", final_symbol="Process_rec_idle_j_emit", first_intval="", first_vloc="<REC_IDLE>", initial="false", second_intval="", second_vloc="<REC_IDLE>"]
+  1 -> 2 [first_vedge="<Process@Process_rec_idle_j_emit>", second_vedge="<Process@Process_rec_idle_j_emit>"]
+  2 -> 3 [first_vedge="<Process@Process_rec_ack_j_emit>", second_vedge="<Process@Process_rec_ack_j_emit>"]
+  3 -> 4 [first_vedge="<Process@Process_snd_idle_i_emit>", second_vedge="<Process@Process_snd_idle_i_emit>"]
+  0 -> 1 [delay="42"]
+}
+MEMORY_MAX_RSS  xxxx
+RELATIONSHIP_FULFILLED false
+RUNNING_TIME_SECONDS  xxxx
+VISITED_PAIR_OF_STATES 5

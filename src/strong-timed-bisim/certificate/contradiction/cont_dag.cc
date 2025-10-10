@@ -92,7 +92,7 @@ bool cont_dag_t::create_cont_from_non_bisim_cache(tchecker::strong_timed_bisim::
     else if (!cur->is_synchronized()) {
       auto new_sync = std::make_shared<node_t>(*cur);
       new_sync->synchronize();
-      if (nullptr == find_node(new_sync)) { // cycle detected?
+      if (nullptr != find_node(new_sync)) { // cycle detected?
         return false;
       }
       new_sync = this->add_node(*new_sync);
@@ -196,7 +196,17 @@ bool cont_dag_t::add_non_bisim_action_transition(tchecker::strong_timed_bisim::n
           cur_init_node->reset_value(true, cur_init_node->valuation().first->size() - 1);
           cur_init_node->reset_value(false, cur_init_node->valuation().second->size() - 1);
         }
-        if(non_bisim_cache.is_cached(cur_init_node->location_pair(), cur_init_node->valuation().first, _vcg1->get_no_of_original_clocks(), _vcg2->get_no_of_original_clocks())) {
+
+        std::shared_ptr<node_t> synced_init_node 
+          = std::make_shared<node_t>(*cur_init_node);
+
+        synced_init_node->synchronize(); 
+          
+        if (nullptr != find_node(synced_init_node)) { // cycle detected?
+          continue;
+        }
+
+        if(non_bisim_cache.is_cached(synced_init_node->location_pair(), synced_init_node->valuation().first, _vcg1->get_no_of_original_clocks(), _vcg2->get_no_of_original_clocks())) {
           return_values[idx_1][idx_2] = cur_sub_dag->create_cont_from_non_bisim_cache(non_bisim_cache, *cur_init_node);
           sub_dag[idx_1][idx_2] = cur_sub_dag;
         }

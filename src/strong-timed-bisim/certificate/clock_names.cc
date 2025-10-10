@@ -44,13 +44,26 @@ clock_names(const std::shared_ptr<tchecker::vcg::vcg_t> vcg, std::string postfix
       if(id == 0) {
         return std::string("Ref Clock");
       }
-      if (id <= no_orig_clks) {
-        return vcg->system().clock_name(id - 1) + postfix;
-      }
 
       if (id == (no_orig_clks + 1)) {
         return std::string("Urgent_Clock");
       }
+
+      auto counter = id-1;
+      auto const & clocks = vcg->system().clock_variables();
+      for(tchecker::clock_id_t base : clocks.identifiers(tchecker::VK_DECLARED)) {
+        tchecker::clock_id_t size_of_cur_decl_clk = clocks.info(base).size();
+        if(counter < size_of_cur_decl_clk) {
+          if(1 == size_of_cur_decl_clk) {
+            return clocks.name(base) + postfix;
+          }
+          std::stringstream clk_name;
+          clk_name << clocks.name(base) << postfix << "[" << counter << "]";
+          return clk_name.str();
+        }
+        counter -= size_of_cur_decl_clk;
+      }
+
       throw std::runtime_error(std::string(__FILE__) + std::string(": ") + std::to_string(__LINE__) + std::string(": ") +
                              std::string("strange clock id: ") + std::to_string(id));
     };

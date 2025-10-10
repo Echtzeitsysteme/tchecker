@@ -86,7 +86,8 @@ void tck_compare(const char * output_filename,
   const char * second_sysdecl_filename,
   tck_compare_relationship_t relationship,
   int * block_size, 
-  int * table_size);
+  int * table_size,
+  bool generate_witness=false);
 
 #ifdef __cplusplus
 }

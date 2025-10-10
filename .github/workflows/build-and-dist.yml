@@ -1,0 +1,35 @@
+name: Build and Distribute TChecker Library
+
+on:
+  push:
+    branches:
+      - 'master'
+
+jobs:
+
+  build-and-copy-library:
+    name: build TChecker
+    runs-on: ubuntu-latest
+    container: alzeha/echtzeitsysteme-tchecker-gcc:latest
+    env:
+      INSTALL_DIR: "install"
+      CXX: "g++"
+      CONFNAME: "int64"
+      TCHECKER_BUILD_TYPE: "Release"
+      LIBTCHECKER_ENABLE_SHARED: "ON"
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+      - name: build
+        run: ci-scripts/build.sh
+      - name: copy
+        uses: dmnemec/copy_file_to_another_repo_action@main
+        env:
+          API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
+        with:
+          source_file: 'build/src/libtchecker.so'
+          destination_repo: 'Echtzeitsysteme/tcheckerpy'
+          destination_folder: 'src/tcheckerpy'
+          user_email: 'alexander.lieb@online.de'
+          user_name: 'alzeha'
+          commit_message: 'updated libtchecker.so from https://github.com/Echtzeitsysteme/tchecker'

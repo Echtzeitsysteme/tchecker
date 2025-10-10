@@ -65,7 +65,6 @@ edge:Process:EMPTY:REC_ACK:Process_snd_ack_i_emit{do:Process_xr=0;Process_yr=0}
 edge:Process:EMPTY:REC_REQ:Process_snd_req_i_emit{do:Process_xr=0;Process_yr=0}
 edge:Process:REC_REQ:EMPTY:Process_rec_req_j_emit{}
 edge:Process:REC_REQ_ACK:REC_REQ_ACK:Process_snd_ack_i_emit{}
-edge:Process:REC_REQ_ACK:REC_REQ_ACK:Process_snd_ack_i_emit{} # Mutation
 edge:Process:REC_ACK:REC_ACK_IDLE:Process_snd_idle_i_emit{do:Process_yr=0}
 edge:Process:REC_REQ_ACK:REC_ACK:Process_rec_req_j_emit{}
 edge:Process:REC_REQ:REC_REQ_ACK:Process_snd_ack_i_emit{}

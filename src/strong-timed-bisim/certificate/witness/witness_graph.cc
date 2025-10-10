@@ -40,9 +40,13 @@ void graph_t::add_edge(tchecker::zg::state_sptr_t A_source, tchecker::ta::state_
 
   auto empty_target =
       std::make_shared<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> (condition->get_no_of_virtual_clocks() + 1);
-  add_node(A_target, B_target, empty_target);
-
+  
   std::shared_ptr<node_t> target = find_node(A_target, B_target, empty_target);
+
+  if(nullptr == target) {
+    add_node(A_target, B_target, empty_target);
+    target = find_node(A_target, B_target, empty_target);
+  }
 
   base_graph_t::add_edge(A_transition, B_transition, src, target, condition);
 }

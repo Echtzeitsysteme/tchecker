@@ -161,11 +161,13 @@ void node_t::synchronize()
   for (unsigned short i = 1; i <= orig_clocks_1; ++i) {
     if ((*_valuation.first)[i] == 0 && (*_valuation.first)[orig_clocks_1 + i] != 0) {
       (*_valuation.first)[orig_clocks_1 + i] = 0;
+      (*_valuation.second)[orig_clocks_2 + i] = 0;
     }
   }
 
   for (unsigned short i = 1; i <= orig_clocks_2; ++i) {
     if ((*_valuation.second)[i] == 0 && (*_valuation.second)[orig_clocks_2 + orig_clocks_1 + i] != 0) {
+      (*_valuation.first)[orig_clocks_1 + orig_clocks_1 + i] = 0;
       (*_valuation.second)[orig_clocks_2 + orig_clocks_1 + i] = 0;
     }
   }
@@ -194,10 +196,9 @@ bool node_t::is_leaf(tchecker::zg::state_sptr_t & init_1, tchecker::zg::state_sp
                      std::shared_ptr<tchecker::vcg::vcg_t> vcg1, std::shared_ptr<tchecker::vcg::vcg_t> vcg2, 
                      clock_rational_value_t max_possible_delay)
 {
-  auto add_urgent = _urgent_clk_exists ? 1 : 0;
   assert(vcg1->get_no_of_virtual_clocks() == vcg2->get_no_of_virtual_clocks());
-  assert(_valuation.first->size() == (2*vcg1->get_no_of_original_clocks() + vcg2->get_no_of_original_clocks() + 1 + add_urgent));
-  assert(_valuation.second->size() == (2*vcg2->get_no_of_original_clocks() + vcg1->get_no_of_original_clocks() + 1 + add_urgent));
+  assert(_valuation.first->size() == (2*vcg1->get_no_of_original_clocks() + vcg2->get_no_of_original_clocks() + 1 + (_urgent_clk_exists ? 1 : 0)));
+  assert(_valuation.second->size() == (2*vcg2->get_no_of_original_clocks() + vcg1->get_no_of_original_clocks() + 1 + (_urgent_clk_exists ? 1 : 0)));
   
   if(!is_synchronized()) {
     return false;
@@ -207,28 +208,34 @@ bool node_t::is_leaf(tchecker::zg::state_sptr_t & init_1, tchecker::zg::state_sp
 
   auto state_1 = vcg1->clone_state(init_1);
   tchecker::dbm::copy(state_1->zone().dbm(), zones->first->dbm(), zones->first->dim());
+  auto state_1_fut = vcg1->clone_state(state_1);
 
   auto state_2 = vcg2->clone_state(init_2);
   tchecker::dbm::copy(state_2->zone().dbm(), zones->second->dbm(), zones->second->dim());
+  auto state_2_fut = vcg2->clone_state(state_2);
+
 
   assert(state_2->zone().is_virtual_equivalent(state_1->zone(), vcg1->get_no_of_virtual_clocks()));
 
-  if (tchecker::ta::delay_allowed(vcg1->system(), state_1->vloc())) {
-    vcg1->semantics()->delay(state_1->zone_ptr()->dbm(), state_1->zone_ptr()->dim(), *(_invariant.first));
+  if (tchecker::ta::delay_allowed(vcg1->system(), state_1_fut->vloc())) {
+    vcg1->semantics()->delay(state_1_fut->zone_ptr()->dbm(), state_1_fut->zone_ptr()->dim(), *(_invariant.first));
   }
 
-  if (tchecker::ta::delay_allowed(vcg2->system(), state_2->vloc())) {
-    vcg2->semantics()->delay(state_2->zone_ptr()->dbm(), state_2->zone_ptr()->dim(), *(_invariant.second));
+  if (tchecker::ta::delay_allowed(vcg2->system(), state_2_fut->vloc())) {
+    vcg2->semantics()->delay(state_2_fut->zone_ptr()->dbm(), state_2_fut->zone_ptr()->dim(), *(_invariant.second));
   }
 
-  if(!state_1->zone().is_virtual_equivalent(state_2->zone(), vcg1->get_no_of_virtual_clocks())) {
-    auto first = max_delay(state_1->zone(), max_possible_delay, tchecker::clock_rational_value_t(0, 1), true);
-    auto second = max_delay(state_2->zone(), max_possible_delay, tchecker::clock_rational_value_t(0, 1), false);
+  if(!state_1_fut->zone().is_virtual_equivalent(state_2_fut->zone(), vcg1->get_no_of_virtual_clocks())) {
+    auto first = max_delay(state_1_fut->zone(), max_possible_delay, tchecker::clock_rational_value_t(0, 1), true);
+    auto second = max_delay(state_2_fut->zone(), max_possible_delay, tchecker::clock_rational_value_t(0, 1), false);
     _final = true;
     _final_first_has_transition = (first > second);
     double symbol = _final_first_has_transition ? static_cast<double>(first.numerator()) / first.denominator() : static_cast<double>(second.numerator()) / second.denominator();
+    symbol *= 10;
+    int symbol_cut = std::round(symbol);
+    
     std::ostringstream oss;
-    oss << std::setprecision(1) << symbol;
+    oss << (symbol_cut/10);
 
     _final_symbol.emplace(oss.str());
     return true;
