@@ -190,8 +190,12 @@ sync_vc_t::revert_sync(tchecker::zg::zone_t const & zone_1, tchecker::zg::zone_t
   sync(dbm1_synced, dbm2_synced, dim1, dim2, no_of_orig_clocks_1, no_of_orig_clocks_2, orig_reset_set_A, orig_reset_set_B);
 
   assert(is_phi_subset_of_a_zone(dbm1_synced, dim1, no_of_orig_clocks_1, phi_e) && is_phi_subset_of_a_zone(dbm2_synced, dim2, no_of_orig_clocks_2, phi_e));
-  assert(tchecker::dbm::status_t::EMPTY != tchecker::dbm::constrain(dbm1_synced, dim1, phi_e.get_vc(no_of_orig_clocks_1, true)));  
-  assert(tchecker::dbm::status_t::EMPTY != tchecker::dbm::constrain(dbm2_synced, dim2, phi_e.get_vc(no_of_orig_clocks_2, true)));
+
+  auto constrain_status_1 = tchecker::dbm::constrain(dbm1_synced, dim1, phi_e.get_vc(no_of_orig_clocks_1, true));
+  auto constrain_status_2 = tchecker::dbm::constrain(dbm2_synced, dim2, phi_e.get_vc(no_of_orig_clocks_2, true));
+  
+  assert(tchecker::dbm::status_t::EMPTY != constrain_status_1);  
+  assert(tchecker::dbm::status_t::EMPTY != constrain_status_2);
 
   tchecker::dbm::db_t *multiple_reset = (tchecker::dbm::db_t *)malloc(dim1*dim1*sizeof(tchecker::dbm::db_t));
 
