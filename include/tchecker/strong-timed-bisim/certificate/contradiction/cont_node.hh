@@ -188,7 +188,9 @@ private:
   const bool _urgent_clk_exists;
 
   bool _final;
-  std::set<std::string> _final_symbol;
+  bool _final_is_delay;
+  std::string _final_delay;
+  std::shared_ptr<tchecker::graph::edge_vedge_t> _final_trans;
   bool _final_first_has_transition;
 
 };

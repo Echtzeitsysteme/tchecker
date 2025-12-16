@@ -53,7 +53,8 @@ node_t::node_t(tchecker::zg::state_sptr_t s_1, tchecker::zg::state_sptr_t s_2,
 node_t::node_t(const node_t & other) 
   : tchecker::strong_timed_bisim::certificate::node_t(*(other._location_pair), 0, other._initial), 
     _invariant(other._invariant), _urgent_clk_exists(other._urgent_clk_exists), _final(other._final),
-    _final_symbol(other._final_symbol), _final_first_has_transition(other._final_first_has_transition)
+    _final_is_delay(other._final_is_delay), _final_delay(other._final_delay), _final_trans(other._final_trans),
+    _final_first_has_transition(other._final_first_has_transition)
 {
   auto raw_1 = clockval_allocate_and_construct(other._valuation.first->size());
   auto valuation_1 = std::shared_ptr<tchecker::clockval_t>(raw_1, &clockval_destruct_and_deallocate);
@@ -104,16 +105,13 @@ void node_t::attributes(std::map<std::string, std::string> & m, const std::share
 
   if(_final) {
     m["final"] = _final_first_has_transition ? "first" : "second";
-    std::string symbol = "";
-    bool first = true;
-    for (auto const& cur : _final_symbol) {
-      if(!first) {
-        symbol += ", ";
-      }
-      symbol += cur;
-      first = false;
+    if(_final_is_delay) {
+      m["final_delay"] = _final_delay;
+    } else {
+      m["final_edge"] = tchecker::to_string(_final_trans->vedge(), 
+                                            (_final_first_has_transition) ? 
+                                              (vcg1->system().as_system_system()) : (vcg2->system().as_system_system()));
     }
-    m["final_symbol"] = symbol;
   }
 
   tchecker::strong_timed_bisim::certificate::node_t::attributes(m, vcg1, vcg2);
@@ -237,7 +235,8 @@ bool node_t::is_leaf(tchecker::zg::state_sptr_t & init_1, tchecker::zg::state_sp
     std::ostringstream oss;
     oss << (symbol_cut/10);
 
-    _final_symbol.emplace(oss.str());
+    _final_is_delay = true;
+    _final_delay = oss.str();
     return true;
   }
 
@@ -249,6 +248,7 @@ bool node_t::is_leaf(tchecker::zg::state_sptr_t & init_1, tchecker::zg::state_sp
 
   if(*avail_events_1 != *avail_events_2) {
     _final = true;
+    _final_is_delay = false;
     std::set<std::set<std::string>> diff;
 
     std::set_difference(
@@ -265,9 +265,11 @@ bool node_t::is_leaf(tchecker::zg::state_sptr_t & init_1, tchecker::zg::state_sp
         avail_events_1->begin(), avail_events_1->end(),
         std::inserter(diff, diff.begin())
       );
+      assert(!diff.empty()); // if the sets are not equal, either the first or second diff must be non-empty
+      _final_trans = vcg2->edge_of_event(state_2, *diff.begin());
+    } else {
+      _final_trans = vcg1->edge_of_event(state_1, *diff.begin());
     }
-
-    _final_symbol.insert(diff.begin()->begin(), diff.begin()->end());
     return true;
   }
 

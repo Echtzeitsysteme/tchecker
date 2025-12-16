@@ -10,7 +10,7 @@ digraph av_protocol.xml_av_protocol.xml {
   8 [clockval_1="Ref Clock=0,Process_clock_A_c_1=0", clockval_2="Ref Clock=0,Process_clock_A_c_2=0", first_intval="", first_vloc="<ex_silence1>", initial="false", second_intval="", second_vloc="<ex_silence1>"]
   9 [clockval_1="Ref Clock=0,Process_clock_A_c_1=2343", clockval_2="Ref Clock=0,Process_clock_A_c_2=2343", first_intval="", first_vloc="<ex_silence1>", initial="false", second_intval="", second_vloc="<ex_silence1>"]
   10 [clockval_1="Ref Clock=0,Process_clock_A_c_1=0", clockval_2="Ref Clock=0,Process_clock_A_c_2=0", first_intval="", first_vloc="<ex_silence2>", initial="false", second_intval="", second_vloc="<ex_silence2>"]
-  11 [clockval_1="Ref Clock=0,Process_clock_A_c_1=0", clockval_2="Ref Clock=0,Process_clock_A_c_2=0", final="second", final_symbol="782", first_intval="", first_vloc="<ex_silence2>", initial="false", second_intval="", second_vloc="<ex_silence2>"]
+  11 [clockval_1="Ref Clock=0,Process_clock_A_c_1=0", clockval_2="Ref Clock=0,Process_clock_A_c_2=0", final="second", final_delay="782", first_intval="", first_vloc="<ex_silence2>", initial="false", second_intval="", second_vloc="<ex_silence2>"]
   1 -> 2 [first_vedge="<Process@Process_l_emit>", first_vedge_do="Process_clock_A_c=0", second_vedge="<Process@Process_l_emit>", second_vedge_do="Process_clock_A_c=0"]
   4 -> 5 [first_vedge="<Process@Process_k_emit>", first_vedge_prov="(Process_clock_A_c == 781)", second_vedge="<Process@Process_k_emit>", second_vedge_prov="(Process_clock_A_c == 781)"]
   6 -> 7 [first_vedge="<Process@Process_h_emit>", first_vedge_do="Process_clock_A_c=0", second_vedge="<Process@Process_h_emit>", second_vedge_do="Process_clock_A_c=0"]

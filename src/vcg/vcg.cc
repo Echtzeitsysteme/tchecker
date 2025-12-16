@@ -63,6 +63,20 @@ void vcg_t::avail_events(std::shared_ptr<std::set<std::set<std::string>>> result
   }
 }
 
+
+std::shared_ptr<tchecker::graph::edge_vedge_t> vcg_t::edge_of_event(tchecker::zg::state_sptr_t state, std::set<std::string> event)
+{
+  std::vector<tchecker::vcg::vcg_t::sst_t> v;
+  tchecker::zg::const_state_sptr_t state_const{state};
+  next(state_const, v);
+  for (auto && [status, s, t] : v) {
+    if(event == t->vedge().event_names(system())) {
+      return std::make_shared<tchecker::graph::edge_vedge_t>(t->vedge_ptr());
+    }
+  }
+  return nullptr;
+}
+
 void vcg_t::next_with_symbol(std::shared_ptr<std::vector<tchecker::vcg::vcg_t::sst_t>> result,
                              tchecker::zg::state_sptr_t state, std::set<std::string> symbol)
 {

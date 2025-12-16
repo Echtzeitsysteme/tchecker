@@ -9,6 +9,7 @@
 #ifndef TCHECKER_VCG_HH
 #define TCHECKER_VCG_HH
 
+#include "tchecker/graph/edge.hh"
 #include "tchecker/strong-timed-bisim/system.hh"
 #include "tchecker/zg/zg.hh"
 #include "tchecker/zg/zone.hh"
@@ -77,6 +78,23 @@ public:
    \post all available events are added to result
    */
   void avail_events(std::shared_ptr<std::set<std::set<std::string>>> result, tchecker::zg::state_sptr_t state);
+
+  /*!
+   \brief adds a set of available events for this symbolic state
+   \param result : where the events will be stored
+   \param state : a state of this vcg
+   \post all available events are added to result
+   */
+  void avail_events(std::shared_ptr<std::pair<tchecker::vedge_t, std::set<std::set<std::string>>>> result, tchecker::zg::state_sptr_t state);
+
+/*!
+   \brief returns an edge corresponding to this state and event
+   \param state : the state where the edge start from
+   \param event : the event name
+   \return an edge. nullptr if no such edge exists.
+  */
+  std::shared_ptr<tchecker::graph::edge_vedge_t> edge_of_event(tchecker::zg::state_sptr_t state, std::set<std::string> event);
+
 
   /*!
    \brief extracts the outgoing transitions regarding a given symbol to result

@@ -2,7 +2,7 @@ digraph collision_avoidance.xml_collision_avoidance.xml {
   0 [clockval_1="Ref Clock=0,Process_clock_c3_1=0", clockval_2="Ref Clock=0,Process_clock_c3_2=0", first_intval="", first_vloc="<s2_0>", initial="true", second_intval="", second_vloc="<s2_0>"]
   1 [clockval_1="Ref Clock=0,Process_clock_c3_1=3", clockval_2="Ref Clock=0,Process_clock_c3_2=3", first_intval="", first_vloc="<s2_0>", initial="false", second_intval="", second_vloc="<s2_0>"]
   2 [clockval_1="Ref Clock=0,Process_clock_c3_1=0", clockval_2="Ref Clock=0,Process_clock_c3_2=3", first_intval="", first_vloc="<s2_1>", initial="false", second_intval="", second_vloc="<s2_1>"]
-  3 [clockval_1="Ref Clock=0,Process_clock_c3_1=0", clockval_2="Ref Clock=0,Process_clock_c3_2=3", final="first", final_symbol="Process__data0_recv", first_intval="", first_vloc="<s2_1>", initial="false", second_intval="", second_vloc="<s2_1>"]
+  3 [clockval_1="Ref Clock=0,Process_clock_c3_1=0", clockval_2="Ref Clock=0,Process_clock_c3_2=3", final="first", final_edge="<Process@Process__data0_recv>", first_intval="", first_vloc="<s2_1>", initial="false", second_intval="", second_vloc="<s2_1>"]
   1 -> 2 [first_vedge="<Process@Process__from_medium_slave_recv>", first_vedge_do="Process_clock_c3=0", second_vedge="<Process@Process__from_medium_slave_recv>"]
   0 -> 1 [delay="3"]
   2 -> 3 [delay="0"]
