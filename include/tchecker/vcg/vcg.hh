@@ -79,14 +79,6 @@ public:
    */
   void avail_events(std::shared_ptr<std::set<std::set<std::string>>> result, tchecker::zg::state_sptr_t state);
 
-  /*!
-   \brief adds a set of available events for this symbolic state
-   \param result : where the events will be stored
-   \param state : a state of this vcg
-   \post all available events are added to result
-   */
-  void avail_events(std::shared_ptr<std::pair<tchecker::vedge_t, std::set<std::set<std::string>>>> result, tchecker::zg::state_sptr_t state);
-
 /*!
    \brief returns an edge corresponding to this state and event
    \param state : the state where the edge start from
