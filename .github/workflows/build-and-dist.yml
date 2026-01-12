@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - 'master'
+      - 'test_pypi'
 
 jobs:
 
@@ -16,6 +17,7 @@ jobs:
       CXX: "g++"
       CONFNAME: "int64"
       TCHECKER_BUILD_TYPE: "Release"
+      TCHECKER_BOOST_STATIC_LINK: "ON"
       LIBTCHECKER_ENABLE_SHARED: "ON"
     steps:
       - name: checkout
