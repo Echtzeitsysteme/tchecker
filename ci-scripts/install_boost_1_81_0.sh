@@ -6,4 +6,4 @@ cd boost_1_81_0
 
 ./bootstrap.sh
 
-./b2 --with-all  link=static install
+./b2 --with-all  link=static install --prefix=$GITHUB_WORKSPACE/boost
