@@ -6,4 +6,4 @@ cd boost_1_81_0
 
 ./bootstrap.sh
 
-./b2 link=static install
+./b2 link=static cxxflags=-fPIC cflags=-fPIC install
