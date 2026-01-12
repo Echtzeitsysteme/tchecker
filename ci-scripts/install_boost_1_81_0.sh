@@ -6,4 +6,4 @@ cd boost_1_81_0
 
 ./bootstrap.sh
 
-./b2 --with-all  link=static install --prefix=./boost
+./b2 link=static install
