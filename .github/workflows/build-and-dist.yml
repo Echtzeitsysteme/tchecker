@@ -16,10 +16,13 @@ jobs:
       CXX: "g++"
       CONFNAME: "int64"
       TCHECKER_BUILD_TYPE: "Release"
+      TCHECKER_BOOST_STATIC_LINK: "ON"
       LIBTCHECKER_ENABLE_SHARED: "ON"
     steps:
       - name: checkout
         uses: actions/checkout@v4
+      - name: install static libs
+        run: ci-scripts/install_boost_1_81_0.sh
       - name: build
         run: ci-scripts/build.sh
       - name: copy
