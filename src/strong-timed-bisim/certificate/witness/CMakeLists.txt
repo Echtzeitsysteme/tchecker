@@ -3,7 +3,6 @@
 # See files AUTHORS and LICENSE for copyright details.
 
 set(STRONG_TIMED_BISIM_WITNESS_SRC
-    ${CMAKE_CURRENT_SOURCE_DIR}/witness_edge.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/witness_graph.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/witness_node.cc
     ${TCHECKER_INCLUDE_DIR}/tchecker/strong-timed-bisim/certificate/witness/witness_edge.hh
