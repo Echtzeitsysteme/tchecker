@@ -168,6 +168,19 @@ public:
     generate_edge_attr(vcg2, this->edge_pair_ptr()->second, "second");
   }
 
+  bool attributes_equivalent(const edge_t & other, const std::shared_ptr<tchecker::vcg::vcg_t> vcg1, const std::shared_ptr<tchecker::vcg::vcg_t> vcg2) const
+  {
+    std::map<std::string, std::string> attr_this;
+    attr_this.clear();
+    this->attributes(attr_this, vcg1, vcg2);
+
+    std::map<std::string, std::string> attr_other;
+    attr_other.clear();
+    other.attributes(attr_other, vcg1, vcg2);
+
+    return attr_this == attr_other;
+  }
+
 protected:
   std::shared_ptr<std::pair<tchecker::graph::edge_vedge_t, tchecker::graph::edge_vedge_t>> _edge_pair;
   std::shared_ptr<node> _src;

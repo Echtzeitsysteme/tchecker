@@ -48,7 +48,7 @@ void graph_t::add_edge(tchecker::zg::state_sptr_t A_source, tchecker::ta::state_
     target = find_node(A_target, B_target, empty_target);
   }
 
-  base_graph_t::add_edge(A_transition, B_transition, src, target, condition);
+  base_graph_t::add_edge(A_transition, B_transition, src, target);
 }
 
 void graph_t::create_witness_from_visited(tchecker::strong_timed_bisim::visited_map_t & visited,
@@ -133,27 +133,25 @@ void graph_t::create_witness_from_visited(tchecker::strong_timed_bisim::visited_
 
 void graph_t::edge_cleanup()
 {
-  std::map<base_edge_t, std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>> map;
-
-  for (auto cur : *_edges) {
-    if(cur->src()->empty() || cur->tgt()->empty()) {
-      continue;
-    }
-
-    if (0 == map.count(*(cur))) {
-      map[*(cur)] = std::make_shared<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(
-          _vcg1->get_no_of_virtual_clocks() + 1);
-    }
-
-    map[*(cur)]->append_zone(cur->condition());
-  }
 
   std::shared_ptr<std::vector<std::shared_ptr<edge_t>>> new_edges = std::make_shared<std::vector<std::shared_ptr<edge_t>>>();
 
-  for (const auto & entry : map) {
-    entry.second->compress();
-    for (auto cond : *(entry.second)) {
-      std::shared_ptr<edge_t> to_add = std::make_shared<edge_t>(std::make_shared<base_edge_t>(entry.first), cond);
+  for (const auto & entry : *_edges) {
+    if(entry->src()->empty() || entry->tgt()->empty()) {
+      continue;
+    }
+
+    if(std::none_of(new_edges->begin(), new_edges->end(), 
+                      [this, entry] (const std::shared_ptr<edge_t> already_added_edge) {
+                        bool result = ((*find_node(entry->src())) == (*find_node(already_added_edge->src()))); 
+                        result &= ((*find_node(entry->tgt())) == (*find_node(already_added_edge->tgt()))); 
+
+                        return result && entry->attributes_equivalent(*already_added_edge, _vcg1, _vcg2);
+                      }
+                   )
+    ) {
+
+      std::shared_ptr<edge_t> to_add = std::make_shared<edge_t>(*entry);
       new_edges->push_back(to_add);
     }
   }
@@ -186,9 +184,9 @@ void graph_t::add_node_that_already_exists(std::shared_ptr<node_t> to_add)
   found->add_zones(*(to_add->zones()));
 }
 
-std::shared_ptr<std::set<base_edge_t>> graph_t::find_all_edge_types()
+std::shared_ptr<std::set<edge_t>> graph_t::get_edges()
 {
-  std::shared_ptr<std::set<base_edge_t>> result = std::make_shared<std::set<base_edge_t>>();
+  std::shared_ptr<std::set<edge_t>> result = std::make_shared<std::set<edge_t>>();
 
   for (auto cur : *_edges) {
     result->insert(*cur);

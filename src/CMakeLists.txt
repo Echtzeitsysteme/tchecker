@@ -4,7 +4,7 @@
 
 option(TCHECKER_BOOST_STATIC_LINK "Link boost statically" OFF)
 
-set(Boost_USE_STATIC_LIBS       TCHECKER_BOOST_STATIC_LINK)  # only find static libs
+set(Boost_USE_STATIC_LIBS ${TCHECKER_BOOST_STATIC_LINK})  # only find static libs
 set(Boost_USE_DEBUG_LIBS        OFF)  # ignore debug libs and
 set(Boost_USE_RELEASE_LIBS       ON)  # only find release libs
 set(Boost_USE_MULTITHREADED     OFF)

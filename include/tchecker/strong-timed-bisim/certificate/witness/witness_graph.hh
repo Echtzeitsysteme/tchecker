@@ -90,7 +90,7 @@ protected:
    \brief returns a set that contains all types of edges, i.e. all available combinations of edge_pair, src, and target.
    \return a set of all edge types available in _edges
    */
-  std::shared_ptr<std::set<base_edge_t>> find_all_edge_types();
+  std::shared_ptr<std::set<edge_t>> get_edges();
 
   tchecker::zg::state_sptr_t create_symbolic_state(tchecker::ta::state_t &ta_state, 
                                                    tchecker::virtual_constraint::virtual_constraint_t &vc,
