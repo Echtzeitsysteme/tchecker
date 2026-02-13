@@ -65,6 +65,15 @@ void hr_display_t::output(tchecker::zg::const_transition_sptr_t const & t)
     _os << "\t" << key << ": " << value << " ";
 }
 
+/* concrete_hr_display_t */
+
+void concrete_hr_display_t::output_next(tchecker::zg::const_state_sptr_t const & s, std::vector<tchecker::zg::zg_t::sst_t> const & v, tchecker::clock_rational_value_t max_delay)
+{
+  hr_display_t::output_next(s, v);
+  _os << "--- Maximum Delay: " << max_delay << std::endl;
+}
+
+
 /* json_display_t */
 #if USE_BOOST_JSON
 /*!
@@ -166,6 +175,14 @@ void json_display_t::output_initial(std::vector<tchecker::zg::zg_t::sst_t> const
 void json_display_t::output_next(tchecker::zg::const_state_sptr_t const & s, std::vector<tchecker::zg::zg_t::sst_t> const & v)
 {
   _os << tchecker::simulate::json_next(*_zg, s, v) << std::endl;
+}
+
+void concrete_json_display_t::output_next(tchecker::zg::const_state_sptr_t const & s, std::vector<tchecker::zg::zg_t::sst_t> const & v, tchecker::clock_rational_value_t max_delay)
+{
+  boost::json::value o = tchecker::simulate::json_next(*_zg, s, v);
+  o.as_object().emplace("max_delay", to_string(max_delay));
+  _os << o << std::endl;
+
 }
 #endif
 

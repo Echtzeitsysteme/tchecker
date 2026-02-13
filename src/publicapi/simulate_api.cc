@@ -82,12 +82,12 @@ void tck_simulate(std::string output_filename, std::string sysdecl_filename, sim
     }
     std::shared_ptr<tchecker::system::system_t> system = std::make_shared<tchecker::system::system_t>(*sysdecl);
 
-    if (display_type != tchecker::simulate::HUMAN_READABLE_DISPLAY) {
 #if !USE_BOOST_JSON
+    if (display_type != tchecker::simulate::HUMAN_READABLE_DISPLAY) {
       std::cerr << "JSON display is not enabled in this build" << std::endl;
       return;
-#endif
     }
+#endif
 
     std::ostream * os = nullptr;
     std::ofstream ofs;
@@ -117,8 +117,10 @@ void tck_simulate(std::string output_filename, std::string sysdecl_filename, sim
       state_space = tchecker::simulate::randomized_simulation(*sysdecl, nsteps, starting_state_attributes);
     else if (simulation_type == ONESTEP_SIMULATION)
       tchecker::simulate::onestep_simulation(*sysdecl, display_type, *os, starting_state_attributes);
+    else if (simulation_type == CONCRETE_SIMULATION)
+      state_space = tchecker::simulate::concrete_simulation(*sysdecl, display_type, *os);
     else
-      throw std::runtime_error("Select one of interactive, one-step or randomized simulation");
+      throw std::runtime_error("Select one of interactive, one-step, randomized, or concrete simulation");
 
     if (output_trace) {
       assert(state_space.get() != nullptr);

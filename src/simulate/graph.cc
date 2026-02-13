@@ -7,6 +7,8 @@
 
 #include "tchecker/simulate/graph.hh"
 
+#include "tchecker/variables/clocks.hh"
+
 namespace tchecker {
 
 namespace simulate {
@@ -22,6 +24,23 @@ node_t::node_t(tchecker::zg::const_state_sptr_t const & s, bool initial, bool fi
     : tchecker::graph::node_flags_t(initial, final), tchecker::graph::node_zg_state_t(s)
 {
 }
+
+/* concrete_node_t */
+
+// concrete_node_t::concrete_node_t(tchecker::zg::state_sptr_t const & s, std::shared_ptr<tchecker::clockval_t> valuation, bool initial, bool final)
+//     : node_t(s, initial, final), _valuation(valuation)
+// {
+// }
+
+// concrete_node_t::concrete_node_t(tchecker::zg::const_state_sptr_t const & s, std::shared_ptr<tchecker::clockval_t> valuation, bool initial, bool final)
+//     : node_t(s, initial, final), _valuation(valuation)
+// {
+// }
+
+// std::shared_ptr<tchecker::clockval_t> concrete_node_t::get_valuation() const
+// {
+//   return _valuation;
+// }
 
 /* edge_t */
 
@@ -46,6 +65,40 @@ void graph_t::attributes(tchecker::simulate::node_t const & n, std::map<std::str
   _zg->attributes(n.state_ptr(), m);
   tchecker::graph::attributes(static_cast<tchecker::graph::node_flags_t const &>(n), m);
 }
+
+// void graph_t::attributes(tchecker::simulate::concrete_node_t const & n, std::map<std::string, std::string> & m) const
+// {
+//   attributes(static_cast<node_t>(n), m);
+
+//   std::function<std::string (tchecker::clock_id_t)> clock_names =
+//     [this](tchecker::clock_id_t id) {
+//       if(id == 0) {
+//         return std::string("Ref Clock");
+//       }
+
+//       auto counter = id-1;
+//       auto const & clocks = this->_zg->system().clock_variables();
+//       for(tchecker::clock_id_t base : clocks.identifiers(tchecker::VK_DECLARED)) {
+//         tchecker::clock_id_t size_of_cur_decl_clk = clocks.info(base).size();
+//         if(counter < size_of_cur_decl_clk) {
+//           if(1 == size_of_cur_decl_clk) {
+//             return clocks.name(base);
+//           }
+//           std::stringstream clk_name;
+//           clk_name << clocks.name(base) << "[" << counter << "]";
+//           return clk_name.str();
+//         }
+//         counter -= size_of_cur_decl_clk;
+//       }
+
+//       throw std::runtime_error(std::string(__FILE__) + std::string(": ") + std::to_string(__LINE__) + std::string(": ") +
+//                              std::string("strange clock id: ") + std::to_string(id));
+//     };
+
+
+
+//   m["clockval"] = to_string(*(n.get_valuation()), clock_names);
+// }
 
 void graph_t::attributes(tchecker::simulate::edge_t const & e, std::map<std::string, std::string> & m) const
 {
@@ -77,6 +130,31 @@ public:
                                          static_cast<tchecker::graph::node_flags_t const &>(*n2)) < 0);
   }
 };
+
+// /*!
+//  \class node_lexical_less_t
+//  \brief Less-than order on nodes based on lexical ordering
+// */
+// class concrete_node_lexical_less_t {
+// public:
+//   /*!
+//    \brief Less-than order on nodes based on lexical ordering
+//    \param n1 : a node
+//    \param n2 : a node
+//    \return true if n1 is less-than n2 w.r.t. lexical ordering over the states in
+//    the nodes
+//   */
+//   bool operator()(concrete_node_sptr_t const & n1,
+//                   concrete_node_sptr_t const & n2) const
+//   {
+//     node_lexical_less_t node_cmp;
+//     int node_res = node_cmp(n1, n2);
+//     if(node_res != 0)
+//       return node_res;
+
+//     return tchecker::lexical_cmp(*(n1->valuation()), *(n2->valuation()));
+//   }
+// };
 
 /*!
  \class edge_lexical_less_t

@@ -67,6 +67,17 @@ void onestep_simulation(tchecker::parsing::system_declaration_t const & sysdecl,
                         std::ostream & os,
                         std::map<std::string, std::string> const & starting_state_attributes);
 
+/*!
+ \brief One-step simulation of timed automata using concrete values
+ \param sysdecl : system declaration
+ \param display_type : type of display
+ \note simulation starts from the initial state of sysdecl if starting_state_attributes is empty
+*/
+std::shared_ptr<tchecker::simulate::state_space_t>
+concrete_simulation(tchecker::parsing::system_declaration_t const & sysdecl,
+                        enum tchecker::simulate::display_type_t display_type,
+                        std::ostream & os);
+
 } // namespace simulate
 
 } // namespace tchecker

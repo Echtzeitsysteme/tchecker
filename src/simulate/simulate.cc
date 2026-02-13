@@ -252,6 +252,66 @@ void onestep_simulation(tchecker::parsing::system_declaration_t const & sysdecl,
   }
 }
 
+// Concrete Simulation
+
+std::shared_ptr<tchecker::simulate::state_space_t>
+concrete_simulation(tchecker::parsing::system_declaration_t const & sysdecl,
+                        enum tchecker::simulate::display_type_t display_type,
+                        std::ostream & os)
+{
+  std::size_t const block_size = 1000;
+  std::size_t const table_size = 65536;
+
+  std::shared_ptr<tchecker::ta::system_t const> system{new tchecker::ta::system_t{sysdecl}};
+  std::shared_ptr<tchecker::zg::zg_t> zg{tchecker::zg::factory(system, tchecker::ts::NO_SHARING,
+                                                               tchecker::zg::DISTINGUISHED_SEMANTICS, tchecker::zg::NO_EXTRAPOLATION,
+                                                               block_size, table_size)};
+
+  std::shared_ptr<tchecker::simulate::state_space_t> state_space =
+      std::make_shared<tchecker::simulate::state_space_t>(zg, block_size);
+
+  tchecker::simulate::graph_t & g = state_space->graph();
+
+  std::vector<tchecker::zg::zg_t::sst_t> v;
+
+  std::unique_ptr<tchecker::simulate::display_t> display{
+      tchecker::simulate::display_factory(display_type, os, zg)};
+
+  srand(time(NULL)); // needed if user chooses randomize selection
+
+  tchecker::simulate::graph_t::node_sptr_t previous_node{nullptr};
+  std::size_t k = tchecker::simulate::NO_SELECTION;
+
+  // start simulation from initial states
+  zg->initial(v);
+  k = tchecker::simulate::interactive_select(*display, tchecker::zg::const_state_sptr_t{nullptr}, v);
+
+  if (k == tchecker::simulate::NO_SELECTION)
+    return state_space;
+
+  previous_node = g.add_node(zg->state(v[k]));
+
+  previous_node->initial(true);
+  v.clear();
+
+  do {
+    zg->next(previous_node->state_ptr(), v);
+
+    std::size_t k = tchecker::simulate::interactive_select(*display, previous_node->state_ptr(), v);
+    if (k == tchecker::simulate::NO_SELECTION)
+      break;
+
+    tchecker::simulate::graph_t::node_sptr_t node = g.add_node(zg->state(v[k]));
+    g.add_edge(previous_node, node, *zg->transition(v[k]));
+
+    v.clear();
+
+    previous_node = node;
+  } while (1);
+
+  return state_space;
+}
+
 } // namespace simulate
 
 } // namespace tchecker

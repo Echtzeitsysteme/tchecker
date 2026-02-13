@@ -107,7 +107,7 @@ public:
    */
   virtual void output_next(tchecker::zg::const_state_sptr_t const & s, std::vector<tchecker::zg::zg_t::sst_t> const & v);
 
-private:
+protected:
   /*!
  \brief Display state
  \param s : state
@@ -124,6 +124,24 @@ private:
 
   std::ostream & _os;                      /*!< Output stream */
   std::shared_ptr<tchecker::zg::zg_t> _zg; /*!< Zone graph */
+};
+
+/*!
+ \class concrete_hr_display_t
+ \brief Human-readable display
+*/
+class concrete_hr_display_t : public tchecker::simulate::hr_display_t {
+
+ public:
+  using hr_display_t::output_next;
+  /*!
+  \brief Display simulation next step
+  \param s : current state
+  \param v : collection of successor triples (status, state, transition)
+  \post Attributes of state s,  and all states and transitions in v have been output to _os
+  */
+  void output_next(tchecker::zg::const_state_sptr_t const & s, std::vector<tchecker::zg::zg_t::sst_t> const & v, tchecker::clock_rational_value_t max_delay);
+
 };
 
 #if USE_BOOST_JSON
@@ -183,9 +201,19 @@ public:
    */
   virtual void output_next(tchecker::zg::const_state_sptr_t const & s, std::vector<tchecker::zg::zg_t::sst_t> const & v);
 
-private:
+protected:
   std::ostream & _os;                      /*!< Output stream */
   std::shared_ptr<tchecker::zg::zg_t> _zg; /*!< Zone graph */
+};
+
+/*!
+ \class concrete_json_display_t
+ \brief JSON display for concrete simulation
+*/
+class concrete_json_display_t : public tchecker::simulate::json_display_t {
+ public:
+  using json_display_t::output_next;
+  void output_next(tchecker::zg::const_state_sptr_t const & s, std::vector<tchecker::zg::zg_t::sst_t> const & v, tchecker::clock_rational_value_t max_delay);
 };
 #endif
 
@@ -194,8 +222,10 @@ private:
 */
 enum display_type_t {
   HUMAN_READABLE_DISPLAY = 0, /*!< Human readable display */
+  HUMAN_READABLE_CONCRETE_DISPLAY,
 #if USE_BOOST_JSON
   JSON_DISPLAY,               /*!< JSON display */
+  JSON_CONCRETE_DISPLAY
 #endif
 };
 

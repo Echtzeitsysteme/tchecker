@@ -33,7 +33,7 @@ namespace simulate {
 
 /*!
 \class node_t
-\brief Nodes os simulation graph
+\brief Nodes of simulation graph
 */
 class node_t : public tchecker::graph::node_flags_t, public tchecker::graph::node_zg_state_t {
 public:
@@ -55,6 +55,44 @@ public:
    */
   node_t(tchecker::zg::const_state_sptr_t const & s, bool initial = false, bool final = false);
 };
+
+/*!
+\class concrete_node_t
+\brief extends node_t by a concrete value for the clocks (must be within the zone)
+*/
+// class concrete_node_t : public node_t {
+//  public:
+//     /*!
+//    \brief Constructor
+//    \param s : a zone graph state
+//    \param valuation : The concrete values of the clocks
+//    \param initial : initial node flag
+//    \param final : final node flag
+//    \post this node keeps a shared pointer to s, and has initial/final node flags as specified
+//    */
+//   concrete_node_t(tchecker::zg::state_sptr_t const & s, std::shared_ptr<tchecker::clockval_t> valuation, bool initial = false, bool final = false);
+
+//   /*!
+//    \brief Constructor
+//    \param s : a zone graph state
+//    \param valuation : The concrete values of the clocks
+//    \param initial : initial node flag
+//    \param final : final node flag
+//    \post this node keeps a shared pointer to s, and has initial/final node flags as specified
+//    */
+//   concrete_node_t(tchecker::zg::const_state_sptr_t const & s, std::shared_ptr<tchecker::clockval_t> valuation, bool initial = false, bool final = false);
+
+//   /*!
+//    \brief getter for _valuation
+//    \return _valuation
+//   */
+//   std::shared_ptr<tchecker::clockval_t> valuation() const;
+
+//  protected:
+//   std::shared_ptr<tchecker::clockval_t> _valuation;
+// };
+
+// using concrete_node_sptr_t = tchecker::graph::reachability::node_sptr_t<tchecker::simulate::node_t, tchecker::simulate::edge_t> 
 
 /*!
  \class edge_t
@@ -104,6 +142,14 @@ protected:
    \post attributes of node n have been added to map m
   */
   virtual void attributes(tchecker::simulate::node_t const & n, std::map<std::string, std::string> & m) const;
+
+  /*!
+   \brief Accessor to concrete_node attributes
+   \param n : a node
+   \param m : a map (key, value) of attributes
+   \post attributes of node n have been added to map m
+  */
+  //virtual void attributes(tchecker::simulate::concrete_node_t const & n, std::map<std::string, std::string> & m) const;
 
   /*!
    \brief Accessor to edge attributes
