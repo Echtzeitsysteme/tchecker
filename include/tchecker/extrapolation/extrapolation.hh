@@ -11,6 +11,7 @@
 #include "tchecker/clockbounds/clockbounds.hh"
 #include "tchecker/dbm/db.hh"
 #include "tchecker/dbm/dbm.hh"
+#include "tchecker/ta/system.hh"
 /*!
  \file extrapolation.hh
  \brief Zone extrapolations to ensure finiteness of zone graphs
@@ -53,6 +54,20 @@ public:
 */
 class no_extrapolation_t final : public tchecker::zg::extrapolation_t {
 public:
+
+  /*!
+   \brief Constructor
+   \note max_value is set to zero
+  */
+  no_extrapolation_t();  
+
+  /*!
+   \brief Constructor
+   \param system : the system of the extrapolation
+   \note The system is used to set the max_value
+  */
+  no_extrapolation_t(tchecker::ta::system_t const & system);
+
   /*!
    \brief Destructor
   */
@@ -68,6 +83,9 @@ public:
   virtual void extrapolate(tchecker::dbm::db_t * dbm, tchecker::clock_id_t dim, tchecker::vloc_t const & vloc);
 
   virtual tchecker::clockbounds::bound_t max_value() const override;
+
+ private:
+  tchecker::clockbounds::bound_t _max_value;
 };
 
 } // end of namespace zg

@@ -121,7 +121,7 @@ public:
   */
   bool is_leaf(tchecker::zg::state_sptr_t & init_1, tchecker::zg::state_sptr_t & init_2, 
                std::shared_ptr<tchecker::vcg::vcg_t> vcg1, std::shared_ptr<tchecker::vcg::vcg_t> vcg2,
-               clock_rational_value_t max_possible_delay);
+               std::size_t max_possible_delay);
 
   /*!
    \brief generate two zones that contain the valuations of this node
@@ -142,7 +142,7 @@ public:
    \note In case no maximum delay exists as there is a non-included upper bound, .5 is used. In case there exists no upper bound, max_delay is used as delay.
    */
   std::pair<clock_rational_value_t, std::shared_ptr<node_t>>
-  max_delay(std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> vcs, clock_rational_value_t max_delay_value, 
+  max_delay(std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> vcs, std::size_t max_delay_value, 
             std::shared_ptr<tchecker::vcg::vcg_t> vcg1, std::shared_ptr<tchecker::vcg::vcg_t> vcg2);
 
   /*!
@@ -155,7 +155,7 @@ public:
    \note In case no maximum delay exists as there is a non-included upper bound, .5 is used. In case there exists no upper bound, max_delay is used as delay.
    */
   std::pair<clock_rational_value_t, std::shared_ptr<node_t>>
-  max_delay(std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> vc, clock_rational_value_t max_delay_value, 
+  max_delay(std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> vc, std::size_t max_delay_value, 
             std::shared_ptr<tchecker::vcg::vcg_t> vcg1, std::shared_ptr<tchecker::vcg::vcg_t> vcg2);
 
   /*!
@@ -174,12 +174,6 @@ public:
   void reset_value(bool first_not_second, tchecker::clock_id_t i);
 
 private:
-
-  /*!
-   \brief Helper for max_delay
-   */
-  clock_rational_value_t
-  max_delay(tchecker::zg::zone_t & zone, clock_rational_value_t max_delay_value, clock_rational_value_t min_delay, bool first_not_second = true);
 
   std::pair<std::shared_ptr<tchecker::clockval_t>, std::shared_ptr<tchecker::clockval_t>> _valuation;
   // I do not understand how I can access the invariant of a state of a TA. Therefore: Ugly hack.

@@ -30,7 +30,7 @@ tchecker::zg::extrapolation_t * extrapolation_factory(enum extrapolation_type_t 
                                                       tchecker::ta::system_t const & system)
 {
   if (extrapolation_type == tchecker::zg::NO_EXTRAPOLATION)
-    return new tchecker::zg::no_extrapolation_t;
+    return new tchecker::zg::no_extrapolation_t{system};
 
   std::unique_ptr<tchecker::clockbounds::clockbounds_t> clock_bounds{tchecker::clockbounds::compute_clockbounds(system)};
   if (clock_bounds.get() == nullptr)

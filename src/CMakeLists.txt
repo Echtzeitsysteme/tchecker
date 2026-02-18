@@ -53,7 +53,9 @@ add_subdirectory(expression)
 add_subdirectory(extrapolation)
 add_subdirectory(fsm)
 add_subdirectory(graph)
+add_subdirectory(operational-semantics)
 add_subdirectory(parsing)
+add_subdirectory(publicapi)
 add_subdirectory(refzg)
 add_subdirectory(simulate)
 add_subdirectory(statement)
@@ -70,8 +72,6 @@ add_subdirectory(vm)
 add_subdirectory(waiting)
 add_subdirectory(zg)
 
-add_subdirectory(publicapi)
-
 set(OTHER_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/basictypes.cc
   ${TCHECKER_INCLUDE_DIR}/tchecker/basictypes.hh
@@ -86,6 +86,7 @@ set(LIBTCHECKER_SRC
   ${EXTRAPOLATION_SRC}
   ${FSM_SRC}
   ${GRAPH_SRC}
+  ${OPERATIONAL_SEMANTICS_SRC}
   ${OTHER_SRC}
   ${PARSING_SRC}
   ${PUBLICAPI_SRC}

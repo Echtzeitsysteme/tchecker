@@ -5,12 +5,12 @@
  *
  */
 
-#ifndef TCHECKER_TCK_SIMULATE_GRAPH_HH
-#define TCHECKER_TCK_SIMULATE_GRAPH_HH
+#ifndef TCHECKER_TCK_SIMULATE_SYMBOLIC_SYMBOLIC_GRAPH_HH
+#define TCHECKER_TCK_SIMULATE_SYMBOLIC_SYMBOLIC_GRAPH_HH
 
 /*!
- \file graph.hh
- \brief Simulation graph
+ \file symbolic_graph.hh
+ \brief Symbolic Simulation graph
 */
 
 #include <cstdlib>
@@ -19,6 +19,7 @@
 #include <ostream>
 #include <string>
 
+#include "tchecker/simulate/simulate.hh"
 #include "tchecker/graph/edge.hh"
 #include "tchecker/graph/node.hh"
 #include "tchecker/graph/reachability_graph.hh"
@@ -30,6 +31,8 @@
 namespace tchecker {
 
 namespace simulate {
+
+namespace symbolic {
 
 /*!
 \class node_t
@@ -57,44 +60,6 @@ public:
 };
 
 /*!
-\class concrete_node_t
-\brief extends node_t by a concrete value for the clocks (must be within the zone)
-*/
-// class concrete_node_t : public node_t {
-//  public:
-//     /*!
-//    \brief Constructor
-//    \param s : a zone graph state
-//    \param valuation : The concrete values of the clocks
-//    \param initial : initial node flag
-//    \param final : final node flag
-//    \post this node keeps a shared pointer to s, and has initial/final node flags as specified
-//    */
-//   concrete_node_t(tchecker::zg::state_sptr_t const & s, std::shared_ptr<tchecker::clockval_t> valuation, bool initial = false, bool final = false);
-
-//   /*!
-//    \brief Constructor
-//    \param s : a zone graph state
-//    \param valuation : The concrete values of the clocks
-//    \param initial : initial node flag
-//    \param final : final node flag
-//    \post this node keeps a shared pointer to s, and has initial/final node flags as specified
-//    */
-//   concrete_node_t(tchecker::zg::const_state_sptr_t const & s, std::shared_ptr<tchecker::clockval_t> valuation, bool initial = false, bool final = false);
-
-//   /*!
-//    \brief getter for _valuation
-//    \return _valuation
-//   */
-//   std::shared_ptr<tchecker::clockval_t> valuation() const;
-
-//  protected:
-//   std::shared_ptr<tchecker::clockval_t> _valuation;
-// };
-
-// using concrete_node_sptr_t = tchecker::graph::reachability::node_sptr_t<tchecker::simulate::node_t, tchecker::simulate::edge_t> 
-
-/*!
  \class edge_t
  \brief Edge of the simulation graph
 */
@@ -113,7 +78,7 @@ public:
  \brief Simulation graph over the zone graph
 */
 class graph_t
-    : public tchecker::graph::reachability::multigraph_t<tchecker::simulate::node_t, tchecker::simulate::edge_t> {
+    : public tchecker::graph::reachability::multigraph_t<node_t, edge_t> {
 public:
   /*!
    \brief Constructor
@@ -132,7 +97,7 @@ public:
   */
   virtual ~graph_t();
 
-  using tchecker::graph::reachability::multigraph_t<tchecker::simulate::node_t, tchecker::simulate::edge_t>::attributes;
+  using tchecker::graph::reachability::multigraph_t<node_t, edge_t>::attributes;
 
 protected:
   /*!
@@ -141,7 +106,7 @@ protected:
    \param m : a map (key, value) of attributes
    \post attributes of node n have been added to map m
   */
-  virtual void attributes(tchecker::simulate::node_t const & n, std::map<std::string, std::string> & m) const;
+  virtual void attributes(node_t const & n, std::map<std::string, std::string> & m) const;
 
   /*!
    \brief Accessor to concrete_node attributes
@@ -157,26 +122,17 @@ protected:
    \param m : a map (key, value) of attributes
    \post attributes of edge e have been added to map m
   */
-  virtual void attributes(tchecker::simulate::edge_t const & e, std::map<std::string, std::string> & m) const;
+  virtual void attributes(edge_t const & e, std::map<std::string, std::string> & m) const;
 
 private:
   std::shared_ptr<tchecker::zg::zg_t> _zg; /*!< Zone graph */
 };
 
 /*!
- \brief Graph output
- \param os : output stream
- \param g : graph
- \param name : graph name
- \post graph g with name has been output to os
-*/
-std::ostream & dot_output(std::ostream & os, tchecker::simulate::graph_t const & g, std::string const & name);
-
-/*!
  \class state_space_t
  \brief State-space representation consisting of a zone graph and a reachability multi-graph
  */
-class state_space_t {
+class state_space_t : public tchecker::simulate::state_space_t{
 public:
   /*!
    \brief Constructor
@@ -196,14 +152,25 @@ public:
    \brief Accessor
    \return The reachability graph representing the state-space
    */
-  tchecker::simulate::graph_t & graph();
+  graph_t & graph();
+
+  /*!
+   \brief Graph output
+   \param os : output stream
+   \param g : graph
+   \param name : graph name
+   \post graph g with name has been output to os
+  */
+  void dot_output(std::ostream & os, std::string const & name) override;
 
 private:
-  tchecker::ts::state_space_t<tchecker::zg::zg_t, tchecker::simulate::graph_t> _ss; /*!< State-space representation */
+  tchecker::ts::state_space_t<tchecker::zg::zg_t, graph_t> _ss; /*!< State-space representation */
 };
 
-} // namespace simulate
+} // end of namespace symbolic
 
-} // namespace tchecker
+} // end of  namespace simulate
+
+} // end of namespace tchecker
 
 #endif // TCHECKER_simulate_GRAPH_HH

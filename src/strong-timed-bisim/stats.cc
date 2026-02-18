@@ -54,7 +54,7 @@ std::shared_ptr<tchecker::strong_timed_bisim::contra::cont_dag_t> stats_t::count
 void stats_t::init_counterexample(std::shared_ptr<tchecker::vcg::vcg_t> const & vcg1, 
                          std::shared_ptr<tchecker::vcg::vcg_t> const & vcg2,
                          tchecker::zg::state_sptr_t first_init, tchecker::zg::state_sptr_t second_init,
-                         clock_rational_value_t max_delay)
+                         std::size_t max_delay)
 {
   _counterexample = std::make_shared<tchecker::strong_timed_bisim::contra::cont_dag_t>(vcg1, vcg2, first_init, second_init, max_delay);
 }

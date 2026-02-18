@@ -72,15 +72,6 @@ private:
                        visited_map_t & visited);
 
   /*!
-   \brief checks whether we need to do an epsilon transition
-   \param A_state : first state
-   \param B_state : second state
-   \return true if the states are either not synced or the result of a delay is different than the original symbolic states
-  */
-  bool do_an_epsilon_transition(tchecker::zg::state_sptr_t A_state, tchecker::zg::transition_sptr_t A_trans,
-                                tchecker::zg::state_sptr_t B_state, tchecker::zg::transition_sptr_t B_trans);
-
-  /*!
    \brief : removes found contradictions from a zone
    \param zone : the zone to constraint
    \param contradictions : the virtual constraints that shall be removed from zone

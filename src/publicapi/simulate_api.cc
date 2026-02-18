@@ -124,7 +124,7 @@ void tck_simulate(std::string output_filename, std::string sysdecl_filename, sim
 
     if (output_trace) {
       assert(state_space.get() != nullptr);
-      tchecker::simulate::dot_output(*os, state_space->graph(), sysdecl->name());
+      state_space->dot_output(*os, sysdecl->name());
     }
   }
   catch (std::runtime_error & e) {

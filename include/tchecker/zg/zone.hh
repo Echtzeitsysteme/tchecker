@@ -76,6 +76,11 @@ public:
   void make_universal();
 
   /*!
+   \brief makes this zone representing the region of the given valuation
+   */
+  void make_region(tchecker::clockval_t *valuation);
+
+  /*!
    \brief Equality predicate
    \param zone : a DBM zone
    \return true if this is equal to zone, false otherwise

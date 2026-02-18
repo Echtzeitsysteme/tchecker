@@ -87,7 +87,7 @@ public:
   void init_counterexample(std::shared_ptr<tchecker::vcg::vcg_t> const & vcg1, 
                            std::shared_ptr<tchecker::vcg::vcg_t> const & vcg2,
                            tchecker::zg::state_sptr_t first_init, tchecker::zg::state_sptr_t second_init,
-                           clock_rational_value_t max_delay);
+                           std::size_t max_delay);
 
   /*!
    \brief Extract statistics as attributes (key, value)
