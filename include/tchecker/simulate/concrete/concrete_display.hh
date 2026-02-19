@@ -53,8 +53,11 @@ class concrete_display_t {
    \brief Display simulation next step
    \param s : current state
    \param v : collection of next triples (status, state, transition)
+   \param finite_max_delay : whether the max delay is finite
+   \param max_delay : the max delay (only used if finite_max_delay = true)
    */
-  virtual void output_next(tchecker::zg::const_state_sptr_t const & s, std::vector<tchecker::zg::zg_t::sst_t> const & v, tchecker::clock_rational_value_t max_delay) = 0;
+  virtual void output_next(tchecker::zg::const_state_sptr_t const & s, std::vector<tchecker::zg::zg_t::sst_t> const & v, bool finite_max_delay,    
+                           tchecker::clock_rational_value_t max_delay) = 0;
  
  protected:
   /*!
@@ -112,21 +115,10 @@ class concrete_hr_display_t : public concrete_display_t {
   */
   concrete_hr_display_t & operator=(concrete_hr_display_t &&) = delete;
 
-  /*!
-  \brief Display simulation next step
-  \param s : current state
-  \param v : collection of successor triples (status, state, transition)
-  \post Attributes of state s,  and all states and transitions in v have been output to _os
-  */
-  void output_next(tchecker::zg::const_state_sptr_t const & s, std::vector<tchecker::zg::zg_t::sst_t> const & v, tchecker::clock_rational_value_t max_delay);
+  void output_initial(std::vector<tchecker::zg::zg_t::sst_t> const & v);
 
-  /*!
-   \brief Display initial simulation step
-   \param v : collection of initial triples (status, state, transition)
-   \post Attributes of all states and transitions in v have been output to _os
-  */
-  virtual void output_initial(std::vector<tchecker::zg::zg_t::sst_t> const & v);
-
+  void output_next(tchecker::zg::const_state_sptr_t const & s, std::vector<tchecker::zg::zg_t::sst_t> const & v, 
+                   bool finite_max_delay, tchecker::clock_rational_value_t max_delay);
 
 private:
   /*!
@@ -188,20 +180,10 @@ class concrete_json_display_t : public concrete_display_t {
   */
   concrete_json_display_t & operator=(concrete_json_display_t &&) = delete;
 
-  /*!
-   \brief Display simulation next step
-   \param s : current state
-   \param v : collection of successor triples (status, state, transition)
-   \post Attributes of state s as well as all states and transitions in v have been output to _os
-   */
-  void output_next(tchecker::zg::const_state_sptr_t const & s, std::vector<tchecker::zg::zg_t::sst_t> const & v, tchecker::clock_rational_value_t max_delay);
-
-  /*!
-   \brief Display initial simulation step
-   \param v : collection of initial triples (status, state, transition)
-   \post Attributes of all states and transitions in v have been output to _os
-  */
   void output_initial(std::vector<tchecker::zg::zg_t::sst_t> const & v);
+
+  void output_next(tchecker::zg::const_state_sptr_t const & s, std::vector<tchecker::zg::zg_t::sst_t> const & v, 
+                   bool finite_max_delay, tchecker::clock_rational_value_t max_delay);
 
 
 private:

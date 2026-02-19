@@ -5,19 +5,21 @@
  *
  */
 
-#include "tchecker/operational-semantics/helping_functions.hh"
+#include "tchecker/operational-semantics/max_delay.hh"
 
 namespace tchecker {
 
 namespace operational_semantics {
 
 clock_rational_value_t
-max_delay(tchecker::zg::zone_t & zone, tchecker::clockval_t * valuation, std::size_t max_delay_value, std::size_t min_delay_value)
+max_delay(tchecker::zg::zone_t & zone, std::shared_ptr<tchecker::clockval_t> valuation, std::size_t max_delay_value, std::size_t min_delay_value)
 {
   assert(min_delay_value >= 0); 
   assert(max_delay_value >= 0);
   assert(max_delay_value >= min_delay_value);
-  auto clone = tchecker::clockval_clone(*valuation);
+
+  tchecker::clockval_t *raw = tchecker::clockval_clone(*valuation);
+  auto clone = std::shared_ptr<tchecker::clockval_t>(raw, &clockval_destruct_and_deallocate);
   add_delay(clone, *valuation, max_delay_value);
 
   if(zone.belongs(*clone)) { // if the maximum delay applied is still within zone, this is the maximum delay

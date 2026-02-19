@@ -21,9 +21,7 @@ randomized_simulation(tchecker::parsing::system_declaration_t const & sysdecl, s
 
 std::size_t randomized_select(std::vector<tchecker::zg::zg_t::sst_t> const & v)
 {
-  assert(v.size() < NO_SELECTION);
-  if (v.size() == 0)
-    return NO_SELECTION;
+  assert(v.size() > 0);
   return std::rand() % v.size();
 }
 

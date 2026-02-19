@@ -22,14 +22,14 @@ namespace operational_semantics {
  \pre For any clock c there exists an integer n, such that the zone either requires c=n or n < c < n+1
  \note Only fractional values of .0 and .5 are used
  */
-tchecker::clockval_t * convert(tchecker::zg::zone_t & zone);
+std::shared_ptr<tchecker::clockval_t> convert(const tchecker::zg::zone_t & zone);
 
 /*!
  \brief Converts a clock valuation into the corresponding region
  \param clockval : the valuation to convert
  \return a zone, representing the region of the clock valuation
  */
-std::shared_ptr<tchecker::zg::zone_t> convert(tchecker::clockval_t * clockval);
+std::shared_ptr<tchecker::zg::zone_t> convert(std::shared_ptr<tchecker::clockval_t> clockval);
 
 } // end of namespace operational_semantics
 

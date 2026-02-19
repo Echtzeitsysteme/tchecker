@@ -11,11 +11,12 @@ namespace tchecker {
 
 namespace operational_semantics {
 
-tchecker::clockval_t *convert(tchecker::zg::zone_t & zone)
+std::shared_ptr<tchecker::clockval_t> convert(const tchecker::zg::zone_t & zone)
 {
-  tchecker::clockval_t *result = clockval_allocate_and_construct(zone.dim() - 1);
+  auto raw = clockval_allocate_and_construct(zone.dim());
+  auto result = std::shared_ptr<tchecker::clockval_t>(raw, &clockval_destruct_and_deallocate);
 
-  for(std::size_t i = 1; i < zone.dim(); i++) {
+  for(std::size_t i = 0; i < zone.dim(); i++) {
     tchecker::clock_rational_value_t value;
     auto upper_bound = tchecker::dbm::access(zone.dbm(), zone.dim(), i, 0);
     if(upper_bound->cmp == tchecker::LT) {
@@ -23,7 +24,7 @@ tchecker::clockval_t *convert(tchecker::zg::zone_t & zone)
     } else {
       value = tchecker::clock_rational_value_t(upper_bound->value, 1);
     }
-    (*result)[i-1] = value;
+    (*result)[i] = value;
   }
 
   if(!zone.belongs(*result)) {
@@ -39,9 +40,9 @@ tchecker::clockval_t *convert(tchecker::zg::zone_t & zone)
   return result;
 }
 
-std::shared_ptr<tchecker::zg::zone_t> convert(tchecker::clockval_t *clockval)
+std::shared_ptr<tchecker::zg::zone_t> convert(std::shared_ptr<tchecker::clockval_t> clockval)
 {
-  std::shared_ptr<tchecker::zg::zone_t> result = tchecker::zg::factory(clockval->size() + 1);
+  std::shared_ptr<tchecker::zg::zone_t> result = tchecker::zg::factory(clockval->size());
   result->make_universal();
 
   result->make_region(clockval);

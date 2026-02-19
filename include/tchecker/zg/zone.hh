@@ -78,7 +78,7 @@ public:
   /*!
    \brief makes this zone representing the region of the given valuation
    */
-  void make_region(tchecker::clockval_t *valuation);
+  void make_region(std::shared_ptr<tchecker::clockval_t> valuation);
 
   /*!
    \brief Equality predicate

@@ -24,9 +24,6 @@ namespace tchecker {
 
 namespace simulate {
 
-
-static std::size_t const NO_SELECTION = std::numeric_limits<std::size_t>::max();
-
 /*!
  \brief Type of display
 */

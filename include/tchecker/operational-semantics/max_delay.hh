@@ -5,8 +5,8 @@
  *
  */
 
-#ifndef TCHECKER_OPERATIONAL_SEMANTICS_HELPING_FUNCTIONS_HH
-#define TCHECKER_OPERATIONAL_SEMANTICS_HELPING_FUNCTIONS_HH
+#ifndef TCHECKER_OPERATIONAL_SEMANTICS_MAX_DELAY_HH
+#define TCHECKER_OPERATIONAL_SEMANTICS_MAX_DELAY_HH
 
 #include "tchecker/variables/clocks.hh"
 #include "tchecker/zg/zone.hh"
@@ -26,7 +26,7 @@ namespace operational_semantics {
  \note If valuation + max_delay_value \not\in zone and valuation + min_delay_value \not\in zone, 0 is returned.
  */
 clock_rational_value_t
-max_delay(tchecker::zg::zone_t & zone, tchecker::clockval_t * valuation, std::size_t max_delay_value, std::size_t min_delay_value);
+max_delay(tchecker::zg::zone_t & zone, std::shared_ptr<tchecker::clockval_t> valuation, std::size_t max_delay_value, std::size_t min_delay_value);
 
 } // end of namespace operational_semantics
 

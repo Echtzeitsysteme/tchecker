@@ -9,7 +9,7 @@
 
 #include "tchecker/strong-timed-bisim/certificate/clock_names.hh"
 
-#include "tchecker/operational-semantics/helping_functions.hh"
+#include "tchecker/operational-semantics/max_delay.hh"
  
 namespace tchecker {
 
@@ -226,8 +226,8 @@ bool node_t::is_leaf(tchecker::zg::state_sptr_t & init_1, tchecker::zg::state_sp
   }
 
   if(!state_1_fut->zone().is_virtual_equivalent(state_2_fut->zone(), vcg1->get_no_of_virtual_clocks())) {
-    auto first = tchecker::operational_semantics::max_delay(state_1_fut->zone(), &(*(_valuation.first)), max_possible_delay, 0);
-    auto second = tchecker::operational_semantics::max_delay(state_2_fut->zone(), &(*(_valuation.second)), max_possible_delay, 0);
+    auto first = tchecker::operational_semantics::max_delay(state_1_fut->zone(), _valuation.first, max_possible_delay, 0);
+    auto second = tchecker::operational_semantics::max_delay(state_2_fut->zone(), _valuation.second, max_possible_delay, 0);
     _final = true;
     _final_first_has_transition = (first > second);
     double symbol = _final_first_has_transition ? static_cast<double>(first.numerator()) / first.denominator() : static_cast<double>(second.numerator()) / second.denominator();
@@ -321,15 +321,16 @@ node_t::max_delay(std::shared_ptr<tchecker::virtual_constraint::virtual_constrai
   std::pair<std::shared_ptr<tchecker::zg::zone_t>, std::shared_ptr<tchecker::zg::zone_t>> zones =
       vc->generate_synchronized_zones(vcg1->get_no_of_original_clocks(), vcg2->get_no_of_original_clocks());
   
-  clock_rational_value_t delay = tchecker::operational_semantics::max_delay(*zones.first, &(*(_valuation.first)), max_delay_value, 0);
+  clock_rational_value_t delay = tchecker::operational_semantics::max_delay(*zones.first, _valuation.first, max_delay_value, 0);
 
   auto clone_1 = tchecker::clockval_clone(*_valuation.first);
-  add_delay(clone_1, *_valuation.first, delay);
   auto new_valuation_1 = std::shared_ptr<tchecker::clockval_t>(clone_1, &clockval_destruct_and_deallocate);
+  add_delay(new_valuation_1, *_valuation.first, delay);
+
 
   auto clone_2 = tchecker::clockval_clone(*_valuation.second);
-  add_delay(clone_2, *_valuation.second, delay);
   auto new_valuation_2 = std::shared_ptr<tchecker::clockval_t>(clone_2, &clockval_destruct_and_deallocate);
+  add_delay(new_valuation_2, *_valuation.second, delay);
 
   std::shared_ptr<node_t> result = std::make_shared<node_t>(*this);
   result->set_initial(false);

@@ -11,6 +11,7 @@
 
 #include "tchecker/simulate/concrete/concrete_display.hh"
 #include "tchecker/simulate/concrete/clock_names.hh"
+#include "tchecker/operational-semantics/zone_valuation_converter.hh"
 
 namespace tchecker {
 
@@ -30,31 +31,20 @@ std::map<std::string, std::string>
 concrete_display_t::gen_attr_map(tchecker::zg::const_state_sptr_t const & s, std::map<std::string, std::string> & attr)
 {
   assert(tchecker::dbm::is_tight(s->zone().dbm(), s->zone().dim()));
-  assert(s->zone().dim() == _zg->clocks_count() - 1);
+  assert(s->zone().dim() == _zg->clocks_count() + 1);
 
   _zg->attributes(s, attr);
   attr.erase("zone");
 
-  auto raw = clockval_allocate_and_construct(_zg->clocks_count());
-  auto valuation = std::shared_ptr<tchecker::clockval_t>(raw, &clockval_destruct_and_deallocate);
+  std::shared_ptr<tchecker::clockval_t> valuation = tchecker::operational_semantics::convert(s->zone());
 
-  for(tchecker::clock_id_t i = 0; i < valuation->size(); i++) {
-    tchecker::dbm::db_t upper = *(tchecker::dbm::access(s->zone().dbm(), s->zone().dim(), i+1, 0));
-    tchecker::dbm::db_t lower = *(tchecker::dbm::access(s->zone().dbm(), s->zone().dim(), 0, i+1));
+  std::string clockval_str = to_string(*valuation, clock_names(_zg->system()));
 
-    int32_t upper_limit = upper.value;
-    int32_t lower_limit = -1*lower.value;
-
-    assert(
-            (upper.cmp == lower.cmp && upper.cmp == tchecker::LE && upper_limit == lower_limit) ||
-            (upper.cmp == lower.cmp && upper.cmp == tchecker::LT && upper.value == (lower.value + 1))
-          );
-    
-    (*valuation)[i] = tchecker::clock_rational_value_t(upper_limit + lower_limit, 2);
-
+  if (clockval_str.rfind("Ref Clock=0,", 0) == 0) { 
+    clockval_str.erase(0, std::string("Ref Clock=0,").length());
   }
 
-  attr["clockval"] = to_string(*valuation, clock_names(_zg->system()));
+  attr["clockval"] = clockval_str;
   return attr;
 }
 
@@ -65,7 +55,7 @@ concrete_hr_display_t::concrete_hr_display_t(std::ostream & os, std::shared_ptr<
 }
 
 void concrete_hr_display_t::output_next(tchecker::zg::const_state_sptr_t const & s, std::vector<tchecker::zg::zg_t::sst_t> const & v, 
-                                        tchecker::clock_rational_value_t max_delay)
+                                        bool finite_max_delay, tchecker::clock_rational_value_t max_delay)
 {
   _os << "--- Current state: " << std::endl;
   output(s);
@@ -79,7 +69,12 @@ void concrete_hr_display_t::output_next(tchecker::zg::const_state_sptr_t const &
     output(tchecker::zg::const_state_sptr_t{nexts});
     ++i;
   }
-  _os << "--- Max Delay: " << max_delay << std::endl;
+
+  std::ostringstream oss;
+  oss << max_delay;
+
+  _os << "--- Max Delay: " << ((finite_max_delay) ? oss.str() : std::string("infinite")) << std::endl;
+   
 }
 
 void concrete_hr_display_t::output_initial(std::vector<tchecker::zg::zg_t::sst_t> const & v)
@@ -120,9 +115,8 @@ concrete_json_display_t::concrete_json_display_t(std::ostream & os, std::shared_
 {
 }
 
-void concrete_json_display_t::output_next(tchecker::zg::const_state_sptr_t const & s, std::vector<tchecker::zg::zg_t::sst_t> const & v,
-                                          tchecker::clock_rational_value_t max_delay)
-{
+void concrete_json_display_t::output_next(tchecker::zg::const_state_sptr_t const & s, std::vector<tchecker::zg::zg_t::sst_t> const & v, 
+                                          bool finite_max_delay, tchecker::clock_rational_value_t max_delay) {
   boost::json::array a;
 
   for (auto && [status, nexts, nextt] : v) {
@@ -136,7 +130,7 @@ void concrete_json_display_t::output_next(tchecker::zg::const_state_sptr_t const
   o.emplace("current", output(s));
   o.emplace("next", a);
   std::string m_d = std::to_string(max_delay.numerator()) + ((1 != max_delay.denominator()) ? ("/" + max_delay.denominator()) : "");
-  o.emplace("max_delay", m_d);
+  o.emplace("max_delay", (finite_max_delay) ? m_d : std::string("infinite"));
   _os << o << std::endl;
 }
 

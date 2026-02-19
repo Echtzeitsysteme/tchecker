@@ -38,7 +38,18 @@ public:
    \param final : final node flag
    \post this node keeps a shared pointer to s, and has initial/final node flags as specified
    */
-  node_t(std::shared_ptr<tchecker::ta::state_t> ta_state, tchecker::clockval_t *valuation, size_t id,
+  node_t(std::shared_ptr<tchecker::ta::state_t> ta_state, std::shared_ptr<tchecker::clockval_t> valuation, size_t id,
+         bool initial = false, bool final = false);
+
+  /*!
+   \brief Constructor
+   \param ta_state : a ta state
+   \param zone : the zone where the valuation shall be extracted from
+   \param initial : initial node flag
+   \param final : final node flag
+   \post this node keeps a shared pointer to s, and has initial/final node flags as specified
+   */
+  node_t(std::shared_ptr<tchecker::ta::state_t> ta_state, tchecker::zg::zone_t & zone, size_t id,
          bool initial = false, bool final = false);
 
   /*!
@@ -78,7 +89,7 @@ public:
    \brief Getter for the clockval
    \return the valuation
    */
-  tchecker::clockval_t * valuation() const;
+  std::shared_ptr<tchecker::clockval_t> valuation() const;
 
   /*!
    \brief Getter for the TA State
@@ -89,7 +100,7 @@ public:
  private: 
   tchecker::graph::node_flags_t _flags;
   std::shared_ptr<tchecker::ta::state_t> _ta_state;
-  tchecker::clockval_t * _valuation;
+  std::shared_ptr<tchecker::clockval_t> _valuation;
   std::size_t _id;
 };
 
@@ -198,9 +209,9 @@ public:
    \return a shared ptr on the newly added node
    \post node is added to nodes
    */
-  std::shared_ptr<node_t> add_node(std::shared_ptr<tchecker::ta::state_t> ta_state, tchecker::clockval_t * valuation,
-                       bool initial = false, bool final = false);
-  
+  std::shared_ptr<node_t> add_node(std::shared_ptr<tchecker::ta::state_t> ta_state, std::shared_ptr<tchecker::clockval_t> valuation,
+                                   bool initial = false, bool final = false);  
+
   /*!
    \brief adds a new node to the graph
    \param previous : the previous node

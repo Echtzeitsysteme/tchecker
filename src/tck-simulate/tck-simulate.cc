@@ -23,6 +23,7 @@
 static struct option long_options[] = {{"interactive", no_argument, 0, 'i'},
                                        {"random", required_argument, 0, 'r'},
                                        {"onestep", no_argument, 0, '1'},
+                                       {"concrete", no_argument, 0, 'c'},
                                        {"output", required_argument, 0, 'o'},
                                        {"trace", no_argument, 0, 't'},
                                        {"help", no_argument, 0, 'h'},
@@ -32,7 +33,7 @@ static struct option long_options[] = {{"interactive", no_argument, 0, 'i'},
 #endif
                                        {0, 0, 0, 0}};
 
-static char * const options = (char *)"1ir:ho:s:t";
+static char * const options = (char *)"1icr:ho:s:t";
 
 /*!
 \brief Print usage message for program progname
@@ -43,6 +44,7 @@ void usage(char * progname)
   std::cerr << "   -1          one-step simulation (output initial or next states if combined with -s)" << std::endl;
   std::cerr << "   -i          interactive simulation (default)" << std::endl;
   std::cerr << "   -r N        randomized simulation, N steps" << std::endl;
+  std::cerr << "   -c          concrete simulation" << std::endl;
   std::cerr << "   -o file     output file for simulation trace (default: stdout)" << std::endl;
 #if USE_BOOST_JSON
   std::cerr << "   --json      display states/transitions in JSON format" << std::endl;
@@ -99,6 +101,9 @@ int parse_command_line(int argc, char * argv[])
         nsteps = l;
         break;
       }
+      case 'c':
+        simulation_type = CONCRETE_SIMULATION;
+        break;
       case 's':
         starting_state_json = optarg;
         break;

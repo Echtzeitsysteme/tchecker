@@ -835,7 +835,7 @@ tchecker::clock_rational_value_t delay(tchecker::clockval_t const & src,
   return delay;
 }
 
-void add_delay(tchecker::clockval_t *result, tchecker::clockval_t & base, tchecker::clock_rational_value_t delay)
+void add_delay(std::shared_ptr<tchecker::clockval_t> result, tchecker::clockval_t & base, tchecker::clock_rational_value_t delay)
 {
   assert(result->size() == base.size());
 

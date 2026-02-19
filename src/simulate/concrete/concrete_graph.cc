@@ -19,14 +19,20 @@ namespace concrete {
 
 /* node_t */
 
-node_t::node_t(std::shared_ptr<tchecker::ta::state_t> ta_state, tchecker::clockval_t *valuation, size_t id,
+node_t::node_t(std::shared_ptr<tchecker::ta::state_t> ta_state, std::shared_ptr<tchecker::clockval_t> valuation, size_t id,
                bool initial, bool final)
   : _flags(initial, final), _ta_state(ta_state), _valuation(valuation), _id(id)
 {
 }
 
+node_t::node_t(std::shared_ptr<tchecker::ta::state_t> ta_state, tchecker::zg::zone_t & zone, size_t id,
+               bool initial, bool final)
+  : node_t(ta_state, tchecker::operational_semantics::convert(zone), id, initial, final)
+{
+}
+
 node_t::node_t(node_t const & other)
-  : _flags(other._flags), _ta_state(other._ta_state), _valuation(clockval_clone(*other._valuation)), _id(other._id)
+  : _flags(other._flags), _ta_state(other._ta_state), _valuation(clockval_clone(*other._valuation), &clockval_destruct_and_deallocate), _id(other._id)
 {
 }
 
@@ -43,7 +49,7 @@ std::size_t node_t::id() const {return _id;}
 
 void node_t::set_id(std::size_t id) {_id = id;}
 
-tchecker::clockval_t * node_t::valuation() const {return _valuation;}
+std::shared_ptr<tchecker::clockval_t> node_t::valuation() const {return _valuation;}
 
 std::shared_ptr<tchecker::ta::state_t> node_t::ta_state() const {return _ta_state;}
 
@@ -110,7 +116,7 @@ void graph_t::dot_output(std::ostream & os, std::string const & name) {
   }
 }
 
-std::shared_ptr<node_t> graph_t::add_node(std::shared_ptr<tchecker::ta::state_t> ta_state, tchecker::clockval_t * valuation,
+std::shared_ptr<node_t> graph_t::add_node(std::shared_ptr<tchecker::ta::state_t> ta_state, std::shared_ptr<tchecker::clockval_t> valuation,
                               bool initial, bool final)
 {
   std::size_t id = _nodes.size();
@@ -122,7 +128,9 @@ std::shared_ptr<node_t> graph_t::add_node(std::shared_ptr<tchecker::ta::state_t>
 std::shared_ptr<node_t> graph_t::add_node(std::shared_ptr<node_t> previous, tchecker::clock_rational_value_t delay)
 {
   std::size_t id = _nodes.size();
-  tchecker::clockval_t *new_valuation = clockval_clone(*(previous->valuation()));
+  tchecker::clockval_t *raw = clockval_clone(*(previous->valuation()));
+  auto new_valuation = std::shared_ptr<tchecker::clockval_t>(raw, &clockval_destruct_and_deallocate);
+
   add_delay(new_valuation, *new_valuation, delay);
   std::shared_ptr<node_t> result = std::make_shared<node_t>(previous->ta_state(), new_valuation, id, false, previous->flags().final());
   _nodes.emplace_back(result);
@@ -132,13 +140,12 @@ std::shared_ptr<node_t> graph_t::add_node(std::shared_ptr<node_t> previous, tche
 std::shared_ptr<node_t> graph_t::add_node(tchecker::zg::zg_t::state_t & symb_state)
 {
   std::size_t id = _nodes.size();
-  tchecker::clockval_t *new_valuation = tchecker::operational_semantics::convert(symb_state->zone());
   // Now follows an ugly hack.
   // Due to the fact that zg states inherit from ta states (I believe this is a bad decision, but ...), 
   // we have to convert the state_sptr_t to a std::shared_ptr<tchecker::ta::state_t>. Uff...
   // To do so, we take the raw pointer to the chosen_symb and delete the destructor.
   std::shared_ptr<tchecker::ta::state_t> ta_ptr(symb_state.ptr(), [](tchecker::ta::state_t*){}); 
-  std::shared_ptr<node_t> result = std::make_shared<node_t>(ta_ptr, new_valuation, id, false, false);
+  std::shared_ptr<node_t> result = std::make_shared<node_t>(ta_ptr, symb_state->zone(), id, false, false);
   _nodes.emplace_back(result);
   return result;
 }

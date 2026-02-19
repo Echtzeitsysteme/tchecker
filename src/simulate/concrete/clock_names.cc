@@ -15,6 +15,9 @@ namespace concrete {
 
 std::function<std::string (tchecker::clock_id_t)> clock_names(const tchecker::ta::system_t & system) {
   auto result = [sys_ptr = &system](tchecker::clock_id_t id) {
+    if(id == 0) {
+      return std::string("Ref Clock");
+    }
     auto counter = id-1;
     auto const & clocks = sys_ptr->clock_variables();
     for(tchecker::clock_id_t base : clocks.identifiers(tchecker::VK_DECLARED)) {
