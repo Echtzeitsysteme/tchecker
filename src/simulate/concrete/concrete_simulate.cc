@@ -72,6 +72,7 @@ concrete_interactive_select(concrete_display_t & display, tchecker::zg::const_st
       }
       if(0 == use_delay && nullptr != s.ptr()) {
         int64_t random_delay = ( static_cast<int64_t>(std::rand())) % ((max_delay.denominator() == 2) ? (max_delay.numerator() + 1) : 2*max_delay.numerator() + 1);
+        std::cout << "Randomly choosen delay: " << tchecker::clock_rational_value_t(random_delay, 2) << std::endl;
         return std::make_pair(DELAY, tchecker::clock_rational_value_t(random_delay, 2));
       } else {
         if(v.size() == 0) {
@@ -79,6 +80,7 @@ concrete_interactive_select(concrete_display_t & display, tchecker::zg::const_st
         }
         tchecker::clock_rational_value_t used( 
           static_cast<int64_t>(tchecker::simulate::randomized_select(v)), 1);
+        std::cout << "Randomly choosen action: " << used << std::endl;
         return std::make_pair(ACTION, used);
       }
     }
