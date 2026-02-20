@@ -11,6 +11,7 @@
 
 #include "tchecker/operational-semantics/max_delay.hh"
 #include "tchecker/operational-semantics/zone_valuation_converter.hh"
+#include "tchecker/operational-semantics/attributes_to_valuation.hh"
 
 namespace tchecker {
 
@@ -71,7 +72,8 @@ concrete_interactive_select(concrete_display_t & display, tchecker::zg::const_st
         use_delay = 0;
       }
       if(0 == use_delay && nullptr != s.ptr()) {
-        int64_t random_delay = ( static_cast<int64_t>(std::rand())) % ((max_delay.denominator() == 2) ? (max_delay.numerator() + 1) : 2*max_delay.numerator() + 1);
+        int64_t random_delay = ( static_cast<int64_t>(std::rand())) % 
+                                ((max_delay.denominator() == 2) ? (max_delay.numerator() + 1) : 2*max_delay.numerator() + 1);
         std::cout << "Randomly choosen delay: " << tchecker::clock_rational_value_t(random_delay, 2) << std::endl;
         return std::make_pair(DELAY, tchecker::clock_rational_value_t(random_delay, 2));
       } else {
@@ -114,7 +116,8 @@ concrete_interactive_select(concrete_display_t & display, tchecker::zg::const_st
           }
         }
         if(num > INT64_MAX || den > INT64_MAX) {
-          std::cout << "delay to high" << std::endl;
+          std::cout << "invalid values for delay" << std::endl;
+          continue;
         }
         tchecker::clock_rational_value_t val(static_cast<int64_t>(num), static_cast<int64_t>(den));
         if(finite_max_delay && val > max_delay) {
@@ -232,6 +235,66 @@ interactive_simulation(tchecker::parsing::system_declaration_t const & sysdecl,
   } while (1);
 
   return state_space;
+}
+
+
+void onestep_simulation(tchecker::parsing::system_declaration_t const & sysdecl,
+                        enum tchecker::simulate::display_type_t display_type,
+                        std::ostream & os,
+                        std::map<std::string, std::string> const & starting_state_attributes)
+{
+  std::size_t const block_size = 1000;
+  std::size_t const table_size = 65536;
+
+  std::shared_ptr<tchecker::ta::system_t const> system{new tchecker::ta::system_t{sysdecl}};
+  std::shared_ptr<tchecker::zg::zg_t> zg{tchecker::zg::factory(system, tchecker::ts::NO_SHARING,
+                                                               tchecker::zg::STANDARD_SEMANTICS, tchecker::zg::NO_EXTRAPOLATION,
+                                                               block_size, table_size)};
+  std::vector<tchecker::zg::zg_t::sst_t> v;
+
+  std::unique_ptr<concrete_display_t> display{concrete_display_factory(display_type, os, zg)};
+
+  if (starting_state_attributes.empty()) {
+    // start simulation from initial states (interactive selection)
+    zg->initial(v);
+    display->output_initial(v);
+    v.clear();
+  }
+  else {
+
+    std::shared_ptr<tchecker::clockval_t> clockval = tchecker::operational_semantics::build(starting_state_attributes);
+    std::shared_ptr<node_t> previous_node = nullptr;
+    auto highest_delay = zg->extrapolation_max() + 1; // if this delay is possible, any delay is possible.
+
+    std::map<std::string, std::string> attr(starting_state_attributes);
+    attr["zone"] = tchecker::to_string(*tchecker::operational_semantics::convert(clockval), 
+                                       system->clock_variables().flattened().index());
+
+    zg->build(attr, v);
+
+    // start simulation from specified state
+    assert(v.size() <= 1);
+    if (v.size() == 0) {
+      std::cerr << "No valid state to start simulation" << std::endl;
+      return;
+    }
+
+    tchecker::zg::state_sptr_t s{zg->state(v[0])};
+    tchecker::clock_constraint_container_t & previous_node_inv = std::get<2>(v[0])->tgt_invariant_container();
+    v.clear();
+
+    tchecker::clock_rational_value_t max_delay = 0;
+    if (tchecker::ta::delay_allowed(*system, s->vloc())) {
+      tchecker::zg::state_sptr_t eps = zg->clone_state(s);
+      zg->semantics()->delay(eps->zone_ptr()->dbm(), eps->zone_ptr()->dim(), previous_node_inv);
+      max_delay = tchecker::operational_semantics::max_delay(eps->zone(), clockval, highest_delay, 0);
+    }
+  
+    tchecker::zg::const_state_sptr_t s_const{s};
+    zg->next(s_const, v);
+
+    display->output_next(s_const, v, max_delay != highest_delay, max_delay);
+  }
 }
 
 

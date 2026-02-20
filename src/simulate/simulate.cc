@@ -15,7 +15,8 @@ namespace simulate {
 
 std::shared_ptr<tchecker::simulate::state_space_t>
 randomized_simulation(tchecker::parsing::system_declaration_t const & sysdecl, std::size_t nsteps,
-                      std::map<std::string, std::string> const & starting_state_attributes) {
+                      std::map<std::string, std::string> const & starting_state_attributes)
+{
   return tchecker::simulate::symbolic::randomized_simulation(sysdecl, nsteps, starting_state_attributes);
 }
 
@@ -30,22 +31,33 @@ std::shared_ptr<tchecker::simulate::state_space_t>
 interactive_simulation(tchecker::parsing::system_declaration_t const & sysdecl,
                        enum tchecker::simulate::display_type_t display_type,
                        std::ostream & os,
-                       std::map<std::string, std::string> const & starting_state_attributes) {
+                       std::map<std::string, std::string> const & starting_state_attributes)
+{
   return tchecker::simulate::symbolic::interactive_simulation(sysdecl, display_type, os, starting_state_attributes);
 }
 
 void onestep_simulation(tchecker::parsing::system_declaration_t const & sysdecl,
                         enum tchecker::simulate::display_type_t display_type,
                         std::ostream & os,
-                        std::map<std::string, std::string> const & starting_state_attributes) {
+                        std::map<std::string, std::string> const & starting_state_attributes)
+{
   return tchecker::simulate::symbolic::onestep_simulation(sysdecl, display_type, os, starting_state_attributes);
 }
 
 std::shared_ptr<tchecker::simulate::state_space_t>
 concrete_simulation(tchecker::parsing::system_declaration_t const & sysdecl,
                         enum tchecker::simulate::display_type_t display_type,
-                        std::ostream & os) {
+                        std::ostream & os)
+{
   return tchecker::simulate::concrete::interactive_simulation(sysdecl, display_type, os);
+}
+
+void concrete_onestep_simulation(tchecker::parsing::system_declaration_t const & sysdecl,
+                                enum tchecker::simulate::display_type_t display_type,
+                                std::ostream & os,
+                                std::map<std::string, std::string> const & starting_state_attributes)
+{
+  return tchecker::simulate::concrete::onestep_simulation(sysdecl, display_type, os, starting_state_attributes);
 }
 
 } // end of namespace simulate

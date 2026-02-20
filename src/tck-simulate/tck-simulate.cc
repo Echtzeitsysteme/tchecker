@@ -44,7 +44,7 @@ void usage(char * progname)
   std::cerr << "   -1          one-step simulation (output initial or next states if combined with -s)" << std::endl;
   std::cerr << "   -i          interactive simulation (default)" << std::endl;
   std::cerr << "   -r N        randomized simulation, N steps" << std::endl;
-  std::cerr << "   -c          concrete simulation" << std::endl;
+  std::cerr << "   -c          concrete simulation (can be used in combination with -1)" << std::endl;
   std::cerr << "   -o file     output file for simulation trace (default: stdout)" << std::endl;
 #if USE_BOOST_JSON
   std::cerr << "   --json      display states/transitions in JSON format" << std::endl;
@@ -58,7 +58,7 @@ void usage(char * progname)
   std::cerr << "reads from standard input if file is not provided" << std::endl;
 }
 
-static enum simulation_type_t simulation_type = INTERACTIVE_SIMULATION;
+static enum simulation_type_t simulation_type = INTERACTIVE_SIMULATION; // DO NOT CHANGE THIS!
 static enum tchecker::simulate::display_type_t display_type = tchecker::simulate::HUMAN_READABLE_DISPLAY;
 static bool help = false;
 static std::size_t nsteps = 0;
@@ -88,7 +88,11 @@ int parse_command_line(int argc, char * argv[])
     else if (c != 0) {
       switch (c) {
       case '1':
-        simulation_type = ONESTEP_SIMULATION;
+        if(simulation_type == CONCRETE_SIMULATION) {
+          simulation_type = CONCRETE_ONESTEP_SIMULATION;
+        } else {
+          simulation_type = ONESTEP_SIMULATION;
+        }
         break;
       case 'i':
         simulation_type = INTERACTIVE_SIMULATION;
@@ -102,7 +106,11 @@ int parse_command_line(int argc, char * argv[])
         break;
       }
       case 'c':
-        simulation_type = CONCRETE_SIMULATION;
+        if(simulation_type == ONESTEP_SIMULATION) {
+          simulation_type = CONCRETE_ONESTEP_SIMULATION;
+        } else {
+          simulation_type = CONCRETE_SIMULATION;
+        }
         break;
       case 's':
         starting_state_json = optarg;

@@ -65,7 +65,11 @@ std::map<std::string, std::string> parse_state_json(std::string const & state_js
   std::map<std::string, std::string> attributes;
   attributes["vloc"] = value_as_string(json_obj, "vloc");
   attributes["intval"] = value_as_string(json_obj, "intval");
-  attributes["zone"] = value_as_string(json_obj, "zone");
+  if(json_obj.contains("zone")) {
+    attributes["zone"] = value_as_string(json_obj, "zone");
+  } else {
+    attributes["clockval"] = value_as_string(json_obj, "clockval");
+  }
   return attributes;
 }
 #endif
@@ -119,6 +123,8 @@ void tck_simulate(std::string output_filename, std::string sysdecl_filename, sim
       tchecker::simulate::onestep_simulation(*sysdecl, display_type, *os, starting_state_attributes);
     else if (simulation_type == CONCRETE_SIMULATION)
       state_space = tchecker::simulate::concrete_simulation(*sysdecl, display_type, *os);
+    else if (simulation_type == CONCRETE_ONESTEP_SIMULATION)
+      tchecker::simulate::concrete_onestep_simulation(*sysdecl, display_type, *os, starting_state_attributes);
     else
       throw std::runtime_error("Select one of interactive, one-step, randomized, or concrete simulation");
 
