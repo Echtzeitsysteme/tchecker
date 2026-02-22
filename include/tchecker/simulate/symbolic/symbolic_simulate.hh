@@ -40,10 +40,12 @@ static std::size_t const NO_SELECTION = std::numeric_limits<std::size_t>::max();
  simulation steps of the system of timed processes sysdecl
  \note simulation starts from the initial state of sysdecl if starting_state_attributes is empty
 */
-
 std::shared_ptr<tchecker::simulate::symbolic::state_space_t>
-randomized_simulation(tchecker::parsing::system_declaration_t const & sysdecl, std::size_t nsteps,
-                      std::map<std::string, std::string> const & starting_state_attributes);
+randomized_simulation(tchecker::parsing::system_declaration_t const & sysdecl, 
+                      enum tchecker::simulate::display_type_t display_type, 
+                      std::ostream & os,
+                      std::map<std::string, std::string> const & starting_state_attributes,
+                      std::size_t nsteps);
 
 /*!
  \brief Interactive simulation of timed automata

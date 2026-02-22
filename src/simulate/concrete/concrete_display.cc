@@ -58,7 +58,7 @@ void concrete_hr_display_t::output_next(tchecker::zg::const_state_sptr_t const &
                                         bool finite_max_delay, tchecker::clock_rational_value_t max_delay)
 {
   _os << "--- Current state: " << std::endl;
-  output(s);
+  output_state(s);
   _os << "--- Successors: " << std::endl;
 
   std::size_t i = 0;
@@ -66,7 +66,7 @@ void concrete_hr_display_t::output_next(tchecker::zg::const_state_sptr_t const &
     _os << i << ") ";
     output(tchecker::zg::const_transition_sptr_t{nextt});
     _os << std::endl;
-    output(tchecker::zg::const_state_sptr_t{nexts});
+    output_state(tchecker::zg::const_state_sptr_t{nexts});
     ++i;
   }
 
@@ -84,12 +84,12 @@ void concrete_hr_display_t::output_initial(std::vector<tchecker::zg::zg_t::sst_t
   std::size_t i = 0;
   for (auto && [status, nexts, nextt] : v) {
     _os << i << ") ";
-    output(tchecker::zg::const_state_sptr_t{nexts});
+    output_state(tchecker::zg::const_state_sptr_t{nexts});
     ++i;
   }
 }
 
-void concrete_hr_display_t::output(tchecker::zg::const_state_sptr_t const & s)
+void concrete_hr_display_t::output_state(tchecker::zg::const_state_sptr_t const & s)
 {
   
   std::map<std::string, std::string> attr;
@@ -150,6 +150,11 @@ void concrete_json_display_t::output_initial(std::vector<tchecker::zg::zg_t::sst
   o.emplace("initial", a);
 
   _os << o << std::endl;
+}
+
+void concrete_json_display_t::output_state(tchecker::zg::const_state_sptr_t const & s)
+{
+  _os << output(s) << std::endl;
 }
 
 boost::json::value concrete_json_display_t::output(tchecker::zg::const_state_sptr_t const & s)

@@ -28,8 +28,11 @@ namespace symbolic {
 // Randomized simulation */
 
 std::shared_ptr<tchecker::simulate::symbolic::state_space_t>
-randomized_simulation(tchecker::parsing::system_declaration_t const & sysdecl, std::size_t nsteps,
-                      std::map<std::string, std::string> const & starting_state_attributes)
+randomized_simulation(tchecker::parsing::system_declaration_t const & sysdecl, 
+                      enum tchecker::simulate::display_type_t display_type, 
+                      std::ostream & os,
+                      std::map<std::string, std::string> const & starting_state_attributes,
+                      std::size_t nsteps)
 {
   std::size_t const block_size = 1000;
   std::size_t const table_size = 65536;
@@ -38,7 +41,11 @@ randomized_simulation(tchecker::parsing::system_declaration_t const & sysdecl, s
   std::shared_ptr<tchecker::zg::zg_t> zg{tchecker::zg::factory(system, tchecker::ts::NO_SHARING,
                                                                tchecker::zg::STANDARD_SEMANTICS, tchecker::zg::NO_EXTRAPOLATION,
                                                                block_size, table_size)};
+
+  std::unique_ptr<display_t> display{display_factory(display_type, os, zg)};
+
   std::shared_ptr<state_space_t> state_space = std::make_shared<state_space_t>(zg, block_size);
+ 
 
   graph_t & g = state_space->graph();
 
@@ -71,6 +78,8 @@ randomized_simulation(tchecker::parsing::system_declaration_t const & sysdecl, s
 
     previous_node = node;
   }
+
+  display->output_state(previous_node->state_ptr());
 
   return state_space;
 }

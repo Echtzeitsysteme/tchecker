@@ -52,6 +52,13 @@ public:
    \param v : collection of next triples (status, state, transition)
    */
   virtual void output_next(tchecker::zg::const_state_sptr_t const & s, std::vector<tchecker::zg::zg_t::sst_t> const & v) = 0;
+
+  /*!
+   \brief Display state
+   \param s : state
+   \post Attributes of state s in _zg have been output to _os
+  */
+  virtual void output_state(tchecker::zg::const_state_sptr_t const & s) = 0;
 };
 
 /*!
@@ -110,14 +117,9 @@ public:
    */
   virtual void output_next(tchecker::zg::const_state_sptr_t const & s, std::vector<tchecker::zg::zg_t::sst_t> const & v);
 
-private:
-  /*!
- \brief Display state
- \param s : state
- \post Attributes of state s in _zg have been output to _os
-  */
-  void output(tchecker::zg::const_state_sptr_t const & s);
+  void output_state(tchecker::zg::const_state_sptr_t const & s);
 
+private:
   /*!
    \brief Display transition
    \param t : transition
@@ -185,6 +187,8 @@ public:
    \post Attributes of state s as well as all states and transitions in v have been output to _os
    */
   virtual void output_next(tchecker::zg::const_state_sptr_t const & s, std::vector<tchecker::zg::zg_t::sst_t> const & v);
+
+  void output_state(tchecker::zg::const_state_sptr_t const & s);
 
 protected:
   std::ostream & _os;                      /*!< Output stream */

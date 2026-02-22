@@ -98,7 +98,11 @@ int parse_command_line(int argc, char * argv[])
         simulation_type = INTERACTIVE_SIMULATION;
         break;
       case 'r': {
-        simulation_type = RANDOMIZED_SIMULATION;
+        if(simulation_type == CONCRETE_SIMULATION) {
+          simulation_type = CONCRETE_RANDOMIZED_SIMULATION;
+        } else {
+          simulation_type = RANDOMIZED_SIMULATION;
+        }
         long long int l = std::strtoll(optarg, nullptr, 10);
         if (l < 0)
           throw std::runtime_error("Invalid trace length (must be positive)");
@@ -108,6 +112,8 @@ int parse_command_line(int argc, char * argv[])
       case 'c':
         if(simulation_type == ONESTEP_SIMULATION) {
           simulation_type = CONCRETE_ONESTEP_SIMULATION;
+        } else if (simulation_type == RANDOMIZED_SIMULATION) {
+          simulation_type = CONCRETE_RANDOMIZED_SIMULATION;
         } else {
           simulation_type = CONCRETE_SIMULATION;
         }

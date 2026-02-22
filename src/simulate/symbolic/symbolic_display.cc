@@ -30,7 +30,7 @@ void hr_display_t::output_initial(std::vector<tchecker::zg::zg_t::sst_t> const &
   std::size_t i = 0;
   for (auto && [status, nexts, nextt] : v) {
     _os << i << ") ";
-    output(tchecker::zg::const_state_sptr_t{nexts});
+    output_state(tchecker::zg::const_state_sptr_t{nexts});
     ++i;
   }
 }
@@ -38,7 +38,7 @@ void hr_display_t::output_initial(std::vector<tchecker::zg::zg_t::sst_t> const &
 void hr_display_t::output_next(tchecker::zg::const_state_sptr_t const & s, std::vector<tchecker::zg::zg_t::sst_t> const & v)
 {
   _os << "--- Current state: " << std::endl;
-  output(s);
+  output_state(s);
   _os << "--- Successors: " << std::endl;
 
   std::size_t i = 0;
@@ -46,12 +46,12 @@ void hr_display_t::output_next(tchecker::zg::const_state_sptr_t const & s, std::
     _os << i << ") ";
     output(tchecker::zg::const_transition_sptr_t{nextt});
     _os << std::endl;
-    output(tchecker::zg::const_state_sptr_t{nexts});
+    output_state(tchecker::zg::const_state_sptr_t{nexts});
     ++i;
   }
 }
 
-void hr_display_t::output(tchecker::zg::const_state_sptr_t const & s)
+void hr_display_t::output_state(tchecker::zg::const_state_sptr_t const & s)
 {
   std::map<std::string, std::string> attr;
   _zg->attributes(s, attr);
@@ -170,6 +170,12 @@ void json_display_t::output_next(tchecker::zg::const_state_sptr_t const & s, std
 {
   _os << json_next(*_zg, s, v) << std::endl;
 }
+
+void json_display_t::output_state(tchecker::zg::const_state_sptr_t const & s)
+{
+  _os << json_state(*_zg, s) << std::endl;
+}
+
 #endif
 
 /* factory */

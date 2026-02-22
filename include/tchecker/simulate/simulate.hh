@@ -53,16 +53,20 @@ class state_space_t {
 /*!
  \brief Randomized simulation of timed automata
  \param sysdecl : system declaration
- \param nsteps : number of simulation steps
+ \param display_type : type of display
  \param starting_state_attributes : attributes of simulation starting state
+ \param nsteps : number of simulation steps
  \return state-space consisting of a zone graph and the simulation tree built from nsteps randomized
  simulation steps of the system of timed processes sysdecl
  \note simulation starts from the initial state of sysdecl if starting_state_attributes is empty
 */
 
 std::shared_ptr<tchecker::simulate::state_space_t>
-randomized_simulation(tchecker::parsing::system_declaration_t const & sysdecl, std::size_t nsteps,
-                      std::map<std::string, std::string> const & starting_state_attributes);
+randomized_simulation(tchecker::parsing::system_declaration_t const & sysdecl, 
+                      enum tchecker::simulate::display_type_t display_type, 
+                      std::ostream & os,
+                      std::map<std::string, std::string> const & starting_state_attributes,
+                      std::size_t nsteps);
 
 /*!
  \brief Random selection
@@ -101,15 +105,15 @@ void onestep_simulation(tchecker::parsing::system_declaration_t const & sysdecl,
                         std::map<std::string, std::string> const & starting_state_attributes);
 
 /*!
- \brief One-step simulation of timed automata using concrete values
+ \brief Interactive simulation of timed automata using concrete values
  \param sysdecl : system declaration
  \param display_type : type of display
  \note simulation starts from the initial state of sysdecl if starting_state_attributes is empty
 */
 std::shared_ptr<tchecker::simulate::state_space_t>
-concrete_simulation(tchecker::parsing::system_declaration_t const & sysdecl,
-                        enum tchecker::simulate::display_type_t display_type,
-                        std::ostream & os);
+concrete_interactive_simulation(tchecker::parsing::system_declaration_t const & sysdecl,
+                               enum tchecker::simulate::display_type_t display_type,
+                               std::ostream & os);
 
 /*!
  \brief One-step simulation of timed automata
@@ -122,6 +126,23 @@ void concrete_onestep_simulation(tchecker::parsing::system_declaration_t const &
                                 enum tchecker::simulate::display_type_t display_type,
                                 std::ostream & os,
                                 std::map<std::string, std::string> const & starting_state_attributes);
+
+/*!
+ \brief Randomized simulation of timed automata using concrete values
+ \param sysdecl : system declaration
+ \param display_type : type of display
+ \param starting_state_attributes : attributes of simulation starting state
+ \param nsteps : number of simulation steps
+ \return state-space consisting of a zone graph and the simulation tree built from nsteps randomized
+ simulation steps of the system of timed processes sysdecl
+ \note simulation starts from the initial state of sysdecl if starting_state_attributes is empty
+*/
+std::shared_ptr<tchecker::simulate::state_space_t>
+concrete_randomized_simulation(tchecker::parsing::system_declaration_t const & sysdecl, 
+                               enum tchecker::simulate::display_type_t display_type, 
+                               std::ostream & os,
+                               std::map<std::string, std::string> const & starting_state_attributes,
+                               std::size_t nsteps);
 
 } // namespace simulate
 

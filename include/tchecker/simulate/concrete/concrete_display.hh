@@ -58,6 +58,13 @@ class concrete_display_t {
    */
   virtual void output_next(tchecker::zg::const_state_sptr_t const & s, std::vector<tchecker::zg::zg_t::sst_t> const & v, bool finite_max_delay,    
                            tchecker::clock_rational_value_t max_delay) = 0;
+      
+  /*!
+   \brief Display state
+   \param s : state
+   \post Attributes of state s in _zg have been output to _os
+  */
+  virtual void output_state(tchecker::zg::const_state_sptr_t const & s) = 0;
  
  protected:
   /*!
@@ -115,18 +122,14 @@ class concrete_hr_display_t : public concrete_display_t {
   */
   concrete_hr_display_t & operator=(concrete_hr_display_t &&) = delete;
 
-  void output_initial(std::vector<tchecker::zg::zg_t::sst_t> const & v);
+  void output_initial(std::vector<tchecker::zg::zg_t::sst_t> const & v) override;
 
   void output_next(tchecker::zg::const_state_sptr_t const & s, std::vector<tchecker::zg::zg_t::sst_t> const & v, 
-                   bool finite_max_delay, tchecker::clock_rational_value_t max_delay);
+                   bool finite_max_delay, tchecker::clock_rational_value_t max_delay) override;
+
+  void output_state(tchecker::zg::const_state_sptr_t const & s) override;
 
 private:
-  /*!
- \brief Display state
- \param s : state
- \post Attributes of state s in _zg have been output to _os
-  */
-  void output(tchecker::zg::const_state_sptr_t const & s);
 
   /*!
    \brief Display transition
@@ -180,11 +183,12 @@ class concrete_json_display_t : public concrete_display_t {
   */
   concrete_json_display_t & operator=(concrete_json_display_t &&) = delete;
 
-  void output_initial(std::vector<tchecker::zg::zg_t::sst_t> const & v);
+  void output_initial(std::vector<tchecker::zg::zg_t::sst_t> const & v) override;
 
   void output_next(tchecker::zg::const_state_sptr_t const & s, std::vector<tchecker::zg::zg_t::sst_t> const & v, 
-                   bool finite_max_delay, tchecker::clock_rational_value_t max_delay);
+                   bool finite_max_delay, tchecker::clock_rational_value_t max_delay) override;
 
+  void output_state(tchecker::zg::const_state_sptr_t const & s) override;
 
 private:
 
@@ -193,14 +197,14 @@ private:
  \param s : state
  \post Attributes of state s in _zg have been output to _os
   */
-   boost::json::value output(tchecker::zg::const_state_sptr_t const & s);
+  boost::json::value output(tchecker::zg::const_state_sptr_t const & s);
 
   /*!
    \brief Display transition
    \param t : transition
    \post Attributes of transition t in _zg have been output to _os
    */
-   boost::json::value output(tchecker::zg::const_transition_sptr_t const & t);
+  boost::json::value output(tchecker::zg::const_transition_sptr_t const & t);
 
 };
 
