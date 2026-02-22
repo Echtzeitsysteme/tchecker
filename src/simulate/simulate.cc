@@ -52,7 +52,8 @@ concrete_interactive_simulation(tchecker::parsing::system_declaration_t const & 
                                 enum tchecker::simulate::display_type_t display_type,
                                 std::ostream & os)
 {
-  return tchecker::simulate::concrete::interactive_simulation(sysdecl, display_type, os);
+  tchecker::simulate::concrete::concrete_simulator_t sim{sysdecl, display_type, os};
+  return sim.interactive_simulation();
 }
 
 void concrete_onestep_simulation(tchecker::parsing::system_declaration_t const & sysdecl,
@@ -60,7 +61,8 @@ void concrete_onestep_simulation(tchecker::parsing::system_declaration_t const &
                                 std::ostream & os,
                                 std::map<std::string, std::string> const & starting_state_attributes)
 {
-  return tchecker::simulate::concrete::onestep_simulation(sysdecl, display_type, os, starting_state_attributes);
+  tchecker::simulate::concrete::concrete_simulator_t sim{sysdecl, display_type, os};
+  return sim.onestep_simulation(starting_state_attributes);
 }
 
 std::shared_ptr<tchecker::simulate::state_space_t>
@@ -70,7 +72,8 @@ concrete_randomized_simulation(tchecker::parsing::system_declaration_t const & s
                                std::map<std::string, std::string> const & starting_state_attributes,
                                std::size_t nsteps)
 {
-  return tchecker::simulate::concrete::randomized_simulation(sysdecl, display_type, os, starting_state_attributes, nsteps);
+  tchecker::simulate::concrete::concrete_simulator_t sim{sysdecl, display_type, os};
+  return sim.randomized_simulation(starting_state_attributes, nsteps);
 }
 
 } // end of namespace simulate

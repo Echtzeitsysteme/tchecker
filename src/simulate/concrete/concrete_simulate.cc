@@ -18,22 +18,110 @@ namespace simulate {
 
 namespace concrete {
 
-/*!
- \brief Concrete Transition Types
-*/
-enum concrete_trans_type_t {
-  ACTION = 0,
-  DELAY
-};
-
 static int64_t const NO_SELECTION = std::numeric_limits<int64_t>::max();
 
+concrete_simulator_t::concrete_simulator_t(tchecker::parsing::system_declaration_t const & sysdecl,
+                                           enum tchecker::simulate::display_type_t display_type,
+                                           std::ostream & os)
+  : _system(new tchecker::ta::system_t{sysdecl}),
+    _zg(tchecker::zg::factory(_system, tchecker::ts::NO_SHARING, 
+                              tchecker::zg::DISTINGUISHED_SEMANTICS, tchecker::zg::NO_EXTRAPOLATION,
+                              1000, 65536)),
+    _state_space(std::make_shared<state_space_t>(_system)),
+    _g(_state_space->graph()),
+    _display(std::unique_ptr<tchecker::simulate::concrete::concrete_display_t>(concrete_display_factory(display_type, os, _zg))),
+    _highest_delay(_zg->extrapolation_max() + 1),
+    _os(os)
+{
+  srand(time(NULL)); // needed if user chooses randomize selection
+}
 
-static std::pair<concrete_trans_type_t, tchecker::clock_rational_value_t> 
-concrete_interactive_select(std::ostream & s_out,std::function<std::string()> input_func, concrete_display_t & display, tchecker::zg::const_state_sptr_t const & s,
-                            std::vector<tchecker::zg::zg_t::sst_t> const & v, bool finite_max_delay,
-                            tchecker::clock_rational_value_t max_delay,
-                            bool print_interaction)
+// Concrete Simulation
+std::shared_ptr<tchecker::simulate::concrete::state_space_t>
+concrete_simulator_t::interactive_simulation()
+{
+
+  // During the interactive select, decision should be done by user input.
+  auto read_input = []() -> std::string {
+    std::string input;
+    std::getline(std::cin, input);  // Reads the entire line, including spaces
+    return input;
+  };
+  
+  auto select = initial_select(read_input, true);
+  if(ERROR == select.first) {
+    return _state_space;
+  }
+
+  do {
+    select = next_select(read_input, true);
+    if (ERROR == select.first) {
+      break;
+    }
+  } while (1);
+
+  return _state_space;
+}
+
+void concrete_simulator_t::onestep_simulation(std::map<std::string, std::string> const & starting_state_attributes)
+{
+  if (starting_state_attributes.empty()) {
+    // start simulation from initial states (interactive selection)
+    _zg->initial(_v);
+    _display->output_initial(_v);
+  }
+  else {
+
+    parse_starting_state_attributes(starting_state_attributes);
+
+    tchecker::clock_rational_value_t max_delay = calculate_max_delay();
+    tchecker::zg::const_state_sptr_t previous_symb_const{_previous_symb};
+
+    _v.clear();
+    _zg->next(previous_symb_const, _v);
+
+    _display->output_next(previous_symb_const, _v, max_delay != _highest_delay, max_delay);
+  }
+}
+
+std::shared_ptr<tchecker::simulate::concrete::state_space_t>
+concrete_simulator_t::randomized_simulation(std::map<std::string, std::string> const & starting_state_attributes,
+                                            std::size_t nsteps)
+{
+
+  auto give_r = []() -> std::string {
+    return std::string("r");
+  };
+
+  if (starting_state_attributes.empty()) { // start simulation from initial state
+    auto select = initial_select(give_r, false);
+    if(ERROR == select.first) {
+      return _state_space;
+    }
+  } else { // start simulation from specified starting state
+    parse_starting_state_attributes(starting_state_attributes);
+  }
+  for (std::size_t i = 0; i < nsteps; ++i) {
+
+    auto select = next_select(give_r, false);
+    if (ERROR == select.first) {
+      break;
+    }
+  }
+  tchecker::zg::const_state_sptr_t previous_symb_const{_previous_symb};
+  _display->output_state(previous_symb_const);
+  return _state_space;
+}
+
+std::pair<concrete_trans_type_t, tchecker::clock_rational_value_t> 
+concrete_simulator_t::concrete_interactive_select(std::ostream & s_out,
+                                                  std::function<std::string()> input_func, 
+                                                  concrete_display_t & display, 
+                                                  tchecker::zg::const_state_sptr_t const & s,
+                                                  std::vector<tchecker::zg::zg_t::sst_t> const & v,
+                                                  bool finite_max_delay,
+                                                  tchecker::clock_rational_value_t max_delay,
+                                                  bool print_interaction)
 {
   assert(v.size() < NO_SELECTION);
   assert(max_delay.denominator() == 1 || max_delay.denominator() == 2);
@@ -147,258 +235,106 @@ concrete_interactive_select(std::ostream & s_out,std::function<std::string()> in
   } while (1);
 }
 
-// Concrete Simulation
-std::shared_ptr<tchecker::simulate::concrete::state_space_t>
-interactive_simulation(tchecker::parsing::system_declaration_t const & sysdecl,
-                        enum tchecker::simulate::display_type_t display_type,
-                        std::ostream & os)
+
+std::pair<tchecker::simulate::concrete::concrete_trans_type_t, tchecker::clock_rational_value_t>
+concrete_simulator_t::initial_select(std::function<std::string()> input_func, bool print_interaction)
 {
-  std::size_t const block_size = 1000;
-  std::size_t const table_size = 65536;
-
-  std::shared_ptr<tchecker::ta::system_t const> system{new tchecker::ta::system_t{sysdecl}};
-  std::shared_ptr<tchecker::zg::zg_t> zg{tchecker::zg::factory(system, tchecker::ts::NO_SHARING,
-                                                                tchecker::zg::DISTINGUISHED_SEMANTICS, tchecker::zg::NO_EXTRAPOLATION,
-                                                                block_size, table_size)};
-
-  std::shared_ptr<state_space_t> state_space = std::make_shared<state_space_t>(system);
-
-  graph_t & g = state_space->graph();
-
-  std::vector<tchecker::zg::zg_t::sst_t> v;
-
-  std::unique_ptr<concrete_display_t> display{concrete_display_factory(display_type, os, zg)};
-
-  srand(time(NULL)); // needed if user chooses randomize selection
-
-  auto highest_delay = zg->extrapolation_max() + 1; // if this delay is possible, any delay is possible.
-
-
-  // start simulation from initial states
-  zg->initial(v);
-  // for the initial statest, max_delay is not relevant, as the initial node must be chosen, first.
-  auto read_input = []() -> std::string {
-    std::string input;
-    std::getline(std::cin, input);  // Reads the entire line, including spaces
-    return input;
-  };
-  auto select = concrete_interactive_select(std::cout, read_input, *display, tchecker::zg::const_state_sptr_t{nullptr}, v, clock_rational_value_t(highest_delay, 1), true, true);
-  
+  _v.clear();
+    // start simulation from initial states
+  _zg->initial(_v);
+  auto select = concrete_interactive_select(_os, input_func, *_display, 
+                                            tchecker::zg::const_state_sptr_t{nullptr}, _v, 
+                                            clock_rational_value_t(_highest_delay, 1), false, print_interaction);
+                                      
   if (select.second.numerator() > 0 && 
       select.second.numerator() ==  NO_SELECTION && 
       select.second.denominator() == 1) {
-    return state_space;
+    return std::make_pair<tchecker::simulate::concrete::concrete_trans_type_t, tchecker::clock_rational_value_t>(ERROR, 0);
   }
 
-  tchecker::zg::state_sptr_t previous_symb = std::get<1>(v[select.second.numerator()]);
+  _previous_symb = std::get<1>(_v[select.second.numerator()]);
   // for some reason, the invariant of a tchecker::ta::state_t is not stored within the state, but within the transition. 
   // Therefore, we need to store it explicitly.
-  tchecker::clock_constraint_container_t & previous_node_inv = std::get<2>(v[select.second.numerator()])->tgt_invariant_container();
+  _previous_node_inv = std::make_shared<tchecker::clock_constraint_container_t>(
+                              std::get<2>(_v[select.second.numerator()])->tgt_invariant_container());
 
-  std::shared_ptr<node_t> previous_node = g.add_node(previous_symb); 
-  v.clear();
-
-  do {
-
-    tchecker::clock_rational_value_t max_delay = 0;
-    if (tchecker::ta::delay_allowed(*system, previous_node->ta_state()->vloc())) {
-      tchecker::zg::state_sptr_t eps = zg->clone_state(previous_symb);
-      zg->semantics()->delay(eps->zone_ptr()->dbm(), eps->zone_ptr()->dim(), previous_node_inv);
-      max_delay = tchecker::operational_semantics::max_delay(eps->zone(), previous_node->valuation(), highest_delay, 0);
-    }
-  
-    tchecker::zg::const_state_sptr_t previous_symb_const{previous_symb};
-    zg->next(previous_symb_const, v);
-
-    select = concrete_interactive_select(std::cout, read_input, *display, previous_symb_const, v, max_delay != highest_delay, max_delay, true);
-    if (select.second.numerator() > 0 && 
-        select.second.numerator() ==  NO_SELECTION && 
-        select.second.denominator() == 1) {
-      break;
-    }
-
-    if (DELAY == select.first) {
-      std::shared_ptr<tchecker::ta::state_t> ta_ptr(previous_symb.ptr(), [](tchecker::ta::state_t*){}); 
-      auto new_node = g.add_node(previous_node, select.second);
-      g.add_delay_edge(select.second, *previous_node, *new_node);
-      previous_node = new_node;
-      std::shared_ptr<tchecker::zg::zone_t> new_zone = tchecker::operational_semantics::convert(previous_node->valuation());
-      previous_symb->replace_zone(*new_zone);
-    } else if (ACTION == select.first) {
-      auto new_symb = std::get<1>(v[select.second.numerator()]);
-      auto new_node = g.add_node(new_symb);
-      auto transition = std::get<2>(v[select.second.numerator()]);
-      g.add_action_edge(transition, *previous_node, *new_node);
-      previous_node = new_node;
-      previous_symb = new_symb;
-      previous_node_inv = std::get<2>(v[select.second.numerator()])->tgt_invariant_container();
-    }
-
-    v.clear();
-    
-  } while (1);
-
-  return state_space;
+  _previous_node = _g.add_node(_previous_symb); 
+  return select;
 }
 
-
-void onestep_simulation(tchecker::parsing::system_declaration_t const & sysdecl,
-                        enum tchecker::simulate::display_type_t display_type,
-                        std::ostream & os,
-                        std::map<std::string, std::string> const & starting_state_attributes)
+std::pair<tchecker::simulate::concrete::concrete_trans_type_t, tchecker::clock_rational_value_t>
+concrete_simulator_t::next_select(std::function<std::string()> input_func, bool print_interaction)
 {
-  std::size_t const block_size = 1000;
-  std::size_t const table_size = 65536;
-
-  std::shared_ptr<tchecker::ta::system_t const> system{new tchecker::ta::system_t{sysdecl}};
-  std::shared_ptr<tchecker::zg::zg_t> zg{tchecker::zg::factory(system, tchecker::ts::NO_SHARING,
-                                                               tchecker::zg::STANDARD_SEMANTICS, tchecker::zg::NO_EXTRAPOLATION,
-                                                               block_size, table_size)};
-  std::vector<tchecker::zg::zg_t::sst_t> v;
-
-  std::unique_ptr<concrete_display_t> display{concrete_display_factory(display_type, os, zg)};
-
-  if (starting_state_attributes.empty()) {
-    // start simulation from initial states (interactive selection)
-    zg->initial(v);
-    display->output_initial(v);
-    v.clear();
-  }
-  else {
-
-    std::shared_ptr<tchecker::clockval_t> clockval = tchecker::operational_semantics::build(starting_state_attributes);
-    std::shared_ptr<node_t> previous_node = nullptr;
-    auto highest_delay = zg->extrapolation_max() + 1; // if this delay is possible, any delay is possible.
-
-    std::map<std::string, std::string> attr(starting_state_attributes);
-    attr["zone"] = tchecker::to_string(*tchecker::operational_semantics::convert(clockval), 
-                                       system->clock_variables().flattened().index());
-
-    zg->build(attr, v);
-
-    // start simulation from specified state
-    assert(v.size() <= 1);
-    if (v.size() == 0) {
-      std::cerr << "No valid state to start simulation" << std::endl;
-      return;
-    }
-
-    tchecker::zg::state_sptr_t s{zg->state(v[0])};
-    tchecker::clock_constraint_container_t & previous_node_inv = std::get<2>(v[0])->tgt_invariant_container();
-    v.clear();
-
-    tchecker::clock_rational_value_t max_delay = 0;
-    if (tchecker::ta::delay_allowed(*system, s->vloc())) {
-      tchecker::zg::state_sptr_t eps = zg->clone_state(s);
-      zg->semantics()->delay(eps->zone_ptr()->dbm(), eps->zone_ptr()->dim(), previous_node_inv);
-      max_delay = tchecker::operational_semantics::max_delay(eps->zone(), clockval, highest_delay, 0);
-    }
+  _v.clear();
+  tchecker::clock_rational_value_t max_delay = calculate_max_delay();
   
-    tchecker::zg::const_state_sptr_t s_const{s};
-    zg->next(s_const, v);
+  tchecker::zg::const_state_sptr_t previous_symb_const{_previous_symb};
+  _zg->next(previous_symb_const, _v);
 
-    display->output_next(s_const, v, max_delay != highest_delay, max_delay);
+  auto select = concrete_interactive_select(std::cout, input_func, *_display, previous_symb_const, _v, max_delay != _highest_delay, max_delay, print_interaction);
+  if (select.second.numerator() > 0 && 
+      select.second.numerator() ==  NO_SELECTION && 
+      select.second.denominator() == 1) {
+    return std::make_pair<tchecker::simulate::concrete::concrete_trans_type_t, tchecker::clock_rational_value_t>(ERROR, 0);
   }
+
+  if (DELAY == select.first) {
+    std::shared_ptr<tchecker::ta::state_t> ta_ptr(_previous_symb.ptr(), [](tchecker::ta::state_t*){}); 
+    auto new_node = _g.add_node(_previous_node, select.second);
+    _g.add_delay_edge(select.second, *_previous_node, *new_node);
+    _previous_node = new_node;
+    std::shared_ptr<tchecker::zg::zone_t> new_zone = tchecker::operational_semantics::convert(_previous_node->valuation());
+    _previous_symb->replace_zone(*new_zone);
+  } else if (ACTION == select.first) {
+    auto new_symb = std::get<1>(_v[select.second.numerator()]);
+    auto new_node = _g.add_node(new_symb);
+    auto transition = std::get<2>(_v[select.second.numerator()]);
+    _g.add_action_edge(transition, *_previous_node, *new_node);
+    _previous_node = new_node;
+    _previous_symb = new_symb;
+    _previous_node_inv = std::make_shared<tchecker::clock_constraint_container_t>(
+                          std::get<2>(_v[select.second.numerator()])->tgt_invariant_container());
+  }
+
+  return select;
 }
 
-std::shared_ptr<tchecker::simulate::concrete::state_space_t>
-randomized_simulation(tchecker::parsing::system_declaration_t const & sysdecl, 
-                      enum tchecker::simulate::display_type_t display_type, 
-                      std::ostream & os,
-                      std::map<std::string, std::string> const & starting_state_attributes,
-                      std::size_t nsteps)
+tchecker::clock_rational_value_t concrete_simulator_t::calculate_max_delay()
 {
-  std::size_t const block_size = 1000;
-  std::size_t const table_size = 65536;
+  tchecker::clock_rational_value_t max_delay = 0;
+  if (tchecker::ta::delay_allowed(*_system, _previous_node->ta_state()->vloc())) {
+    tchecker::zg::state_sptr_t eps = _zg->clone_state(_previous_symb);
+    _zg->semantics()->delay(eps->zone_ptr()->dbm(), eps->zone_ptr()->dim(), *_previous_node_inv);
+    max_delay = tchecker::operational_semantics::max_delay(eps->zone(), _previous_node->valuation(), _highest_delay, 0);
+  }
+  return max_delay;  
+}
 
-  std::shared_ptr<tchecker::ta::system_t const> system{new tchecker::ta::system_t{sysdecl}};
-  std::shared_ptr<tchecker::zg::zg_t> zg{tchecker::zg::factory(system, tchecker::ts::NO_SHARING,
-                                                                tchecker::zg::DISTINGUISHED_SEMANTICS, tchecker::zg::NO_EXTRAPOLATION,
-                                                                block_size, table_size)};
+int concrete_simulator_t::parse_starting_state_attributes(std::map<std::string, std::string> const & starting_state_attributes)
+{
+  assert(!starting_state_attributes.empty());
 
-  std::shared_ptr<state_space_t> state_space = std::make_shared<state_space_t>(system);
-  std::unique_ptr<concrete_display_t> display{concrete_display_factory(display_type, os, zg)};
+  std::shared_ptr<tchecker::clockval_t> clockval = tchecker::operational_semantics::build(starting_state_attributes);
 
-  graph_t & g = state_space->graph();
-  std::vector<tchecker::zg::zg_t::sst_t> v;
-  srand(time(NULL)); // needed if user chooses randomize selection
+  std::map<std::string, std::string> attr(starting_state_attributes);
+  attr["zone"] = tchecker::to_string(*tchecker::operational_semantics::convert(clockval), 
+                                     _system->clock_variables().flattened().index());
 
+  _v.clear();
+  _zg->build(attr, _v);
 
-  auto highest_delay = zg->extrapolation_max() + 1; // if this delay is possible, any delay is possible.
-
-  if (starting_state_attributes.empty()) { // start simulation from initial state
-    zg->initial(v);
-  } else { // start simulation from specified starting state
-
-    std::shared_ptr<tchecker::clockval_t> clockval = tchecker::operational_semantics::build(starting_state_attributes);
-    std::map<std::string, std::string> attr(starting_state_attributes);
-    attr["zone"] = tchecker::to_string(*tchecker::operational_semantics::convert(clockval), 
-                                       system->clock_variables().flattened().index());
-
-    zg->build(attr, v);
+  // start simulation from specified state
+  assert(_v.size() <= 1);
+  if (_v.size() == 0) {
+    std::cerr << "No valid state to start simulation" << std::endl;
+    throw std::runtime_error("No valid state to start simulation");
   }
 
-  auto give_r = []() -> std::string {
-    return std::string("r");
-  };
-  auto select = concrete_interactive_select(os, give_r, 
-                  *display, tchecker::zg::const_state_sptr_t{nullptr}, v, clock_rational_value_t(highest_delay, 1), true, false);
+  _previous_symb = _zg->state(_v[0]);
+  _previous_node_inv = std::make_shared<tchecker::clock_constraint_container_t>(std::get<2>(_v[0])->tgt_invariant_container());
+  _previous_node = _g.add_node(_previous_symb);
 
-
-  tchecker::zg::state_sptr_t previous_symb = std::get<1>(v[select.second.numerator()]);
-
-  // for some reason, the invariant of a tchecker::ta::state_t is not stored within the state, but within the transition. 
-  // Therefore, we need to store it explicitly.
-  tchecker::clock_constraint_container_t & previous_node_inv = std::get<2>(v[select.second.numerator()])->tgt_invariant_container();
-
-  std::shared_ptr<node_t> previous_node = g.add_node(previous_symb);
-  v.clear();
-
-
-  for (std::size_t i = 0; i < nsteps; ++i) {
-
-    tchecker::clock_rational_value_t max_delay = 0;
-    if (tchecker::ta::delay_allowed(*system, previous_node->ta_state()->vloc())) {
-      tchecker::zg::state_sptr_t eps = zg->clone_state(previous_symb);
-      zg->semantics()->delay(eps->zone_ptr()->dbm(), eps->zone_ptr()->dim(), previous_node_inv);
-      max_delay = tchecker::operational_semantics::max_delay(eps->zone(), previous_node->valuation(), highest_delay, 0);
-    }
-
-    tchecker::zg::const_state_sptr_t previous_symb_const{previous_symb};
-    zg->next(previous_symb_const, v);
-
-    select = concrete_interactive_select(os, give_r, *display, previous_symb_const, v, max_delay != highest_delay, max_delay, false);
-    if (select.second.numerator() > 0 && 
-        select.second.numerator() ==  NO_SELECTION && 
-        select.second.denominator() == 1) {
-      break;
-    }
-      
-    if (DELAY == select.first) {
-      std::shared_ptr<tchecker::ta::state_t> ta_ptr(previous_symb.ptr(), [](tchecker::ta::state_t*){}); 
-      auto new_node = g.add_node(previous_node, select.second);
-      g.add_delay_edge(select.second, *previous_node, *new_node);
-      previous_node = new_node;
-      std::shared_ptr<tchecker::zg::zone_t> new_zone = tchecker::operational_semantics::convert(previous_node->valuation());
-      previous_symb->replace_zone(*new_zone);
-    } else if (ACTION == select.first) {
-      auto new_symb = std::get<1>(v[select.second.numerator()]);
-      auto new_node = g.add_node(new_symb);
-      auto transition = std::get<2>(v[select.second.numerator()]);
-      g.add_action_edge(transition, *previous_node, *new_node);
-      previous_node = new_node;
-      previous_symb = new_symb;
-      previous_node_inv = std::get<2>(v[select.second.numerator()])->tgt_invariant_container();
-    }
-
-    v.clear();
-  }
-
-  tchecker::zg::const_state_sptr_t previous_symb_const{previous_symb};
-
-  display->output_state(previous_symb_const);
-
-  return state_space;
+  return 0;
 }
 
 } // end of namespace concrete
