@@ -15,6 +15,11 @@ else()
   find_package(Boost OPTIONAL_COMPONENTS json)
 endif()
 
+message(STATUS "Supposed to use static boost libraries:  ${TCHECKER_BOOST_STATIC_LINK}")
+message(STATUS "Boost include dirs:  ${Boost_INCLUDE_DIRS}")
+message(STATUS "Boost library dirs: ${Boost_LIBRARY_DIRS}")
+message(STATUS "Boost libraries:   ${Boost_LIBRARIES}")
+
 if(boost_json_DIR)
   set(USE_BOOST_JSON 1)
   add_compile_definitions(USE_BOOST_JSON=1)
