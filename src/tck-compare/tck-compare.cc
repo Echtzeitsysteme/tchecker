@@ -30,6 +30,8 @@ static struct option long_options[] = {{"relationship", required_argument, 0, 'r
 //                                       {"block-size", required_argument, 0, 0},
 //                                       {"table-size", required_argument, 0, 0},
                                        {"witness", no_argument, 0, 'W'},
+                                       {"sFirst", required_argument, 0, 0},
+                                       {"sSecond", required_argument, 0, 0},
                                        {0, 0, 0, 0}};
 
 static char const * const options = (char *)"hr:n:o:W";
@@ -42,10 +44,12 @@ void usage(char * progname)
 {
   std::cerr << "Usage: " << progname << " [options] [file1] [file2]" << std::endl;
   std::cerr << "   -h                 help" << std::endl;
-  std::cerr << "   -o output file for witness/contradiction DAG (default is standard output)" << std::endl;
+  std::cerr << "   -o                 output file for witness/contradiction DAG (default is standard output)" << std::endl;
   std::cerr << "   -r relationship    relationship to check" << std::endl;
-  std::cerr << "                strong-timed-bisim  strong timed bisimilarity" << std::endl;
-  std::cerr << "   -W generate a witness/contradiction DAG" << std::endl;
+  std::cerr << "                        strong-timed-bisim  strong timed bisimilarity" << std::endl;
+  std::cerr << "   -W                 generate a witness/contradiction DAG" << std::endl;
+  std::cerr << "   -sFirst state      starting state of the first VCG, specified as a JSON object with keys vloc, intval and zone" << std::endl;
+  std::cerr << "   -sSecond state     starting state of the second VCG, specified as a JSON object with keys vloc, intval and zone" << std::endl;
 }
 
 enum tck_compare_relationship_t relationship = STRONG_TIMED_BISIM;   /*!< Selected relationship */
@@ -55,6 +59,9 @@ std::string output_file = "";                      /*!< Output file name (empty 
 std::ostream * os = &std::cout;                    /*!< Default output stream */
 std::size_t block_size = 10000;                    /*!< Size of allocated blocks */
 std::size_t table_size = 65536;                    /*!< Size of hash tables */
+static std::string first_starting_state_json = ""; 
+static std::string second_starting_state_json = "";
+
 
 /*!
  \brief Parse command-line arguments
@@ -104,8 +111,13 @@ int parse_command_line(int argc, char * argv[])
         block_size = std::strtoull(optarg, nullptr, 10);
       else if (strcmp(long_options[long_option_index].name, "table-size") == 0)
         table_size = std::strtoull(optarg, nullptr, 10);
+      else if (strcmp(long_options[long_option_index].name, "sFirst") == 0) {
+        first_starting_state_json = optarg;
+      } else if (strcmp(long_options[long_option_index].name, "sSecond") == 0) {
+        second_starting_state_json = optarg;
+      }
       else
-        throw std::runtime_error("This also should never be executed");
+        throw std::runtime_error("This should never be executed");
     }
   }
 
@@ -135,7 +147,10 @@ int main(int argc, char * argv[]) {
     
     std::shared_ptr<std::ofstream> os_ptr{nullptr};
 
-    tchecker::publicapi::tck_compare(output_file, first_input, second_input, relationship, block_size, table_size, witness);
+    tchecker::publicapi::tck_compare(output_file, first_input, second_input,
+                                     relationship, block_size, table_size, 
+                                     first_starting_state_json, second_starting_state_json,
+                                     witness);
 
     if (tchecker::log_error_count() > 0)
       return EXIT_FAILURE;

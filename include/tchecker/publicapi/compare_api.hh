@@ -87,6 +87,8 @@ void tck_compare(const char * output_filename,
   tck_compare_relationship_t relationship,
   int * block_size, 
   int * table_size,
+  const char * starting_state_attributes_first = nullptr,
+  const char * starting_state_attributes_second = nullptr,
   bool generate_witness=false);
 
 #ifdef __cplusplus
@@ -111,17 +113,21 @@ namespace publicapi {
   \param relationship Type of relationship to check (see tck_compare_relationship_t)
   \param block_size Block size for internal computation
   \param table_size Table size for internal computation
+  \param first_stating_state_json the json description of the first starting state, or the empty string in case init shall be used
+  \param second_stating_state_json the json description of the second starting state, or the empty string in case init shall be used
   \param generate_witness Whether a witness/Contradiction DAG shall be generated
 
   \note This is the C++ API. For C/FFI usage, see the C-compatible version above.
 */
   void tck_compare(std::string output_filename, 
-                  std::string first_sysdecl_filename, 
-                  std::string second_sysdecl_filename,
-                  tck_compare_relationship_t relationship,
-                  std::size_t block_size, 
-                  std::size_t table_size,
-                  bool generate_witness);
+                   std::string first_sysdecl_filename, 
+                   std::string second_sysdecl_filename,
+                   tck_compare_relationship_t relationship,
+                   std::size_t block_size, 
+                   std::size_t table_size,
+                   std::string first_starting_state_json,
+                   std::string second_starting_state_json,
+                   bool generate_witness);
 
 } // end of namespace publicapi
 
