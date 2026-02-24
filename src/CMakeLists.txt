@@ -8,7 +8,11 @@ set(Boost_USE_STATIC_LIBS ${TCHECKER_BOOST_STATIC_LINK})  # only find static lib
 set(Boost_USE_DEBUG_LIBS        OFF)  # ignore debug libs and
 set(Boost_USE_RELEASE_LIBS       ON)  # only find release libs
 set(Boost_USE_MULTITHREADED     OFF)
-find_package(Boost OPTIONAL_COMPONENTS json)
+
+if(TCHECKER_BOOST_STATIC_LINK)
+  find_package(Boost REQUIRED COMPONENTS system json)
+else()
+  find_package(Boost OPTIONAL_COMPONENTS json)
 
 if(boost_json_DIR)
   set(USE_BOOST_JSON 1)
@@ -120,6 +124,11 @@ if(LIBTCHECKER_ENABLE_SHARED)
     $<TARGET_OBJECTS:program_parsing_shared>
     $<TARGET_OBJECTS:system_parsing_shared>)
   target_link_libraries(libtchecker_shared ${Boost_LIBRARIES})
+  if(TCHECKER_BOOST_STATIC_LINK)
+    set_target_properties(libtchecker_shared PROPERTIES
+        LINK_SEARCH_START_STATIC ON
+        LINK_SEARCH_END_STATIC   ON)
+  endif()
   set_property(TARGET libtchecker_shared PROPERTY OUTPUT_NAME tchecker)
   set_property(TARGET libtchecker_shared PROPERTY CXX_STANDARD 17)
   set_property(TARGET libtchecker_shared PROPERTY CXX_STANDARD_REQUIRED ON)
