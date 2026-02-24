@@ -13,6 +13,7 @@ if(TCHECKER_BOOST_STATIC_LINK)
   find_package(Boost REQUIRED COMPONENTS system json)
 else()
   find_package(Boost OPTIONAL_COMPONENTS json)
+endif()
 
 if(boost_json_DIR)
   set(USE_BOOST_JSON 1)
