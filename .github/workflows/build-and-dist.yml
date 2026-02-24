@@ -37,3 +37,8 @@ jobs:
           user_email: 'alexander.lieb@online.de'
           user_name: 'alzeha'
           commit_message: 'updated libtchecker.so from https://github.com/Echtzeitsysteme/tchecker'
+      - name: Create artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: libtchecker.so
+          path: libtchecker.so
