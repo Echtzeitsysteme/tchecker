@@ -129,7 +129,10 @@ void concrete_json_display_t::output_next(tchecker::zg::const_state_sptr_t const
   boost::json::object o;
   o.emplace("current", output(s));
   o.emplace("next", a);
-  std::string m_d = std::to_string(max_delay.numerator()) + ((1 != max_delay.denominator()) ? ("/" + max_delay.denominator()) : "");
+  std::string m_d = std::to_string(max_delay.numerator()) + 
+                      ((1 != max_delay.denominator()) ? 
+                        (std::string("/") + std::to_string(max_delay.denominator())) :
+                        std::string(""));
   o.emplace("max_delay", (finite_max_delay) ? m_d : std::string("infinite"));
   _os << o << std::endl;
 }
