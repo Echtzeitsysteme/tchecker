@@ -17,6 +17,7 @@ jobs:
       CONFNAME: ${{ matrix.intsize }}
       INSTALL_DIR: "install"
       TCHECKER_BUILD_TYPE: "Debug"
+      TCHECKER_BOOST_STATIC_LINK: "OFF"
       
     steps:
       - uses: actions/checkout@v4
