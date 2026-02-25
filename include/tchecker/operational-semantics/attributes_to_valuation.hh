@@ -16,6 +16,11 @@ namespace tchecker {
 
 namespace operational_semantics {
 
+/*!
+ \brief Generate clockval_t from attributes
+ \param attributes : the attributes
+ \return the clockval as described in attributes
+ */
 std::shared_ptr<tchecker::clockval_t> build(std::map<std::string, std::string> const & attributes);
 
 } // end of namespace operational_semantics
