@@ -66,7 +66,8 @@ tchecker::clock_id_t clocks_check(std::shared_ptr<tchecker::ta::system_t> const 
 tchecker::strong_timed_bisim::stats_t
 run(std::shared_ptr<tchecker::parsing::system_declaration_t> const & sysdecl_first, 
     std::shared_ptr<tchecker::parsing::system_declaration_t> const & sysdecl_second,
-    std::ostream * os, std::size_t block_size, std::size_t table_size, bool generate_witness) {
+    std::ostream * os, std::size_t block_size, std::size_t table_size, 
+    std::string first_starting_state_json, std::string second_starting_state_json, bool generate_witness) {
 
   std::vector<std::shared_ptr<tchecker::ta::system_t>> systems;
 
@@ -74,7 +75,11 @@ run(std::shared_ptr<tchecker::parsing::system_declaration_t> const & sysdecl_fir
     std::shared_ptr<tchecker::ta::system_t> cur_system{new tchecker::ta::system_t{ (i == 0) ? *sysdecl_first : *sysdecl_second}};
     std::shared_ptr<tchecker::syncprod::system_t const> system_syncprod = std::make_shared<tchecker::syncprod::system_t const>(cur_system->as_syncprod_system());
     std::shared_ptr<tchecker::system::system_t> product = std::make_shared<tchecker::system::system_t>(tchecker::syncprod::synchronized_product(system_syncprod, (i == 0) ? FIRST_PRODUCT_NAME : SECOND_PRODUCT_NAME, LOC_DELIMITER));
-    check_for_init(product);
+    if (first_starting_state_json.empty() && second_starting_state_json.empty()) {
+      check_for_init(product);
+    } else if (first_starting_state_json.empty() || second_starting_state_json.empty()) {
+      throw std::runtime_error(std::string("Either give a state for both automata or for none."));
+    }
     systems.push_back(cur_system);
   }
 
@@ -93,8 +98,7 @@ run(std::shared_ptr<tchecker::parsing::system_declaration_t> const & sysdecl_fir
 
   for(size_t i = 0; i < 2; ++i) {
     std::shared_ptr<tchecker::strong_timed_bisim::system_virtual_clocks_t const> extended_system{new tchecker::strong_timed_bisim::system_virtual_clocks_t{*(systems[i]), no_of_virt_clocks, 0 == i}};
-    std::shared_ptr<tchecker::vcg::vcg_t> vcg{tchecker::vcg::factory(extended_system, 0 == i, systems[0], systems[1], urgent_or_committed_clock, tchecker::ts::SHARING, tchecker::zg::DISTINGUISHED_SEMANTICS,
-                                                                     tchecker::zg::EXTRA_M_GLOBAL, block_size, table_size)};
+    std::shared_ptr<tchecker::vcg::vcg_t> vcg{tchecker::vcg::factory(extended_system, 0 == i, systems[0], systems[1], urgent_or_committed_clock, tchecker::ts::SHARING, tchecker::zg::DISTINGUISHED_SEMANTICS, tchecker::zg::EXTRA_M_GLOBAL, block_size, table_size)};
     vcgs.push_back(vcg);
   }
 
@@ -102,7 +106,7 @@ run(std::shared_ptr<tchecker::parsing::system_declaration_t> const & sysdecl_fir
 
   auto algorithm = new tchecker::strong_timed_bisim::Lieb_et_al(vcgs[0], vcgs[1], generate_witness);
 
-  return algorithm->run();
+  return algorithm->run(first_starting_state_json, second_starting_state_json);
 
 }
 
