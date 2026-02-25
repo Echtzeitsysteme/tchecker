@@ -24,7 +24,11 @@ namespace simulate {
 
 namespace concrete {  
 
-
+/*!
+ \brief creates a function that maps clock_ids to clock names
+ \param system : the ta system
+ \return a function that maps clock_ids to clock names
+ */
 std::function<std::string (tchecker::clock_id_t)> clock_names(const tchecker::ta::system_t & system);
 
 } // end of namespace concrete
