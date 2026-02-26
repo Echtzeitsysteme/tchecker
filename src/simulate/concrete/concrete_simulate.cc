@@ -66,7 +66,6 @@ concrete_simulator_t::interactive_simulation()
 void concrete_simulator_t::onestep_simulation(std::map<std::string, std::string> const & starting_state_attributes)
 {
   if (starting_state_attributes.empty()) {
-    // start simulation from initial states (interactive selection)
     _zg->initial(_v);
     _display->output_initial(_v);
   }
