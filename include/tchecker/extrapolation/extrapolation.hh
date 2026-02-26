@@ -80,7 +80,7 @@ public:
    \param vloc : a tuple of locations
    \post dbm has not been modified
    */
-  virtual void extrapolate(tchecker::dbm::db_t * dbm, tchecker::clock_id_t dim, tchecker::vloc_t const & vloc);
+  virtual void extrapolate(tchecker::dbm::db_t * dbm, tchecker::clock_id_t dim, tchecker::vloc_t const & vloc) override;
 
   virtual tchecker::clockbounds::bound_t max_value() const override;
 

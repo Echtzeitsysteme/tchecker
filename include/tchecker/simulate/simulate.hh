@@ -48,6 +48,8 @@ class state_space_t {
    \post this with name has been output to os
   */
   virtual void dot_output(std::ostream & os, std::string const & name) = 0;
+
+  virtual ~state_space_t() = default;
 };
 
 /*!
