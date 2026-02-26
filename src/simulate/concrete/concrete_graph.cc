@@ -128,9 +128,7 @@ std::shared_ptr<node_t> graph_t::add_node(std::shared_ptr<tchecker::ta::state_t>
 std::shared_ptr<node_t> graph_t::add_node(std::shared_ptr<node_t> previous, tchecker::clock_rational_value_t delay)
 {
   std::size_t id = _nodes.size();
-  tchecker::clockval_t *raw = clockval_clone(*(previous->valuation()));
-  auto new_valuation = std::shared_ptr<tchecker::clockval_t>(raw, &clockval_destruct_and_deallocate);
-
+  auto new_valuation = clockval_factory(previous->valuation());
   add_delay(new_valuation, *new_valuation, delay);
   std::shared_ptr<node_t> result = std::make_shared<node_t>(previous->ta_state(), new_valuation, id, false, previous->flags().final());
   _nodes.emplace_back(result);
