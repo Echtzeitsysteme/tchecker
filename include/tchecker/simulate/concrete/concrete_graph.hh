@@ -24,9 +24,9 @@ namespace simulate {
 
 namespace concrete {
 
-  /*!
-\class node_t
-\brief Nodes of simulation graph
+/*!
+ \class node_t
+ \brief Nodes of simulation graph
 */
 class node_t {
 public:

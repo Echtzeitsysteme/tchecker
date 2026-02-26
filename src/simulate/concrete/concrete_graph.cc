@@ -32,7 +32,7 @@ node_t::node_t(std::shared_ptr<tchecker::ta::state_t> ta_state, tchecker::zg::zo
 }
 
 node_t::node_t(node_t const & other)
-  : _flags(other._flags), _ta_state(other._ta_state), _valuation(clockval_clone(*other._valuation), &clockval_destruct_and_deallocate), _id(other._id)
+  : _flags(other._flags), _ta_state(other._ta_state), _valuation(clockval_factory(other._valuation)), _id(other._id)
 {
 }
 
