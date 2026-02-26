@@ -592,6 +592,16 @@ std::shared_ptr<tchecker::clockval_t> clockval_factory(unsigned short size, tche
   return result;
 }
 
+std::shared_ptr<tchecker::clockval_t> clockval_factory(std::shared_ptr<tchecker::clockval_t> v)
+{
+  auto result = clockval_factory(v->size());
+  for (auto i = 0; i < v->size(); ++i) {
+    (*result)[i] = (*v)[i];
+  }
+  return result;
+}
+
+
 std::ostream & output(std::ostream & os, tchecker::clockval_t const & clockval,
                       std::function<std::string(tchecker::clock_id_t)> clock_name)
 {
