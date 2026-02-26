@@ -11,7 +11,7 @@ wget -q https://cloud.debian.org/images/cloud/trixie/latest/debian-13-generic-am
 cp debian-13-generic-amd64.qcow2 /var/lib/libvirt/images/
 
 # create VM and start provisioning
-virt-install --name tchecker --memory  16384 --vcpus 4 --disk=size=10,backing_store=/var/lib/libvirt/images/debian-13-generic-amd64.qcow2 --cloud-init user-data=.ci-scripts/cloud-init.yml,disable=on --network bridge=virbr0,mac=52:54:00:fa:58:c8 --osinfo=debian13
+virt-install --name tchecker --memory  16384 --vcpus 4 --disk=size=10,backing_store=/var/lib/libvirt/images/debian-13-generic-amd64.qcow2 --cloud-init user-data=ci-scripts/cloud-init.yml,disable=on --network bridge=virbr0,mac=52:54:00:fa:58:c8 --osinfo=debian13
 # ^the VM terminates itself after provisioning
 
 # create ovf
