@@ -1,0 +1,37 @@
+#Main idea contributed by [Maximilian Kratz] ([GitHub/GitLab handle or email])
+# Thanks for the inspiration!
+
+name: vm-creator
+on:
+  push:
+    branches:
+      - 'master'
+      - 'feature/vm'
+
+jobs:
+  provision:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v6
+    # Enable KVM and install QEMU + libvirt + virt-manager
+    # Based on:
+    # https://github.com/orgs/community/discussions/8305#discussioncomment-5888654
+    - name: Enable KVM group perms
+      run: |
+        echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+        sudo udevadm control --reload-rules
+        sudo udevadm trigger --name-match=kvm
+        sudo apt-get update
+        sudo apt-get install -y - qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils virt-manager
+        sudo usermod -a -G kvm,libvirt $USER
+    - name: Run script
+      # Workaround to get a TTY device
+      # https://github.com/gfx/example-github-actions-with-tty
+      shell: 'script -q -e -c "bash {0}"'
+      run: |
+        sudo bash ci-scripts/create-vm.sh
+    - name: Upload artifact
+      uses: actions/upload-artifact@v6
+      with:
+        name: tchecker-ova
+        path: tchecker.ova

@@ -1,4 +1,6 @@
 #!/bin/bash
+# Main idea contributed by [Maximilian Kratz] ([GitHub/GitLab handle or email])
+# Thanks for the inspiration!
 
 set -e
 
