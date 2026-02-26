@@ -31,7 +31,7 @@ max_delay(tchecker::zg::zone_t & zone, std::shared_ptr<tchecker::clockval_t> val
     return 0;
   }
 
-  if(min_delay_value + 1 == max_delay_value) { // if the min_delay_value is within the zone but max_delay_value is not, we have to check the value in the center
+  if(min_delay_value + 1 == max_delay_value) {
     
     auto zero_five = clock_rational_value_t(min_delay_value, 1) + clock_rational_value_t(1, 2); // clock_rational_value_t(1, 2) = 1/2 = 0.5
     
@@ -44,6 +44,7 @@ max_delay(tchecker::zg::zone_t & zone, std::shared_ptr<tchecker::clockval_t> val
     }
   }
 
+  // if the min_delay_value is within the zone but max_delay_value is not, we have to check the value in the center
   std::size_t center = (max_delay_value + min_delay_value)/2;
 
   auto upper_result = max_delay(zone, valuation, max_delay_value, center);
