@@ -165,7 +165,7 @@ concrete_simulator_t::concrete_interactive_select(std::ostream & s_out,
         return std::make_pair(DELAY, tchecker::clock_rational_value_t(random_delay, max_delay.denominator()));
       } else {
         if(v.size() == 0) {
-          throw std::runtime_error("We need an initial state");
+          throw std::runtime_error("An initial state is needed.");
         }
         tchecker::clock_rational_value_t used( 
           static_cast<int64_t>(tchecker::simulate::randomized_select(v)), 1);
