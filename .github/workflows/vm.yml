@@ -1,4 +1,4 @@
-# Main idea contributed by [Maximilian Kratz] ([GitHub/GitLab handle or email])
+# Main idea contributed by [Maximilian Kratz] (@maxkratz)
 # Thanks for the inspiration!
 
 name: vm-creator
@@ -22,7 +22,7 @@ jobs:
         sudo udevadm control --reload-rules
         sudo udevadm trigger --name-match=kvm
         sudo apt-get update
-        sudo apt-get install -y - qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils virt-manager
+        sudo apt-get install -y - qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils virt-manager virt-v2v
         sudo usermod -a -G kvm,libvirt $USER
     - name: Run script
       # Workaround to get a TTY device

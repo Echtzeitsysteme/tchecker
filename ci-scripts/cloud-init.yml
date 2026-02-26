@@ -1,0 +1,64 @@
+#cloud-config
+
+# Main idea contributed by [Maximilian Kratz] (@maxkratz)
+# Thanks for the inspiration!
+
+# create user
+users:
+  - name: tchecker
+    # so our user can just sudo without any password
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    shell: /bin/bash
+    lock_passwd: false
+    # password = tchecker
+    passwd: $6$pnk.joQHRL7WPvyn$g3eWumplhDyjq5EJoGjgWXS4GFlqDmcDiLvzMDty5Q3EL1Do0blsNsr5Oo/zMm4vvTY5P6EBmK/WlEAIYI7qP/
+
+# set host name
+hostname: tchecker
+create_hostname_file: true
+
+# copy setup script
+write_files:
+  - path: /usr/local/bin/setup.sh
+    content: |
+      #!/bin/bash
+      set -e
+      export DEBIAN_FRONTEND=noninteractive
+      apt-get update
+      apt-get upgrade -yq
+      apt-get install -yq tmux xfce4 firefox-esr git python3 python3-pip cmake bison flex doxygen
+      apt-get install -yq build-essential g++ python3-dev autotools-dev libicu-dev libbz2-dev
+      mkdir -p /home/tchecker/boost/
+      cd /home/tchecker/boost/
+      wget https://sourceforge.net/projects/boost/files/boost/1.86.0/boost_1_86_0.tar.gz
+      tar xf boost_1_86_0.tar.gz
+      cd boost_1_86_0
+      ./bootstrap.sh
+      ./b2 install
+      mkdir -p /home/tchecker/Catch2/
+      git clone https://github.com/catchorg/Catch2.git /home/tchecker/Catch2/
+      cd /home/tchecker/Catch2
+      cmake -B build -S . -DBUILD_TESTING=OFF
+      cmake --build build/ --target install
+      mkdir -p /home/tchecker/Desktop/webapp/
+      git clone https://github.com/Echtzeitsysteme/tchecker-webapp.git /home/tchecker/Desktop/webapp/
+      mkdir -p /home/tchecker/tchecker_code/
+      git clone https://github.com/Echtzeitsysteme/tchecker.git /home/tchecker/tchecker_code/
+      mkdir -p /home/tchecker/build
+      mkdir -p /home/tchecker/install
+      cd /home/tchecker/build/
+      cmake ../tchecker_code -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=../install/
+      make -j2
+      make doc
+      make install
+      echo "export PATH=$PATH:/home/tchecker/install/bin" >> /home/tchecker/.bashrc
+    owner: 'root:root'
+    permissions: '0644'
+
+# execute setup script
+runcmd:
+  - sudo /bin/bash /usr/local/bin/setup.sh
+
+power_state:
+  mode: poweroff
+  message: Powering off
