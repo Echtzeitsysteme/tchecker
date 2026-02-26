@@ -109,14 +109,6 @@ protected:
   virtual void attributes(node_t const & n, std::map<std::string, std::string> & m) const;
 
   /*!
-   \brief Accessor to concrete_node attributes
-   \param n : a node
-   \param m : a map (key, value) of attributes
-   \post attributes of node n have been added to map m
-  */
-  //virtual void attributes(tchecker::simulate::concrete_node_t const & n, std::map<std::string, std::string> & m) const;
-
-  /*!
    \brief Accessor to edge attributes
    \param e : an edge
    \param m : a map (key, value) of attributes
