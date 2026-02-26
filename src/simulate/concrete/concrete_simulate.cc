@@ -160,9 +160,8 @@ concrete_simulator_t::concrete_interactive_select(std::ostream & s_out,
         use_delay = 0;
       }
       if(0 == use_delay && nullptr != s.ptr()) {
-        int64_t random_delay = ( static_cast<int64_t>(std::rand())) % 
-                                ((max_delay.denominator() == 2) ? (max_delay.numerator() + 1) : 2*max_delay.numerator() + 1);
-        s_out << "Randomly choosen delay: " << tchecker::clock_rational_value_t(random_delay, 2) << std::endl;
+        int64_t random_delay = ( static_cast<int64_t>(std::rand())) % (max_delay.denominator() * max_delay.numerator() + 1);
+        s_out << "Randomly choosen delay: " << tchecker::clock_rational_value_t(random_delay, max_delay.denominator()) << std::endl;
         return std::make_pair(DELAY, tchecker::clock_rational_value_t(random_delay, 2));
       } else {
         if(v.size() == 0) {
