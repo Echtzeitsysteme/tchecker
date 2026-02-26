@@ -21,9 +21,8 @@ namespace simulate {
 
 namespace symbolic {
 
-/*!
- \brief Type of display
-*/
+static std::size_t const NO_SELECTION = std::numeric_limits<std::size_t>::max();
+
 
 // Randomized simulation */
 

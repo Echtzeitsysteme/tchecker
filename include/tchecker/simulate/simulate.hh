@@ -71,9 +71,7 @@ randomized_simulation(tchecker::parsing::system_declaration_t const & sysdecl,
 /*!
  \brief Random selection
  \param v : a vector of triples (status, state, transition)
- \pre the size of v is less than NO_SELECTION (checked by assertion)
- \return the index of the chosen element in v if v is not empty,
- tchecker::simulate::NO_SELECTION otherwise
+ \return the index of the chosen element in v
 */
 std::size_t randomized_select(std::vector<tchecker::zg::zg_t::sst_t> const & v);
 

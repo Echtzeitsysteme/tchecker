@@ -28,9 +28,6 @@ namespace simulate {
 
 namespace symbolic {
 
-static std::size_t const NO_SELECTION = std::numeric_limits<std::size_t>::max();
-
-
 /*!
  \brief Randomized simulation of timed automata
  \param sysdecl : system declaration
