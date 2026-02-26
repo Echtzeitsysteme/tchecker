@@ -9,7 +9,7 @@
 #define TCHECKER_TCK_SIMULATE_SYMBOLIC_SYMBOLIC_DISPLAY_HH
 
 /*!
- \file display.hh
+ \file simbolic_display.hh
  \brief State/transition display
 */
 
