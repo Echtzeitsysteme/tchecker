@@ -589,6 +589,7 @@ std::shared_ptr<tchecker::clockval_t> clockval_factory(unsigned short size, tche
 {
   auto raw = clockval_allocate_and_construct(size, value);
   auto result = std::shared_ptr<tchecker::clockval_t>(raw, &clockval_destruct_and_deallocate);
+  return result;
 }
 
 std::ostream & output(std::ostream & os, tchecker::clockval_t const & clockval,
