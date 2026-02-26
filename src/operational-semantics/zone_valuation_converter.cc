@@ -13,8 +13,7 @@ namespace operational_semantics {
 
 std::shared_ptr<tchecker::clockval_t> convert(const tchecker::zg::zone_t & zone)
 {
-  auto raw = clockval_allocate_and_construct(zone.dim());
-  auto result = std::shared_ptr<tchecker::clockval_t>(raw, &clockval_destruct_and_deallocate);
+  auto result = clockval_factory(zone.dim());
 
   for(std::size_t i = 0; i < zone.dim(); i++) {
     tchecker::clock_rational_value_t value;

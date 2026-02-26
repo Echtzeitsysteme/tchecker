@@ -36,15 +36,14 @@ node_t::node_t(tchecker::zg::state_sptr_t s_1, tchecker::zg::state_sptr_t s_2,
                _invariant(std::make_pair(invariant_1, invariant_2)),
                _urgent_clk_exists(urgent_clk_exists), _final(false)
 {
-  auto raw_1 = clockval_allocate_and_construct(2*no_of_orig_clks_1 + no_of_orig_clks_2 + 1 + (_urgent_clk_exists ? 1 : 0)); // +1 due to the ref clock
-  auto valuation_1 = std::shared_ptr<tchecker::clockval_t>(raw_1, &clockval_destruct_and_deallocate);
+  auto valuation_1 = clockval_factory(2*no_of_orig_clks_1 + no_of_orig_clks_2 + 1 + (_urgent_clk_exists ? 1 : 0)); // +1 due to the ref clock
+ 
   for(tchecker::clock_id_t i = 0; i < valuation_1->size(); i++) {
     (*valuation_1)[i] = 0;
   }
 
-  
-  auto raw_2 = clockval_allocate_and_construct(2*no_of_orig_clks_2 + no_of_orig_clks_1 + 1 + (_urgent_clk_exists ? 1 : 0)); // +1 due to the ref clock
-  auto valuation_2 = std::shared_ptr<tchecker::clockval_t>(raw_2, &clockval_destruct_and_deallocate);
+  auto valuation_2 = clockval_factory(2*no_of_orig_clks_2 + no_of_orig_clks_1 + 1 + (_urgent_clk_exists ? 1 : 0)); // +1 due to the ref clock
+
   for(tchecker::clock_id_t i = 0; i < valuation_2->size(); i++) {
     (*valuation_2)[i] = 0;
   }
@@ -58,15 +57,12 @@ node_t::node_t(const node_t & other)
     _final_is_delay(other._final_is_delay), _final_delay(other._final_delay), _final_trans(other._final_trans),
     _final_first_has_transition(other._final_first_has_transition)
 {
-  auto raw_1 = clockval_allocate_and_construct(other._valuation.first->size());
-  auto valuation_1 = std::shared_ptr<tchecker::clockval_t>(raw_1, &clockval_destruct_and_deallocate);
+  auto valuation_1 = clockval_factory(other._valuation.first->size());
   for(tchecker::clock_id_t i = 0; i < valuation_1->size(); i++) {
     (*valuation_1)[i] = (*other._valuation.first)[i];
   }
 
-  
-  auto raw_2 = clockval_allocate_and_construct(other._valuation.second->size()); // +1 due to the ref clock
-  auto valuation_2 = std::shared_ptr<tchecker::clockval_t>(raw_2, &clockval_destruct_and_deallocate);
+  auto valuation_2 = clockval_factory(other._valuation.second->size());
   for(tchecker::clock_id_t i = 0; i < valuation_2->size(); i++) {
     (*valuation_2)[i] = (*other._valuation.second)[i];
   }
@@ -89,14 +85,12 @@ void node_t::attributes(std::map<std::string, std::string> & m, const std::share
                       const std::shared_ptr<tchecker::vcg::vcg_t> vcg2) const
 {
 
-  auto raw_1 = clockval_allocate_and_construct(vcg1->get_no_of_original_clocks() + 1);
-  auto valuation_1 = std::shared_ptr<tchecker::clockval_t>(raw_1, &clockval_destruct_and_deallocate);
+  auto valuation_1 = clockval_factory(vcg1->get_no_of_original_clocks() + 1);
   for(tchecker::clock_id_t i = 0; i < valuation_1->size(); i++) {
     (*valuation_1)[i] = (*(_valuation.first))[i];
   }
 
-  auto raw_2 = clockval_allocate_and_construct(vcg2->get_no_of_original_clocks() + 1);
-  auto valuation_2 = std::shared_ptr<tchecker::clockval_t>(raw_2, &clockval_destruct_and_deallocate);
+  auto valuation_2 = clockval_factory(vcg2->get_no_of_original_clocks() + 1);
   for(tchecker::clock_id_t i = 0; i < valuation_2->size(); i++) {
     (*valuation_2)[i] = (*(_valuation.second))[i];
   }

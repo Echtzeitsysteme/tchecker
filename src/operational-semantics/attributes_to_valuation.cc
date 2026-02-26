@@ -17,9 +17,8 @@ std::shared_ptr<tchecker::clockval_t> build(std::map<std::string, std::string> c
 {
   std::vector<std::string> str_assignments = tchecker::split(attributes.at("clockval"), ',');
 
-  auto raw = clockval_allocate_and_construct(str_assignments.size() + 1); // +1 due to refclock
-  auto result = std::shared_ptr<tchecker::clockval_t>(raw, &clockval_destruct_and_deallocate);
-
+  auto result = clockval_factory(str_assignments.size() + 1); // +1 due to refclock
+  
   (*result)[0] = 0;
   for(std::size_t i = 1; i <=str_assignments.size(); ++i) {
     std::vector<std::string> assignment = tchecker::split(str_assignments[i-1], '=');

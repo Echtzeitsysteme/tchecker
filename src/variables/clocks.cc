@@ -585,6 +585,12 @@ void clockval_destruct_and_deallocate(tchecker::clockval_t * v)
   delete[] reinterpret_cast<char *>(v);
 }
 
+std::shared_ptr<tchecker::clockval_t> clockval_factory(unsigned short size, tchecker::clock_rational_value_t value)
+{
+  auto raw = clockval_allocate_and_construct(size, value);
+  auto result = std::shared_ptr<tchecker::clockval_t>(raw, &clockval_destruct_and_deallocate);
+}
+
 std::ostream & output(std::ostream & os, tchecker::clockval_t const & clockval,
                       std::function<std::string(tchecker::clock_id_t)> clock_name)
 {

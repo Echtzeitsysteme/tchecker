@@ -911,6 +911,15 @@ tchecker::clockval_t * clockval_clone(tchecker::clockval_t const & clockval);
 void clockval_destruct_and_deallocate(tchecker::clockval_t * v);
 
 /*!
+ \brief A factory to create clock valuations
+ \param size : size of clocks valuation
+ \param value : clock value
+ \return a std::shared_ptr to an instance of tchecker::clockval_t of size values, initialized to value
+ \note The destructor points to clockval_destruct_and_deallocate
+ */
+std::shared_ptr<tchecker::clockval_t> clockval_factory(unsigned short size, tchecker::clock_rational_value_t value = 0);
+
+/*!
  \brief Output clocks valuation
  \param os : output stream
  \param clockval : clocks valuation
