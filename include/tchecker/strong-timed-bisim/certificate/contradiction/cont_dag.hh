@@ -40,7 +40,7 @@ public:
   */
   cont_dag_t(std::shared_ptr<tchecker::vcg::vcg_t> vcg1, std::shared_ptr<tchecker::vcg::vcg_t> vcg2, 
              tchecker::zg::state_sptr_t first_init, tchecker::zg::state_sptr_t second_init,
-             clock_rational_value_t max_delay);
+             std::size_t max_delay);
 
   /*!
    \brief Partial Copy Constructor
@@ -128,7 +128,7 @@ private:
   std::shared_ptr<node_t> _root;
 
   const std::shared_ptr<std::vector<std::shared_ptr<delay_edge_t>>> _delays;
-  const clock_rational_value_t _max_delay;
+  const std::size_t _max_delay;
   const bool _urgent_clk_exists;
 };
 

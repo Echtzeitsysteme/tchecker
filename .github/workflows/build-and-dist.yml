@@ -22,7 +22,7 @@ jobs:
       - name: checkout
         uses: actions/checkout@v4
       - name: install static libs
-        run: ci-scripts/install_boost_1_81_0.sh
+        run: ci-scripts/install_boost_1_86.sh
       - name: build
         run: ci-scripts/build.sh
       - name: copy
@@ -36,3 +36,8 @@ jobs:
           user_email: 'alexander.lieb@online.de'
           user_name: 'alzeha'
           commit_message: 'updated libtchecker.so from https://github.com/Echtzeitsysteme/tchecker'
+      - name: Create artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: libtchecker.so
+          path: build/src/libtchecker.so

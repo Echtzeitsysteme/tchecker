@@ -15,7 +15,7 @@ namespace contra {
 
 cont_dag_t::cont_dag_t(std::shared_ptr<tchecker::vcg::vcg_t> vcg1, std::shared_ptr<tchecker::vcg::vcg_t> vcg2, 
                        tchecker::zg::state_sptr_t first_init, tchecker::zg::state_sptr_t second_init,
-                       clock_rational_value_t max_delay)
+                       std::size_t max_delay)
     : base_graph_t(vcg1, vcg2), _init_states(std::make_pair(first_init, second_init)), 
       _delays(std::make_shared<std::vector<std::shared_ptr<delay_edge_t>>>()), _max_delay(max_delay + 1),
       _urgent_clk_exists(_vcg1->get_no_of_original_clocks() + _vcg2->get_no_of_original_clocks() < _vcg1->get_no_of_virtual_clocks())

@@ -23,6 +23,7 @@
 static struct option long_options[] = {{"interactive", no_argument, 0, 'i'},
                                        {"random", required_argument, 0, 'r'},
                                        {"onestep", no_argument, 0, '1'},
+                                       {"concrete", no_argument, 0, 'c'},
                                        {"output", required_argument, 0, 'o'},
                                        {"trace", no_argument, 0, 't'},
                                        {"help", no_argument, 0, 'h'},
@@ -32,7 +33,7 @@ static struct option long_options[] = {{"interactive", no_argument, 0, 'i'},
 #endif
                                        {0, 0, 0, 0}};
 
-static char * const options = (char *)"1ir:ho:s:t";
+static char * const options = (char *)"1icr:ho:s:t";
 
 /*!
 \brief Print usage message for program progname
@@ -43,6 +44,7 @@ void usage(char * progname)
   std::cerr << "   -1          one-step simulation (output initial or next states if combined with -s)" << std::endl;
   std::cerr << "   -i          interactive simulation (default)" << std::endl;
   std::cerr << "   -r N        randomized simulation, N steps" << std::endl;
+  std::cerr << "   -c          concrete simulation (can be used in combination with -1)" << std::endl;
   std::cerr << "   -o file     output file for simulation trace (default: stdout)" << std::endl;
 #if USE_BOOST_JSON
   std::cerr << "   --json      display states/transitions in JSON format" << std::endl;
@@ -56,7 +58,7 @@ void usage(char * progname)
   std::cerr << "reads from standard input if file is not provided" << std::endl;
 }
 
-static enum simulation_type_t simulation_type = INTERACTIVE_SIMULATION;
+static enum simulation_type_t simulation_type = INTERACTIVE_SIMULATION; // DO NOT CHANGE THIS!
 static enum tchecker::simulate::display_type_t display_type = tchecker::simulate::HUMAN_READABLE_DISPLAY;
 static bool help = false;
 static std::size_t nsteps = 0;
@@ -86,19 +88,36 @@ int parse_command_line(int argc, char * argv[])
     else if (c != 0) {
       switch (c) {
       case '1':
-        simulation_type = ONESTEP_SIMULATION;
+        if(simulation_type == CONCRETE_SIMULATION) {
+          simulation_type = CONCRETE_ONESTEP_SIMULATION;
+        } else {
+          simulation_type = ONESTEP_SIMULATION;
+        }
         break;
       case 'i':
         simulation_type = INTERACTIVE_SIMULATION;
         break;
       case 'r': {
-        simulation_type = RANDOMIZED_SIMULATION;
+        if(simulation_type == CONCRETE_SIMULATION) {
+          simulation_type = CONCRETE_RANDOMIZED_SIMULATION;
+        } else {
+          simulation_type = RANDOMIZED_SIMULATION;
+        }
         long long int l = std::strtoll(optarg, nullptr, 10);
         if (l < 0)
           throw std::runtime_error("Invalid trace length (must be positive)");
         nsteps = l;
         break;
       }
+      case 'c':
+        if(simulation_type == ONESTEP_SIMULATION) {
+          simulation_type = CONCRETE_ONESTEP_SIMULATION;
+        } else if (simulation_type == RANDOMIZED_SIMULATION) {
+          simulation_type = CONCRETE_RANDOMIZED_SIMULATION;
+        } else {
+          simulation_type = CONCRETE_SIMULATION;
+        }
+        break;
       case 's':
         starting_state_json = optarg;
         break;

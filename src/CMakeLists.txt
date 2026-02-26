@@ -8,7 +8,17 @@ set(Boost_USE_STATIC_LIBS ${TCHECKER_BOOST_STATIC_LINK})  # only find static lib
 set(Boost_USE_DEBUG_LIBS        OFF)  # ignore debug libs and
 set(Boost_USE_RELEASE_LIBS       ON)  # only find release libs
 set(Boost_USE_MULTITHREADED     OFF)
-find_package(Boost OPTIONAL_COMPONENTS json)
+
+if(TCHECKER_BOOST_STATIC_LINK)
+  find_package(Boost REQUIRED COMPONENTS system json)
+else()
+  find_package(Boost OPTIONAL_COMPONENTS json)
+endif()
+
+message(STATUS "Supposed to use static boost libraries:  ${TCHECKER_BOOST_STATIC_LINK}")
+message(STATUS "Boost include dirs:  ${Boost_INCLUDE_DIRS}")
+message(STATUS "Boost library dirs: ${Boost_LIBRARY_DIRS}")
+message(STATUS "Boost libraries:   ${Boost_LIBRARIES}")
 
 if(boost_json_DIR)
   set(USE_BOOST_JSON 1)
@@ -53,7 +63,9 @@ add_subdirectory(expression)
 add_subdirectory(extrapolation)
 add_subdirectory(fsm)
 add_subdirectory(graph)
+add_subdirectory(operational-semantics)
 add_subdirectory(parsing)
+add_subdirectory(publicapi)
 add_subdirectory(refzg)
 add_subdirectory(simulate)
 add_subdirectory(statement)
@@ -70,8 +82,6 @@ add_subdirectory(vm)
 add_subdirectory(waiting)
 add_subdirectory(zg)
 
-add_subdirectory(publicapi)
-
 set(OTHER_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/basictypes.cc
   ${TCHECKER_INCLUDE_DIR}/tchecker/basictypes.hh
@@ -86,6 +96,7 @@ set(LIBTCHECKER_SRC
   ${EXTRAPOLATION_SRC}
   ${FSM_SRC}
   ${GRAPH_SRC}
+  ${OPERATIONAL_SEMANTICS_SRC}
   ${OTHER_SRC}
   ${PARSING_SRC}
   ${PUBLICAPI_SRC}
@@ -119,6 +130,11 @@ if(LIBTCHECKER_ENABLE_SHARED)
     $<TARGET_OBJECTS:program_parsing_shared>
     $<TARGET_OBJECTS:system_parsing_shared>)
   target_link_libraries(libtchecker_shared ${Boost_LIBRARIES})
+  if(TCHECKER_BOOST_STATIC_LINK)
+    set_target_properties(libtchecker_shared PROPERTIES
+        LINK_SEARCH_START_STATIC ON
+        LINK_SEARCH_END_STATIC   ON)
+  endif()
   set_property(TARGET libtchecker_shared PROPERTY OUTPUT_NAME tchecker)
   set_property(TARGET libtchecker_shared PROPERTY CXX_STANDARD 17)
   set_property(TARGET libtchecker_shared PROPERTY CXX_STANDARD_REQUIRED ON)

@@ -1,0 +1,10 @@
+set(SIMULATE_CONCRETE_SRC
+${CMAKE_CURRENT_SOURCE_DIR}/clock_names.cc
+${CMAKE_CURRENT_SOURCE_DIR}/concrete_display.cc
+${CMAKE_CURRENT_SOURCE_DIR}/concrete_graph.cc
+${CMAKE_CURRENT_SOURCE_DIR}/concrete_simulate.cc
+${TCHECKER_INCLUDE_DIR}/tchecker/simulate/concrete/clock_names.hh
+${TCHECKER_INCLUDE_DIR}/tchecker/simulate/concrete/concrete_display.hh
+${TCHECKER_INCLUDE_DIR}/tchecker/simulate/concrete/concrete_graph.hh
+${TCHECKER_INCLUDE_DIR}/tchecker/simulate/concrete/concrete_simulate.hh
+PARENT_SCOPE)

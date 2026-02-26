@@ -5,11 +5,11 @@
  *
  */
 
-#ifndef TCHECKER_TCK_SIMULATE_DISPLAY_HH
-#define TCHECKER_TCK_SIMULATE_DISPLAY_HH
+#ifndef TCHECKER_TCK_SIMULATE_SYMBOLIC_SYMBOLIC_DISPLAY_HH
+#define TCHECKER_TCK_SIMULATE_SYMBOLIC_SYMBOLIC_DISPLAY_HH
 
 /*!
- \file display.hh
+ \file simbolic_display.hh
  \brief State/transition display
 */
 
@@ -21,10 +21,13 @@
 #include "tchecker/zg/state.hh"
 #include "tchecker/zg/transition.hh"
 #include "tchecker/zg/zg.hh"
+#include "tchecker/simulate/simulate.hh"
 
 namespace tchecker {
 
 namespace simulate {
+
+namespace symbolic {
 
 /*!
  \class display_t
@@ -49,13 +52,20 @@ public:
    \param v : collection of next triples (status, state, transition)
    */
   virtual void output_next(tchecker::zg::const_state_sptr_t const & s, std::vector<tchecker::zg::zg_t::sst_t> const & v) = 0;
+
+  /*!
+   \brief Display state
+   \param s : state
+   \post Attributes of state s in _zg have been output to _os
+  */
+  virtual void output_state(tchecker::zg::const_state_sptr_t const & s) = 0;
 };
 
 /*!
  \class hr_display_t
  \brief Human-readable display
 */
-class hr_display_t : public tchecker::simulate::display_t {
+class hr_display_t : public display_t {
 public:
   /*!
    \brief Constructor
@@ -70,12 +80,12 @@ public:
   /*!
    \brief Copy constructor
   */
-  hr_display_t(tchecker::simulate::hr_display_t const &) = default;
+  hr_display_t(hr_display_t const &) = default;
 
   /*!
    \brief Move constructor
   */
-  hr_display_t(tchecker::simulate::hr_display_t &&) = default;
+  hr_display_t(hr_display_t &&) = default;
 
   /*!
    \brief Destructor
@@ -85,12 +95,12 @@ public:
   /*!
    \brief Assignment operator
   */
-  tchecker::simulate::hr_display_t & operator=(tchecker::simulate::hr_display_t const &) = delete;
+  hr_display_t & operator=(hr_display_t const &) = delete;
 
   /*!
    \brief Move-assignment operator
   */
-  tchecker::simulate::hr_display_t & operator=(tchecker::simulate::hr_display_t &&) = delete;
+  hr_display_t & operator=(hr_display_t &&) = delete;
 
   /*!
    \brief Display initial simulation step
@@ -107,14 +117,9 @@ public:
    */
   virtual void output_next(tchecker::zg::const_state_sptr_t const & s, std::vector<tchecker::zg::zg_t::sst_t> const & v);
 
-private:
-  /*!
- \brief Display state
- \param s : state
- \post Attributes of state s in _zg have been output to _os
-*/
-  void output(tchecker::zg::const_state_sptr_t const & s);
+  void output_state(tchecker::zg::const_state_sptr_t const & s);
 
+private:
   /*!
    \brief Display transition
    \param t : transition
@@ -131,7 +136,7 @@ private:
  \class json_display_t
  \brief JSON display
 */
-class json_display_t : public tchecker::simulate::display_t {
+class json_display_t : public display_t {
 public:
   /*!
    \brief Constructor
@@ -146,12 +151,12 @@ public:
   /*!
    \brief Copy constructor
   */
-  json_display_t(tchecker::simulate::json_display_t const &) = default;
+  json_display_t(json_display_t const &) = default;
 
   /*!
    \brief Move constructor
   */
-  json_display_t(tchecker::simulate::json_display_t &&) = default;
+  json_display_t(json_display_t &&) = default;
 
   /*!
    \brief Destructor
@@ -161,12 +166,12 @@ public:
   /*!
    \brief Assignment operator
   */
-  tchecker::simulate::json_display_t & operator=(tchecker::simulate::json_display_t const &) = delete;
+  json_display_t & operator=(json_display_t const &) = delete;
 
   /*!
    \brief Move-assignment operator
   */
-  tchecker::simulate::json_display_t & operator=(tchecker::simulate::json_display_t &&) = delete;
+  json_display_t & operator=(json_display_t &&) = delete;
 
   /*!
    \brief Display initial simulation step
@@ -183,21 +188,14 @@ public:
    */
   virtual void output_next(tchecker::zg::const_state_sptr_t const & s, std::vector<tchecker::zg::zg_t::sst_t> const & v);
 
-private:
+  void output_state(tchecker::zg::const_state_sptr_t const & s);
+
+protected:
   std::ostream & _os;                      /*!< Output stream */
   std::shared_ptr<tchecker::zg::zg_t> _zg; /*!< Zone graph */
 };
-#endif
 
-/*!
- \brief Type of display
-*/
-enum display_type_t {
-  HUMAN_READABLE_DISPLAY = 0, /*!< Human readable display */
-#if USE_BOOST_JSON
-  JSON_DISPLAY,               /*!< JSON display */
 #endif
-};
 
 /*!
  \brief Display factory
@@ -206,11 +204,13 @@ enum display_type_t {
  \param zg : zone graph
  \return display of type display_type over output stream os using zone graph zg
 */
-tchecker::simulate::display_t * display_factory(enum tchecker::simulate::display_type_t display_type, std::ostream & os,
+display_t * display_factory(enum tchecker::simulate::display_type_t display_type, std::ostream & os,
                                                     std::shared_ptr<tchecker::zg::zg_t> zg);
 
-} // namespace tck_simulate
+} // end of namespace symbolic                                                    
 
-} // namespace tchecker
+} // end of  namespace simulate
+
+} // end of namespace tchecker
 
 #endif // TCHECKER_TCK_SIMULATE_DISPLAY_HH

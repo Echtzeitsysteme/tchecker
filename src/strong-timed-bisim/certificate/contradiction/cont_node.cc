@@ -8,6 +8,8 @@
 #include "tchecker/strong-timed-bisim/certificate/contradiction/cont_node.hh"
 
 #include "tchecker/strong-timed-bisim/certificate/clock_names.hh"
+
+#include "tchecker/operational-semantics/max_delay.hh"
  
 namespace tchecker {
 
@@ -34,15 +36,14 @@ node_t::node_t(tchecker::zg::state_sptr_t s_1, tchecker::zg::state_sptr_t s_2,
                _invariant(std::make_pair(invariant_1, invariant_2)),
                _urgent_clk_exists(urgent_clk_exists), _final(false)
 {
-  auto raw_1 = clockval_allocate_and_construct(2*no_of_orig_clks_1 + no_of_orig_clks_2 + 1 + (_urgent_clk_exists ? 1 : 0)); // +1 due to the ref clock
-  auto valuation_1 = std::shared_ptr<tchecker::clockval_t>(raw_1, &clockval_destruct_and_deallocate);
+  auto valuation_1 = clockval_factory(2*no_of_orig_clks_1 + no_of_orig_clks_2 + 1 + (_urgent_clk_exists ? 1 : 0)); // +1 due to the ref clock
+ 
   for(tchecker::clock_id_t i = 0; i < valuation_1->size(); i++) {
     (*valuation_1)[i] = 0;
   }
 
-  
-  auto raw_2 = clockval_allocate_and_construct(2*no_of_orig_clks_2 + no_of_orig_clks_1 + 1 + (_urgent_clk_exists ? 1 : 0)); // +1 due to the ref clock
-  auto valuation_2 = std::shared_ptr<tchecker::clockval_t>(raw_2, &clockval_destruct_and_deallocate);
+  auto valuation_2 = clockval_factory(2*no_of_orig_clks_2 + no_of_orig_clks_1 + 1 + (_urgent_clk_exists ? 1 : 0)); // +1 due to the ref clock
+
   for(tchecker::clock_id_t i = 0; i < valuation_2->size(); i++) {
     (*valuation_2)[i] = 0;
   }
@@ -56,15 +57,12 @@ node_t::node_t(const node_t & other)
     _final_is_delay(other._final_is_delay), _final_delay(other._final_delay), _final_trans(other._final_trans),
     _final_first_has_transition(other._final_first_has_transition)
 {
-  auto raw_1 = clockval_allocate_and_construct(other._valuation.first->size());
-  auto valuation_1 = std::shared_ptr<tchecker::clockval_t>(raw_1, &clockval_destruct_and_deallocate);
+  auto valuation_1 = clockval_factory(other._valuation.first->size());
   for(tchecker::clock_id_t i = 0; i < valuation_1->size(); i++) {
     (*valuation_1)[i] = (*other._valuation.first)[i];
   }
 
-  
-  auto raw_2 = clockval_allocate_and_construct(other._valuation.second->size()); // +1 due to the ref clock
-  auto valuation_2 = std::shared_ptr<tchecker::clockval_t>(raw_2, &clockval_destruct_and_deallocate);
+  auto valuation_2 = clockval_factory(other._valuation.second->size());
   for(tchecker::clock_id_t i = 0; i < valuation_2->size(); i++) {
     (*valuation_2)[i] = (*other._valuation.second)[i];
   }
@@ -87,14 +85,12 @@ void node_t::attributes(std::map<std::string, std::string> & m, const std::share
                       const std::shared_ptr<tchecker::vcg::vcg_t> vcg2) const
 {
 
-  auto raw_1 = clockval_allocate_and_construct(vcg1->get_no_of_original_clocks() + 1);
-  auto valuation_1 = std::shared_ptr<tchecker::clockval_t>(raw_1, &clockval_destruct_and_deallocate);
+  auto valuation_1 = clockval_factory(vcg1->get_no_of_original_clocks() + 1);
   for(tchecker::clock_id_t i = 0; i < valuation_1->size(); i++) {
     (*valuation_1)[i] = (*(_valuation.first))[i];
   }
 
-  auto raw_2 = clockval_allocate_and_construct(vcg2->get_no_of_original_clocks() + 1);
-  auto valuation_2 = std::shared_ptr<tchecker::clockval_t>(raw_2, &clockval_destruct_and_deallocate);
+  auto valuation_2 = clockval_factory(vcg2->get_no_of_original_clocks() + 1);
   for(tchecker::clock_id_t i = 0; i < valuation_2->size(); i++) {
     (*valuation_2)[i] = (*(_valuation.second))[i];
   }
@@ -192,7 +188,7 @@ bool node_t::is_element_of(tchecker::zg::state_sptr_t symb_state_1, tchecker::zg
 
 bool node_t::is_leaf(tchecker::zg::state_sptr_t & init_1, tchecker::zg::state_sptr_t & init_2, 
                      std::shared_ptr<tchecker::vcg::vcg_t> vcg1, std::shared_ptr<tchecker::vcg::vcg_t> vcg2, 
-                     clock_rational_value_t max_possible_delay)
+                     std::size_t max_possible_delay)
 {
   assert(vcg1->get_no_of_virtual_clocks() == vcg2->get_no_of_virtual_clocks());
   assert(_valuation.first->size() == (2*vcg1->get_no_of_original_clocks() + vcg2->get_no_of_original_clocks() + 1 + (_urgent_clk_exists ? 1 : 0)));
@@ -224,8 +220,8 @@ bool node_t::is_leaf(tchecker::zg::state_sptr_t & init_1, tchecker::zg::state_sp
   }
 
   if(!state_1_fut->zone().is_virtual_equivalent(state_2_fut->zone(), vcg1->get_no_of_virtual_clocks())) {
-    auto first = max_delay(state_1_fut->zone(), max_possible_delay, tchecker::clock_rational_value_t(0, 1), true);
-    auto second = max_delay(state_2_fut->zone(), max_possible_delay, tchecker::clock_rational_value_t(0, 1), false);
+    auto first = tchecker::operational_semantics::max_delay(state_1_fut->zone(), _valuation.first, max_possible_delay, 0);
+    auto second = tchecker::operational_semantics::max_delay(state_2_fut->zone(), _valuation.second, max_possible_delay, 0);
     _final = true;
     _final_first_has_transition = (first > second);
     double symbol = _final_first_has_transition ? static_cast<double>(first.numerator()) / first.denominator() : static_cast<double>(second.numerator()) / second.denominator();
@@ -293,7 +289,7 @@ node_t::generate_zones(std::shared_ptr<tchecker::vcg::vcg_t> vcg1, std::shared_p
 
 std::pair<clock_rational_value_t, std::shared_ptr<node_t>>
 node_t::max_delay(std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> vcs, 
-                  clock_rational_value_t max_delay_value, 
+                  std::size_t max_delay_value, 
                   std::shared_ptr<tchecker::vcg::vcg_t> vcg1, std::shared_ptr<tchecker::vcg::vcg_t> vcg2)
 {
   std::pair<clock_rational_value_t, std::shared_ptr<node_t>> max = std::make_pair(clock_rational_value_t{0, 1}, nullptr);
@@ -310,7 +306,7 @@ node_t::max_delay(std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_c
 
 std::pair<clock_rational_value_t, std::shared_ptr<node_t>>
 node_t::max_delay(std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> vc, 
-                  clock_rational_value_t max_delay_value, 
+                  std::size_t max_delay_value, 
                   std::shared_ptr<tchecker::vcg::vcg_t> vcg1,
                   std::shared_ptr<tchecker::vcg::vcg_t> vcg2)
 {
@@ -319,15 +315,16 @@ node_t::max_delay(std::shared_ptr<tchecker::virtual_constraint::virtual_constrai
   std::pair<std::shared_ptr<tchecker::zg::zone_t>, std::shared_ptr<tchecker::zg::zone_t>> zones =
       vc->generate_synchronized_zones(vcg1->get_no_of_original_clocks(), vcg2->get_no_of_original_clocks());
   
-  clock_rational_value_t delay = this->max_delay(*zones.first, max_delay_value, 0);
+  clock_rational_value_t delay = tchecker::operational_semantics::max_delay(*zones.first, _valuation.first, max_delay_value, 0);
 
   auto clone_1 = tchecker::clockval_clone(*_valuation.first);
-  add_delay(clone_1, *_valuation.first, delay);
   auto new_valuation_1 = std::shared_ptr<tchecker::clockval_t>(clone_1, &clockval_destruct_and_deallocate);
+  add_delay(new_valuation_1, *_valuation.first, delay);
+
 
   auto clone_2 = tchecker::clockval_clone(*_valuation.second);
-  add_delay(clone_2, *_valuation.second, delay);
   auto new_valuation_2 = std::shared_ptr<tchecker::clockval_t>(clone_2, &clockval_destruct_and_deallocate);
+  add_delay(new_valuation_2, *_valuation.second, delay);
 
   std::shared_ptr<node_t> result = std::make_shared<node_t>(*this);
   result->set_initial(false);
@@ -359,56 +356,6 @@ void node_t::set_valuation(std::pair<std::shared_ptr<tchecker::clockval_t>, std:
       (*_valuation.second)[i] = 0;
     }
   }
-
-
-clock_rational_value_t
-node_t::max_delay(tchecker::zg::zone_t & zone, clock_rational_value_t max_delay_value, clock_rational_value_t min_delay, bool first_not_second)
-{
-  assert(min_delay >= 0);
-  assert(max_delay_value >= 0);
-  assert(max_delay_value >= min_delay);
-  assert(min_delay.denominator() == 1 || min_delay.denominator() == -1);
-  assert(max_delay_value.denominator() == 1 || max_delay_value.denominator() == -1);
-  auto used_valuation = (first_not_second) ? _valuation.first : _valuation.second;
-  auto clone = tchecker::clockval_clone(*used_valuation);
-  add_delay(clone, *used_valuation, max_delay_value);
-
-  if(zone.belongs(*clone)) { // if the maximum delay applied is still within zone, this is the maximum delay
-    return max_delay_value;
-  }
-
-  add_delay(clone, *used_valuation, min_delay);
-
-  if(!zone.belongs(*clone)) { // if the minimum delay applied is not within zone, this is not a valid range of delays. So return 0.
-    return 0;
-  }
-
-  if(min_delay + 1 == max_delay_value) { // if the min_delay is within the zone but max_delay is not, we have to check the value in the center
-    
-    auto zero_five = min_delay + clock_rational_value_t(1, 2); // clock_rational_value_t(1, 2) = 1/2 = 0.5
-    
-    add_delay(clone, *used_valuation, zero_five);
-
-    if(zone.belongs(*clone)) {
-      return zero_five;
-    } else {
-      return min_delay;
-    }
-  }
-
-  // binary search
-  auto center = (max_delay_value + min_delay)/2;
-
-  if(center.denominator() != 1 && center.denominator() != -1) {
-    center = (max_delay_value + min_delay + 1)/2;
-  }
-
-  auto upper_result = this->max_delay(zone, max_delay_value, center, first_not_second);
-
-  auto lower_result = this->max_delay(zone, center, min_delay, first_not_second);
-
-  return std::max(upper_result, lower_result);
-}
 
 }// end of namespace contra
 

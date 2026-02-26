@@ -33,6 +33,8 @@ bool zone_t::is_universal_positive() const { return tchecker::dbm::is_universal_
 
 void zone_t::make_universal() { tchecker::dbm::universal(dbm(), _dim); }
 
+void zone_t::make_region(std::shared_ptr<tchecker::clockval_t> valuation) {tchecker::dbm::reduce_to_valuation(dbm(), *valuation, _dim); }
+
 bool zone_t::operator==(tchecker::zg::zone_t const & zone) const
 {
   if (_dim != zone._dim)

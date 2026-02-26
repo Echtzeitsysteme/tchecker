@@ -20,9 +20,12 @@
  \brief Type of simulation
 */
 enum simulation_type_t {
-  INTERACTIVE_SIMULATION, /*!< Interactive simulation */
-  ONESTEP_SIMULATION,     /*!< One-step simulation */
-  RANDOMIZED_SIMULATION,  /*!< Randomized simulation */
+  INTERACTIVE_SIMULATION,        /*!< Interactive simulation */
+  ONESTEP_SIMULATION,            /*!< One-step simulation */
+  RANDOMIZED_SIMULATION,         /*!< Randomized simulation */
+  CONCRETE_SIMULATION,           /*!< Concrete simulation */
+  CONCRETE_ONESTEP_SIMULATION,   /*!< Concrete one-step simulation */
+  CONCRETE_RANDOMIZED_SIMULATION /*!< Concrete randomized simulation */
 };
 
 #ifdef __cplusplus

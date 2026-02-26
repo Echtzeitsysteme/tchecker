@@ -54,7 +54,7 @@ tchecker::strong_timed_bisim::stats_t Lieb_et_al::run()
     stats.witness()->create_witness_from_visited(visited, std::get<1>(sst_first[0]), std::get<1>(sst_second[0]));
   } else if (_witness) {
     tchecker::clockbounds::bound_t max_delay = std::max(_A->extrapolation_max(), _B->extrapolation_max());
-    stats.init_counterexample(_A, _B, std::get<1>(sst_first[0]), std::get<1>(sst_second[0]), clock_rational_value_t(max_delay, 1));
+    stats.init_counterexample(_A, _B, std::get<1>(sst_first[0]), std::get<1>(sst_second[0]), max_delay);
     stats.counterexample()->create_cont_from_non_bisim_cache(
                                _non_bisim_cache, 
                                std::make_shared<tchecker::clock_constraint_container_t>(std::get<2>(sst_first[0])->tgt_invariant_container()), 
@@ -123,17 +123,18 @@ std::shared_ptr<algorithm_return_value_t> Lieb_et_al::check_for_virt_bisim(tchec
   tchecker::vcg::sync_vc_t syncer{_A, _B};
   syncer.sync_with_urgent(A_synced, B_synced, A_trans->reset_container(), B_trans->reset_container());
 
-  if (do_an_epsilon_transition(A_synced, A_trans, B_synced, B_trans)) {
-    tchecker::zg::state_sptr_t A_epsilon = _A->clone_state(A_synced);
-    tchecker::zg::state_sptr_t B_epsilon = _B->clone_state(B_synced);
+  tchecker::zg::state_sptr_t A_epsilon = _A->clone_state(A_synced);
+  tchecker::zg::state_sptr_t B_epsilon = _B->clone_state(B_synced);
 
-    if (tchecker::ta::delay_allowed(_A->system(), A_state->vloc())) {
-      _A->semantics()->delay(A_epsilon->zone_ptr()->dbm(), A_epsilon->zone_ptr()->dim(), A_trans->tgt_invariant_container());
-    }
+  if (tchecker::ta::delay_allowed(_A->system(), A_state->vloc())) {
+    _A->semantics()->delay(A_epsilon->zone_ptr()->dbm(), A_epsilon->zone_ptr()->dim(), A_trans->tgt_invariant_container());
+  }
 
-    if (tchecker::ta::delay_allowed(_B->system(), B_state->vloc())) {
-      _B->semantics()->delay(B_epsilon->zone_ptr()->dbm(), B_epsilon->zone_ptr()->dim(), B_trans->tgt_invariant_container());
-    }
+  if (tchecker::ta::delay_allowed(_B->system(), B_state->vloc())) {
+    _B->semantics()->delay(B_epsilon->zone_ptr()->dbm(), B_epsilon->zone_ptr()->dim(), B_trans->tgt_invariant_container());
+  }
+
+  if ((A_state->zone() != A_epsilon->zone() || B_state->zone() != B_epsilon->zone())) {
 
     tchecker::zg::const_state_sptr_t A_epsilon_const{A_epsilon};
     tchecker::zg::const_state_sptr_t B_epsilon_const{B_epsilon};
@@ -273,40 +274,6 @@ Lieb_et_al::extract_vc_without_contradictions(
   result = tchecker::virtual_constraint::combine(*result, _A->get_no_of_virtual_clocks());
   result->compress();
   return result;
-}
-
-bool Lieb_et_al::do_an_epsilon_transition(tchecker::zg::state_sptr_t A_state, tchecker::zg::transition_sptr_t A_trans,
-                                          tchecker::zg::state_sptr_t B_state, tchecker::zg::transition_sptr_t B_trans)
-{
-
-  assert(tchecker::vcg::are_zones_synced(A_state->zone(), B_state->zone(), _A->get_no_of_original_clocks(),
-                                         _B->get_no_of_original_clocks()));
-
-  tchecker::zg::state_sptr_t A_epsilon = _A->clone_state(A_state);
-  tchecker::zg::state_sptr_t B_epsilon = _B->clone_state(B_state);
-
-  if (tchecker::ta::delay_allowed(_A->system(), A_state->vloc())) {
-    _A->semantics()->delay(A_epsilon->zone_ptr()->dbm(), A_epsilon->zone_ptr()->dim(), A_trans->tgt_invariant_container());
-  }
-
-  if (tchecker::ta::delay_allowed(_B->system(), B_state->vloc())) {
-    _B->semantics()->delay(B_epsilon->zone_ptr()->dbm(), B_epsilon->zone_ptr()->dim(), B_trans->tgt_invariant_container());
-  }
-
-  return (A_state->zone() != A_epsilon->zone() || B_state->zone() != B_epsilon->zone());
-}
-
-bool check_disjointness(std::shared_ptr<tchecker::zone_container_t<tchecker::zg::zone_t>> zones)
-{
-  for (auto i = zones->begin(); i < zones->end(); i++) {
-    for (auto j = i + 1; j < zones->end(); j++) {
-      if (!tchecker::dbm::disjoint((*i)->dbm(), (*j)->dbm(), (*i)->dim())) {
-        return false;
-      }
-    }
-  }
-
-  return true;
 }
 
 std::shared_ptr<algorithm_return_value_t> Lieb_et_al::check_target_pair(

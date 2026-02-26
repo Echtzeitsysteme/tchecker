@@ -14,9 +14,9 @@ RUN apt install -y gcc-12 g++-12 \
 
 RUN apt --purge remove libboost-all-dev libboost-doc libboost-dev
 
-RUN wget http://downloads.sourceforge.net/project/boost/boost/1.81.0/boost_1_81_0.tar.gz && \
-    tar -zxvf boost_1_81_0.tar.gz && \
-    cd boost_1_81_0/ && \
+RUN wget http://downloads.sourceforge.net/project/boost/boost/1.86.0/boost_1_86_0.tar.gz && \
+    tar -zxvf boost_1_86_0.tar.gz && \
+    cd boost_1_86_0/ && \
     ./bootstrap.sh && \
     ./b2 --with=all install && \
     cd ..
@@ -40,9 +40,9 @@ RUN apt install -y clang-18 \
 
 RUN apt --purge remove libboost-all-dev libboost-doc libboost-dev
 
-RUN wget http://downloads.sourceforge.net/project/boost/boost/1.81.0/boost_1_81_0.tar.gz && \
-    tar -zxvf boost_1_81_0.tar.gz && \
-    cd boost_1_81_0/ && \
+RUN wget http://downloads.sourceforge.net/project/boost/boost/1.86.0/boost_1_86_0.tar.gz && \
+    tar -zxvf boost_1_86_0.tar.gz && \
+    cd boost_1_86_0/ && \
     ./bootstrap.sh && \
     ./b2 --with=all install && \
     cd ..

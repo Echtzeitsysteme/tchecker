@@ -65,7 +65,11 @@ std::map<std::string, std::string> parse_state_json(std::string const & state_js
   std::map<std::string, std::string> attributes;
   attributes["vloc"] = value_as_string(json_obj, "vloc");
   attributes["intval"] = value_as_string(json_obj, "intval");
-  attributes["zone"] = value_as_string(json_obj, "zone");
+  if(json_obj.contains("zone")) {
+    attributes["zone"] = value_as_string(json_obj, "zone");
+  } else {
+    attributes["clockval"] = value_as_string(json_obj, "clockval");
+  }
   return attributes;
 }
 #endif
@@ -82,12 +86,12 @@ void tck_simulate(std::string output_filename, std::string sysdecl_filename, sim
     }
     std::shared_ptr<tchecker::system::system_t> system = std::make_shared<tchecker::system::system_t>(*sysdecl);
 
-    if (display_type != tchecker::simulate::HUMAN_READABLE_DISPLAY) {
 #if !USE_BOOST_JSON
+    if (display_type != tchecker::simulate::HUMAN_READABLE_DISPLAY) {
       std::cerr << "JSON display is not enabled in this build" << std::endl;
       return;
-#endif
     }
+#endif
 
     std::ostream * os = nullptr;
     std::ofstream ofs;
@@ -114,15 +118,21 @@ void tck_simulate(std::string output_filename, std::string sysdecl_filename, sim
     if (simulation_type == INTERACTIVE_SIMULATION)
       state_space = tchecker::simulate::interactive_simulation(*sysdecl, display_type, *os, starting_state_attributes);
     else if (simulation_type == RANDOMIZED_SIMULATION)
-      state_space = tchecker::simulate::randomized_simulation(*sysdecl, nsteps, starting_state_attributes);
+      state_space = tchecker::simulate::randomized_simulation(*sysdecl, display_type, *os, starting_state_attributes, nsteps);
     else if (simulation_type == ONESTEP_SIMULATION)
       tchecker::simulate::onestep_simulation(*sysdecl, display_type, *os, starting_state_attributes);
+    else if (simulation_type == CONCRETE_SIMULATION)
+      state_space = tchecker::simulate::concrete_interactive_simulation(*sysdecl, display_type, *os);
+    else if (simulation_type == CONCRETE_RANDOMIZED_SIMULATION)
+      tchecker::simulate::concrete_randomized_simulation(*sysdecl, display_type, *os, starting_state_attributes, nsteps);
+    else if (simulation_type == CONCRETE_ONESTEP_SIMULATION)
+      tchecker::simulate::concrete_onestep_simulation(*sysdecl, display_type, *os, starting_state_attributes);
     else
-      throw std::runtime_error("Select one of interactive, one-step or randomized simulation");
+      throw std::runtime_error("Select one of interactive, one-step, randomized, or concrete simulation");
 
     if (output_trace) {
       assert(state_space.get() != nullptr);
-      tchecker::simulate::dot_output(*os, state_space->graph(), sysdecl->name());
+      state_space->dot_output(*os, sysdecl->name());
     }
   }
   catch (std::runtime_error & e) {

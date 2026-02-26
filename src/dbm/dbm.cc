@@ -1194,7 +1194,7 @@ void reduce_to_valuation(tchecker::dbm::db_t * dbm, tchecker::clockval_t & valua
         constrain(dbm, dim, y, x, ineq_cmp_t::LE, -1*sub.numerator());
       } else { // else get the integer such that a < valuation[x] - valuation[y] < a+1 and add these constraints to the DBM
         tchecker::integer_t a = sub.numerator() / sub.denominator();
-        if(0 > a) {
+        if(0 >= a) {
           constrain(dbm, dim, x, y, ineq_cmp_t::LT, a);
           constrain(dbm, dim, y, x, ineq_cmp_t::LT, (-1*a)+1);
         } else {

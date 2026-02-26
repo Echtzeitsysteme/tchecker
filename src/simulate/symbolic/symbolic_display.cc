@@ -9,11 +9,13 @@
 #include <boost/json.hpp>
 #endif
 
-#include "tchecker/simulate/display.hh"
+#include "tchecker/simulate/symbolic/symbolic_display.hh"
 
 namespace tchecker {
 
 namespace simulate {
+
+namespace symbolic {
 
 hr_display_t::hr_display_t(std::ostream & os, std::shared_ptr<tchecker::zg::zg_t> const & zg) : _os(os), _zg(zg)
 {
@@ -28,7 +30,7 @@ void hr_display_t::output_initial(std::vector<tchecker::zg::zg_t::sst_t> const &
   std::size_t i = 0;
   for (auto && [status, nexts, nextt] : v) {
     _os << i << ") ";
-    output(tchecker::zg::const_state_sptr_t{nexts});
+    output_state(tchecker::zg::const_state_sptr_t{nexts});
     ++i;
   }
 }
@@ -36,7 +38,7 @@ void hr_display_t::output_initial(std::vector<tchecker::zg::zg_t::sst_t> const &
 void hr_display_t::output_next(tchecker::zg::const_state_sptr_t const & s, std::vector<tchecker::zg::zg_t::sst_t> const & v)
 {
   _os << "--- Current state: " << std::endl;
-  output(s);
+  output_state(s);
   _os << "--- Successors: " << std::endl;
 
   std::size_t i = 0;
@@ -44,12 +46,12 @@ void hr_display_t::output_next(tchecker::zg::const_state_sptr_t const & s, std::
     _os << i << ") ";
     output(tchecker::zg::const_transition_sptr_t{nextt});
     _os << std::endl;
-    output(tchecker::zg::const_state_sptr_t{nexts});
+    output_state(tchecker::zg::const_state_sptr_t{nexts});
     ++i;
   }
 }
 
-void hr_display_t::output(tchecker::zg::const_state_sptr_t const & s)
+void hr_display_t::output_state(tchecker::zg::const_state_sptr_t const & s)
 {
   std::map<std::string, std::string> attr;
   _zg->attributes(s, attr);
@@ -64,6 +66,7 @@ void hr_display_t::output(tchecker::zg::const_transition_sptr_t const & t)
   for (auto && [key, value] : attr)
     _os << "\t" << key << ": " << value << " ";
 }
+
 
 /* json_display_t */
 #if USE_BOOST_JSON
@@ -104,8 +107,8 @@ static boost::json::value json_sst(tchecker::zg::zg_t & zg, tchecker::zg::zg_t::
   boost::json::object o;
   auto && [status, s, t] = sst;
   o.emplace("status", status);
-  o.emplace("state", tchecker::simulate::json_state(zg, tchecker::zg::const_state_sptr_t{s}));
-  o.emplace("transition", tchecker::simulate::json_transition(zg, tchecker::zg::const_transition_sptr_t{t}));
+  o.emplace("state", json_state(zg, tchecker::zg::const_state_sptr_t{s}));
+  o.emplace("transition", json_transition(zg, tchecker::zg::const_transition_sptr_t{t}));
   return o;
 }
 
@@ -119,7 +122,7 @@ static boost::json::value json_vsst(tchecker::zg::zg_t & zg, std::vector<tchecke
 {
   boost::json::array a;
   for (tchecker::zg::zg_t::sst_t const & sst : v)
-    a.emplace_back(tchecker::simulate::json_sst(zg, sst));
+    a.emplace_back(json_sst(zg, sst));
   return a;
 }
 
@@ -132,7 +135,7 @@ static boost::json::value json_vsst(tchecker::zg::zg_t & zg, std::vector<tchecke
 static boost::json::value json_initial(tchecker::zg::zg_t & zg, std::vector<tchecker::zg::zg_t::sst_t> const & v)
 {
   boost::json::object o;
-  o.emplace("initial", tchecker::simulate::json_vsst(zg, v));
+  o.emplace("initial", json_vsst(zg, v));
   return o;
 }
 
@@ -147,8 +150,8 @@ static boost::json::value json_next(tchecker::zg::zg_t & zg, tchecker::zg::const
                                     std::vector<tchecker::zg::zg_t::sst_t> const & v)
 {
   boost::json::object o;
-  o.emplace("current", tchecker::simulate::json_state(zg, s));
-  o.emplace("next", tchecker::simulate::json_vsst(zg, v));
+  o.emplace("current", json_state(zg, s));
+  o.emplace("next", json_vsst(zg, v));
   return o;
 }
 
@@ -160,32 +163,40 @@ json_display_t::json_display_t(std::ostream & os, std::shared_ptr<tchecker::zg::
 
 void json_display_t::output_initial(std::vector<tchecker::zg::zg_t::sst_t> const & v)
 {
-  _os << tchecker::simulate::json_initial(*_zg, v) << std::endl;
+  _os << json_initial(*_zg, v) << std::endl;
 }
 
 void json_display_t::output_next(tchecker::zg::const_state_sptr_t const & s, std::vector<tchecker::zg::zg_t::sst_t> const & v)
 {
-  _os << tchecker::simulate::json_next(*_zg, s, v) << std::endl;
+  _os << json_next(*_zg, s, v) << std::endl;
 }
+
+void json_display_t::output_state(tchecker::zg::const_state_sptr_t const & s)
+{
+  _os << json_state(*_zg, s) << std::endl;
+}
+
 #endif
 
 /* factory */
 
-tchecker::simulate::display_t * display_factory(enum tchecker::simulate::display_type_t display_type, std::ostream & os,
-                                                    std::shared_ptr<tchecker::zg::zg_t> zg)
+display_t * display_factory(enum tchecker::simulate::display_type_t display_type, std::ostream & os,
+                            std::shared_ptr<tchecker::zg::zg_t> zg)
 {
   switch (display_type) {
   case tchecker::simulate::HUMAN_READABLE_DISPLAY:
-    return new tchecker::simulate::hr_display_t{os, zg};
+    return new hr_display_t{os, zg};
 #if USE_BOOST_JSON
   case tchecker::simulate::JSON_DISPLAY:
-    return new tchecker::simulate::json_display_t{os, zg};
+    return new json_display_t{os, zg};
 #endif
   default:
     throw std::runtime_error("This should never occur: switch statement is not complete");
   }
 }
 
-} // namespace tck_simulate
+} // end of namespace symbolic
 
-} // namespace tchecker
+} // end of namespace simulate
+
+} // end of namespace tchecker

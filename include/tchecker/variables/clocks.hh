@@ -911,6 +911,23 @@ tchecker::clockval_t * clockval_clone(tchecker::clockval_t const & clockval);
 void clockval_destruct_and_deallocate(tchecker::clockval_t * v);
 
 /*!
+ \brief A factory to create clock valuations
+ \param size : size of clocks valuation
+ \param value : clock value
+ \return a std::shared_ptr to an instance of tchecker::clockval_t of size values, initialized to value
+ \note The destructor points to clockval_destruct_and_deallocate
+ */
+std::shared_ptr<tchecker::clockval_t> clockval_factory(unsigned short size, tchecker::clock_rational_value_t value = 0);
+
+/*!
+ \brief A factory to create clock valuations
+ \param v : clocks valuation
+ \return a std::shared_ptr to a copy of *v
+ \note The destructor points to clockval_destruct_and_deallocate
+ */
+std::shared_ptr<tchecker::clockval_t> clockval_factory(std::shared_ptr<tchecker::clockval_t> v);
+
+/*!
  \brief Output clocks valuation
  \param os : output stream
  \param clockval : clocks valuation
@@ -1031,7 +1048,7 @@ tchecker::clock_rational_value_t delay(tchecker::clockval_t const & src,
  \note result and base must have the same size
  \post result[i] = base[i] + delay, except for i = 0.
  */
-void add_delay(tchecker::clockval_t *result, tchecker::clockval_t & base, tchecker::clock_rational_value_t delay);
+void add_delay(std::shared_ptr<tchecker::clockval_t> result, tchecker::clockval_t & base, tchecker::clock_rational_value_t delay);
 
 } // end of namespace tchecker
 
