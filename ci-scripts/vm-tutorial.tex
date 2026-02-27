@@ -69,7 +69,22 @@ cd virtualbox-install-dir \end{lstlisting}
 \end{enumerate}
 
 \section{Accessing the Examples}
-All examples are located in the directory \texttt{/home/tchecker/tchecker\_code/examples}. Each example consists of a shell script and a \texttt{.txt} file. The shell script generates a \texttt{.tck} file, which is used as input for \texttt{tchecker}.
+\label{ex:}
+All examples are located in the directory \texttt{/home/tchecker/tchecker\_code/examples}. 
+
+\begin{enumerate}
+    \item Open a terminal in the VM.
+    \item Navigate to the examples directory:
+    \begin{lstlisting}[language=bash]
+    cd /home/tchecker/tchecker_code/examples \end{lstlisting}
+    \item Run the shell script for the desired example:
+    \begin{lstlisting}[language=bash]
+    ./example_script.sh \end{lstlisting}
+    \item Use \texttt{tchecker} to analyze the generated \texttt{.tck} file (\href{https://github.com/ticktac-project/tchecker/wiki/Using-TChecker}{https://github.com/ticktac-project/tchecker/wiki/Using-TChecker}).
+\end{enumerate}
+
+Each example consists of a shell script and a \texttt{.txt} file. The shell script generates a \texttt{.tck} file, which is used as input for \texttt
+{tchecker}.
 
 \section{Using the TChecker WebApp}
 \subsection{Starting the WebApp}
@@ -89,20 +104,6 @@ All examples are located in the directory \texttt{/home/tchecker/tchecker\_code/
     \item Follow the steps in Section 4.2 to generate a \texttt{.tck} file.
     \item Upload the \texttt{.tck} file to the web application.
     \item Use the web interface to analyze the model.
-\end{enumerate}
-
-\section{Using TChecker from the Command Line}
-
-\subsection{Running an Example}
-\begin{enumerate}
-    \item Open a terminal in the VM.
-    \item Navigate to the examples directory:
-    \begin{lstlisting}[language=bash]
-    cd /home/tchecker/tchecker_code/examples \end{lstlisting}
-    \item Run the shell script for the desired example:
-    \begin{lstlisting}[language=bash]
-    ./example_script.sh \end{lstlisting}
-    \item Use \texttt{tchecker} to analyze the generated \texttt{.tck} file (\href{https://github.com/ticktac-project/tchecker/wiki/Using-TChecker}{https://github.com/ticktac-project/tchecker/wiki/Using-TChecker}).
 \end{enumerate}
 
 \end{document}
