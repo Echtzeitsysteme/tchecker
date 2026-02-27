@@ -24,14 +24,20 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y - qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils virt-manager virt-v2v
         sudo usermod -a -G kvm,libvirt $USER
+        latexmk -pdflatex=pdflatex -pdf ci-scripts/vm-tutorial.tex
     - name: Run script
       # Workaround to get a TTY device
       # https://github.com/gfx/example-github-actions-with-tty
       shell: 'script -q -e -c "bash {0}"'
       run: |
         sudo bash ci-scripts/create-vm.sh
-    - name: Upload artifact
+    - name: Upload VM
       uses: actions/upload-artifact@v6
       with:
         name: tchecker-ova
         path: tchecker.ova
+    - name: Upload Tutorial 
+      uses: actions/upload-artifact@v6
+      with:
+        name: vm-tutorial-pdf
+        with: vm-tutorial.pdf

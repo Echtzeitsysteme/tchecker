@@ -1,0 +1,108 @@
+\documentclass{article}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2
+}
+
+\lstset{style=mystyle}
+
+\title{Tutorial: Using the TChecker VM}
+\author{Alexander Lieb}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+This tutorial provides a step-by-step guide for using the VM created with the GitHub Action \href{https://github.com/Echtzeitsysteme/tchecker/blob/feature/vm/.github/workflows/vm.yml}{tchecker/vm.yml}. The VM includes the \texttt{tchecker} tool and the \texttt{tchecker-webapp}, along with example files. The default username and password for the VM are both \texttt{tchecker}.
+
+\section{Prerequisites}
+\begin{itemize}
+    \item VirtualBox installed on your system.
+    \item The \texttt{tchecker.ova} file downloaded from the GitHub Action.
+\end{itemize}
+
+\section{Importing the VM into VirtualBox}
+\subsection{Using the VirtualBox GUI}
+\begin{enumerate}
+    \item Open VirtualBox.
+    \item Go to \textbf{File} $\rightarrow$ \textbf{Import Appliance}.
+    \item Follow the prompts to import the VM.
+    \item Start the VM and log in using the username and password \texttt{tchecker}.
+\end{enumerate}
+
+\subsection{Using the Command Line}
+\begin{enumerate}
+    \item Open a terminal or command prompt.
+    \item Navigate to the VirtualBox installation directory:
+    \begin{lstlisting}[language=bash]
+cd virtualbox-install-dir \end{lstlisting}
+    \item Import the VM using the following command:
+    \begin{lstlisting}[language=bash]
+    .\VBoxManage.exe import path/to/tchecker.ova --vsys 0 --vmname name-of-vm --unit 12 \end{lstlisting}
+    \item Start the VM from the VirtualBox GUI or using the command line.
+\end{enumerate}
+
+\section{Accessing the Examples}
+All examples are located in the directory \texttt{/home/tchecker/tchecker\_code/examples}. Each example consists of a shell script and a \texttt{.txt} file. The shell script generates a \texttt{.tck} file, which is used as input for \texttt{tchecker}.
+
+\section{Using the TChecker WebApp}
+\subsection{Starting the WebApp}
+\begin{enumerate}
+    \item Open a terminal in the VM.
+    \item Navigate to the \texttt{tchecker-webapp} directory:
+    \begin{lstlisting}[language=bash]
+    cd /home/tchecker/Desktop/webapp \end{lstlisting}
+    \item Start the web application:
+    \begin{lstlisting}[language=bash]
+    sh ./start.sh \end{lstlisting}
+    \item Open a web browser and navigate to \texttt{http://localhost:5173}.
+\end{enumerate}
+
+\subsection{Analyzing Examples with the WebApp}
+\begin{enumerate}
+    \item Follow the steps in Section 4.2 to generate a \texttt{.tck} file.
+    \item Upload the \texttt{.tck} file to the web application.
+    \item Use the web interface to analyze the model.
+\end{enumerate}
+
+\section{Using TChecker from the Command Line}
+
+\subsection{Running an Example}
+\begin{enumerate}
+    \item Open a terminal in the VM.
+    \item Navigate to the examples directory:
+    \begin{lstlisting}[language=bash]
+    cd /home/tchecker/tchecker_code/examples \end{lstlisting}
+    \item Run the shell script for the desired example:
+    \begin{lstlisting}[language=bash]
+    ./example_script.sh \end{lstlisting}
+    \item Use \texttt{tchecker} to analyze the generated \texttt{.tck} file \href{https://github.com/ticktac-project/tchecker/wiki/Using-TChecker}{https://github.com/ticktac-project/tchecker/wiki/Using-TChecker}.
+\end{enumerate}
+
+\end{document}
