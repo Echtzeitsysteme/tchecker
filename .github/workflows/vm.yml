@@ -22,8 +22,9 @@ jobs:
         sudo udevadm control --reload-rules
         sudo udevadm trigger --name-match=kvm
         sudo apt-get update
-        sudo apt-get install -y - qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils virt-manager latexmk
+        sudo apt-get install -y - qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils virt-manager
         sudo usermod -a -G kvm,libvirt $USER
+        sudo apt-get install -y texlive-latex-base texlive-fonts-recommended texlive-fonts-extra texlive-latex-extra latexmk
         latexmk -pdflatex=pdflatex -pdf ci-scripts/vm-tutorial.tex
     - name: Run script
       # Workaround to get a TTY device
