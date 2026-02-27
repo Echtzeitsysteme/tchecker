@@ -24,6 +24,7 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y - qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils virt-manager
         sudo usermod -a -G kvm,libvirt $USER
+    - name: Create Tutorial
         sudo apt-get install -y texlive-latex-base texlive-fonts-recommended texlive-fonts-extra texlive-latex-extra latexmk
         latexmk -pdflatex=pdflatex -pdf ci-scripts/vm-tutorial.tex
     - name: Run script
@@ -41,4 +42,4 @@ jobs:
       uses: actions/upload-artifact@v6
       with:
         name: vm-tutorial-pdf
-        with: vm-tutorial.pdf
+        path: vm-tutorial.pdf
