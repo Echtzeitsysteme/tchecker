@@ -92,45 +92,5 @@
         <rasd:ResourceType>10</rasd:ResourceType>
       </Item>
     </VirtualHardwareSection>
-    <!--
-    <vbox:Machine ovf:required="false" version="1.19-linux" uuid="{c2aa71bd-794d-4327-9383-a1d659ec5d8e}" name="tchecker" OSType="Debian_64" snapshotFolder="Snapshots" lastStateChange="2026-02-24T07:50:00Z">
-      <ovf:Info>Complete VirtualBox machine configuration in VirtualBox format</ovf:Info>
-      <Hardware>
-        <Memory RAMSize="8192"/>
-        <Boot>
-          <Order position="1" device="HardDisk"/>
-          <Order position="2" device="DVD"/>
-          <Order position="3" device="None"/>
-          <Order position="4" device="None"/>
-        </Boot>
-        <Display controller="VMSVGA" VRAMSize="128"/>
-        <Firmware type="EFI"/>
-        <Network>
-          <Adapter slot="0" enabled="true" MACAddress="525400fa58c8" type="82540EM">
-            <NAT localhost-reachable="true">
-              <DNS use-proxy="true"/>
-            </NAT>
-          </Adapter>
-        </Network>
-        <AudioAdapter driver="Null" enabled="true"/>
-        <Clipboard/>
-        <StorageControllers>
-          <StorageController name="IDE Controller" type="PIIX4" PortCount="2" useHostIOCache="true" Bootable="true"/>
-          <StorageController name="SATA Controller" type="AHCI" PortCount="1" useHostIOCache="false" Bootable="true" IDE0MasterEmulationPort="0" IDE0SlaveEmulationPort="1" IDE1MasterEmulationPort="2" IDE1SlaveEmulationPort="3">
-            <AttachedDevice type="HardDisk" hotpluggable="false" port="0" device="0">
-              <Image uuid="{fec17f1a-c0bd-40f4-81f4-3ea567877c67}"/>
-            </AttachedDevice>
-          </StorageController>
-        </StorageControllers>
-        <RTC localOrUTC="UTC"/>
-        <CPU count="4">
-          <HardwareVirtExLargePages enabled="false"/>
-          <PAE enabled="false"/>
-          <LongMode enabled="true"/>
-          <X2APIC enabled="true"/>
-        </CPU>
-      </Hardware>
-    </vbox:Machine>
-    -->
   </VirtualSystem>
 </Envelope>
