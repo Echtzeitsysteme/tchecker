@@ -29,8 +29,6 @@ write_files:
       apt-get install -yq tmux xfce4 firefox-esr git python3-full python3-pip python3-venv cmake bison flex doxygen
       apt-get install -yq build-essential g++ python3-dev autotools-dev libicu-dev libbz2-dev npm
       npm install -g yarn
-      sudo -u tchecker python3 -m venv /home/tchecker/Desktop/webapp/venv
-      sudo -u tchecker /home/tchecker/Desktop/webapp/venv/bin/pip install -r /home/tchecker/Desktop/webapp/requirements.txt
       mkdir -p /home/tchecker/boost/
       cd /home/tchecker/boost/
       wget https://sourceforge.net/projects/boost/files/boost/1.86.0/boost_1_86_0.tar.gz
@@ -45,6 +43,8 @@ write_files:
       cmake --build build/ --target install
       mkdir -p /home/tchecker/Desktop/webapp/
       git clone https://github.com/Echtzeitsysteme/tchecker-webapp.git /home/tchecker/Desktop/webapp/
+      sudo -u tchecker python3 -m venv /home/tchecker/Desktop/webapp/venv
+      sudo -u tchecker /home/tchecker/Desktop/webapp/venv/bin/pip install -r /home/tchecker/Desktop/webapp/requirements.txt
       mkdir -p /home/tchecker/tchecker_code/
       git clone https://github.com/Echtzeitsysteme/tchecker.git /home/tchecker/tchecker_code/
       mkdir -p /home/tchecker/build
