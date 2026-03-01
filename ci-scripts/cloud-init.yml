@@ -26,9 +26,11 @@ write_files:
       export DEBIAN_FRONTEND=noninteractive
       apt-get update
       apt-get upgrade -yq
-      apt-get install -yq tmux xfce4 firefox-esr git python3 python3-pip cmake bison flex doxygen
+      apt-get install -yq tmux xfce4 firefox-esr git python3-full python3-pip python3-venv cmake bison flex doxygen
       apt-get install -yq build-essential g++ python3-dev autotools-dev libicu-dev libbz2-dev npm
       npm install -g yarn
+      sudo -u tchecker python3 -m venv /home/tchecker/Desktop/webapp/venv
+      sudo -u tchecker /home/tchecker/Desktop/webapp/venv/bin/pip install -r /home/tchecker/Desktop/webapp/requirements.txt
       mkdir -p /home/tchecker/boost/
       cd /home/tchecker/boost/
       wget https://sourceforge.net/projects/boost/files/boost/1.86.0/boost_1_86_0.tar.gz
@@ -53,10 +55,6 @@ write_files:
       make doc
       make install
       echo "export PATH=$PATH:/home/tchecker/install/bin" >> /home/tchecker/.bashrc
-      su tchecker
-      cd /home/tchecker/Desktop/webapp/
-      pip install -r requirements.txt
-      exit
     owner: 'root:root'
     permissions: '0644'
 
