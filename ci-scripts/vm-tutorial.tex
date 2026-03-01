@@ -44,7 +44,7 @@ This tutorial provides a step-by-step guide for using the VM created with the Gi
 \section{Prerequisites}
 \begin{itemize}
     \item VirtualBox installed on your system.
-    \item The \texttt{tchecker.ova} file downloaded from the GitHub Action.
+    \item The \texttt{tchecker.ova} file.
 \end{itemize}
 
 \section{Importing the VM into VirtualBox}
@@ -80,7 +80,11 @@ All examples are located in the directory \texttt{/home/tchecker/tchecker\_code/
     \item Run the shell script for the desired example:
     \begin{lstlisting}[language=bash]
     ./example_script.sh \end{lstlisting}
-    \item Use \texttt{tchecker} to analyze the generated \texttt{.tck} file (\href{https://github.com/ticktac-project/tchecker/wiki/Using-TChecker}{https://github.com/ticktac-project/tchecker/wiki/Using-TChecker}).
+    \item Use \texttt{tchecker} to analyze the generated \texttt{.tck} file 
+    \item For most tools, the description can be found at (\href{https://github.com/ticktac-project/tchecker/wiki/Using-TChecker}{https://github.com/ticktac-project/tchecker/wiki/Using-TChecker}).
+    \item For the comparison, the tool tck-compare is used:
+    \begin{lstlisting}[language=bash]
+    tck-compare -h \end{lstlisting}
 \end{enumerate}
 
 Each example consists of a shell script and a \texttt{.txt} file. The shell script generates a \texttt{.tck} file, which is used as input for \texttt
