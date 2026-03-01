@@ -29,6 +29,7 @@ write_files:
       apt-get install -yq tmux xfce4 firefox-esr git python3-full python3-pip python3-venv cmake bison flex doxygen
       apt-get install -yq build-essential g++ python3-dev autotools-dev libicu-dev libbz2-dev npm
       npm install -g yarn
+      npm install -g vite
       mkdir -p /home/tchecker/boost/
       cd /home/tchecker/boost/
       wget https://sourceforge.net/projects/boost/files/boost/1.86.0/boost_1_86_0.tar.gz
