@@ -34,7 +34,7 @@ write_files:
       sudo -u tchecker git clone https://github.com/Echtzeitsysteme/tchecker-webapp.git /home/tchecker/Desktop/webapp/
       sudo -u tchecker python3 -m venv /home/tchecker/Desktop/webapp/venv
       sudo -u tchecker /home/tchecker/Desktop/webapp/venv/bin/pip install -r /home/tchecker/Desktop/webapp/requirements.txt
-      sudo -u tchecker cd /home/tchecker/Desktop/webapp/frontend/ && yarn install
+      sudo -u tchecker bash -c "cd /home/tchecker/Desktop/webapp/frontend/ && yarn install"
       mkdir -p /home/tchecker/boost/
       cd /home/tchecker/boost/
       wget https://sourceforge.net/projects/boost/files/boost/1.86.0/boost_1_86_0.tar.gz
