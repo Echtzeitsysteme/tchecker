@@ -1025,12 +1025,12 @@ std::ostream & output(std::ostream & os, tchecker::dbm::db_t const * dbm, tcheck
       // xi == xj + k
       if (tchecker::dbm::sum(cij, cji) == tchecker::dbm::LE_ZERO) {
         os << " && ";
-        os << clock_name(i) << "==" << clock_name(j);
         tchecker::integer_t vij = tchecker::dbm::value(cij);
-        if (vij > 0)
-          os << "+" << tchecker::dbm::value(cij);
-        else if (vij < 0)
-          os << "-" << -tchecker::dbm::value(cij);
+        if(vij == 0) {
+          os << clock_name(i) << "==" << clock_name(j);
+        } else {
+          os << clock_name(i) << "-" << clock_name(j) << "==" << tchecker::dbm::value(cij);
+        }
       }
       // k1 <= xi - xj <= k2
       else if ((cij != tchecker::dbm::LT_INFINITY) || (cji != tchecker::dbm::LT_INFINITY)) {
