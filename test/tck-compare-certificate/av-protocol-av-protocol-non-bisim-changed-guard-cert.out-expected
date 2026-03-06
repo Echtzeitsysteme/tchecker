@@ -44,4 +44,4 @@ digraph av_protocol.xml_av_protocol_change_guard_1.xml {
 MEMORY_MAX_RSS  xxxx
 RELATIONSHIP_FULFILLED false
 RUNNING_TIME_SECONDS  xxxx
-VISITED_PAIR_OF_STATES 30
+VISITED_PAIR_OF_STATES 25
