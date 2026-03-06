@@ -55,8 +55,8 @@ if(WITHOUT_SUBSETS)
 endif()
 
 if(SUBSET_COUNTER LESS 1)
-    set(WITHOUT_SUBSETS ON)
-    message(STATUS "No behaviour defined. Defaulting to check for equivalence.")
+    set(SUBSETS_WITH_COMPRESS ON)
+    message(STATUS "No behaviour defined. Defaulting to SUBSETS_WITH_COMPRESS.")
 endif()
 
 if(SUBSET_COUNTER GREATER 1)
