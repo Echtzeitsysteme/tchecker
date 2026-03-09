@@ -28,6 +28,9 @@ public:
     \param location_pair : the pair of locations to add
     \param valuation_1 : the clock valuation of vcg1
     \param valuation_2 : the clock valuation of vcg2
+    \param invariant_1 : the invariant of the first vloc
+    \param invariant_2 : the invariant of the second vloc
+    \param cut_off : above this value, values are considered to be equal
     \param id : the id of this node within the witness graph
     \param urgent : whether an urgent clk exists
     \param initial : whether this node is the root
@@ -35,12 +38,13 @@ public:
   node_t(std::pair<tchecker::ta::state_t, tchecker::ta::state_t> & location_pair,
          std::shared_ptr<tchecker::clockval_t> valuation_1, std::shared_ptr<tchecker::clockval_t> valuation_2,
          std::shared_ptr<tchecker::clock_constraint_container_t> invariant_1, std::shared_ptr<tchecker::clock_constraint_container_t> invariant_2,
-         std::size_t id = 0, bool urgent_clk_exists = false, bool initial = false);
+         tchecker::clock_rational_value_t cut_off, std::size_t id = 0, bool urgent_clk_exists = false, bool initial = false);
 
   /*!
     \brief Constructor
     \param s_1 : a synchronized, symbolic state of vcg1 that contains only a single state
     \param s_2 : a synchronized, symbolic state of vcg2 that is virtual equivalent to first
+    \param cut_off : above this value, values are considered to be equal
     \param id : the id of this node within the witness graph
     \param no_of_orig_clks_1 : the number of original clocks of the first vcg
     \param no_of_orig_clks_2 : the number of original clocks of the second vcg
@@ -50,7 +54,7 @@ public:
   node_t(tchecker::zg::state_sptr_t s_1, tchecker::zg::state_sptr_t s_2,
          tchecker::clock_id_t no_of_orig_clks_1, tchecker::clock_id_t no_of_orig_clks_2,
          std::shared_ptr<tchecker::clock_constraint_container_t> invariant_1, std::shared_ptr<tchecker::clock_constraint_container_t> invariant_2,
-         std::size_t id = 0, bool urgent_clk_exists = false, bool initial = false);
+         tchecker::clock_rational_value_t cut_off, std::size_t id = 0, bool urgent_clk_exists = false, bool initial = false);
   
   /*!
    \brief Copy Constructor
@@ -186,6 +190,8 @@ private:
   std::string _final_delay;
   std::shared_ptr<tchecker::graph::edge_vedge_t> _final_trans;
   bool _final_first_has_transition;
+
+  tchecker::clock_rational_value_t const _cut_off;
 
 };
 

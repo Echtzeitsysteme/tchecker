@@ -36,20 +36,23 @@ public:
    \param vcg1 : first vcg
    \param vcg1 : second vcg
    \param max_delay : the maximum allowed delay
+   \param previous : the dag, this is a subdag of. Nullptr if this is the init.
    \note this keeps a pointer on the vcg
   */
   cont_dag_t(std::shared_ptr<tchecker::vcg::vcg_t> vcg1, std::shared_ptr<tchecker::vcg::vcg_t> vcg2, 
              tchecker::zg::state_sptr_t first_init, tchecker::zg::state_sptr_t second_init,
-             std::size_t max_delay);
+             std::size_t max_delay, tchecker::strong_timed_bisim::contra::cont_dag_t *previous);
 
   /*!
    \brief Partial Copy Constructor
    \param other : the cont_dag_t to copy
    \param first_init : the new first init
    \param second_init : the new second init
+   \param previous : the dag, this is a subdag of. Nullptr if this is the init.
    \note Edges are not copied, only nodes.
   */
-  cont_dag_t(const cont_dag_t & other, tchecker::zg::state_sptr_t first_init, tchecker::zg::state_sptr_t second_init);
+  cont_dag_t(const cont_dag_t & other, tchecker::zg::state_sptr_t first_init, tchecker::zg::state_sptr_t second_init, 
+            tchecker::strong_timed_bisim::contra::cont_dag_t *previous);
 
   /*!
    \brief Creates a contradiction DAG from a given non_bisim_cache in case the given NTA are not timed bisimilar
@@ -103,6 +106,12 @@ protected:
 
 private:
 
+  /*!
+   \brief The actual creator
+   \param non_bisim_cache : the cache of the virtual clock algorithm
+   \param src : the initial node of this dag
+   \return whether the creation of the CDAG was successfull
+   */
   bool create_cont_from_non_bisim_cache(tchecker::strong_timed_bisim::non_bisim_cache_t &non_bisim_cache, node_t &src);
 
   /*!
@@ -124,12 +133,20 @@ private:
    */
   void add_nodes_and_edges_of(cont_dag_t & other, std::shared_ptr<node_t> src, tchecker::zg::zg_t::sst_t trans_1, tchecker::zg::zg_t::sst_t trans_2);
 
+  /*!
+   \brief Checks whether a node is element of this or any upper CDAG
+   \param node : the node to check
+   \return whether the node is already element of this or any upper CDAG
+   */
+  bool does_node_exist_in_this_or_upper(std::shared_ptr<node_t> node);
+
   std::pair<tchecker::zg::state_sptr_t, tchecker::zg::state_sptr_t> _init_states; 
   std::shared_ptr<node_t> _root;
 
   const std::shared_ptr<std::vector<std::shared_ptr<delay_edge_t>>> _delays;
   const std::size_t _max_delay;
   const bool _urgent_clk_exists;
+  tchecker::strong_timed_bisim::contra::cont_dag_t *_previous;
 };
 
 } // end of namespace contra

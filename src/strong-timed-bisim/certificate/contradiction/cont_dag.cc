@@ -15,18 +15,20 @@ namespace contra {
 
 cont_dag_t::cont_dag_t(std::shared_ptr<tchecker::vcg::vcg_t> vcg1, std::shared_ptr<tchecker::vcg::vcg_t> vcg2, 
                        tchecker::zg::state_sptr_t first_init, tchecker::zg::state_sptr_t second_init,
-                       std::size_t max_delay)
+                       std::size_t max_delay, tchecker::strong_timed_bisim::contra::cont_dag_t *previous)
     : base_graph_t(vcg1, vcg2), _init_states(std::make_pair(first_init, second_init)), 
       _delays(std::make_shared<std::vector<std::shared_ptr<delay_edge_t>>>()), _max_delay(max_delay + 1),
-      _urgent_clk_exists(_vcg1->get_no_of_original_clocks() + _vcg2->get_no_of_original_clocks() < _vcg1->get_no_of_virtual_clocks())
+      _urgent_clk_exists(_vcg1->get_no_of_original_clocks() + _vcg2->get_no_of_original_clocks() < _vcg1->get_no_of_virtual_clocks()),
+      _previous(previous)
 {
   assert(vcg1->get_no_of_virtual_clocks() == vcg2->get_no_of_virtual_clocks());
 }
 
-cont_dag_t::cont_dag_t(const cont_dag_t & other, tchecker::zg::state_sptr_t first_init, tchecker::zg::state_sptr_t second_init)
+cont_dag_t::cont_dag_t(const cont_dag_t & other, tchecker::zg::state_sptr_t first_init, tchecker::zg::state_sptr_t second_init,
+                       tchecker::strong_timed_bisim::contra::cont_dag_t *previous)
     : base_graph_t(other.vcg1_ptr(), other.vcg2_ptr()), _init_states(std::make_pair(first_init, second_init)), 
       _delays(std::make_shared<std::vector<std::shared_ptr<delay_edge_t>>>()), _max_delay(other._max_delay),
-      _urgent_clk_exists(other._urgent_clk_exists)
+      _urgent_clk_exists(other._urgent_clk_exists), _previous(previous)
 {
   for(auto cur : *(other._nodes)) {
     add_node(cur);
@@ -39,7 +41,7 @@ bool cont_dag_t::create_cont_from_non_bisim_cache(tchecker::strong_timed_bisim::
 {
 
   auto init_node = std::make_shared<node_t>(_init_states.first, _init_states.second, _vcg1->get_no_of_original_clocks(),
-                                             _vcg2->get_no_of_original_clocks(), invariant_1, invariant_2, 0, _urgent_clk_exists, true);
+                                             _vcg2->get_no_of_original_clocks(), invariant_1, invariant_2, _max_delay, 0, _urgent_clk_exists, true);
 
   return create_cont_from_non_bisim_cache(non_bisim_cache, *init_node);
 }
@@ -92,7 +94,7 @@ bool cont_dag_t::create_cont_from_non_bisim_cache(tchecker::strong_timed_bisim::
     else if (!cur->is_synchronized()) {
       auto new_sync = std::make_shared<node_t>(*cur);
       new_sync->synchronize();
-      if (nullptr != find_node(new_sync)) { // cycle detected?
+      if (does_node_exist_in_this_or_upper(new_sync)) { // cycle detected?
         return false;
       }
       new_sync = this->add_node(*new_sync);
@@ -113,7 +115,7 @@ bool cont_dag_t::create_cont_from_non_bisim_cache(tchecker::strong_timed_bisim::
         delay = cur->max_delay(non_bisim_cache.entry(cur->location_pair()), _max_delay, _vcg1, _vcg2);
       }
       if (gate && delay.first > clock_rational_value_t(0, 1)) {
-        if (nullptr != find_node(delay.second)) { // cycle detected?
+        if (does_node_exist_in_this_or_upper(delay.second)) { // cycle detected?
           return false;
         }
         auto new_node = this->add_node(delay.second);
@@ -165,13 +167,13 @@ bool cont_dag_t::add_non_bisim_action_transition(tchecker::strong_timed_bisim::n
       auto && [status_1, s_1, t_1] = (*trans_1)[idx_1];
       for (size_t idx_2 = 0; idx_2 < trans_2->size(); idx_2++) {
         auto && [status_2, s_2, t_2] = (*trans_2)[idx_2];
-        assert(s_2->zone().is_virtual_equivalent(s_1->zone(), _vcg1->get_no_of_virtual_clocks()));
         
-        std::shared_ptr<cont_dag_t> cur_sub_dag = std::make_shared<cont_dag_t>(*this, s_1, s_2);
+        std::shared_ptr<cont_dag_t> cur_sub_dag = std::make_shared<cont_dag_t>(*this, s_1, s_2, this);
+
         std::shared_ptr<node_t> cur_init_node 
           = std::make_shared<node_t>(s_1, s_2, _vcg1->get_no_of_original_clocks(), _vcg2->get_no_of_original_clocks(),
                                       std::make_shared<tchecker::clock_constraint_container_t>(t_1->tgt_invariant_container()), 
-                                      std::make_shared<tchecker::clock_constraint_container_t>(t_2->tgt_invariant_container()), 
+                                      std::make_shared<tchecker::clock_constraint_container_t>(t_2->tgt_invariant_container()), _max_delay,
                                       0, _urgent_clk_exists, false);
                     
         cur_init_node->set_valuation(src->valuation());
@@ -202,7 +204,7 @@ bool cont_dag_t::add_non_bisim_action_transition(tchecker::strong_timed_bisim::n
 
         synced_init_node->synchronize(); 
           
-        if (nullptr != find_node(synced_init_node)) { // cycle detected?
+        if (does_node_exist_in_this_or_upper(synced_init_node)) { // cycle detected?
           continue;
         }
 
@@ -232,7 +234,7 @@ bool cont_dag_t::add_non_bisim_action_transition(tchecker::strong_timed_bisim::n
     } 
   }
 
-  // we did not find a valid contradiction DAG. Therefore, return nullptr
+  // we did not find a valid contradiction DAG. Therefore, return false
   return false;
 }
 
@@ -256,6 +258,17 @@ void cont_dag_t::add_nodes_and_edges_of(cont_dag_t & other, std::shared_ptr<node
     auto tgt = find_node(cur->tgt());
     add_delay(cur->delay(), src, tgt);
   }
+}
+
+bool cont_dag_t::does_node_exist_in_this_or_upper(std::shared_ptr<node_t> node)
+{
+  if (nullptr != find_node(node)) {
+    return true;
+  }
+  if(nullptr != _previous) {
+    return _previous->does_node_exist_in_this_or_upper(node);
+  }
+  return false;
 }
 
 

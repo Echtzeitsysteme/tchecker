@@ -20,21 +20,23 @@ namespace contra {
 node_t::node_t(std::pair<tchecker::ta::state_t, tchecker::ta::state_t> & location_pair,
                std::shared_ptr<tchecker::clockval_t> valuation_1, std::shared_ptr<tchecker::clockval_t> valuation_2,
                std::shared_ptr<tchecker::clock_constraint_container_t> invariant_1, std::shared_ptr<tchecker::clock_constraint_container_t> invariant_2,
-               std::size_t id, bool urgent_clk_exists, bool initial) :
+               tchecker::clock_rational_value_t cut_off, std::size_t id, bool urgent_clk_exists, bool initial) :
                tchecker::strong_timed_bisim::certificate::node_t(location_pair, id, initial),
                _valuation(std::make_pair(valuation_1, valuation_2)),
                _invariant(std::make_pair(invariant_1, invariant_2)),
-               _urgent_clk_exists(urgent_clk_exists)
+               _urgent_clk_exists(urgent_clk_exists),
+               _cut_off(cut_off)
 {
 }
 
 node_t::node_t(tchecker::zg::state_sptr_t s_1, tchecker::zg::state_sptr_t s_2,
                tchecker::clock_id_t no_of_orig_clks_1, tchecker::clock_id_t no_of_orig_clks_2,
                std::shared_ptr<tchecker::clock_constraint_container_t> invariant_1, std::shared_ptr<tchecker::clock_constraint_container_t> invariant_2,
-               std::size_t id, bool urgent_clk_exists, bool initial) :
+               tchecker::clock_rational_value_t cut_off, std::size_t id, bool urgent_clk_exists, bool initial) :
                tchecker::strong_timed_bisim::certificate::node_t(s_1, s_2, id, initial),
                _invariant(std::make_pair(invariant_1, invariant_2)),
-               _urgent_clk_exists(urgent_clk_exists), _final(false)
+               _urgent_clk_exists(urgent_clk_exists), _final(false),
+               _cut_off(cut_off)
 {
   auto valuation_1 = clockval_factory(2*no_of_orig_clks_1 + no_of_orig_clks_2 + 1 + (_urgent_clk_exists ? 1 : 0)); // +1 due to the ref clock
  
@@ -55,7 +57,7 @@ node_t::node_t(const node_t & other)
   : tchecker::strong_timed_bisim::certificate::node_t(*(other._location_pair), 0, other._initial), 
     _invariant(other._invariant), _urgent_clk_exists(other._urgent_clk_exists), _final(other._final),
     _final_is_delay(other._final_is_delay), _final_delay(other._final_delay), _final_trans(other._final_trans),
-    _final_first_has_transition(other._final_first_has_transition)
+    _final_first_has_transition(other._final_first_has_transition), _cut_off(other._cut_off)
 {
   auto valuation_1 = clockval_factory(other._valuation.first->size());
   for(tchecker::clock_id_t i = 0; i < valuation_1->size(); i++) {
@@ -75,8 +77,20 @@ bool node_t::operator==(node_t & other)
 {
   bool result = tchecker::strong_timed_bisim::certificate::node_t::operator==(other);
 
-  result &= (0 == tchecker::lexical_cmp(*(this->valuation().first), *(other.valuation().first)));
-  result &= (0 == tchecker::lexical_cmp(*(this->valuation().second), *(other.valuation().second)));
+  result &= this->_cut_off == other._cut_off;
+
+  result &= other._valuation.first->size() == this->_valuation.second->size();
+  result &= other._valuation.second->size() == this->_valuation.second->size();
+
+  for(tchecker::clock_id_t i = 0; i < this->_valuation.first->size(); i++) {
+    result &= (*(this->_valuation.first))[i] == (*(other._valuation.first))[i] || 
+              (((*(this->_valuation.first))[i]) > _cut_off && (*(other._valuation.first))[i] > _cut_off);
+  }  
+
+  for(tchecker::clock_id_t i = 0; i < this->_valuation.second->size(); i++) {
+    result &= (*(this->_valuation.second))[i] == (*(other._valuation.second))[i] || 
+              (((*(this->_valuation.second))[i]) > _cut_off && (*(other._valuation.second))[i] > _cut_off);
+  }
 
   return result;
 } 
@@ -276,11 +290,13 @@ bool node_t::is_leaf(tchecker::zg::state_sptr_t & init_1, tchecker::zg::state_sp
 std::shared_ptr<std::pair<std::shared_ptr<tchecker::zg::zone_t>, std::shared_ptr<tchecker::zg::zone_t>>>
 node_t::generate_zones(std::shared_ptr<tchecker::vcg::vcg_t> vcg1, std::shared_ptr<tchecker::vcg::vcg_t> vcg2) const
 {
-  std::shared_ptr<tchecker::zg::zone_t> first = tchecker::zg::factory(vcg1->get_no_of_original_clocks() + vcg1->get_no_of_virtual_clocks() + 1);
+  auto first_no_clks = vcg1->get_no_of_original_clocks() + vcg1->get_no_of_virtual_clocks() + 1;
+  std::shared_ptr<tchecker::zg::zone_t> first = tchecker::zg::factory(first_no_clks);
   first->make_universal();
   tchecker::dbm::reduce_to_valuation(first->dbm(), *_valuation.first, first->dim());
 
-  std::shared_ptr<tchecker::zg::zone_t> second = tchecker::zg::factory(vcg2->get_no_of_original_clocks() + vcg2->get_no_of_virtual_clocks() + 1);
+  auto second_no_clks = vcg2->get_no_of_original_clocks() + vcg2->get_no_of_virtual_clocks() + 1;
+  std::shared_ptr<tchecker::zg::zone_t> second = tchecker::zg::factory(second_no_clks);
   second->make_universal();
   tchecker::dbm::reduce_to_valuation(second->dbm(), *_valuation.second, second->dim());
 

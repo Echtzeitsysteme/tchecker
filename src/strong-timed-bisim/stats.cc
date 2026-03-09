@@ -56,7 +56,7 @@ void stats_t::init_counterexample(std::shared_ptr<tchecker::vcg::vcg_t> const & 
                          tchecker::zg::state_sptr_t first_init, tchecker::zg::state_sptr_t second_init,
                          std::size_t max_delay)
 {
-  _counterexample = std::make_shared<tchecker::strong_timed_bisim::contra::cont_dag_t>(vcg1, vcg2, first_init, second_init, max_delay);
+  _counterexample = std::make_shared<tchecker::strong_timed_bisim::contra::cont_dag_t>(vcg1, vcg2, first_init, second_init, max_delay, nullptr);
 }
 
 void stats_t::attributes(std::map<std::string, std::string> & m) const {
