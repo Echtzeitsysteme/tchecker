@@ -5,10 +5,10 @@
  *
  */
 
-  /*!
-    \file compare_api.hh
-    \brief API for comparing two TChecker system declarations
-  */
+/*!
+  \file compare_api.hh
+  \brief API for comparing two TChecker system declarations
+*/
 
 #ifndef TCHECKER_PUBLICAPI_COMPARE_API_HH
 #define TCHECKER_PUBLICAPI_COMPARE_API_HH
@@ -125,8 +125,8 @@ namespace publicapi {
                    tck_compare_relationship_t relationship,
                    std::size_t block_size, 
                    std::size_t table_size,
-                   std::string first_starting_state_json,
-                   std::string second_starting_state_json,
+                   std::string & first_starting_state_json,
+                   std::string & second_starting_state_json,
                    bool generate_witness);
 
 } // end of namespace publicapi

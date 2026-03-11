@@ -17,6 +17,8 @@
 #include "tchecker/parsing/parsing.hh"
 #include "tchecker/system/system.hh"
 
+#include "tchecker/publicapi/json_parser.hh"
+
 void tck_compare(const char * output_filename, 
   const char * first_sysdecl_filename, 
   const char * second_sysdecl_filename,
@@ -51,12 +53,12 @@ namespace publicapi {
 
 void strong_timed_bisim(std::ostream & os, std::shared_ptr<tchecker::parsing::system_declaration_t> const & sysdecl_first,
                         std::shared_ptr<tchecker::parsing::system_declaration_t> const & sysdecl_second, std::size_t block_size,
-                        std::size_t table_size,  std::string first_starting_state_json, std::string second_starting_state_json,
-                        bool generate_witness)
+                        std::size_t table_size, std::map<std::string, std::string> & first_starting_state, 
+                        std::map<std::string, std::string> & second_starting_state, bool generate_witness)
 {
 
   auto stats = tchecker::strong_timed_bisim::run(sysdecl_first, sysdecl_second, &os, block_size, table_size, 
-                                                 first_starting_state_json, second_starting_state_json, generate_witness);
+                                                 first_starting_state, second_starting_state, generate_witness);
 
   if(generate_witness) {
     if(stats.relationship_fulfilled()) {
@@ -76,7 +78,8 @@ void strong_timed_bisim(std::ostream & os, std::shared_ptr<tchecker::parsing::sy
 
 void tck_compare(std::string output_filename, std::string first_sysdecl_filename, std::string second_sysdecl_filename,
                  tck_compare_relationship_t relationship, std::size_t block_size, std::size_t table_size,
-                 std::string first_starting_state_json, std::string second_starting_state_json, bool generate_witness)
+                 std::string & first_starting_state_json, std::string & second_starting_state_json, 
+                 bool generate_witness)
 {
   try {
     std::shared_ptr<tchecker::parsing::system_declaration_t> first_sysdecl{nullptr};
@@ -109,9 +112,26 @@ void tck_compare(std::string output_filename, std::string first_sysdecl_filename
       os = &std::cout;
     }
 
+#if !USE_BOOST_JSON
+    if (!first_starting_state_json.empty() || !second_starting_state_json.empty()) {
+      std::cerr << "JSON display is not enabled in this build" << std::endl;
+      return;
+    }
+#endif
+
+    std::map<std::string, std::string> first_starting_state_attributes, second_starting_state_attributes;
+#if USE_BOOST_JSON
+    if (!first_starting_state_json.empty()) {
+      first_starting_state_attributes = parse_state_json(first_starting_state_json);
+    }
+    if (!second_starting_state_json.empty()) {
+      second_starting_state_attributes = parse_state_json(second_starting_state_json);
+    }
+#endif
+
     if (relationship == STRONG_TIMED_BISIM) {
       strong_timed_bisim(*os, first_sysdecl, second_sysdecl, block_size, table_size, 
-                          first_starting_state_json, second_starting_state_json, generate_witness);
+                          first_starting_state_attributes, second_starting_state_attributes, generate_witness);
     }
     else {
       throw std::runtime_error("Unknown relationship");

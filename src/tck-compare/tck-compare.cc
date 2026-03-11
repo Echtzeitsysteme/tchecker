@@ -48,8 +48,8 @@ void usage(char * progname)
   std::cerr << "   -r relationship    relationship to check" << std::endl;
   std::cerr << "                        strong-timed-bisim  strong timed bisimilarity" << std::endl;
   std::cerr << "   -W                 generate a witness/contradiction DAG" << std::endl;
-  std::cerr << "   -sFirst state      starting state of the first VCG, specified as a JSON object with keys vloc, intval and zone" << std::endl;
-  std::cerr << "   -sSecond state     starting state of the second VCG, specified as a JSON object with keys vloc, intval and zone" << std::endl;
+  std::cerr << "   --sFirst state      starting state of the first VCG, specified as a JSON object with keys vloc, intval and zone" << std::endl;
+  std::cerr << "   --sSecond state     starting state of the second VCG, specified as a JSON object with keys vloc, intval and zone" << std::endl;
 }
 
 enum tck_compare_relationship_t relationship = STRONG_TIMED_BISIM;   /*!< Selected relationship */

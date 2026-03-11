@@ -67,18 +67,17 @@ tchecker::strong_timed_bisim::stats_t
 run(std::shared_ptr<tchecker::parsing::system_declaration_t> const & sysdecl_first, 
     std::shared_ptr<tchecker::parsing::system_declaration_t> const & sysdecl_second,
     std::ostream * os, std::size_t block_size, std::size_t table_size, 
-    std::string first_starting_state_json, std::string second_starting_state_json, bool generate_witness) {
+    std::map<std::string, std::string> & first_starting_state, std::map<std::string, std::string> & second_starting_state, 
+    bool generate_witness) {
 
   std::vector<std::shared_ptr<tchecker::ta::system_t>> systems;
 
   for(size_t i = 0; i < 2; ++i) {
     std::shared_ptr<tchecker::ta::system_t> cur_system{new tchecker::ta::system_t{ (i == 0) ? *sysdecl_first : *sysdecl_second}};
     std::shared_ptr<tchecker::syncprod::system_t const> system_syncprod = std::make_shared<tchecker::syncprod::system_t const>(cur_system->as_syncprod_system());
-    std::shared_ptr<tchecker::system::system_t> product = std::make_shared<tchecker::system::system_t>(tchecker::syncprod::synchronized_product(system_syncprod, (i == 0) ? FIRST_PRODUCT_NAME : SECOND_PRODUCT_NAME, LOC_DELIMITER));
-    if (first_starting_state_json.empty() && second_starting_state_json.empty()) {
+    std::shared_ptr<tchecker::system::system_t> product = std::make_shared<tchecker::system::system_t>(tchecker::syncprod::synchronized_product(system_syncprod, (0 == i) ? FIRST_PRODUCT_NAME : SECOND_PRODUCT_NAME, LOC_DELIMITER));
+    if ((0 == i) ? first_starting_state.empty() : second_starting_state.empty()) {
       check_for_init(product);
-    } else if (first_starting_state_json.empty() || second_starting_state_json.empty()) {
-      throw std::runtime_error(std::string("Either give a state for both automata or for none."));
     }
     systems.push_back(cur_system);
   }
@@ -106,7 +105,7 @@ run(std::shared_ptr<tchecker::parsing::system_declaration_t> const & sysdecl_fir
 
   auto algorithm = new tchecker::strong_timed_bisim::Lieb_et_al(vcgs[0], vcgs[1], generate_witness);
 
-  return algorithm->run(first_starting_state_json, second_starting_state_json);
+  return algorithm->run(first_starting_state, second_starting_state);
 
 }
 

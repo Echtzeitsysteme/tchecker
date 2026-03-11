@@ -4,9 +4,11 @@ ${CMAKE_CURRENT_SOURCE_DIR}/reach_api.cc
 ${CMAKE_CURRENT_SOURCE_DIR}/liveness_api.cc
 ${CMAKE_CURRENT_SOURCE_DIR}/compare_api.cc
 ${CMAKE_CURRENT_SOURCE_DIR}/simulate_api.cc
+${CMAKE_CURRENT_SOURCE_DIR}/json_parser.cc
 ${TCHECKER_INCLUDE_DIR}/tchecker/publicapi/syntax_api.hh
 ${TCHECKER_INCLUDE_DIR}/tchecker/publicapi/reach_api.hh
 ${TCHECKER_INCLUDE_DIR}/tchecker/publicapi/liveness_api.hh
 ${TCHECKER_INCLUDE_DIR}/tchecker/publicapi/compare_api.hh
 ${TCHECKER_INCLUDE_DIR}/tchecker/publicapi/simulate_api.hh
+${TCHECKER_INCLUDE_DIR}/tchecker/publicapi/json_parser.hh
 PARENT_SCOPE)
