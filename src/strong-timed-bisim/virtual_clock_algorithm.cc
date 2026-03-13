@@ -11,6 +11,7 @@
 #include "tchecker/vcg/revert_transitions.hh"
 #include "tchecker/vcg/sync.hh"
 #include "tchecker/vcg/virtual_constraint.hh"
+#include "tchecker/operational-semantics/zone_valuation_converter.hh"
 
 namespace tchecker {
 
@@ -37,7 +38,8 @@ tchecker::strong_timed_bisim::stats_t Lieb_et_al::run(std::map<std::string, std:
   std::vector<tchecker::zg::zg_t::sst_t> sst_second;
   sst_second.clear();
 
-  std::pair<tchecker::zg::const_state_sptr_t, tchecker::zg::const_state_sptr_t> states;
+  std::pair<tchecker::zg::state_sptr_t, tchecker::zg::state_sptr_t> st;
+  std::pair<tchecker::zg::const_state_sptr_t, tchecker::zg::const_state_sptr_t> const_st;
 
   if(first_starting_state.empty()) {
     this->_A->initial(sst_first);
@@ -46,29 +48,47 @@ tchecker::strong_timed_bisim::stats_t Lieb_et_al::run(std::map<std::string, std:
       throw std::runtime_error("problems with initial state");
     }
 
+    tchecker::zg::state_sptr_t first{std::get<1>(sst_first[0])};
+    tchecker::zg::state_sptr_t second{std::get<1>(sst_second[0])};
     tchecker::zg::const_state_sptr_t const_first{std::get<1>(sst_first[0])};
     tchecker::zg::const_state_sptr_t const_second{std::get<1>(sst_second[0])};  
-    states = std::make_pair(const_first, const_second);
+
+    st = std::make_pair(first, second);
+    const_st = std::make_pair(const_first, const_second);
 
   } else {
-    states = this->create_starting_states(first_starting_state, sst_first, second_starting_state, sst_second);
+    st = this->create_starting_states(first_starting_state, sst_first, second_starting_state, sst_second);
+    tchecker::zg::const_state_sptr_t const_first{std::get<0>(st)};
+    tchecker::zg::const_state_sptr_t const_second{std::get<1>(st)}; 
+    const_st = std::make_pair(const_first, const_second);
   }
 
   visited_map_t visited(_A->get_no_of_virtual_clocks(), _A, _B);
 
   auto result =
-      this->check_for_virt_bisim(std::get<0>(states), std::get<2>(sst_first[0]), std::get<1>(states), std::get<2>(sst_second[0]), visited);
+      this->check_for_virt_bisim(const_st.first, std::get<2>(sst_first[0]), const_st.second, std::get<2>(sst_second[0]), visited);
   
   if (_witness && result->contradiction_free()) {
     stats.init_witness(_A, _B);
-    stats.witness()->create_witness_from_visited(visited, std::get<1>(sst_first[0]), std::get<1>(sst_second[0]));
+    stats.witness()->create_witness_from_visited(visited, st.first, st.second);
   } else if (_witness) {
     tchecker::clockbounds::bound_t max_delay = std::max(_A->extrapolation_max(), _B->extrapolation_max());
-    stats.init_counterexample(_A, _B, std::get<1>(sst_first[0]), std::get<1>(sst_second[0]), max_delay);
-    stats.counterexample()->create_cont_from_non_bisim_cache(
-                               _non_bisim_cache, 
-                               std::make_shared<tchecker::clock_constraint_container_t>(std::get<2>(sst_first[0])->tgt_invariant_container()), 
-                               std::make_shared<tchecker::clock_constraint_container_t>(std::get<2>(sst_second[0])->tgt_invariant_container()));
+
+    tchecker::ta::state_t first_ta_state{st.first->vloc_ptr(), st.first->intval_ptr()};
+    tchecker::ta::state_t second_ta_state{st.second->vloc_ptr(), st.second->intval_ptr()};
+
+    auto zones = 
+      (*((*(result->get_contradictions())).begin()))->generate_synchronized_zones(_A->get_no_of_original_clocks(), _B->get_no_of_original_clocks());
+
+    auto first_valuation = tchecker::operational_semantics::convert(*zones.first);
+    auto second_valuation = tchecker::operational_semantics::convert(*zones.second);
+
+    stats.init_counterexample(_A, _B, first_ta_state, second_ta_state, 
+                              *first_valuation, *second_valuation,
+                              std::get<2>(sst_first[0])->tgt_invariant_container(),
+                              std::get<2>(sst_second[0])->tgt_invariant_container(),
+                              max_delay);
+    stats.counterexample()->create_cont_from_non_bisim_cache(_non_bisim_cache);
   }
 
   stats.set_end_time();
@@ -441,13 +461,10 @@ Lieb_et_al::check_for_outgoing_transitions(tchecker::zg::zone_t const & zone_A, 
   return std::make_shared<algorithm_return_value_t>(empty_contradictions_set, zone_A, zone_B);
 }
 
-std::pair<tchecker::zg::const_state_sptr_t, tchecker::zg::const_state_sptr_t>
+std::pair<tchecker::zg::state_sptr_t, tchecker::zg::state_sptr_t>
 Lieb_et_al::create_starting_states(std::map<std::string, std::string> & first_starting_state, std::vector<tchecker::zg::zg_t::sst_t> & sst_first,
                                         std::map<std::string, std::string> & second_starting_state, std::vector<tchecker::zg::zg_t::sst_t> & sst_second)
 {
-  std::cout << first_starting_state["zone"] << std::endl;
-  std::cout << second_starting_state["zone"] << std::endl;
-
   sst_first.clear();
   sst_second.clear();
     // we first need to create the virtual constraint.
@@ -484,22 +501,15 @@ Lieb_et_al::create_starting_states(std::map<std::string, std::string> & first_st
   std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> second_vc = 
     tchecker::virtual_constraint::factory(second->zone(), _B->get_no_of_virtual_clocks());
 
-  tchecker::dbm::constrain(first->zone().dbm(), first->zone().dim(), second_vc->get_vc(_A->get_no_of_original_clocks(), false));
-  tchecker::dbm::constrain(second->zone().dbm(), second->zone().dim(), first_vc->get_vc(_B->get_no_of_original_clocks(), false));
+  tchecker::dbm::constrain(first->zone().dbm(), first->zone().dim(), second_vc->get_vc(_A->get_no_of_original_clocks(), true));
+  tchecker::dbm::constrain(second->zone().dbm(), second->zone().dim(), first_vc->get_vc(_B->get_no_of_original_clocks(), true));
 
   if(_A->get_urgent_or_committed()) {
-    tchecker::dbm::reset_to_value(first->zone().dbm(), first->zone().dim(), _A->get_no_of_original_clocks() + _A->get_no_of_virtual_clocks(), 42);
-    tchecker::dbm::reset_to_value(second->zone().dbm(), second->zone().dim(), _B->get_no_of_original_clocks() + _B->get_no_of_virtual_clocks(), 42);
+    tchecker::dbm::reset_to_value(first->zone().dbm(), first->zone().dim(), _A->get_no_of_original_clocks() + _A->get_no_of_virtual_clocks(), 0);
+    tchecker::dbm::reset_to_value(second->zone().dbm(), second->zone().dim(), _B->get_no_of_original_clocks() + _B->get_no_of_virtual_clocks(), 0);
   }
 
-  tchecker::zg::const_state_sptr_t first_const{first};
-  tchecker::zg::const_state_sptr_t second_const{second};
-
-  tchecker::dbm::output_matrix(std::cout, first->zone().dbm(), first->zone().dim());
-  tchecker::dbm::output_matrix(std::cout, second->zone().dbm(), second->zone().dim());
-
-  return std::make_pair(first_const, second_const);
-
+  return std::make_pair(first, second);
 }
 
 } // end of namespace strong_timed_bisim

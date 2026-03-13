@@ -52,11 +52,16 @@ std::shared_ptr<tchecker::strong_timed_bisim::contra::cont_dag_t> stats_t::count
 
 
 void stats_t::init_counterexample(std::shared_ptr<tchecker::vcg::vcg_t> const & vcg1, 
-                         std::shared_ptr<tchecker::vcg::vcg_t> const & vcg2,
-                         tchecker::zg::state_sptr_t first_init, tchecker::zg::state_sptr_t second_init,
-                         std::size_t max_delay)
+                                  std::shared_ptr<tchecker::vcg::vcg_t> const & vcg2,
+                                  tchecker::ta::state_t & first_init, tchecker::ta::state_t & second_init,
+                                  tchecker::clockval_t & first_clockval, tchecker::clockval_t & second_clockval,
+                                  tchecker::clock_constraint_container_t & first_invariant, 
+                                  tchecker::clock_constraint_container_t & second_invariant,
+                                  std::size_t max_delay)
 {
-  _counterexample = std::make_shared<tchecker::strong_timed_bisim::contra::cont_dag_t>(vcg1, vcg2, first_init, second_init, max_delay, nullptr);
+  _counterexample = std::make_shared<tchecker::strong_timed_bisim::contra::cont_dag_t>(
+                                      vcg1, vcg2, first_init, second_init, first_clockval, second_clockval, 
+                                      first_invariant, second_invariant, max_delay+1, nullptr);
 }
 
 void stats_t::attributes(std::map<std::string, std::string> & m) const {

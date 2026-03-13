@@ -113,7 +113,7 @@ private:
                                   std::shared_ptr<std::vector<tchecker::vcg::vcg_t::sst_t>> trans_B,
                                   visited_map_t & visited);
 
-  std::pair<tchecker::zg::const_state_sptr_t, tchecker::zg::const_state_sptr_t>
+  std::pair<tchecker::zg::state_sptr_t, tchecker::zg::state_sptr_t>
   create_starting_states(std::map<std::string, std::string> & first_starting_state, std::vector<tchecker::zg::zg_t::sst_t> & sst_first,
                               std::map<std::string, std::string> & second_starting_state, std::vector<tchecker::zg::zg_t::sst_t> & sst_second);
 

@@ -983,16 +983,27 @@ public:
   /*!
    \brief clones a state of this zg
    \param the state to clone
-   \brief the cloned state
+   \return the cloned state
    */
   inline tchecker::zg::state_sptr_t clone_state(tchecker::zg::const_state_sptr_t const & to_clone) {return _state_allocator.clone(*to_clone);}
 
   /*!
    \brief clones a state of this zg
    \param to_clone : the state to clone
-   \brief the cloned state
+   \return the cloned state
    */
   inline tchecker::zg::state_sptr_t clone_state(tchecker::zg::state_sptr_t const & to_clone) {return _state_allocator.clone(*to_clone);}
+
+  /*!   
+   \brief creates a state of this zg
+   \param vloc : the vloc
+   \param intval : the intval
+   \param zone : the zone
+   \return the new state
+   */
+  tchecker::zg::state_sptr_t create_state(const tchecker::vloc_t & vloc,
+                                          const tchecker::intval_t & intval,
+                                          const tchecker::zg::zone_t & zone);
 
 protected:
   /*!

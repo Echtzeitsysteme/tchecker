@@ -44,8 +44,8 @@ void graph_t::add_edge(tchecker::zg::state_sptr_t A_source, tchecker::ta::state_
   std::shared_ptr<node_t> target = find_node(A_target, B_target, empty_target);
 
   if(nullptr == target) {
-    add_node(A_target, B_target, empty_target);
-    target = find_node(A_target, B_target, empty_target);
+    auto helper = std::make_shared<node_t>(A_target, B_target, empty_target);
+    target = add_node(helper);
   }
 
   base_graph_t::add_edge(A_transition, B_transition, src, target);

@@ -19,7 +19,6 @@ namespace operational_semantics {
  \brief Converts a zone into a clock valuation
  \param zone : the zone to convert
  \return a clock valuation from that zone
- \pre For any clock c there exists an integer n, such that the zone either requires c=n or n < c < n+1
  \note Only fractional values of .0 and .5 are used
  */
 std::shared_ptr<tchecker::clockval_t> convert(const tchecker::zg::zone_t & zone);

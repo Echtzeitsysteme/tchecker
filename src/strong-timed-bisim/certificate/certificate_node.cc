@@ -15,8 +15,7 @@ namespace strong_timed_bisim {
 
 namespace certificate {
 
-node_t::node_t(tchecker::zg::state_sptr_t const & s_1, tchecker::zg::state_sptr_t const & s_2,
-               std::size_t id, bool initial)
+node_t::node_t(tchecker::zg::state_sptr_t const & s_1, tchecker::zg::state_sptr_t const & s_2, std::size_t id, bool initial)
     : _location_pair(std::make_shared<std::pair<tchecker::ta::state_t, tchecker::ta::state_t>>(
                       tchecker::ta::state_t(s_1->vloc_ptr(), s_1->intval_ptr()), 
                       tchecker::ta::state_t(s_2->vloc_ptr(), s_2->intval_ptr()))),
@@ -25,18 +24,19 @@ node_t::node_t(tchecker::zg::state_sptr_t const & s_1, tchecker::zg::state_sptr_
 {
 }
 
-node_t::node_t(std::pair<tchecker::ta::state_t, tchecker::ta::state_t> & location_pair,
-               std::size_t id, bool initial)
+node_t::node_t(std::pair<tchecker::ta::state_t, tchecker::ta::state_t> & location_pair, std::size_t id, bool initial)
     : _location_pair(std::make_shared<std::pair<tchecker::ta::state_t, tchecker::ta::state_t>>(
                       tchecker::ta::state_t(location_pair.first.vloc_ptr(), location_pair.first.intval_ptr()), 
-                      tchecker::ta::state_t(location_pair.second.vloc_ptr(), location_pair.second.intval_ptr()))),
+                      tchecker
+                      
+                      
+                      ::ta::state_t(location_pair.second.vloc_ptr(), location_pair.second.intval_ptr()))),
       _id(id),
       _initial(initial)
 {
 }
 
-node_t::node_t(tchecker::ta::state_t &first_loc, tchecker::ta::state_t & second_loc, 
-               std::size_t id, bool initial)
+node_t::node_t(tchecker::ta::state_t &first_loc, tchecker::ta::state_t & second_loc, std::size_t id, bool initial)
     : _location_pair(std::make_shared<std::pair<tchecker::ta::state_t, tchecker::ta::state_t>>(
                      tchecker::ta::state_t(first_loc.vloc_ptr(), first_loc.intval_ptr()), 
                      tchecker::ta::state_t(second_loc.vloc_ptr(), second_loc.intval_ptr()))),

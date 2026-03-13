@@ -38,11 +38,18 @@ node_t::node_t(tchecker::ta::state_t &first_loc, tchecker::ta::state_t & second_
 {
 }
 
-node_t::node_t(tchecker::ta::state_t &first_loc, tchecker::ta::state_t & second_loc, 
-         tchecker::clock_id_t no_of_virt_clks, std::size_t id, bool initial)
-         : tchecker::strong_timed_bisim::certificate::node_t(first_loc, second_loc, id, initial)
+node_t::node_t(tchecker::ta::state_t &first_loc, tchecker::ta::state_t & second_loc, tchecker::clock_id_t no_of_virt_clks, 
+               std::size_t id, bool initial)
+    : tchecker::strong_timed_bisim::certificate::node_t(first_loc, second_loc, id, initial)
 {
   _zones = std::make_shared<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(no_of_virt_clks + 1);
+}
+
+node_t::node_t(node_t & other)
+    : tchecker::strong_timed_bisim::certificate::node_t(other.location_pair().first, other.location_pair().second, other._id, other._initial),
+      _zones(other._zones)
+{
+
 }
 
 std::size_t node_t::hash() const
