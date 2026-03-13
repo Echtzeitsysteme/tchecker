@@ -1,0 +1,19 @@
+# This file is a part of the TChecker project.
+#
+# See files AUTHORS and LICENSE for copyright details.
+
+system:changed_actions
+
+clock:1:x
+
+event:a
+event:b
+event:c
+
+process:P
+location:P:A{initial:}
+location:P:B{invariant: x<2}
+location:P:C{}
+edge:P:A:B:a{provided: x<=0}
+edge:P:B:C:b{}
+edge:P:C:A:c{provided: x>3 : do: x=0}

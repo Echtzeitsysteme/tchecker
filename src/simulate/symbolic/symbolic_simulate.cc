@@ -67,6 +67,9 @@ randomized_simulation(tchecker::parsing::system_declaration_t const & sysdecl,
   for (std::size_t i = 0; i < nsteps; ++i) {
     zg->next(previous_node->state_ptr(), v);
 
+    if(0 == v.size()) {
+      break;
+    }
     std::size_t k = randomized_select(v);
     if (k == NO_SELECTION)
       break;

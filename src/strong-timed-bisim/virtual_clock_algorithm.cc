@@ -471,13 +471,14 @@ Lieb_et_al::create_starting_states(std::map<std::string, std::string> & first_st
   this->_A->build(first_starting_state, sst_first);
   this->_B->build(second_starting_state, sst_second);
 
-  tchecker::zg::state_sptr_t first{std::get<1>(sst_first[0])};
-  tchecker::zg::state_sptr_t second{std::get<1>(sst_second[0])};
-
   if (sst_first.size() != 1 || sst_second.size() != 1) {
     std::cerr << "No valid state to start comparison" << std::endl;
+    std::cerr << "Please provide a valid state for both or for none" << std::endl;
     throw std::runtime_error("No valid state to start comparison");
   }
+
+  tchecker::zg::state_sptr_t first{std::get<1>(sst_first[0])};
+  tchecker::zg::state_sptr_t second{std::get<1>(sst_second[0])};
 
   for(tchecker::clock_id_t i = 0; i < _A->get_no_of_original_clocks(); ++i) {
     std::string virt_name = std::string("chi") + std::to_string(i);

@@ -15,14 +15,14 @@ void compress_zone(std::shared_ptr<tchecker::zg::zone_t> zone)
 {
   for(std::size_t i = 0; i < zone->dim(); i++) {
     auto upper_bound = tchecker::dbm::access(zone->dbm(), zone->dim(), i, 0);
-    auto lower_bound = tchecker::dbm::access(zone->dbm(), zone->dim(), i, 0);
+    auto lower_bound = tchecker::dbm::access(zone->dbm(), zone->dim(), 0, i);
 
     // first check whether clock i can only have one value
-    if(tchecker::LE == upper_bound->cmp && tchecker::LE == lower_bound->cmp && lower_bound->value == upper_bound->value) {
+    if(tchecker::LE == upper_bound->cmp && tchecker::LE == lower_bound->cmp && (-1)*lower_bound->value == upper_bound->value) {
       continue;
     }
     // Now check whether clock i can only have values between value and value+1
-    if(tchecker::LT == upper_bound->cmp && tchecker::LT == lower_bound->cmp && lower_bound->value + 1 == upper_bound->value) {
+    if(tchecker::LT == upper_bound->cmp && tchecker::LT == lower_bound->cmp && (-1)*lower_bound->value + 1 == upper_bound->value) {
       continue;
     }
     // If both is not the case, we can reduce the valuations

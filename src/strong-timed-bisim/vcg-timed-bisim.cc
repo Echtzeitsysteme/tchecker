@@ -28,7 +28,8 @@ namespace tchecker {
 
 namespace strong_timed_bisim {
 
-void check_for_init(std::shared_ptr<tchecker::system::system_t> const system){
+void check_for_init(std::shared_ptr<tchecker::system::system_t> const system)
+{
   auto init_loc = system->initial_locations(0);
   auto iter = init_loc.begin();
 
@@ -49,7 +50,8 @@ void check_for_init(std::shared_ptr<tchecker::system::system_t> const system){
   }
 }
 
-tchecker::clock_id_t clocks_check(std::shared_ptr<tchecker::ta::system_t> const system) {
+tchecker::clock_id_t clocks_check(std::shared_ptr<tchecker::ta::system_t> const system)
+{
   auto p_c = system->clock_variables().identifiers(tchecker::VK_DECLARED);
   for(auto it = p_c.begin(); it != p_c.end(); ++it) {
     std::string clock_name{system->clock_name(*it)};
@@ -68,7 +70,8 @@ run(std::shared_ptr<tchecker::parsing::system_declaration_t> const & sysdecl_fir
     std::shared_ptr<tchecker::parsing::system_declaration_t> const & sysdecl_second,
     std::ostream * os, std::size_t block_size, std::size_t table_size, 
     std::map<std::string, std::string> & first_starting_state, std::map<std::string, std::string> & second_starting_state, 
-    bool generate_witness) {
+    bool generate_witness)
+{
 
   std::vector<std::shared_ptr<tchecker::ta::system_t>> systems;
 

@@ -1,0 +1,9 @@
+digraph easy_ad94_fig10_easy_ad94_different_guard_fig10 {
+  0 [clockval_1="Ref Clock=0,x_1=5/2,y_1=1", clockval_2="Ref Clock=0,x_2=1,y_2=1", first_intval="", first_vloc="<l2>", initial="true", second_intval="", second_vloc="<l1>"]
+  1 [clockval_1="Ref Clock=0,x_1=7/2,y_1=2", clockval_2="Ref Clock=0,x_2=2,y_2=2", final="second", final_edge="<P@b>", first_intval="", first_vloc="<l2>", initial="false", second_intval="", second_vloc="<l1>"]
+  0 -> 1 [delay="1"]
+}
+MEMORY_MAX_RSS  xxxx
+RELATIONSHIP_FULFILLED false
+RUNNING_TIME_SECONDS  xxxx
+VISITED_PAIR_OF_STATES 1
