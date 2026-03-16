@@ -46,7 +46,7 @@ public:
   */
   graph_t(std::shared_ptr<tchecker::vcg::vcg_t> vcg1, std::shared_ptr<tchecker::vcg::vcg_t> vcg2)
     : _vcg1(vcg1), _vcg2(vcg2), _nodes(std::make_shared<std::vector<std::shared_ptr<node>>>()),
-      _edges(std::make_shared<std::vector<std::shared_ptr<edge>>>()), _nodes_id_counter(0)
+      _edges(std::make_shared<std::vector<std::shared_ptr<edge>>>())
   { }
 
   /*!
@@ -130,6 +130,8 @@ protected:
   */
   std::shared_ptr<node> find_node(std::shared_ptr<node> to_find) const
   {
+    assert(nullptr != to_find);
+    assert(nullptr != _nodes);
     for (auto cur : *_nodes) {
       if (*cur == *to_find) {
         return cur;
@@ -162,16 +164,16 @@ protected:
   std::shared_ptr<node> add_node(std::shared_ptr<node> to_add)
   {
     if (nullptr == find_node(to_add)) {
-      to_add->set_id(_nodes_id_counter++);
-      _nodes->push_back(to_add);
-      return to_add;
+      std::shared_ptr<node> copy = std::make_shared<node>(*to_add);
+      copy->set_id(_nodes_id_counter++);
+      _nodes->push_back(copy);
+      return copy;
     }
     else {
       add_node_that_already_exists(to_add);
       return to_add;
     }
   }
-
   /*!
    \brief Add a node
    \param args : the arguments for the constructor of the node to add
@@ -190,7 +192,12 @@ protected:
    */
   std::shared_ptr<edge> add_edge(std::shared_ptr<edge> to_add)
   {
-    _edges->push_back(to_add);
+    assert(nullptr != find_node(to_add->src()));
+    assert(nullptr != find_node(to_add->tgt()));
+
+    auto copy = std::make_shared<edge>(to_add->edge_pair_ptr(), find_node(to_add->src()), find_node(to_add->tgt()));
+
+    _edges->push_back(copy);
     return to_add;
   }
 
@@ -212,9 +219,7 @@ protected:
   std::shared_ptr<std::vector<std::shared_ptr<node>>> _nodes;
   std::shared_ptr<std::vector<std::shared_ptr<edge>>> _edges;
 
- private:
-  // any added nodes gets an unique id. This is the corresponding counter.
-  std::size_t _nodes_id_counter;
+  std::size_t _nodes_id_counter = 0;
 };
 
 } // end of namespace certificate

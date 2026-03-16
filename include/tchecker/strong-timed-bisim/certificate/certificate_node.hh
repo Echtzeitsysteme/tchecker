@@ -24,35 +24,38 @@ namespace certificate {
  */
 class node_t {
  public:
+   // TODO: Remove!
   /*!
-  \brief Constructor
-  \param s_1 : a symbolic state of the first VCG
-  \param s_2 : a symbolic state of the second VCG
-  \param id : the id of this node within the witness graph
-  \param initial : whether this is the initial node of the graph
-  \post this node keeps a shared pointer to s, and has initial node flag as specified
+   \brief Constructor
+   \param s_1 : a symbolic state of the first VCG
+   \param s_2 : a symbolic state of the second VCG
+   \param id : the id of this node
+   \param initial : whether this is the initial node of the graph
+   \post this node keeps a shared pointer to s, and has initial node flag as specified
   */
-  node_t(tchecker::zg::state_sptr_t const & s_1, tchecker::zg::state_sptr_t const & s_2, 
-         std::size_t id = 0, bool initial = false);
+  node_t(tchecker::zg::state_sptr_t const & s_1, tchecker::zg::state_sptr_t const & s_2, std::size_t id = 0, bool initial = false);
 
   /*!
    \brief Constructor
    \param location_pair : the pair of locations to add
-   \param id : the id of this node within the witness graph
+   \param id : the id of this node
    \param initial : whether this is the initial node of the graph
   */
-  node_t(std::pair<tchecker::ta::state_t, tchecker::ta::state_t> & location_pair,
-         std::size_t id = 0, bool initial = false);
+  node_t(std::pair<tchecker::ta::state_t, tchecker::ta::state_t> & location_pair, std::size_t id = 0, bool initial = false);
 
   /*!
    \brief Constructor
    \param first_loc : the first location
    \param second_loc : the second location
-   \param id : the id of this node within the witness graph
+   \param id : the id of this node
    \param initial : whether this is the initial node of the graph
   */
-  node_t(tchecker::ta::state_t &first_loc, tchecker::ta::state_t & second_loc, 
-         std::size_t id = 0, bool initial = false);
+  node_t(tchecker::ta::state_t &first_loc, tchecker::ta::state_t & second_loc, std::size_t id = 0, bool initial = false);
+
+  node_t(const node_t&) = delete;
+  node_t(node_t&&) = delete;
+  node_t& operator=(const node_t&) = delete;
+  node_t& operator=(node_t&) = delete;
 
   /*!
    \brief Accessor

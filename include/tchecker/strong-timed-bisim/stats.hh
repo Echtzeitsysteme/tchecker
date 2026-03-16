@@ -86,7 +86,10 @@ public:
    */
   void init_counterexample(std::shared_ptr<tchecker::vcg::vcg_t> const & vcg1, 
                            std::shared_ptr<tchecker::vcg::vcg_t> const & vcg2,
-                           tchecker::zg::state_sptr_t first_init, tchecker::zg::state_sptr_t second_init,
+                           tchecker::ta::state_t & first_init, tchecker::ta::state_t & second_init,
+                           tchecker::clockval_t & first_clockval, tchecker::clockval_t & second_clockval,
+                           tchecker::clock_constraint_container_t & first_invariant, 
+                           tchecker::clock_constraint_container_t & second_invariant,
                            std::size_t max_delay);
 
   /*!

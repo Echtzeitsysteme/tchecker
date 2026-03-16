@@ -386,6 +386,31 @@ void zg_t::share(tchecker::zg::state_sptr_t & s) { _state_allocator.share(s); }
 
 void zg_t::share(tchecker::zg::transition_sptr_t & t) { _transition_allocator.share(t); }
 
+// create a state
+
+tchecker::zg::state_sptr_t zg_t::create_state(const tchecker::vloc_t & vloc, 
+                                              const tchecker::intval_t & intval,
+                                              const tchecker::zg::zone_t & zone)
+{
+  tchecker::zg::state_sptr_t result = _state_allocator.construct();
+
+  assert(vloc.size() == result->vloc().size());
+  assert(intval.size() == result->intval().size());
+  assert(result->zone().dim() == zone.dim());
+
+  for(std::size_t i = 0; i < vloc.size(); i++) {
+    (*(result->vloc_ptr()))[i] = vloc[i];
+  }
+
+  for(std::size_t i = 0; i < intval.size(); i++) {
+    (*(result->intval_ptr()))[i] = intval[i];
+  }
+
+  tchecker::dbm::copy(result->zone().dbm(), zone.dbm(), zone.dim());
+
+  return result;
+}
+
 // Private
 
 tchecker::zg::state_sptr_t zg_t::clone_and_constrain(tchecker::zg::const_state_sptr_t const & s,

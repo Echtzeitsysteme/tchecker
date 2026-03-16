@@ -49,10 +49,14 @@ public:
 
   /*!
    \brief running the algorithm of Lieb et al.
-   \param input_first : the first vcg
-   \param input_second : the second vcg
+   \param first_starting_state : the attributes of the first starting state
+   \param second_starting_state : the attributes of the second starting state
+   \param inter_constraint : a constraint between the clocks of the first ta and the second ta
+   \note In inter_constraint, clocks of the first TA must have the postfix _1 and analogously for the second.
    */
-  tchecker::strong_timed_bisim::stats_t run();
+  tchecker::strong_timed_bisim::stats_t run(std::map<std::string, std::string> & first_starting_state, 
+                                            std::map<std::string, std::string> & second_starting_state,
+                                            std::string & inter_constraint);
 
 private:
 

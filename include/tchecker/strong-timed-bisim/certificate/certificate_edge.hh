@@ -36,7 +36,10 @@ public:
               std::shared_ptr<node> target) :
     _edge_pair(std::make_shared<std::pair<tchecker::graph::edge_vedge_t, tchecker::graph::edge_vedge_t>>(t1.vedge_ptr(), t2.vedge_ptr())),
     _src(source), _tgt(target)
-  { }
+  {
+    assert(nullptr != source);
+    assert(nullptr != target);
+  }
 
   /*!
    \brief Constructor
@@ -48,7 +51,8 @@ public:
          std::shared_ptr<node> source, std::shared_ptr<node> target) :
     _edge_pair(edge_pair), _src(source), _tgt(target)
   {
-
+    assert(nullptr != source);
+    assert(nullptr != target);
   }
 
   /*!

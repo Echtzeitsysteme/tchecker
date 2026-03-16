@@ -24,13 +24,21 @@ namespace strong_timed_bisim {
  \param sysdecl_first : first system declaration
  \param block_size : number of elements allocated in one block
  \param table_size : size of hash tables
- \post 
+ \param first_starting_state : the attributes of the first starting state or the empty string, if init should be used
+ \param second_starting_state : the attributes of the second starting state or the empty string, if init should be used
+ \param inter_constraint : a constraint between any clocks of the first or second ta.
+ \param generate_witness : whether a witness should be generated
  \return statistics on the run and the reachability graph
+ \note In inter_constraint, clocks of the first TA must have the postfix _1 and analogously for the second.
  */
 tchecker::strong_timed_bisim::stats_t
 run(std::shared_ptr<tchecker::parsing::system_declaration_t> const & sysdecl_first, 
     std::shared_ptr<tchecker::parsing::system_declaration_t> const & sysdecl_second,
-    std::ostream * os, std::size_t block_size, std::size_t table_size, bool generate_witness);
+    std::ostream * os, std::size_t block_size, std::size_t table_size, 
+    std::map<std::string, std::string> & first_starting_state, 
+    std::map<std::string, std::string> & second_starting_state, 
+    std::string & inter_constraint,
+    bool generate_witness);
 
 } // end of namespace strong_timed_bisim
 } // end of namespace tchecker

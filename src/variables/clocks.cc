@@ -278,8 +278,12 @@ private:
 void from_string(tchecker::clock_constraint_container_t & c, tchecker::clock_variables_t const & clocks,
                  std::string const & str)
 {
-  if (str == "")
+  if (str.empty())
     return;
+
+  if(std::string("true") == str || std::string("(true)") == str) {
+    return;
+  }
 
   // parse str as a typed expression
   std::shared_ptr<tchecker::expression_t> expr{tchecker::parsing::parse_expression("", str)};
@@ -594,9 +598,15 @@ std::shared_ptr<tchecker::clockval_t> clockval_factory(unsigned short size, tche
 
 std::shared_ptr<tchecker::clockval_t> clockval_factory(std::shared_ptr<tchecker::clockval_t> v)
 {
-  auto result = clockval_factory(v->size());
-  for (auto i = 0; i < v->size(); ++i) {
-    (*result)[i] = (*v)[i];
+  return clockval_factory(*v);
+}
+
+
+std::shared_ptr<tchecker::clockval_t> clockval_factory(tchecker::clockval_t & v)
+{
+  auto result = clockval_factory(v.size());
+  for (auto i = 0; i < v.size(); ++i) {
+    (*result)[i] = (v)[i];
   }
   return result;
 }

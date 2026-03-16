@@ -8,9 +8,11 @@
 #include "tchecker/strong-timed-bisim/virtual_clock_algorithm.hh"
 #include "tchecker/dbm/dbm.hh"
 #include "tchecker/strong-timed-bisim/contradiction_searcher.hh"
+#include "tchecker/strong-timed-bisim/init_states_creator.hh"
 #include "tchecker/vcg/revert_transitions.hh"
 #include "tchecker/vcg/sync.hh"
 #include "tchecker/vcg/virtual_constraint.hh"
+#include "tchecker/operational-semantics/zone_valuation_converter.hh"
 
 namespace tchecker {
 
@@ -25,40 +27,55 @@ Lieb_et_al::Lieb_et_al(std::shared_ptr<tchecker::vcg::vcg_t> input_first, std::s
   assert(_A->get_urgent_or_committed() == _B->get_urgent_or_committed());
 }
 
-tchecker::strong_timed_bisim::stats_t Lieb_et_al::run()
+tchecker::strong_timed_bisim::stats_t Lieb_et_al::run(std::map<std::string, std::string> & first_starting_state, 
+                                                      std::map<std::string, std::string> & second_starting_state,
+                                                      std::string & inter_constraint)
 {
-
   tchecker::strong_timed_bisim::stats_t stats;
 
   stats.set_start_time();
 
   std::vector<tchecker::zg::zg_t::sst_t> sst_first;
+  sst_first.clear();
   std::vector<tchecker::zg::zg_t::sst_t> sst_second;
+  sst_second.clear();
 
-  this->_A->initial(sst_first);
-  this->_B->initial(sst_second);
+  std::pair<tchecker::zg::state_sptr_t, tchecker::zg::state_sptr_t> st;
+  std::pair<tchecker::zg::const_state_sptr_t, tchecker::zg::const_state_sptr_t> const_st;
 
-  if (STATE_OK != std::get<0>(sst_first[0]) || STATE_OK != std::get<0>(sst_second[0]))
-    throw std::runtime_error("problems with initial state");
+  st = create_initial_states(this->_A, this->_B, first_starting_state, sst_first, 
+                             second_starting_state, sst_second, inter_constraint);
 
-  tchecker::zg::const_state_sptr_t const_first{std::get<1>(sst_first[0])};
-  tchecker::zg::const_state_sptr_t const_second{std::get<1>(sst_second[0])};
+  tchecker::zg::const_state_sptr_t const_first{std::get<0>(st)};
+  tchecker::zg::const_state_sptr_t const_second{std::get<1>(st)}; 
+  const_st = std::make_pair(const_first, const_second);
 
   visited_map_t visited(_A->get_no_of_virtual_clocks(), _A, _B);
 
   auto result =
-      this->check_for_virt_bisim(const_first, std::get<2>(sst_first[0]), const_second, std::get<2>(sst_second[0]), visited);
+      this->check_for_virt_bisim(const_st.first, std::get<2>(sst_first[0]), const_st.second, std::get<2>(sst_second[0]), visited);
   
   if (_witness && result->contradiction_free()) {
     stats.init_witness(_A, _B);
-    stats.witness()->create_witness_from_visited(visited, std::get<1>(sst_first[0]), std::get<1>(sst_second[0]));
+    stats.witness()->create_witness_from_visited(visited, st.first, st.second);
   } else if (_witness) {
     tchecker::clockbounds::bound_t max_delay = std::max(_A->extrapolation_max(), _B->extrapolation_max());
-    stats.init_counterexample(_A, _B, std::get<1>(sst_first[0]), std::get<1>(sst_second[0]), max_delay);
-    stats.counterexample()->create_cont_from_non_bisim_cache(
-                               _non_bisim_cache, 
-                               std::make_shared<tchecker::clock_constraint_container_t>(std::get<2>(sst_first[0])->tgt_invariant_container()), 
-                               std::make_shared<tchecker::clock_constraint_container_t>(std::get<2>(sst_second[0])->tgt_invariant_container()));
+
+    tchecker::ta::state_t first_ta_state{st.first->vloc_ptr(), st.first->intval_ptr()};
+    tchecker::ta::state_t second_ta_state{st.second->vloc_ptr(), st.second->intval_ptr()};
+
+    auto zones = 
+      (*((*(result->get_contradictions())).begin()))->generate_synchronized_zones(_A->get_no_of_original_clocks(), _B->get_no_of_original_clocks());
+
+    auto first_valuation = tchecker::operational_semantics::convert(*zones.first);
+    auto second_valuation = tchecker::operational_semantics::convert(*zones.second);
+
+    stats.init_counterexample(_A, _B, first_ta_state, second_ta_state, 
+                              *first_valuation, *second_valuation,
+                              std::get<2>(sst_first[0])->tgt_invariant_container(),
+                              std::get<2>(sst_second[0])->tgt_invariant_container(),
+                              max_delay);
+    stats.counterexample()->create_cont_from_non_bisim_cache(_non_bisim_cache);
   }
 
   stats.set_end_time();

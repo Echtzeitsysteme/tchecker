@@ -27,20 +27,22 @@ class node_t : public tchecker::strong_timed_bisim::certificate::node_t {
   \param s_1 : a symbolic state of the first VCG
   \param s_2 : a symbolic state of the second VCG
   \param id : the id of this node within the witness graph
+  \param initial : whether this node is the initial node
   \post this node keeps a shared pointer to s, and has initial node flag as specified
   */
   node_t(tchecker::zg::state_sptr_t const & s_1, tchecker::zg::state_sptr_t const & s_2, 
-         tchecker::clock_id_t no_of_virt_clks, std::size_t id=0, bool initial = false);
+         tchecker::clock_id_t no_of_virt_clks, std::size_t id = 0, bool initial = false);
 
   /*!
    \brief Constructor
    \param location_pair : the pair of locations to add
    \param vc : the virtual constraints of the synchronized symbolic states to add
    \param id : the id of this node within the witness graph
+   \param initial : whether this node is the initial node
   */
   node_t(std::pair<tchecker::ta::state_t, tchecker::ta::state_t> & location_pair,
          std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> vc, 
-         std::size_t id=0, bool initial = false);
+         std::size_t id = 0, bool initial = false);
 
   /*!
    \brief Constructor
@@ -48,10 +50,11 @@ class node_t : public tchecker::strong_timed_bisim::certificate::node_t {
    \param second_loc : the second location
    \param vc : the virtual constraints of the synchronized symbolic states to add
    \param id : the id of this node within the witness graph
+   \param initial : whether this node is the initial node
   */
   node_t(tchecker::ta::state_t &first_loc, tchecker::ta::state_t & second_loc, 
          std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> vc, 
-         std::size_t id=0, bool initial = false);
+         std::size_t id = 0, bool initial = false);
 
   /*!
    \brief Constructor
@@ -59,9 +62,15 @@ class node_t : public tchecker::strong_timed_bisim::certificate::node_t {
    \param second_loc : the second location
    \param no_of_virt_clks : the number of virtual clocks
    \param id : the id of this node within the witness graph
+   \param initial : whether this node is the initial node
   */
   node_t(tchecker::ta::state_t &first_loc, tchecker::ta::state_t & second_loc, tchecker::clock_id_t no_of_virt_clks, 
-         std::size_t id=0, bool initial = false);
+         std::size_t id, bool initial = false);
+
+  /*!
+   \brief Copy Constructor
+   */
+  node_t(node_t & other);
 
    /*!
   \brief Accessor

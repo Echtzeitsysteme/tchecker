@@ -1,0 +1,7 @@
+digraph easy_ad94_fig10_easy_ad94_fig10 {
+  0 [first_intval="", first_vloc="<l2>", initial="true", second_intval="", second_vloc="<l2>", zones="(2<x_1 && 1<=y_1 && 2<x_2 && 1<=y_2 && 1<x_1-y_1<2 && -1<x_1-x_2<1 && 1<x_1-y_2<2 && -2<y_1-x_2<-1 && y_1==y_2 && 1<x_2-y_2<2)"]
+}
+MEMORY_MAX_RSS  xxxx
+RELATIONSHIP_FULFILLED true
+RUNNING_TIME_SECONDS  xxxx
+VISITED_PAIR_OF_STATES 1
