@@ -89,6 +89,7 @@ void tck_compare(const char * output_filename,
   int * table_size,
   const char * starting_state_attributes_first = nullptr,
   const char * starting_state_attributes_second = nullptr,
+  const char * inter_constraint = nullptr,
   bool generate_witness=false);
 
 #ifdef __cplusplus
@@ -115,9 +116,10 @@ namespace publicapi {
   \param table_size Table size for internal computation
   \param first_stating_state_json the json description of the first starting state, or the empty string in case init shall be used
   \param second_stating_state_json the json description of the second starting state, or the empty string in case init shall be used
+  \param inter_constraint : constraints between any clocks of both automata, or the empty string in case no such constraint is given
   \param generate_witness Whether a witness/Contradiction DAG shall be generated
-
   \note This is the C++ API. For C/FFI usage, see the C-compatible version above.
+  \note In inter_constraint, any clock of the first automaton must be given with the postfix _1. Analogously for any clock of the second TA.
 */
   void tck_compare(std::string output_filename, 
                    std::string first_sysdecl_filename, 
@@ -127,6 +129,7 @@ namespace publicapi {
                    std::size_t table_size,
                    std::string & first_starting_state_json,
                    std::string & second_starting_state_json,
+                   std::string & inter_constraint,
                    bool generate_witness);
 
 } // end of namespace publicapi

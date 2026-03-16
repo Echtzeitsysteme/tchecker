@@ -69,7 +69,9 @@ tchecker::strong_timed_bisim::stats_t
 run(std::shared_ptr<tchecker::parsing::system_declaration_t> const & sysdecl_first, 
     std::shared_ptr<tchecker::parsing::system_declaration_t> const & sysdecl_second,
     std::ostream * os, std::size_t block_size, std::size_t table_size, 
-    std::map<std::string, std::string> & first_starting_state, std::map<std::string, std::string> & second_starting_state, 
+    std::map<std::string, std::string> & first_starting_state, 
+    std::map<std::string, std::string> & second_starting_state, 
+    std::string & inter_constraint,
     bool generate_witness)
 {
 
@@ -104,11 +106,9 @@ run(std::shared_ptr<tchecker::parsing::system_declaration_t> const & sysdecl_fir
     vcgs.push_back(vcg);
   }
 
-//  std::cout << __FILE__ << ": " << __LINE__ << ": created vcgs" << std::endl;
-
   auto algorithm = new tchecker::strong_timed_bisim::Lieb_et_al(vcgs[0], vcgs[1], generate_witness);
 
-  return algorithm->run(first_starting_state, second_starting_state);
+  return algorithm->run(first_starting_state, second_starting_state, inter_constraint);
 
 }
 

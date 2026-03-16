@@ -51,9 +51,12 @@ public:
    \brief running the algorithm of Lieb et al.
    \param first_starting_state : the attributes of the first starting state
    \param second_starting_state : the attributes of the second starting state
+   \param inter_constraint : a constraint between the clocks of the first ta and the second ta
+   \note In inter_constraint, clocks of the first TA must have the postfix _1 and analogously for the second.
    */
   tchecker::strong_timed_bisim::stats_t run(std::map<std::string, std::string> & first_starting_state, 
-                                            std::map<std::string, std::string> & second_starting_state);
+                                            std::map<std::string, std::string> & second_starting_state,
+                                            std::string & inter_constraint);
 
 private:
 
@@ -112,10 +115,6 @@ private:
                                   std::shared_ptr<std::vector<tchecker::vcg::vcg_t::sst_t>> trans_A, 
                                   std::shared_ptr<std::vector<tchecker::vcg::vcg_t::sst_t>> trans_B,
                                   visited_map_t & visited);
-
-  std::pair<tchecker::zg::state_sptr_t, tchecker::zg::state_sptr_t>
-  create_starting_states(std::map<std::string, std::string> & first_starting_state, std::vector<tchecker::zg::zg_t::sst_t> & sst_first,
-                              std::map<std::string, std::string> & second_starting_state, std::vector<tchecker::zg::zg_t::sst_t> & sst_second);
 
   const std::shared_ptr<tchecker::vcg::vcg_t> _A;
   const std::shared_ptr<tchecker::vcg::vcg_t> _B;

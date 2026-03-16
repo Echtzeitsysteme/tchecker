@@ -8,6 +8,7 @@
 #include "tchecker/strong-timed-bisim/virtual_clock_algorithm.hh"
 #include "tchecker/dbm/dbm.hh"
 #include "tchecker/strong-timed-bisim/contradiction_searcher.hh"
+#include "tchecker/strong-timed-bisim/init_states_creator.hh"
 #include "tchecker/vcg/revert_transitions.hh"
 #include "tchecker/vcg/sync.hh"
 #include "tchecker/vcg/virtual_constraint.hh"
@@ -27,7 +28,8 @@ Lieb_et_al::Lieb_et_al(std::shared_ptr<tchecker::vcg::vcg_t> input_first, std::s
 }
 
 tchecker::strong_timed_bisim::stats_t Lieb_et_al::run(std::map<std::string, std::string> & first_starting_state, 
-                                                      std::map<std::string, std::string> & second_starting_state)
+                                                      std::map<std::string, std::string> & second_starting_state,
+                                                      std::string & inter_constraint)
 {
   tchecker::strong_timed_bisim::stats_t stats;
 
@@ -41,27 +43,12 @@ tchecker::strong_timed_bisim::stats_t Lieb_et_al::run(std::map<std::string, std:
   std::pair<tchecker::zg::state_sptr_t, tchecker::zg::state_sptr_t> st;
   std::pair<tchecker::zg::const_state_sptr_t, tchecker::zg::const_state_sptr_t> const_st;
 
-  if(first_starting_state.empty()) {
-    this->_A->initial(sst_first);
-    this->_B->initial(sst_second);
-    if (STATE_OK != std::get<0>(sst_first[0]) || STATE_OK != std::get<0>(sst_second[0])) {
-      throw std::runtime_error("problems with initial state");
-    }
+  st = create_initial_states(this->_A, this->_B, first_starting_state, sst_first, 
+                             second_starting_state, sst_second, inter_constraint);
 
-    tchecker::zg::state_sptr_t first{std::get<1>(sst_first[0])};
-    tchecker::zg::state_sptr_t second{std::get<1>(sst_second[0])};
-    tchecker::zg::const_state_sptr_t const_first{std::get<1>(sst_first[0])};
-    tchecker::zg::const_state_sptr_t const_second{std::get<1>(sst_second[0])};  
-
-    st = std::make_pair(first, second);
-    const_st = std::make_pair(const_first, const_second);
-
-  } else {
-    st = this->create_starting_states(first_starting_state, sst_first, second_starting_state, sst_second);
-    tchecker::zg::const_state_sptr_t const_first{std::get<0>(st)};
-    tchecker::zg::const_state_sptr_t const_second{std::get<1>(st)}; 
-    const_st = std::make_pair(const_first, const_second);
-  }
+  tchecker::zg::const_state_sptr_t const_first{std::get<0>(st)};
+  tchecker::zg::const_state_sptr_t const_second{std::get<1>(st)}; 
+  const_st = std::make_pair(const_first, const_second);
 
   visited_map_t visited(_A->get_no_of_virtual_clocks(), _A, _B);
 
@@ -459,58 +446,6 @@ Lieb_et_al::check_for_outgoing_transitions(tchecker::zg::zone_t const & zone_A, 
           _A->get_no_of_virtual_clocks() + 1);
 
   return std::make_shared<algorithm_return_value_t>(empty_contradictions_set, zone_A, zone_B);
-}
-
-std::pair<tchecker::zg::state_sptr_t, tchecker::zg::state_sptr_t>
-Lieb_et_al::create_starting_states(std::map<std::string, std::string> & first_starting_state, std::vector<tchecker::zg::zg_t::sst_t> & sst_first,
-                                        std::map<std::string, std::string> & second_starting_state, std::vector<tchecker::zg::zg_t::sst_t> & sst_second)
-{
-  sst_first.clear();
-  sst_second.clear();
-    // we first need to create the virtual constraint.
-  this->_A->build(first_starting_state, sst_first);
-  this->_B->build(second_starting_state, sst_second);
-
-  if (sst_first.size() != 1 || sst_second.size() != 1) {
-    std::cerr << "No valid state to start comparison" << std::endl;
-    std::cerr << "Please provide a valid state for both or for none" << std::endl;
-    throw std::runtime_error("No valid state to start comparison");
-  }
-
-  tchecker::zg::state_sptr_t first{std::get<1>(sst_first[0])};
-  tchecker::zg::state_sptr_t second{std::get<1>(sst_second[0])};
-
-  for(tchecker::clock_id_t i = 0; i < _A->get_no_of_original_clocks(); ++i) {
-    std::string virt_name = std::string("chi") + std::to_string(i);
-    tchecker::clock_id_t virt_id = _A->system().clock_id(virt_name);
-
-    tchecker::dbm::constrain(first->zone().dbm(), first->zone().dim(), i+1, virt_id+1, tchecker::ineq_cmp_t::LE, 0);
-    tchecker::dbm::constrain(first->zone().dbm(), first->zone().dim(), virt_id+1, i+1, tchecker::ineq_cmp_t::LE, 0);
-  }
-
-  std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> first_vc = 
-    tchecker::virtual_constraint::factory(first->zone(), _A->get_no_of_virtual_clocks());
-
-  for(tchecker::clock_id_t i = 0; i < _B->get_no_of_original_clocks(); ++i) {
-    std::string virt_name = std::string("chi") + std::to_string(i + _A->get_no_of_original_clocks());
-    tchecker::clock_id_t virt_id = _B->system().clock_id(virt_name);
-
-    tchecker::dbm::constrain(second->zone().dbm(), second->zone().dim(), i+1, virt_id+1, tchecker::ineq_cmp_t::LE, 0);
-    tchecker::dbm::constrain(second->zone().dbm(), second->zone().dim(), virt_id+1, i+1, tchecker::ineq_cmp_t::LE, 0);
-  }
-
-  std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> second_vc = 
-    tchecker::virtual_constraint::factory(second->zone(), _B->get_no_of_virtual_clocks());
-
-  tchecker::dbm::constrain(first->zone().dbm(), first->zone().dim(), second_vc->get_vc(_A->get_no_of_original_clocks(), true));
-  tchecker::dbm::constrain(second->zone().dbm(), second->zone().dim(), first_vc->get_vc(_B->get_no_of_original_clocks(), true));
-
-  if(_A->get_urgent_or_committed()) {
-    tchecker::dbm::reset_to_value(first->zone().dbm(), first->zone().dim(), _A->get_no_of_original_clocks() + _A->get_no_of_virtual_clocks(), 0);
-    tchecker::dbm::reset_to_value(second->zone().dbm(), second->zone().dim(), _B->get_no_of_original_clocks() + _B->get_no_of_virtual_clocks(), 0);
-  }
-
-  return std::make_pair(first, second);
 }
 
 } // end of namespace strong_timed_bisim

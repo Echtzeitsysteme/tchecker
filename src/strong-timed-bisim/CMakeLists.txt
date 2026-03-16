@@ -13,6 +13,7 @@ set(STRONG_TIMED_BISIM_SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/contradiction_searcher.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/visited_map.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/vcg-timed-bisim.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/init_states_creator.cc
     ${TCHECKER_INCLUDE_DIR}/tchecker/strong-timed-bisim/stats.hh
     ${TCHECKER_INCLUDE_DIR}/tchecker/strong-timed-bisim/algorithm_return_value.hh
     ${TCHECKER_INCLUDE_DIR}/tchecker/strong-timed-bisim/non_bisim_cache.hh
@@ -21,5 +22,6 @@ set(STRONG_TIMED_BISIM_SRC
     ${TCHECKER_INCLUDE_DIR}/tchecker/strong-timed-bisim/contradiction_searcher.hh
     ${TCHECKER_INCLUDE_DIR}/tchecker/strong-timed-bisim/visited_map.hh
     ${TCHECKER_INCLUDE_DIR}/tchecker/strong-timed-bisim/vcg-timed-bisim.hh
+    ${TCHECKER_INCLUDE_DIR}/tchecker/strong-timed-bisim/init_states_creator.hh
     ${STRONG_TIMED_BISIM_CERT_SRC}
     PARENT_SCOPE)
