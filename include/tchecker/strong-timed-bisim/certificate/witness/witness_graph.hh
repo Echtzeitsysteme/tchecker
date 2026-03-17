@@ -66,9 +66,9 @@ protected:
   void edge_cleanup();
 
   /*!
-   \brief removes unused nodes
+   \brief removes unused nodes and edges
   */
-  void node_cleanup();
+  void cleanup();
 
   /*!
    \brief Add an edge

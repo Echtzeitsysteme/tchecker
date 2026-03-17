@@ -20,7 +20,7 @@ jobs:
       LIBTCHECKER_ENABLE_SHARED: "ON"
     steps:
       - name: checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: install static libs
         run: ci-scripts/install_boost_1_86.sh
       - name: build
