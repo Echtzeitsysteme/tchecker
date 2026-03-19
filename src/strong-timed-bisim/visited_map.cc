@@ -86,7 +86,8 @@ void visited_map_t::emplace(const visited_map_key_t key,
   }
 }
 
-bool visited_map_t::check_and_add_pair(tchecker::zg::state_sptr_t first, tchecker::zg::state_sptr_t second)
+std::pair<tchecker::zg::state_sptr_t, tchecker::zg::state_sptr_t>
+visited_map_t::normalize(tchecker::zg::state_sptr_t first, tchecker::zg::state_sptr_t second)
 {
   auto A_norm = _A->clone_state(first);
   auto B_norm = _B->clone_state(second);
@@ -105,19 +106,25 @@ bool visited_map_t::check_and_add_pair(tchecker::zg::state_sptr_t first, tchecke
     (*extrapolation_vloc)[(*(A_norm->vloc_ptr())).size() + i] = _A->get_no_of_locations() + (*(B_norm->vloc_ptr()))[i];
   }
 
-  _A->run_extrapolation(A_norm->zone().dbm(), A_norm->zone().dim(), *extrapolation_vloc);
-  _B->run_extrapolation(B_norm->zone().dbm(), B_norm->zone().dim(), *extrapolation_vloc);
+  _A->run_synced_extrapolation(A_norm->zone().dbm(), A_norm->zone().dim(), *extrapolation_vloc, _A->get_no_of_original_clocks());
+  _B->run_synced_extrapolation(B_norm->zone().dbm(), B_norm->zone().dim(), *extrapolation_vloc, 
+                                _B->get_no_of_original_clocks() + _A->get_no_of_original_clocks() + _A->get_urgent_or_committed());
 
   vloc_destruct_and_deallocate(extrapolation_vloc);
 
   tchecker::dbm::tighten(A_norm->zone().dbm(), A_norm->zone().dim());
   tchecker::dbm::tighten(B_norm->zone().dbm(), B_norm->zone().dim());
 
-  if (contains_superset(A_norm, B_norm)) {
+  return std::make_pair(A_norm, B_norm);
+}
+
+bool visited_map_t::check_and_add_pair(tchecker::zg::state_sptr_t first, tchecker::zg::state_sptr_t second)
+{
+  if (contains_superset(first, second)) {
     return true;
   }
   else {
-    emplace(A_norm, B_norm);
+    emplace(first, second);
     return false;
   }
 }

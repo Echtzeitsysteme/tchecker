@@ -97,6 +97,17 @@ public:
   void next_with_symbol(std::shared_ptr<std::vector<tchecker::vcg::vcg_t::sst_t>> result, 
                         tchecker::zg::state_sptr_t state, std::set<std::string>  symbol);
 
+
+  /*!
+   \brief run extrapolation for synchronized symbolic states
+   \param dbm : the dbm to extrapolate
+   \param dim : the dimension of the dbm
+   \param vloc : a set of locations
+   \param offset : the offset between original clock and corresponding virtual clock
+   \post the dbm is extrapolated
+   */
+  void run_synced_extrapolation(tchecker::dbm::db_t *dbm, tchecker::clock_id_t dim, tchecker::vloc_t const & vloc, tchecker::clock_id_t offset) const;
+
 private:
 
   tchecker::clock_id_t _no_of_virtual_clocks;

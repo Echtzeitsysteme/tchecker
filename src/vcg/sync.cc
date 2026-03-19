@@ -56,9 +56,7 @@ sync_vc_t::revert_sync_with_urgent(tchecker::zg::const_state_sptr_t & A_state, t
     result->append_zone(pair.second);
   }
 
-  result->compress();
   result = tchecker::virtual_constraint::combine(*result, _A->get_no_of_virtual_clocks());
-  result->compress();
 
   // now, we have to unreset the urgent clock in case it was reseted before the sync
   if (_A->get_urgent_or_committed() && (!tchecker::ta::delay_allowed(_A->system(), A_state->vloc()) ||
@@ -75,9 +73,7 @@ sync_vc_t::revert_sync_with_urgent(tchecker::zg::const_state_sptr_t & A_state, t
     result = intermediate;
   }
 
-  result->compress();
   result = tchecker::virtual_constraint::combine(*result, _A->get_no_of_virtual_clocks());
-  result->compress();
 
   return result;
 }
@@ -188,8 +184,6 @@ sync_vc_t::revert_sync(tchecker::zg::zone_t const & zone_1, tchecker::zg::zone_t
   tchecker::dbm::copy(dbm2_synced, dbm2, dim2);
 
   sync(dbm1_synced, dbm2_synced, dim1, dim2, no_of_orig_clocks_1, no_of_orig_clocks_2, orig_reset_set_A, orig_reset_set_B);
-
-  assert(is_phi_subset_of_a_zone(dbm1_synced, dim1, no_of_orig_clocks_1, phi_e) && is_phi_subset_of_a_zone(dbm2_synced, dim2, no_of_orig_clocks_2, phi_e));
 
   auto constrain_status_1 = tchecker::dbm::constrain(dbm1_synced, dim1, phi_e.get_vc(no_of_orig_clocks_1, true));
   auto constrain_status_2 = tchecker::dbm::constrain(dbm2_synced, dim2, phi_e.get_vc(no_of_orig_clocks_2, true));
