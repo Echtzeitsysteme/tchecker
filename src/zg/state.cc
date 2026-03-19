@@ -22,7 +22,9 @@ state_t::state_t(tchecker::intrusive_shared_ptr_t<tchecker::shared_vloc_t> const
                  tchecker::intrusive_shared_ptr_t<tchecker::zg::shared_zone_t> const & zone)
     : tchecker::ta::state_t(vloc, intval), _zone(zone)
 {
-  assert(_zone.ptr() != nullptr);
+  assert(nullptr != vloc->ptr());
+  assert(nullptr != intval->ptr());
+  assert(nullptr != _zone.ptr());
 }
 
 state_t::state_t(tchecker::ta::state_t const & s, tchecker::intrusive_shared_ptr_t<tchecker::shared_vloc_t> const & vloc,

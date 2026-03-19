@@ -161,7 +161,7 @@ std::shared_ptr<virtual_constraint_t> factory(const tchecker::dbm::db_t * dbm, t
 
 /*!
  \brief combine operator (see the TR of Lieb et al.)
- \param a container of virtual constraints
+ \param lo_vc : a container of virtual constraints
  \return a container of virtual constraints
  */
 std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> combine(tchecker::zone_container_t<virtual_constraint_t> & lo_vc, tchecker::clock_id_t no_of_virtual_clocks);

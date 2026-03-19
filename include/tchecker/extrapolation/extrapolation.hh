@@ -42,6 +42,18 @@ public:
   virtual void extrapolate(tchecker::dbm::db_t * dbm, tchecker::clock_id_t dim, tchecker::vloc_t const & vloc) = 0;
 
   /*!
+   \brief Zone extrapolation for synchronized states (see VCGs). The difference between original and corresponding virtual clock must stay <=0
+   \param dbm : a dbm
+   \param dim : dimension of dbm
+   \param vloc : a tuple of locations
+   \param no_original_clocks : the number of original clocks
+   \param offset : the offset between original and corresponding virtual clock
+   \post dbm has been extrapolated using clocks bounds in vloc
+   */
+  void extrapolate_synced(tchecker::dbm::db_t * dbm, tchecker::clock_id_t dim, tchecker::vloc_t const & vloc, 
+                          tchecker::clock_id_t no_original_clocks, tchecker::clock_id_t offset);
+
+  /*!
    \brief Accessor for the maximum value
    \return the maximum value used
    */

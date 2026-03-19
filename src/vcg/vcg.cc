@@ -93,6 +93,12 @@ void vcg_t::next_with_symbol(std::shared_ptr<std::vector<tchecker::vcg::vcg_t::s
   }
 }
 
+void vcg_t::run_synced_extrapolation
+        (tchecker::dbm::db_t *dbm, tchecker::clock_id_t dim, tchecker::vloc_t const & vloc, tchecker::clock_id_t offset) const {
+    _non_enabled_extrapolation->extrapolate_synced(dbm, dim, vloc, get_no_of_original_clocks(), offset);
+  }
+
+
 } // end of namespace vcg
 
 } // end of namespace tchecker

@@ -177,7 +177,24 @@ run(tchecker::parsing::system_declaration_t const & sysdecl, std::string const &
     std::cerr << tchecker::log_warning << "system has no initial state" << std::endl;
 
   std::shared_ptr<tchecker::zg::zg_t> zg{tchecker::zg::factory(system, tchecker::ts::SHARING, tchecker::zg::ELAPSED_SEMANTICS,
-                                                               tchecker::zg::EXTRA_LU_PLUS_LOCAL, block_size, table_size)};
+#if defined(TCHECKER_REACH_USE_GLOBAL_M_EXTRAPOLATION)
+                                                                tchecker::zg::EXTRA_M_GLOBAL,
+#elif defined(TCHECKER_REACH_USE_LOCAL_M_EXTRAPOLATION)
+                                                                tchecker::zg::EXTRA_M_LOCAL,
+#elif defined(TCHECKER_REACH_USE_GLOBAL_M_PLUS_EXTRAPOLATION)
+                                                                tchecker::zg::EXTRA_M_PLUS_GLOBAL,
+#elif defined(TCHECKER_REACH_USE_LOCAL_M_PLUS_EXTRAPOLATION)
+                                                                tchecker::zg::EXTRA_M_PLUS_LOCAL,
+#elif defined(TCHECKER_REACH_USE_GLOBAL_LU_EXTRAPOLATION)
+                                                                tchecker::zg::EXTRA_LU_GLOBAL,
+#elif defined(TCHECKER_REACH_USE_LOCAL_LU_EXTRAPOLATION)
+                                                                tchecker::zg::EXTRA_LU_LOCAL,
+#elif defined(TCHECKER_REACH_USE_GLOBAL_LU_PLUS_EXTRAPOLATION)
+                                                                tchecker::zg::EXTRA_LU_PLUS_GLOBAL
+#elif defined(TCHECKER_REACH_USE_LOCAL_LU_PLUS_EXTRAPOLATION)
+                                                                tchecker::zg::EXTRA_LU_PLUS_LOCAL,
+#endif
+                                                                block_size, table_size)};
 
   std::shared_ptr<tchecker::algorithms::zg_reach::state_space_t> state_space =
       std::make_shared<tchecker::algorithms::zg_reach::state_space_t>(zg, block_size, table_size);
