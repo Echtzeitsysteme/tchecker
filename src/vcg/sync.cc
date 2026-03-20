@@ -45,6 +45,7 @@ std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual
 sync_vc_t::revert_sync_with_urgent(tchecker::zg::const_state_sptr_t & A_state, tchecker::zg::const_state_sptr_t & B_state,
                                  const std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> & contradiction)
 {
+  assert(A_state->zone().is_virtual_equivalent(B_state->zone(), _A->get_no_of_virtual_clocks()));
   std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> result =
       std::make_shared<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(
           _A->get_no_of_virtual_clocks() + 1);
@@ -185,29 +186,34 @@ sync_vc_t::revert_sync(tchecker::zg::zone_t const & zone_1, tchecker::zg::zone_t
 
   sync(dbm1_synced, dbm2_synced, dim1, dim2, no_of_orig_clocks_1, no_of_orig_clocks_2, orig_reset_set_A, orig_reset_set_B);
 
-  auto constrain_status_1 = tchecker::dbm::constrain(dbm1_synced, dim1, phi_e.get_vc(no_of_orig_clocks_1, true));
-  auto constrain_status_2 = tchecker::dbm::constrain(dbm2_synced, dim2, phi_e.get_vc(no_of_orig_clocks_2, true));
+  enum tchecker::dbm::status_t stat_1 = tchecker::dbm::constrain(dbm1_synced, dim1, phi_e.get_vc(no_of_orig_clocks_1, true));
+  enum tchecker::dbm::status_t stat_2 = tchecker::dbm::constrain(dbm2_synced, dim2, phi_e.get_vc(no_of_orig_clocks_2, true));
   
-  assert(tchecker::dbm::status_t::EMPTY != constrain_status_1);  
-  assert(tchecker::dbm::status_t::EMPTY != constrain_status_2);
+  std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> first;
+  std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> second;
 
-  tchecker::dbm::db_t *multiple_reset = (tchecker::dbm::db_t *)malloc(dim1*dim1*sizeof(tchecker::dbm::db_t));
+  if(tchecker::dbm::status_t::EMPTY != stat_1) {
 
-  enum tchecker::dbm::status_t stat_1 = revert_multiple_reset(multiple_reset, dbm1, dim1, dbm1_synced, virt_reset_set_A);
+    tchecker::dbm::db_t *multiple_reset = (tchecker::dbm::db_t *)malloc(dim1*dim1*sizeof(tchecker::dbm::db_t));
 
-  std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> first
-    = tchecker::virtual_constraint::factory(multiple_reset, dim1, phi_e.get_no_of_virtual_clocks());
+    stat_1 = revert_multiple_reset(multiple_reset, dbm1, dim1, dbm1_synced, virt_reset_set_A);
 
-  free(multiple_reset);
+    first = tchecker::virtual_constraint::factory(multiple_reset, dim1, phi_e.get_no_of_virtual_clocks());
 
-  multiple_reset = (tchecker::dbm::db_t *)malloc(dim2*dim2*sizeof(tchecker::dbm::db_t));
+    free(multiple_reset);
+  }
 
-  enum tchecker::dbm::status_t stat_2 = revert_multiple_reset(multiple_reset, dbm2, dim2, dbm2_synced, virt_reset_set_B);
+  if(tchecker::dbm::status_t::EMPTY != stat_2) {
 
-  std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> second
-    = tchecker::virtual_constraint::factory(multiple_reset, dim2, phi_e.get_no_of_virtual_clocks());
+    tchecker::dbm::db_t *multiple_reset = (tchecker::dbm::db_t *)malloc(dim2*dim2*sizeof(tchecker::dbm::db_t));
 
-  free(multiple_reset);
+    stat_2 = revert_multiple_reset(multiple_reset, dbm2, dim2, dbm2_synced, virt_reset_set_B);
+
+    second = tchecker::virtual_constraint::factory(multiple_reset, dim2, phi_e.get_no_of_virtual_clocks());
+
+    free(multiple_reset);
+  }
+
 
   orig_reset_set_A.clear();
   orig_reset_set_B.clear();
@@ -217,13 +223,13 @@ sync_vc_t::revert_sync(tchecker::zg::zone_t const & zone_1, tchecker::zg::zone_t
   virt_reset_set_B.clear();
 
   if (tchecker::dbm::EMPTY == stat_1) {
-    tchecker::dbm::empty(first->dbm(), first->dim());
+    first = tchecker::virtual_constraint::factory(phi_e.get_no_of_virtual_clocks());
   } else {
     assert(is_phi_subset_of_a_zone(dbm1, dim1, no_of_orig_clocks_1, *first));
   }
 
   if (tchecker::dbm::EMPTY == stat_2) {
-    tchecker::dbm::empty(second->dbm(), second->dim());
+    second = tchecker::virtual_constraint::factory(phi_e.get_no_of_virtual_clocks());
   } else {
     assert(is_phi_subset_of_a_zone(dbm2, dim2, no_of_orig_clocks_2, *second));
   }
