@@ -1,6 +1,6 @@
 digraph collision_avoidance.xml_collision_avoidance.xml {
-  0 [first_intval="", first_vloc="<s2_0>", initial="true", second_intval="", second_vloc="<s2_0>", zones="(0<=Process_clock_c3_1 && 0<=Process_clock_c3_2 && Process_clock_c3_1==Process_clock_c3_2), (2<=Process_clock_c3_1 && 0<=Process_clock_c3_2 && 2<=Process_clock_c3_1-Process_clock_c3_2)"]
-  1 [first_intval="", first_vloc="<s2_5>", initial="false", second_intval="", second_vloc="<s2_5>", zones="(2<=Process_clock_c3_1 && 2<=Process_clock_c3_2 && Process_clock_c3_1==Process_clock_c3_2)"]
+  0 [first_intval="", first_vloc="<s2_0>", initial="true", second_intval="", second_vloc="<s2_0>", zones="(0<=Process_clock_c3_1 && 0<=Process_clock_c3_2)"]
+  1 [first_intval="", first_vloc="<s2_5>", initial="false", second_intval="", second_vloc="<s2_5>", zones="(0<=Process_clock_c3_1 && 0<=Process_clock_c3_2)"]
   2 [first_intval="", first_vloc="<s2_4>", initial="false", second_intval="", second_vloc="<s2_4>", zones="(1<=Process_clock_c3_1 && 1<=Process_clock_c3_2 && Process_clock_c3_1==Process_clock_c3_2)"]
   3 [first_intval="", first_vloc="<s2_1>", initial="false", second_intval="", second_vloc="<s2_1>", zones="(0<=Process_clock_c3_1 && 0<=Process_clock_c3_2 && Process_clock_c3_1==Process_clock_c3_2)"]
   4 [first_intval="", first_vloc="<s2_2>", initial="false", second_intval="", second_vloc="<s2_2>", zones="(0<=Process_clock_c3_1 && 0<=Process_clock_c3_2 && Process_clock_c3_1==Process_clock_c3_2)"]
@@ -22,4 +22,4 @@ digraph collision_avoidance.xml_collision_avoidance.xml {
 MEMORY_MAX_RSS  xxxx
 RELATIONSHIP_FULFILLED true
 RUNNING_TIME_SECONDS  xxxx
-VISITED_PAIR_OF_STATES 15
+VISITED_PAIR_OF_STATES 6

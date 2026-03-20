@@ -9,4 +9,4 @@ digraph urgent_non_urgent_urgent_non_urgent {
 MEMORY_MAX_RSS  xxxx
 RELATIONSHIP_FULFILLED true
 RUNNING_TIME_SECONDS  xxxx
-VISITED_PAIR_OF_STATES 4
+VISITED_PAIR_OF_STATES 3
