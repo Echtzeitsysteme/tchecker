@@ -21,6 +21,7 @@ void extrapolation_t::extrapolate_synced(tchecker::dbm::db_t * dbm, tchecker::cl
     tchecker::dbm::constrain(dbm, dim, i, i+offset, tchecker::ineq_cmp_t::LE, 0);
     tchecker::dbm::constrain(dbm, dim, i+offset, i, tchecker::ineq_cmp_t::LE, 0);
   }
+  tchecker::dbm::tighten(dbm, dim);
 }
 
 /* no_extrapolation_t */
