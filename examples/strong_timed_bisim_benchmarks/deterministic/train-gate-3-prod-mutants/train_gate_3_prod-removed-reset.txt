@@ -1,0 +1,225 @@
+system:train_gate_3
+event:Gate_appr1_Train1_appr
+event:Gate_appr2_Train2_appr
+event:Gate_appr3_Train3_appr
+event:Train3_tau
+event:Gate_leave3_Train3_leave
+event:Gate_stop2_Train2_stop
+event:Gate_go2_Train2_go
+event:Gate_stop1_Train1_stop
+event:Gate_stop3_Train3_stop
+event:Train1_tau
+event:Gate_leave1_Train1_leave
+event:Gate_go3_Train3_go
+event:Gate_go1_Train1_go
+event:Train2_tau
+event:Gate_leave2_Train2_leave
+int:3:1:3:1:buffer
+int:1:0:2:0:head
+int:1:0:3:0:length
+clock:1:x1
+clock:1:x2
+clock:1:x3
+process:P
+location:P:Free_Safe_Safe_Safe{initial:}
+location:P:Occ_Appr_Safe_Safe{invariant:x1<=20}
+location:P:Occ_Safe_Appr_Safe{invariant:x2<=20}
+location:P:Occ_Safe_Safe_Appr{invariant:x3<=20}
+location:P:Transient_Appr_Safe_Appr{invariant:x1<=20 : invariant:x3<=20 : committed:}
+location:P:Transient_Safe_Appr_Appr{invariant:x2<=20 : invariant:x3<=20 : committed:}
+location:P:Occ_Safe_Safe_Cross{labels:cross3 : invariant:x3<=5}
+location:P:Transient_Appr_Safe_Cross{labels:cross3 : invariant:x1<=20 : invariant:x3<=5 : committed:}
+location:P:Transient_Safe_Appr_Cross{labels:cross3 : invariant:x2<=20 : invariant:x3<=5 : committed:}
+location:P:Occ_Safe_Stop_Cross{labels:cross3 : invariant:x3<=5}
+location:P:Transient_Appr_Stop_Cross{labels:cross3 : invariant:x1<=20 : invariant:x3<=5 : committed:}
+location:P:Free_Safe_Stop_Safe
+location:P:Occ_Appr_Stop_Safe{invariant:x1<=20}
+location:P:Occ_Safe_Start_Safe{invariant:x2<=15}
+location:P:Occ_Safe_Stop_Appr{invariant:x3<=20}
+location:P:Transient_Appr_Stop_Appr{invariant:x1<=20 : invariant:x3<=20 : committed:}
+location:P:Occ_Stop_Stop_Appr{invariant:x3<=20}
+location:P:Occ_Appr_Stop_Stop{invariant:x1<=20}
+location:P:Occ_Cross_Stop_Stop{labels:cross1 : invariant:x1<=5}
+location:P:Free_Safe_Stop_Stop
+location:P:Occ_Safe_Start_Stop{invariant:x2<=15}
+location:P:Occ_Safe_Stop_Start{invariant:x3<=15}
+location:P:Transient_Appr_Stop_Start{invariant:x1<=20 : invariant:x3<=15 : committed:}
+location:P:Occ_Stop_Stop_Start{invariant:x3<=15}
+location:P:Occ_Stop_Stop_Cross{labels:cross3 : invariant:x3<=5}
+location:P:Free_Stop_Stop_Safe
+location:P:Occ_Start_Stop_Safe{invariant:x1<=15}
+location:P:Occ_Stop_Start_Safe{invariant:x2<=15}
+location:P:Transient_Stop_Start_Appr{invariant:x2<=15 : invariant:x3<=20 : committed:}
+location:P:Occ_Stop_Cross_Safe{labels:cross2 : invariant:x2<=5}
+location:P:Free_Stop_Safe_Safe
+location:P:Transient_Stop_Cross_Appr{labels:cross2 : invariant:x2<=5 : invariant:x3<=20 : committed:}
+location:P:Occ_Stop_Cross_Stop{labels:cross2 : invariant:x2<=5}
+location:P:Free_Stop_Safe_Stop
+location:P:Occ_Start_Safe_Stop{invariant:x1<=15}
+location:P:Occ_Stop_Appr_Stop{invariant:x2<=20}
+location:P:Occ_Stop_Safe_Start{invariant:x3<=15}
+location:P:Transient_Stop_Appr_Start{invariant:x2<=20 : invariant:x3<=15 : committed:}
+location:P:Occ_Stop_Safe_Cross{labels:cross3 : invariant:x3<=5}
+location:P:Transient_Stop_Appr_Cross{labels:cross3 : invariant:x2<=20 : invariant:x3<=5 : committed:}
+location:P:Transient_Start_Appr_Stop{invariant:x1<=15 : invariant:x2<=20 : committed:}
+location:P:Occ_Cross_Safe_Stop{labels:cross1 : invariant:x1<=5}
+location:P:Free_Safe_Safe_Stop
+location:P:Transient_Cross_Appr_Stop{labels:cross1 : invariant:x1<=5 : invariant:x2<=20 : committed:}
+location:P:Occ_Appr_Safe_Stop{invariant:x1<=20}
+location:P:Occ_Safe_Appr_Stop{invariant:x2<=20}
+location:P:Occ_Safe_Safe_Start{invariant:x3<=15}
+location:P:Transient_Appr_Safe_Start{invariant:x1<=20 : invariant:x3<=15 : committed:}
+location:P:Transient_Safe_Appr_Start{invariant:x2<=20 : invariant:x3<=15 : committed:}
+location:P:Transient_Appr_Appr_Stop{invariant:x1<=20 : invariant:x2<=20 : committed:}
+location:P:Occ_Safe_Cross_Stop{labels:cross2 : invariant:x2<=5}
+location:P:Transient_Appr_Cross_Stop{labels:cross2 : invariant:x1<=20 : invariant:x2<=5 : committed:}
+location:P:Occ_Start_Stop_Stop{invariant:x1<=15}
+location:P:Occ_Start_Safe_Safe{invariant:x1<=15}
+location:P:Occ_Stop_Appr_Safe{invariant:x2<=20}
+location:P:Occ_Stop_Safe_Appr{invariant:x3<=20}
+location:P:Transient_Stop_Appr_Appr{invariant:x2<=20 : invariant:x3<=20 : committed:}
+location:P:Transient_Start_Appr_Safe{invariant:x1<=15 : invariant:x2<=20 : committed:}
+location:P:Transient_Start_Safe_Appr{invariant:x1<=15 : invariant:x3<=20 : committed:}
+location:P:Occ_Cross_Safe_Safe{labels:cross1 : invariant:x1<=5}
+location:P:Transient_Cross_Appr_Safe{labels:cross1 : invariant:x1<=5 : invariant:x2<=20 : committed:}
+location:P:Transient_Cross_Safe_Appr{labels:cross1 : invariant:x1<=5 : invariant:x3<=20 : committed:}
+location:P:Occ_Cross_Stop_Safe{labels:cross1 : invariant:x1<=5}
+location:P:Transient_Cross_Stop_Appr{labels:cross1 : invariant:x1<=5 : invariant:x3<=20 : committed:}
+location:P:Occ_Stop_Start_Stop{invariant:x2<=15}
+location:P:Transient_Start_Stop_Appr{invariant:x1<=15 : invariant:x3<=20 : committed:}
+location:P:Transient_Appr_Start_Stop{invariant:x1<=20 : invariant:x2<=15 : committed:}
+location:P:Transient_Appr_Start_Safe{invariant:x1<=20 : invariant:x2<=15 : committed:}
+location:P:Transient_Safe_Start_Appr{invariant:x2<=15 : invariant:x3<=20 : committed:}
+location:P:Occ_Safe_Cross_Safe{labels:cross2 : invariant:x2<=5}
+location:P:Transient_Appr_Cross_Safe{labels:cross2 : invariant:x1<=20 : invariant:x2<=5 : committed:}
+location:P:Transient_Safe_Cross_Appr{labels:cross2 : invariant:x2<=5 : invariant:x3<=20 : committed:}
+location:P:Transient_Appr_Appr_Safe{invariant:x1<=20 : invariant:x2<=20 : committed:}
+edge:P:Free_Safe_Safe_Safe:Occ_Appr_Safe_Safe:Gate_appr1_Train1_appr{do:buffer[(head+length)%3]=1;length=length+1 : do:x1=0 : provided:length==0}
+edge:P:Free_Safe_Safe_Safe:Occ_Safe_Appr_Safe:Gate_appr2_Train2_appr{do:buffer[(head+length)%3]=2;length=length+1 : do:x2=0 : provided:length==0}
+edge:P:Free_Safe_Safe_Safe:Occ_Safe_Safe_Appr:Gate_appr3_Train3_appr{do:buffer[(head+length)%3]=3;length=length+1 : do:x3=0 : provided:length==0}
+edge:P:Occ_Safe_Safe_Appr:Transient_Appr_Safe_Appr:Gate_appr1_Train1_appr{do:buffer[(head+length)%3]=1;length=length+1 : do:x1=0}
+edge:P:Occ_Safe_Safe_Appr:Transient_Safe_Appr_Appr:Gate_appr2_Train2_appr{do:buffer[(head+length)%3]=2;length=length+1 : do:x2=0}
+edge:P:Occ_Safe_Safe_Appr:Occ_Safe_Safe_Cross:Train3_tau{do:x3=0 : provided:x3>=10}
+edge:P:Occ_Safe_Safe_Cross:Transient_Appr_Safe_Cross:Gate_appr1_Train1_appr{do:buffer[(head+length)%3]=1;length=length+1 : do:x1=0}
+edge:P:Occ_Safe_Safe_Cross:Transient_Safe_Appr_Cross:Gate_appr2_Train2_appr{do:buffer[(head+length)%3]=2;length=length+1 : do:x2=0}
+edge:P:Occ_Safe_Safe_Cross:Free_Safe_Safe_Safe:Gate_leave3_Train3_leave{do:head=(head+1)%3;length=length-1 : provided:length>0&&buffer[head]==3 : provided:x3>=3}
+edge:P:Transient_Safe_Appr_Cross:Occ_Safe_Stop_Cross:Gate_stop2_Train2_stop{provided:length>0&&buffer[(head+length-1)%3]==2 : provided:x2<=10}
+edge:P:Occ_Safe_Stop_Cross:Transient_Appr_Stop_Cross:Gate_appr1_Train1_appr{do:buffer[(head+length)%3]=1;length=length+1 : do:x1=0}
+edge:P:Occ_Safe_Stop_Cross:Free_Safe_Stop_Safe:Gate_leave3_Train3_leave{do:head=(head+1)%3;length=length-1 : provided:length>0&&buffer[head]==3 : provided:x3>=3}
+edge:P:Free_Safe_Stop_Safe:Occ_Appr_Stop_Safe:Gate_appr1_Train1_appr{do:buffer[(head+length)%3]=1;length=length+1 : do:x1=0 : provided:length==0}
+edge:P:Free_Safe_Stop_Safe:Occ_Safe_Start_Safe:Gate_go2_Train2_go{do:x2=0 : provided:length>0&&buffer[head]==2}
+edge:P:Free_Safe_Stop_Safe:Occ_Safe_Stop_Appr:Gate_appr3_Train3_appr{do:buffer[(head+length)%3]=3;length=length+1 : do:x3=0 : provided:length==0}
+edge:P:Occ_Safe_Stop_Appr:Transient_Appr_Stop_Appr:Gate_appr1_Train1_appr{do:buffer[(head+length)%3]=1;length=length+1 : do:x1=0}
+edge:P:Occ_Safe_Stop_Appr:Occ_Safe_Stop_Cross:Train3_tau{do:x3=0 : provided:x3>=10}
+edge:P:Transient_Appr_Stop_Appr:Occ_Stop_Stop_Appr:Gate_stop1_Train1_stop{provided:length>0&&buffer[(head+length-1)%3]==1 : provided:x1<=10}
+edge:P:Transient_Appr_Stop_Appr:Occ_Appr_Stop_Stop:Gate_stop3_Train3_stop{provided:length>0&&buffer[(head+length-1)%3]==3 : provided:x3<=10}
+edge:P:Occ_Appr_Stop_Stop:Occ_Cross_Stop_Stop:Train1_tau{do:x1=0 : provided:x1>=10}
+edge:P:Occ_Cross_Stop_Stop:Free_Safe_Stop_Stop:Gate_leave1_Train1_leave{do:head=(head+1)%3;length=length-1 : provided:length>0&&buffer[head]==1 : provided:x1>=3}
+edge:P:Free_Safe_Stop_Stop:Occ_Appr_Stop_Stop:Gate_appr1_Train1_appr{do:buffer[(head+length)%3]=1;length=length+1 : do:x1=0 : provided:length==0}
+edge:P:Free_Safe_Stop_Stop:Occ_Safe_Start_Stop:Gate_go2_Train2_go{do:x2=0 : provided:length>0&&buffer[head]==2}
+edge:P:Free_Safe_Stop_Stop:Occ_Safe_Stop_Start:Gate_go3_Train3_go{do:x3=0 : provided:length>0&&buffer[head]==3}
+edge:P:Occ_Safe_Stop_Start:Transient_Appr_Stop_Start:Gate_appr1_Train1_appr{do:buffer[(head+length)%3]=1;length=length+1} # MUTATION!
+edge:P:Occ_Safe_Stop_Start:Occ_Safe_Stop_Cross:Train3_tau{do:x3=0 : provided:x3>=7}
+edge:P:Transient_Appr_Stop_Start:Occ_Stop_Stop_Start:Gate_stop1_Train1_stop{provided:length>0&&buffer[(head+length-1)%3]==1 : provided:x1<=10}
+edge:P:Occ_Stop_Stop_Start:Occ_Stop_Stop_Cross:Train3_tau{do:x3=0 : provided:x3>=7}
+edge:P:Occ_Stop_Stop_Cross:Free_Stop_Stop_Safe:Gate_leave3_Train3_leave{do:head=(head+1)%3;length=length-1 : provided:length>0&&buffer[head]==3 : provided:x3>=3}
+edge:P:Free_Stop_Stop_Safe:Occ_Start_Stop_Safe:Gate_go1_Train1_go{do:x1=0 : provided:length>0&&buffer[head]==1}
+edge:P:Free_Stop_Stop_Safe:Occ_Stop_Start_Safe:Gate_go2_Train2_go{do:x2=0 : provided:length>0&&buffer[head]==2}
+edge:P:Free_Stop_Stop_Safe:Occ_Stop_Stop_Appr:Gate_appr3_Train3_appr{do:buffer[(head+length)%3]=3;length=length+1 : do:x3=0 : provided:length==0}
+edge:P:Occ_Stop_Start_Safe:Transient_Stop_Start_Appr:Gate_appr3_Train3_appr{do:buffer[(head+length)%3]=3;length=length+1 : do:x3=0}
+edge:P:Occ_Stop_Start_Safe:Occ_Stop_Cross_Safe:Train2_tau{do:x2=0 : provided:x2>=7}
+edge:P:Occ_Stop_Cross_Safe:Free_Stop_Safe_Safe:Gate_leave2_Train2_leave{do:head=(head+1)%3;length=length-1 : provided:length>0&&buffer[head]==2 : provided:x2>=3}
+edge:P:Occ_Stop_Cross_Safe:Transient_Stop_Cross_Appr:Gate_appr3_Train3_appr{do:buffer[(head+length)%3]=3;length=length+1 : do:x3=0}
+edge:P:Transient_Stop_Cross_Appr:Occ_Stop_Cross_Stop:Gate_stop3_Train3_stop{provided:length>0&&buffer[(head+length-1)%3]==3 : provided:x3<=10}
+edge:P:Occ_Stop_Cross_Stop:Free_Stop_Safe_Stop:Gate_leave2_Train2_leave{do:head=(head+1)%3;length=length-1 : provided:length>0&&buffer[head]==2 : provided:x2>=3}
+edge:P:Free_Stop_Safe_Stop:Occ_Start_Safe_Stop:Gate_go1_Train1_go{do:x1=0 : provided:length>0&&buffer[head]==1}
+edge:P:Free_Stop_Safe_Stop:Occ_Stop_Appr_Stop:Gate_appr2_Train2_appr{do:buffer[(head+length)%3]=2;length=length+1 : do:x2=0 : provided:length==0}
+edge:P:Free_Stop_Safe_Stop:Occ_Stop_Safe_Start:Gate_go3_Train3_go{do:x3=0 : provided:length>0&&buffer[head]==3}
+edge:P:Occ_Stop_Safe_Start:Transient_Stop_Appr_Start:Gate_appr2_Train2_appr{do:buffer[(head+length)%3]=2;length=length+1 : do:x2=0}
+edge:P:Occ_Stop_Safe_Start:Occ_Stop_Safe_Cross:Train3_tau{do:x3=0 : provided:x3>=7}
+edge:P:Occ_Stop_Safe_Cross:Transient_Stop_Appr_Cross:Gate_appr2_Train2_appr{do:buffer[(head+length)%3]=2;length=length+1 : do:x2=0}
+edge:P:Occ_Stop_Safe_Cross:Free_Stop_Safe_Safe:Gate_leave3_Train3_leave{do:head=(head+1)%3;length=length-1 : provided:length>0&&buffer[head]==3 : provided:x3>=3}
+edge:P:Transient_Stop_Appr_Cross:Occ_Stop_Stop_Cross:Gate_stop2_Train2_stop{provided:length>0&&buffer[(head+length-1)%3]==2 : provided:x2<=10}
+edge:P:Transient_Stop_Appr_Start:Occ_Stop_Stop_Start:Gate_stop2_Train2_stop{provided:length>0&&buffer[(head+length-1)%3]==2 : provided:x2<=10}
+edge:P:Occ_Stop_Appr_Stop:Occ_Stop_Cross_Stop:Train2_tau{do:x2=0 : provided:x2>=10}
+edge:P:Occ_Start_Safe_Stop:Transient_Start_Appr_Stop:Gate_appr2_Train2_appr{do:buffer[(head+length)%3]=2;length=length+1 : do:x2=0}
+edge:P:Occ_Start_Safe_Stop:Occ_Cross_Safe_Stop:Train1_tau{do:x1=0 : provided:x1>=7}
+edge:P:Occ_Cross_Safe_Stop:Free_Safe_Safe_Stop:Gate_leave1_Train1_leave{do:head=(head+1)%3;length=length-1 : provided:length>0&&buffer[head]==1 : provided:x1>=3}
+edge:P:Occ_Cross_Safe_Stop:Transient_Cross_Appr_Stop:Gate_appr2_Train2_appr{do:buffer[(head+length)%3]=2;length=length+1 : do:x2=0}
+edge:P:Transient_Cross_Appr_Stop:Occ_Cross_Stop_Stop:Gate_stop2_Train2_stop{provided:length>0&&buffer[(head+length-1)%3]==2 : provided:x2<=10}
+edge:P:Free_Safe_Safe_Stop:Occ_Appr_Safe_Stop:Gate_appr1_Train1_appr{do:buffer[(head+length)%3]=1;length=length+1 : do:x1=0 : provided:length==0}
+edge:P:Free_Safe_Safe_Stop:Occ_Safe_Appr_Stop:Gate_appr2_Train2_appr{do:buffer[(head+length)%3]=2;length=length+1 : do:x2=0 : provided:length==0}
+edge:P:Free_Safe_Safe_Stop:Occ_Safe_Safe_Start:Gate_go3_Train3_go{do:x3=0 : provided:length>0&&buffer[head]==3}
+edge:P:Occ_Safe_Safe_Start:Transient_Appr_Safe_Start:Gate_appr1_Train1_appr{do:buffer[(head+length)%3]=1;length=length+1 : do:x1=0}
+edge:P:Occ_Safe_Safe_Start:Transient_Safe_Appr_Start:Gate_appr2_Train2_appr{do:buffer[(head+length)%3]=2;length=length+1 : do:x2=0}
+edge:P:Occ_Safe_Safe_Start:Occ_Safe_Safe_Cross:Train3_tau{do:x3=0 : provided:x3>=7}
+edge:P:Transient_Safe_Appr_Start:Occ_Safe_Stop_Start:Gate_stop2_Train2_stop{provided:length>0&&buffer[(head+length-1)%3]==2 : provided:x2<=10}
+edge:P:Transient_Appr_Safe_Start:Occ_Stop_Safe_Start:Gate_stop1_Train1_stop{provided:length>0&&buffer[(head+length-1)%3]==1 : provided:x1<=10}
+edge:P:Occ_Safe_Appr_Stop:Transient_Appr_Appr_Stop:Gate_appr1_Train1_appr{do:buffer[(head+length)%3]=1;length=length+1 : do:x1=0}
+edge:P:Occ_Safe_Appr_Stop:Occ_Safe_Cross_Stop:Train2_tau{do:x2=0 : provided:x2>=10}
+edge:P:Occ_Safe_Cross_Stop:Transient_Appr_Cross_Stop:Gate_appr1_Train1_appr{do:buffer[(head+length)%3]=1;length=length+1 : do:x1=0}
+edge:P:Occ_Safe_Cross_Stop:Free_Safe_Safe_Stop:Gate_leave2_Train2_leave{do:head=(head+1)%3;length=length-1 : provided:length>0&&buffer[head]==2 : provided:x2>=3}
+edge:P:Transient_Appr_Cross_Stop:Occ_Stop_Cross_Stop:Gate_stop1_Train1_stop{provided:length>0&&buffer[(head+length-1)%3]==1 : provided:x1<=10}
+edge:P:Transient_Appr_Appr_Stop:Occ_Stop_Appr_Stop:Gate_stop1_Train1_stop{provided:length>0&&buffer[(head+length-1)%3]==1 : provided:x1<=10}
+edge:P:Transient_Appr_Appr_Stop:Occ_Appr_Stop_Stop:Gate_stop2_Train2_stop{provided:length>0&&buffer[(head+length-1)%3]==2 : provided:x2<=10}
+edge:P:Occ_Appr_Safe_Stop:Transient_Appr_Appr_Stop:Gate_appr2_Train2_appr{do:buffer[(head+length)%3]=2;length=length+1 : do:x2=0}
+edge:P:Occ_Appr_Safe_Stop:Occ_Cross_Safe_Stop:Train1_tau{do:x1=0 : provided:x1>=10}
+edge:P:Transient_Start_Appr_Stop:Occ_Start_Stop_Stop:Gate_stop2_Train2_stop{provided:length>0&&buffer[(head+length-1)%3]==2 : provided:x2<=10}
+edge:P:Occ_Start_Stop_Stop:Occ_Cross_Stop_Stop:Train1_tau{do:x1=0 : provided:x1>=7}
+edge:P:Free_Stop_Safe_Safe:Occ_Start_Safe_Safe:Gate_go1_Train1_go{do:x1=0 : provided:length>0&&buffer[head]==1}
+edge:P:Free_Stop_Safe_Safe:Occ_Stop_Appr_Safe:Gate_appr2_Train2_appr{do:buffer[(head+length)%3]=2;length=length+1 : do:x2=0 : provided:length==0}
+edge:P:Free_Stop_Safe_Safe:Occ_Stop_Safe_Appr:Gate_appr3_Train3_appr{do:buffer[(head+length)%3]=3;length=length+1 : do:x3=0 : provided:length==0}
+edge:P:Occ_Stop_Safe_Appr:Transient_Stop_Appr_Appr:Gate_appr2_Train2_appr{do:buffer[(head+length)%3]=2;length=length+1 : do:x2=0}
+edge:P:Occ_Stop_Safe_Appr:Occ_Stop_Safe_Cross:Train3_tau{do:x3=0 : provided:x3>=10}
+edge:P:Transient_Stop_Appr_Appr:Occ_Stop_Stop_Appr:Gate_stop2_Train2_stop{provided:length>0&&buffer[(head+length-1)%3]==2 : provided:x2<=10}
+edge:P:Transient_Stop_Appr_Appr:Occ_Stop_Appr_Stop:Gate_stop3_Train3_stop{provided:length>0&&buffer[(head+length-1)%3]==3 : provided:x3<=10}
+edge:P:Occ_Stop_Appr_Safe:Transient_Stop_Appr_Appr:Gate_appr3_Train3_appr{do:buffer[(head+length)%3]=3;length=length+1 : do:x3=0}
+edge:P:Occ_Stop_Appr_Safe:Occ_Stop_Cross_Safe:Train2_tau{do:x2=0 : provided:x2>=10}
+edge:P:Occ_Start_Safe_Safe:Transient_Start_Appr_Safe:Gate_appr2_Train2_appr{do:buffer[(head+length)%3]=2;length=length+1 : do:x2=0}
+edge:P:Occ_Start_Safe_Safe:Transient_Start_Safe_Appr:Gate_appr3_Train3_appr{do:buffer[(head+length)%3]=3;length=length+1 : do:x3=0}
+edge:P:Occ_Start_Safe_Safe:Occ_Cross_Safe_Safe:Train1_tau{do:x1=0 : provided:x1>=7}
+edge:P:Occ_Cross_Safe_Safe:Free_Safe_Safe_Safe:Gate_leave1_Train1_leave{do:head=(head+1)%3;length=length-1 : provided:length>0&&buffer[head]==1 : provided:x1>=3}
+edge:P:Occ_Cross_Safe_Safe:Transient_Cross_Appr_Safe:Gate_appr2_Train2_appr{do:buffer[(head+length)%3]=2;length=length+1 : do:x2=0}
+edge:P:Occ_Cross_Safe_Safe:Transient_Cross_Safe_Appr:Gate_appr3_Train3_appr{do:buffer[(head+length)%3]=3;length=length+1 : do:x3=0}
+edge:P:Transient_Cross_Safe_Appr:Occ_Cross_Safe_Stop:Gate_stop3_Train3_stop{provided:length>0&&buffer[(head+length-1)%3]==3 : provided:x3<=10}
+edge:P:Transient_Cross_Appr_Safe:Occ_Cross_Stop_Safe:Gate_stop2_Train2_stop{provided:length>0&&buffer[(head+length-1)%3]==2 : provided:x2<=10}
+edge:P:Occ_Cross_Stop_Safe:Free_Safe_Stop_Safe:Gate_leave1_Train1_leave{do:head=(head+1)%3;length=length-1 : provided:length>0&&buffer[head]==1 : provided:x1>=3}
+edge:P:Occ_Cross_Stop_Safe:Transient_Cross_Stop_Appr:Gate_appr3_Train3_appr{do:buffer[(head+length)%3]=3;length=length+1 : do:x3=0}
+edge:P:Transient_Cross_Stop_Appr:Occ_Cross_Stop_Stop:Gate_stop3_Train3_stop{provided:length>0&&buffer[(head+length-1)%3]==3 : provided:x3<=10}
+edge:P:Transient_Start_Safe_Appr:Occ_Start_Safe_Stop:Gate_stop3_Train3_stop{provided:length>0&&buffer[(head+length-1)%3]==3 : provided:x3<=10}
+edge:P:Transient_Start_Appr_Safe:Occ_Start_Stop_Safe:Gate_stop2_Train2_stop{provided:length>0&&buffer[(head+length-1)%3]==2 : provided:x2<=10}
+edge:P:Transient_Stop_Start_Appr:Occ_Stop_Start_Stop:Gate_stop3_Train3_stop{provided:length>0&&buffer[(head+length-1)%3]==3 : provided:x3<=10}
+edge:P:Occ_Stop_Start_Stop:Occ_Stop_Cross_Stop:Train2_tau{do:x2=0 : provided:x2>=7}
+edge:P:Occ_Start_Stop_Safe:Transient_Start_Stop_Appr:Gate_appr3_Train3_appr{do:buffer[(head+length)%3]=3;length=length+1 : do:x3=0}
+edge:P:Occ_Start_Stop_Safe:Occ_Cross_Stop_Safe:Train1_tau{do:x1=0 : provided:x1>=7}
+edge:P:Transient_Start_Stop_Appr:Occ_Start_Stop_Stop:Gate_stop3_Train3_stop{provided:length>0&&buffer[(head+length-1)%3]==3 : provided:x3<=10}
+edge:P:Occ_Safe_Start_Stop:Transient_Appr_Start_Stop:Gate_appr1_Train1_appr{do:buffer[(head+length)%3]=1;length=length+1 : do:x1=0}
+edge:P:Occ_Safe_Start_Stop:Occ_Safe_Cross_Stop:Train2_tau{do:x2=0 : provided:x2>=7}
+edge:P:Transient_Appr_Start_Stop:Occ_Stop_Start_Stop:Gate_stop1_Train1_stop{provided:length>0&&buffer[(head+length-1)%3]==1 : provided:x1<=10}
+edge:P:Occ_Stop_Stop_Appr:Occ_Stop_Stop_Cross:Train3_tau{do:x3=0 : provided:x3>=10}
+edge:P:Occ_Safe_Start_Safe:Transient_Appr_Start_Safe:Gate_appr1_Train1_appr{do:buffer[(head+length)%3]=1;length=length+1 : do:x1=0}
+edge:P:Occ_Safe_Start_Safe:Transient_Safe_Start_Appr:Gate_appr3_Train3_appr{do:buffer[(head+length)%3]=3;length=length+1 : do:x3=0}
+edge:P:Occ_Safe_Start_Safe:Occ_Safe_Cross_Safe:Train2_tau{do:x2=0 : provided:x2>=7}
+edge:P:Occ_Safe_Cross_Safe:Transient_Appr_Cross_Safe:Gate_appr1_Train1_appr{do:buffer[(head+length)%3]=1;length=length+1 : do:x1=0}
+edge:P:Occ_Safe_Cross_Safe:Free_Safe_Safe_Safe:Gate_leave2_Train2_leave{do:head=(head+1)%3;length=length-1 : provided:length>0&&buffer[head]==2 : provided:x2>=3}
+edge:P:Occ_Safe_Cross_Safe:Transient_Safe_Cross_Appr:Gate_appr3_Train3_appr{do:buffer[(head+length)%3]=3;length=length+1 : do:x3=0}
+edge:P:Transient_Safe_Cross_Appr:Occ_Safe_Cross_Stop:Gate_stop3_Train3_stop{provided:length>0&&buffer[(head+length-1)%3]==3 : provided:x3<=10}
+edge:P:Transient_Appr_Cross_Safe:Occ_Stop_Cross_Safe:Gate_stop1_Train1_stop{provided:length>0&&buffer[(head+length-1)%3]==1 : provided:x1<=10}
+edge:P:Transient_Safe_Start_Appr:Occ_Safe_Start_Stop:Gate_stop3_Train3_stop{provided:length>0&&buffer[(head+length-1)%3]==3 : provided:x3<=10}
+edge:P:Transient_Appr_Start_Safe:Occ_Stop_Start_Safe:Gate_stop1_Train1_stop{provided:length>0&&buffer[(head+length-1)%3]==1 : provided:x1<=10}
+edge:P:Occ_Appr_Stop_Safe:Transient_Appr_Stop_Appr:Gate_appr3_Train3_appr{do:buffer[(head+length)%3]=3;length=length+1 : do:x3=0}
+edge:P:Occ_Appr_Stop_Safe:Occ_Cross_Stop_Safe:Train1_tau{do:x1=0 : provided:x1>=10}
+edge:P:Transient_Appr_Stop_Cross:Occ_Stop_Stop_Cross:Gate_stop1_Train1_stop{provided:length>0&&buffer[(head+length-1)%3]==1 : provided:x1<=10}
+edge:P:Transient_Appr_Safe_Cross:Occ_Stop_Safe_Cross:Gate_stop1_Train1_stop{provided:length>0&&buffer[(head+length-1)%3]==1 : provided:x1<=10}
+edge:P:Transient_Safe_Appr_Appr:Occ_Safe_Stop_Appr:Gate_stop2_Train2_stop{provided:length>0&&buffer[(head+length-1)%3]==2 : provided:x2<=10}
+edge:P:Transient_Safe_Appr_Appr:Occ_Safe_Appr_Stop:Gate_stop3_Train3_stop{provided:length>0&&buffer[(head+length-1)%3]==3 : provided:x3<=10}
+edge:P:Transient_Appr_Safe_Appr:Occ_Stop_Safe_Appr:Gate_stop1_Train1_stop{provided:length>0&&buffer[(head+length-1)%3]==1 : provided:x1<=10}
+edge:P:Transient_Appr_Safe_Appr:Occ_Appr_Safe_Stop:Gate_stop3_Train3_stop{provided:length>0&&buffer[(head+length-1)%3]==3 : provided:x3<=10}
+edge:P:Occ_Safe_Appr_Safe:Transient_Appr_Appr_Safe:Gate_appr1_Train1_appr{do:buffer[(head+length)%3]=1;length=length+1 : do:x1=0}
+edge:P:Occ_Safe_Appr_Safe:Transient_Safe_Appr_Appr:Gate_appr3_Train3_appr{do:buffer[(head+length)%3]=3;length=length+1 : do:x3=0}
+edge:P:Occ_Safe_Appr_Safe:Occ_Safe_Cross_Safe:Train2_tau{do:x2=0 : provided:x2>=10}
+edge:P:Transient_Appr_Appr_Safe:Occ_Stop_Appr_Safe:Gate_stop1_Train1_stop{provided:length>0&&buffer[(head+length-1)%3]==1 : provided:x1<=10}
+edge:P:Transient_Appr_Appr_Safe:Occ_Appr_Stop_Safe:Gate_stop2_Train2_stop{provided:length>0&&buffer[(head+length-1)%3]==2 : provided:x2<=10}
+edge:P:Occ_Appr_Safe_Safe:Transient_Appr_Appr_Safe:Gate_appr2_Train2_appr{do:buffer[(head+length)%3]=2;length=length+1 : do:x2=0}
+edge:P:Occ_Appr_Safe_Safe:Transient_Appr_Safe_Appr:Gate_appr3_Train3_appr{do:buffer[(head+length)%3]=3;length=length+1 : do:x3=0}
+edge:P:Occ_Appr_Safe_Safe:Occ_Cross_Safe_Safe:Train1_tau{do:x1=0 : provided:x1>=10}
