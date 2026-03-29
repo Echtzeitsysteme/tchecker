@@ -4,4 +4,4 @@
 #
 # See files AUTHORS and LICENSE for copyright details.
 
-cat "$(dirname $0)/train_gate_3_prod-bisim.txt"
+cat "$(dirname $0)/train-gate-3-prod-non-bisim-removed-reset.txt"
