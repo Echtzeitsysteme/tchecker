@@ -24,7 +24,6 @@ namespace certificate {
  */
 class node_t {
  public:
-   // TODO: Remove!
   /*!
    \brief Constructor
    \param s_1 : a symbolic state of the first VCG

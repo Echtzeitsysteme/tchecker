@@ -20,6 +20,6 @@ jobs:
       TCHECKER_BOOST_STATIC_LINK: "OFF"
       
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: build-and-test
         run: ci-scripts/github-ubuntu-build-and-test-${{ matrix.compiler }}.sh

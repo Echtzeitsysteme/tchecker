@@ -1189,22 +1189,29 @@ void reduce_to_valuation(tchecker::dbm::db_t * dbm, tchecker::clockval_t & valua
       assert(0 < sub.denominator()); // should be fulfilled by design
       assert(tchecker::dbm::is_consistent(dbm, dim));
 
+      // Since we assume that valuation satisfies the dbm, we know that the new constraint is at least as strong as the old one
+      // Therefore, we do not need to tighten the dbm each time we add a new constraint but only at the end.
+      tchecker::dbm::db_t first;
+      tchecker::dbm::db_t second;
       if(1 == sub.denominator()) { // if the difference is an integer,
-        constrain(dbm, dim, x, y, ineq_cmp_t::LE, sub.numerator());
-        constrain(dbm, dim, y, x, ineq_cmp_t::LE, -1*sub.numerator());
+        first = tchecker::dbm::db(ineq_cmp_t::LE, sub.numerator());
+        second = tchecker::dbm::db(ineq_cmp_t::LE, -1*sub.numerator());
       } else { // else get the integer such that a < valuation[x] - valuation[y] < a+1 and add these constraints to the DBM
         tchecker::integer_t a = sub.numerator() / sub.denominator();
         if(0 >= a) {
-          constrain(dbm, dim, x, y, ineq_cmp_t::LT, a);
-          constrain(dbm, dim, y, x, ineq_cmp_t::LT, (-1*a)+1);
+          first = tchecker::dbm::db(ineq_cmp_t::LT, a);
+          second = tchecker::dbm::db(ineq_cmp_t::LT, (-1*a)+1);
         } else {
-          constrain(dbm, dim, x, y, ineq_cmp_t::LT, a+1);
-          constrain(dbm, dim, y, x, ineq_cmp_t::LT, -1*a);
+          first = tchecker::dbm::db(ineq_cmp_t::LT, a+1);
+          second = tchecker::dbm::db(ineq_cmp_t::LT, -1*a);
         }
       }
-      tchecker::dbm::tighten(dbm, dim);
+      DBM(x, y) = first;
+      DBM(y, x) = second;
     }
   }
+
+  tchecker::dbm::tighten(dbm, dim);
 
   assert(!tchecker::dbm::is_empty_0(dbm, dim));
   assert(tchecker::dbm::is_tight(dbm, dim));

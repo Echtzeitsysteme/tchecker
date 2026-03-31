@@ -13,6 +13,8 @@
 #include "tchecker/graph/reachability_graph.hh"
 #include "tchecker/vcg/sync.hh"
 
+#include <map>
+
 namespace tchecker {
 
 namespace strong_timed_bisim {
@@ -134,32 +136,41 @@ void graph_t::create_witness_from_visited(tchecker::strong_timed_bisim::visited_
 void graph_t::edge_cleanup()
 {
 
-  std::shared_ptr<std::vector<std::shared_ptr<edge_t>>> new_edges = std::make_shared<std::vector<std::shared_ptr<edge_t>>>();
+  std::map<std::size_t, std::map<std::size_t, std::vector<std::shared_ptr<tchecker::strong_timed_bisim::witness::edge_t>>>> sorter;
 
-  for (const auto & entry : *_edges) {
+  std::shared_ptr<tchecker::vcg::vcg_t> first = this->_vcg1;
+  std::shared_ptr<tchecker::vcg::vcg_t> second = this->_vcg2;
+
+  auto equi_check 
+    = [first, second](std::shared_ptr<tchecker::strong_timed_bisim::witness::edge_t> & a, 
+                      const std::shared_ptr<tchecker::strong_timed_bisim::witness::edge_t> & b) {
+        return a->attributes_equivalent(*b, first, second);
+      };
+
+  for (auto & entry : *_edges) {
     if(entry->src()->empty() || entry->tgt()->empty()) {
       continue;
     }
 
-    if(std::none_of(new_edges->begin(), new_edges->end(), 
-                      [this, entry] (const std::shared_ptr<edge_t> already_added_edge) {
-                        bool result = ((*find_node(entry->src())) == (*find_node(already_added_edge->src()))); 
-                        result &= ((*find_node(entry->tgt())) == (*find_node(already_added_edge->tgt()))); 
-
-                        return result && entry->attributes_equivalent(*already_added_edge, _vcg1, _vcg2);
-                      }
-                   )
-    ) {
-
-      std::shared_ptr<edge_t> to_add = std::make_shared<edge_t>(*entry);
-      new_edges->push_back(to_add);
-    }
+    if(std::none_of(sorter[entry->src()->id()][entry->tgt()->id()].begin(), sorter[entry->src()->id()][entry->tgt()->id()].end(),
+                    [entry, equi_check, first, second](std::shared_ptr<tchecker::strong_timed_bisim::witness::edge_t> cur) {
+                                                        return equi_check(cur, entry);
+                    })) {
+                      sorter[entry->src()->id()][entry->tgt()->id()].emplace_back(entry);
+                    }
   }
 
+  std::shared_ptr<std::vector<std::shared_ptr<edge_t>>> new_edges = std::make_shared<std::vector<std::shared_ptr<edge_t>>>();
+
+  for(auto& outer_iter : sorter) {
+    for(auto& inner_iter : outer_iter.second) {
+      new_edges->insert(new_edges->end(), inner_iter.second.begin(), inner_iter.second.end());
+    }
+  }
   _edges = new_edges;
 }
 
-void graph_t::node_cleanup() {
+void graph_t::cleanup() {
 
   // run compress on each node
   std::for_each(_nodes->begin(), _nodes->end(), 
@@ -216,8 +227,7 @@ tchecker::zg::state_sptr_t graph_t::create_symbolic_state(tchecker::ta::state_t 
 
 std::ostream & graph_t::dot_output(std::ostream & os, std::string const & name)
 {
-  edge_cleanup();
-  node_cleanup();
+  cleanup();
   return base_graph_t::dot_output(os, name);
 }
 
