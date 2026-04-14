@@ -16,15 +16,7 @@ digraph av_protocol.xml_av_protocol_reset_6.xml {
   16 [first_intval="", first_vloc="<ex_start>", initial="false", second_intval="", second_vloc="<ex_start>", zones="(0<=Process_clock_A_c_1 && 0<=Process_clock_A_c_2)"]
   17 [first_intval="", first_vloc="<sample>", initial="false", second_intval="", second_vloc="<sample>", zones="(0<=Process_clock_A_c_1<=781 && 0<=Process_clock_A_c_2<=781 && Process_clock_A_c_1==Process_clock_A_c_2)"]
   18 [first_intval="", first_vloc="<ex_silence2>", initial="false", second_intval="", second_vloc="<ex_silence2>", zones="(0<=Process_clock_A_c_1<=781 && 0<=Process_clock_A_c_2<=781 && Process_clock_A_c_1==Process_clock_A_c_2)"]
-<<<<<<< HEAD
-  19 [first_intval="", first_vloc="<call_observe>", initial="false", second_intval="", second_vloc="<call_observe>", zones="(781<=Process_clock_A_c_1 && 781<=Process_clock_A_c_2 && Process_clock_A_c_1==Process_clock_A_c_2)"]
-=======
   19 [first_intval="", first_vloc="<call_observe>", initial="false", second_intval="", second_vloc="<call_observe>", zones="(0<=Process_clock_A_c_1 && 0<=Process_clock_A_c_2)"]
-  1 -> 2 [first_vedge="<Process@Process_i_emit>", first_vedge_do="Process_clock_A_c=0", second_vedge="<Process@Process_i_emit>", second_vedge_do="Process_clock_A_c=0"]
-  3 -> 4 [first_vedge="<Process@Process_g_emit>", first_vedge_do="Process_clock_A_c=0", second_vedge="<Process@Process_g_emit>", second_vedge_do="Process_clock_A_c=0"]
-  5 -> 6 [first_vedge="<Process@Process_b_emit>", second_vedge="<Process@Process_b_emit>"]
-  7 -> 8 [first_vedge="<Process@Process_a_emit>", first_vedge_do="Process_clock_A_c=0", second_vedge="<Process@Process_a_emit>", second_vedge_do="Process_clock_A_c=0"]
->>>>>>> 16b33b9 (fixed tests)
   0 -> 4 [first_vedge="<Process@Process_l_emit>", first_vedge_do="Process_clock_A_c=0", second_vedge="<Process@Process_l_emit>", second_vedge_do="Process_clock_A_c=0"]
   1 -> 2 [first_vedge="<Process@Process_i_emit>", first_vedge_do="Process_clock_A_c=0", second_vedge="<Process@Process_i_emit>", second_vedge_do="Process_clock_A_c=0"]
   2 -> 3 [first_vedge="<Process@Process__zero_recv>", first_vedge_prov="(Process_clock_A_c == 2343)", second_vedge="<Process@Process__zero_recv>", second_vedge_prov="(Process_clock_A_c == 2343)"]
