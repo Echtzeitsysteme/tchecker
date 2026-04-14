@@ -60,6 +60,14 @@ public:
   void emplace(visited_map_t & other);
 
   /*!
+   \brief Creates the normalized states
+   \param first : first symbolic state
+   \param second : second symbolic state
+  */
+  std::pair<tchecker::zg::state_sptr_t, tchecker::zg::state_sptr_t>
+  normalize(tchecker::zg::state_sptr_t first, tchecker::zg::state_sptr_t second);
+
+  /*!
    \brief checks whether the normalized pair of the given symbolic state is already saved
    \param first : first symbolic state
    \param second : second symbolic state

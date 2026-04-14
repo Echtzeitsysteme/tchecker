@@ -18,4 +18,4 @@ digraph collision_avoidance.xml_collision_avoidance.xml {
 MEMORY_MAX_RSS  xxxx
 RELATIONSHIP_FULFILLED false
 RUNNING_TIME_SECONDS  xxxx
-VISITED_PAIR_OF_STATES 11
+VISITED_PAIR_OF_STATES 5

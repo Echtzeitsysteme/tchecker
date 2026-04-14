@@ -38,8 +38,7 @@ void visited_map_t::emplace(tchecker::zg::state_sptr_t first, tchecker::zg::stat
 {
   assert(first->zone().is_virtual_equivalent(second->zone(), _no_of_virtual_clocks));
 
-  assert(tchecker::vcg::are_zones_synced(first->zone(), second->zone(), first->zone().dim() - _no_of_virtual_clocks - 1,
-                                         second->zone().dim() - _no_of_virtual_clocks - 1));
+  assert(tchecker::vcg::are_zones_synced(first->zone(), second->zone(), _A->get_no_of_original_clocks(), _B->get_no_of_original_clocks()));
 
   auto key_first = tchecker::ta::state_t(first->vloc_ptr(), first->intval_ptr());
   auto key_second = tchecker::ta::state_t(second->vloc_ptr(), second->intval_ptr());
@@ -86,7 +85,8 @@ void visited_map_t::emplace(const visited_map_key_t key,
   }
 }
 
-bool visited_map_t::check_and_add_pair(tchecker::zg::state_sptr_t first, tchecker::zg::state_sptr_t second)
+std::pair<tchecker::zg::state_sptr_t, tchecker::zg::state_sptr_t>
+visited_map_t::normalize(tchecker::zg::state_sptr_t first, tchecker::zg::state_sptr_t second)
 {
   auto A_norm = _A->clone_state(first);
   auto B_norm = _B->clone_state(second);
@@ -105,19 +105,34 @@ bool visited_map_t::check_and_add_pair(tchecker::zg::state_sptr_t first, tchecke
     (*extrapolation_vloc)[(*(A_norm->vloc_ptr())).size() + i] = _A->get_no_of_locations() + (*(B_norm->vloc_ptr()))[i];
   }
 
-  _A->run_extrapolation(A_norm->zone().dbm(), A_norm->zone().dim(), *extrapolation_vloc);
-  _B->run_extrapolation(B_norm->zone().dbm(), B_norm->zone().dim(), *extrapolation_vloc);
+  _A->run_synced_extrapolation(A_norm->zone().dbm(), A_norm->zone().dim(), *extrapolation_vloc, _A->get_no_of_original_clocks());
+  _B->run_synced_extrapolation(B_norm->zone().dbm(), B_norm->zone().dim(), *extrapolation_vloc, 
+                                _B->get_no_of_original_clocks() + _A->get_no_of_original_clocks());
+
+  
+  auto vc_A = tchecker::virtual_constraint::factory(A_norm->zone(), _A->get_no_of_virtual_clocks());
+  auto vc_B = tchecker::virtual_constraint::factory(B_norm->zone(), _B->get_no_of_virtual_clocks());
+
+  vc_B->logic_and(A_norm->zone(), A_norm->zone());
+  vc_A->logic_and(B_norm->zone(), B_norm->zone());
+
+  assert(A_norm->zone().is_virtual_equivalent(B_norm->zone(), _no_of_virtual_clocks));
+  assert(tchecker::vcg::are_zones_synced(A_norm->zone(), B_norm->zone(), _A->get_no_of_original_clocks(), _B->get_no_of_original_clocks()));  
 
   vloc_destruct_and_deallocate(extrapolation_vloc);
 
-  tchecker::dbm::tighten(A_norm->zone().dbm(), A_norm->zone().dim());
-  tchecker::dbm::tighten(B_norm->zone().dbm(), B_norm->zone().dim());
+  return std::make_pair(A_norm, B_norm);
+}
 
-  if (contains_superset(A_norm, B_norm)) {
+bool visited_map_t::check_and_add_pair(tchecker::zg::state_sptr_t first, tchecker::zg::state_sptr_t second)
+{
+  assert(first->zone().is_virtual_equivalent(second->zone(), _no_of_virtual_clocks));
+  assert(tchecker::vcg::are_zones_synced(first->zone(), second->zone(), _A->get_no_of_original_clocks(), _B->get_no_of_original_clocks()));
+  if (contains_superset(first, second)) {
     return true;
   }
   else {
-    emplace(A_norm, B_norm);
+    emplace(first, second);
     return false;
   }
 }

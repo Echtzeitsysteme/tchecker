@@ -63,6 +63,70 @@ if(SUBSET_COUNTER GREATER 1)
     message(FATAL_ERROR "Multiple subset behaviour defined! Disable one of the previously mentioned subset policies or try --fresh.")
 endif()
 
+option(TCHECKER_REACH_USE_GLOBAL_M_EXTRAPOLATION "Use Global M Extrapolation for Reachability Checking" OFF)
+option(TCHECKER_REACH_USE_LOCAL_M_EXTRAPOLATION "Use Local M Extrapolation for Reachability Checking" OFF)
+option(TCHECKER_REACH_USE_GLOBAL_M_PLUS_EXTRAPOLATION "Use Global M Plus Extrapolation for Reachability Checking" OFF)
+option(TCHECKER_REACH_USE_LOCAL_M_PLUS_EXTRAPOLATION "Use Local M Plus Extrapolation for Reachability Checking" OFF)
+
+option(TCHECKER_REACH_USE_GLOBAL_LU_EXTRAPOLATION "Use Global L/U Extrapolation for Reachability Checking" OFF)
+option(TCHECKER_REACH_USE_LOCAL_LU_EXTRAPOLATION "Use Local L/U Extrapolation for Reachability Checking" OFF)
+option(TCHECKER_REACH_USE_GLOBAL_LU_PLUS_EXTRAPOLATION "Use Global L/U Plus Extrapolation for Reachability Checking" OFF)
+option(TCHECKER_REACH_USE_LOCAL_LU_PLUS_EXTRAPOLATION "Use Local L/U Plus Extrapolation for Reachability Checking" OFF)
+
+set(REACH_EXTRAPOLATION_COUNTER 0)
+
+message(STATUS "Setting the extrapolation for reachability check: ")
+
+if(TCHECKER_REACH_USE_GLOBAL_M_EXTRAPOLATION)
+    message(STATUS "Global M Extrapolation for Reachability Checking is set.")
+    MATH(EXPR REACH_EXTRAPOLATION_COUNTER "${REACH_EXTRAPOLATION_COUNTER}+1")
+endif()
+
+if(TCHECKER_REACH_USE_LOCAL_M_EXTRAPOLATION)
+    message(STATUS "Local M Extrapolation for Reachability Checking is set.")
+    MATH(EXPR REACH_EXTRAPOLATION_COUNTER "${REACH_EXTRAPOLATION_COUNTER}+1")
+endif()
+
+if(TCHECKER_REACH_USE_GLOBAL_M_PLUS_EXTRAPOLATION)
+    message(STATUS "Global M Plus Extrapolation for Reachability Checking is set.")
+    MATH(EXPR REACH_EXTRAPOLATION_COUNTER "${REACH_EXTRAPOLATION_COUNTER}+1")
+endif()
+
+if(TCHECKER_REACH_USE_LOCAL_M_PLUS_EXTRAPOLATION)
+    message(STATUS "Local M Plus Extrapolation for Reachability Checking is set.")
+    MATH(EXPR REACH_EXTRAPOLATION_COUNTER "${REACH_EXTRAPOLATION_COUNTER}+1")
+endif()
+
+if(TCHECKER_REACH_USE_GLOBAL_LU_EXTRAPOLATION)
+    message(STATUS "Global L/U Extrapolation for Reachability Checking is set.")
+    MATH(EXPR REACH_EXTRAPOLATION_COUNTER "${REACH_EXTRAPOLATION_COUNTER}+1")
+endif()
+
+if(TCHECKER_REACH_USE_LOCAL_LU_EXTRAPOLATION)
+    message(STATUS "Local L/U Extrapolation for Reachability Checking is set.")
+    MATH(EXPR REACH_EXTRAPOLATION_COUNTER "${REACH_EXTRAPOLATION_COUNTER}+1")
+endif()
+
+if(TCHECKER_REACH_USE_GLOBAL_LU_PLUS_EXTRAPOLATION)
+    message(STATUS "Global L/U Plus Extrapolation for Reachability Checking is set.")
+    MATH(EXPR REACH_EXTRAPOLATION_COUNTER "${REACH_EXTRAPOLATION_COUNTER}+1")
+endif()
+
+if(TCHECKER_REACH_USE_LOCAL_LU_PLUS_EXTRAPOLATION)
+    message(STATUS "Local L/U Plus Extrapolation for Reachability Checking is set.")
+    MATH(EXPR REACH_EXTRAPOLATION_COUNTER "${REACH_EXTRAPOLATION_COUNTER}+1")
+endif()
+
+
+if(REACH_EXTRAPOLATION_COUNTER LESS 1)
+    set(TCHECKER_REACH_USE_LOCAL_LU_PLUS_EXTRAPOLATION ON)
+    message(STATUS "No extrapolation defined. Defaulting to Local L/U Plus")
+endif()
+
+if(REACH_EXTRAPOLATION_COUNTER GREATER 1)
+    message(FATAL_ERROR "Multiple extrapolations defined! Disable one of the previously mentioned subset policies or try --fresh.")
+endif()
+
 #
 # Check if "flag" is accepted by the current CXX compiler. If the flag is
 # supported its value is assigned to the variable "var"; else "var" is asigned

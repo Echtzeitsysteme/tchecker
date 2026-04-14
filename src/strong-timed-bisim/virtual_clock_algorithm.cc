@@ -194,12 +194,21 @@ std::shared_ptr<algorithm_return_value_t> Lieb_et_al::check_for_virt_bisim(tchec
   // check whether there already exists a contradiction
   auto cache = _non_bisim_cache.already_cached(A_synced, B_synced);
   if (!cache->is_empty()) {
+    _visited_pair_of_states--;
     auto result = std::make_shared<algorithm_return_value_t>(syncer.revert_sync_with_urgent(A_state, B_state, cache), A_state, B_state);
     return result;
   }
 
+  // normalize
+  std::pair<tchecker::zg::state_sptr_t, tchecker::zg::state_sptr_t> normalized 
+    = visited.normalize(A_synced, B_synced);
+
+  A_synced = normalized.first;
+  B_synced = normalized.second;
+
   // checking whether normalized_pair is subset of visited. If not: add it.
   if (visited.check_and_add_pair(A_synced, B_synced)) {
+    _visited_pair_of_states--;
     return std::make_shared<algorithm_return_value_t>(_A->get_no_of_virtual_clocks(), A_state, B_state);
   }
 
