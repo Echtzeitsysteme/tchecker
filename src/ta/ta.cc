@@ -313,11 +313,22 @@ void attributes(tchecker::ta::system_t const & system, tchecker::ta::state_t con
 void attributes(tchecker::ta::system_t const & system, tchecker::ta::transition_t const & t,
                 std::map<std::string, std::string> & m)
 {
+  try {
   tchecker::syncprod::attributes(system.as_syncprod_system(), t, m);
   m["src_invariant"] = tchecker::to_string(t.src_invariant_container(), system.clock_variables().index());
   m["guard"] = tchecker::to_string(t.guard_container(), system.clock_variables().index());
   m["reset"] = tchecker::to_string(t.reset_container(), system.clock_variables().index());
   m["tgt_invariant"] = tchecker::to_string(t.tgt_invariant_container(), system.clock_variables().index());
+  } catch(const std::invalid_argument& e) {
+    if("key is not indexed" == std::string(e.what())) {
+      m["src_invariant"] = tchecker::to_string(t.src_invariant_container(), system.clock_variables().flattened().index());
+      m["guard"] = tchecker::to_string(t.guard_container(), system.clock_variables().flattened().index());
+      m["reset"] = tchecker::to_string(t.reset_container(), system.clock_variables().flattened().index());
+      m["tgt_invariant"] = tchecker::to_string(t.tgt_invariant_container(), system.clock_variables().flattened().index());
+    } else {
+      throw;
+    }
+  }
 }
 
 /* initialize */
