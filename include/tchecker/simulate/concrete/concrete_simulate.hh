@@ -104,7 +104,7 @@ class concrete_simulator_t {
                               tchecker::zg::const_state_sptr_t const & s,
                               std::vector<tchecker::zg::zg_t::sst_t> const & v,
                               bool finite_max_delay,
-                              tchecker::clock_rational_value_t max_delay,
+                              tchecker::operational_semantics::max_delay_t max_delay,
                               bool print_interaction);
 
   std::pair<tchecker::simulate::concrete::concrete_trans_type_t, tchecker::clock_rational_value_t>
@@ -113,7 +113,7 @@ class concrete_simulator_t {
   std::pair<tchecker::simulate::concrete::concrete_trans_type_t, tchecker::clock_rational_value_t>
   next_select(std::function<std::string()> input_func, bool print_interaction);
 
-  tchecker::clock_rational_value_t calculate_max_delay();
+  tchecker::operational_semantics::max_delay_t calculate_max_delay();
 
   int parse_starting_state_attributes(std::map<std::string, std::string> const & starting_state_attributes);
 

@@ -22,6 +22,8 @@
 
 #include "tchecker/simulate/simulate.hh"
 #include "tchecker/zg/zg.hh"
+#include "tchecker/simulate/concrete/concrete_graph.hh"
+#include "tchecker/operational-semantics/max_delay.hh"
 
 
 namespace tchecker {
@@ -51,29 +53,37 @@ class concrete_display_t {
 
   /*!
    \brief Display simulation next step
-   \param s : current state
+   \param s : current symbolic state
+   \param val : current valuation
    \param v : collection of next triples (status, state, transition)
    \param finite_max_delay : whether the max delay is finite
    \param max_delay : the max delay (only used if finite_max_delay = true)
    */
-  virtual void output_next(tchecker::zg::const_state_sptr_t const & s, std::vector<tchecker::zg::zg_t::sst_t> const & v, bool finite_max_delay,    
-                           tchecker::clock_rational_value_t max_delay) = 0;
+  virtual void output_next(tchecker::zg::const_state_sptr_t const & s, 
+                           tchecker::clockval_t & val,
+                           std::vector<tchecker::zg::zg_t::sst_t> const & v, 
+                           bool finite_max_delay,
+                           tchecker::operational_semantics::max_delay_t max_delay) = 0;
       
   /*!
    \brief Display state
    \param s : state
+   \param val : current valuation
    \post Attributes of state s in _zg have been output to _os
   */
-  virtual void output_state(tchecker::zg::const_state_sptr_t const & s) = 0;
+  virtual void output_state(tchecker::zg::const_state_sptr_t const & s, tchecker::clockval_t & val) = 0;
  
  protected:
   /*!
    \brief Get attributes of states
    \param s : state
+   \param val : current valuation
    \param attr : the map to fill
    \post Attributes of state s in _zg have been added to attr
   */
-  std::map<std::string, std::string> gen_attr_map(tchecker::zg::const_state_sptr_t const & s, std::map<std::string, std::string> & attr);
+  std::map<std::string, std::string> gen_attr_map(tchecker::zg::const_state_sptr_t const & s, 
+                                                  tchecker::clockval_t & val, 
+                                                  std::map<std::string, std::string> & attr);
 
   std::ostream & _os;                      /*!< Output stream */
   std::shared_ptr<tchecker::zg::zg_t> _zg; /*!< Zone graph */
@@ -124,10 +134,13 @@ class concrete_hr_display_t : public concrete_display_t {
 
   void output_initial(std::vector<tchecker::zg::zg_t::sst_t> const & v) override;
 
-  void output_next(tchecker::zg::const_state_sptr_t const & s, std::vector<tchecker::zg::zg_t::sst_t> const & v, 
-                   bool finite_max_delay, tchecker::clock_rational_value_t max_delay) override;
-
-  void output_state(tchecker::zg::const_state_sptr_t const & s) override;
+  void output_next(tchecker::zg::const_state_sptr_t const & s, 
+                   tchecker::clockval_t & val,
+                   std::vector<tchecker::zg::zg_t::sst_t> const & v, 
+                   bool finite_max_delay,
+                   tchecker::operational_semantics::max_delay_t max_delay) override;
+      
+  void output_state(tchecker::zg::const_state_sptr_t const & s, tchecker::clockval_t & val) override;
 
 private:
 
@@ -185,10 +198,13 @@ class concrete_json_display_t : public concrete_display_t {
 
   void output_initial(std::vector<tchecker::zg::zg_t::sst_t> const & v) override;
 
-  void output_next(tchecker::zg::const_state_sptr_t const & s, std::vector<tchecker::zg::zg_t::sst_t> const & v, 
-                   bool finite_max_delay, tchecker::clock_rational_value_t max_delay) override;
-
-  void output_state(tchecker::zg::const_state_sptr_t const & s) override;
+  void output_next(tchecker::zg::const_state_sptr_t const & s, 
+                   tchecker::clockval_t & val,
+                   std::vector<tchecker::zg::zg_t::sst_t> const & v, 
+                   bool finite_max_delay,
+                   tchecker::operational_semantics::max_delay_t max_delay) override;
+      
+  void output_state(tchecker::zg::const_state_sptr_t const & s, tchecker::clockval_t & val) override;
 
 private:
 
@@ -197,7 +213,7 @@ private:
  \param s : state
  \post Attributes of state s in _zg have been output to _os
   */
-  boost::json::value output(tchecker::zg::const_state_sptr_t const & s);
+  boost::json::value output(tchecker::zg::const_state_sptr_t const & s, tchecker::clockval_t & val);
 
   /*!
    \brief Display transition

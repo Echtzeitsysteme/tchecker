@@ -232,8 +232,17 @@ bool node_t::is_leaf(std::shared_ptr<tchecker::vcg::vcg_t> vcg1, std::shared_ptr
     auto first = tchecker::operational_semantics::max_delay(state_1_fut->zone(), _valuation.first, _cut_off, 0);
     auto second = tchecker::operational_semantics::max_delay(state_2_fut->zone(), _valuation.second, _cut_off, 0);
     _final = true;
-    _final_first_has_transition = (first > second);
-    double symbol = _final_first_has_transition ? static_cast<double>(first.numerator()) / first.denominator() : static_cast<double>(second.numerator()) / second.denominator();
+    _final_first_has_transition = (second < first);
+
+    double symbol = _final_first_has_transition ? 
+                          static_cast<double>(first.value().numerator())/first.value().denominator() 
+                        : static_cast<double>(second.value().numerator())/second.value().denominator();
+    
+    if((_final_first_has_transition && tchecker::operational_semantics::cmp_t::L == first.cmp()) ||
+       (!_final_first_has_transition && tchecker::operational_semantics::cmp_t::L == second.cmp())) {
+      symbol -= 0.5;
+    }
+
     symbol *= 10;
     int symbol_cut = std::round(symbol);
     
@@ -324,7 +333,10 @@ node_t::max_delay(std::shared_ptr<tchecker::virtual_constraint::virtual_constrai
   std::pair<std::shared_ptr<tchecker::zg::zone_t>, std::shared_ptr<tchecker::zg::zone_t>> zones =
       vc->generate_synchronized_zones(vcg1->get_no_of_original_clocks(), vcg2->get_no_of_original_clocks());
   
-  clock_rational_value_t delay = tchecker::operational_semantics::max_delay(*zones.first, _valuation.first, _cut_off, 0);
+  auto max_delay = tchecker::operational_semantics::max_delay(*zones.first, _valuation.first, _cut_off, 0);
+
+  clock_rational_value_t delay = (tchecker::operational_semantics::cmp_t::LE == max_delay.cmp()) ?
+                                  max_delay.value(): max_delay.value() - clock_rational_value_t(1, 2);
 
   auto clone_1 = tchecker::clockval_clone(*_valuation.first);
   auto new_valuation_1 = std::shared_ptr<tchecker::clockval_t>(clone_1, &clockval_destruct_and_deallocate);

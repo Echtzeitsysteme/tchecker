@@ -6,6 +6,9 @@
  */
 
 #include "tchecker/simulate/concrete/concrete_simulate.hh"
+
+#include<random>
+
 #include "tchecker/simulate/concrete/concrete_display.hh"
 
 #include "tchecker/operational-semantics/max_delay.hh"
@@ -67,19 +70,19 @@ void concrete_simulator_t::onestep_simulation(std::map<std::string, std::string>
 {
   if (starting_state_attributes.empty()) {
     _zg->initial(_v);
-    _display->output_initial(_v);
+    _display->output_initial(_v);    
   }
   else {
 
     parse_starting_state_attributes(starting_state_attributes);
 
-    tchecker::clock_rational_value_t max_delay = calculate_max_delay();
+    auto max_delay = calculate_max_delay();
     tchecker::zg::const_state_sptr_t previous_symb_const{_previous_symb};
 
     _v.clear();
     _zg->next(previous_symb_const, _v);
-
-    _display->output_next(previous_symb_const, _v, max_delay != _highest_delay, max_delay);
+    _display->output_next(previous_symb_const, *(_previous_node->valuation()), _v, 
+                          max_delay < tchecker::operational_semantics::max_delay_t(_highest_delay, tchecker::operational_semantics::cmp_t::LE), max_delay);
   }
 }
 
@@ -108,7 +111,7 @@ concrete_simulator_t::randomized_simulation(std::map<std::string, std::string> c
     }
   }
   tchecker::zg::const_state_sptr_t previous_symb_const{_previous_symb};
-  _display->output_state(previous_symb_const);
+  _display->output_state(previous_symb_const, *(_previous_node->valuation()));
   return _state_space;
 }
 
@@ -119,13 +122,12 @@ concrete_simulator_t::concrete_interactive_select(std::ostream & s_out,
                                                   tchecker::zg::const_state_sptr_t const & s,
                                                   std::vector<tchecker::zg::zg_t::sst_t> const & v,
                                                   bool finite_max_delay,
-                                                  tchecker::clock_rational_value_t max_delay,
+                                                  tchecker::operational_semantics::max_delay_t max_delay,
                                                   bool print_interaction)
 {
   assert(v.size() < NO_SELECTION);
-  assert(max_delay.denominator() == 1 || max_delay.denominator() == 2);
 
-  if (v.size() == 0 && 0 == max_delay) {
+  if (v.size() == 0 && 0 == max_delay.value()) {
     s_out << "We have reached a dead end. No continuation possible." << std::endl;
     return std::make_pair(ACTION, 
             tchecker::clock_rational_value_t(NO_SELECTION, 1));
@@ -135,7 +137,7 @@ concrete_simulator_t::concrete_interactive_select(std::ostream & s_out,
     display.output_initial(v);
   }
   else if (print_interaction) {
-    display.output_next(s, v, finite_max_delay, max_delay);
+    display.output_next(s, *(_previous_node->valuation()), v, finite_max_delay, max_delay);
   }
 
   do {
@@ -155,14 +157,36 @@ concrete_simulator_t::concrete_interactive_select(std::ostream & s_out,
       return std::make_pair(ACTION, 
               tchecker::clock_rational_value_t(NO_SELECTION, 1));
     else if (input[0] == 'r') {
-      int use_delay = std::rand() % 2;
+      bool use_delay = (std::rand() % 2) == 0;
       if(v.size() == 0) {
-        use_delay = 0;
+        use_delay = true;
       }
-      if(0 == use_delay && nullptr != s.ptr()) {
-        int64_t random_delay = ( static_cast<int64_t>(std::rand())) % (max_delay.denominator() * max_delay.numerator() + 1);
-        s_out << "Randomly choosen delay: " << tchecker::clock_rational_value_t(random_delay, max_delay.denominator()) << std::endl;
-        return std::make_pair(DELAY, tchecker::clock_rational_value_t(random_delay, max_delay.denominator()));
+      if(use_delay && nullptr != s.ptr()) {
+        std::random_device rd;
+        std::mt19937_64 gen(rd());
+
+        if(max_delay.value().denominator() > INT64_MAX/max_delay.value().numerator()) {
+          std::string msg = std::string("The max delay is ");
+          msg+= std::to_string(max_delay.value().numerator());
+          msg+= std::string("/");
+          msg+= std::to_string(max_delay.value().denominator());
+          msg+= std::string(" and since numerator*denominator exceeds INT64_MAX, we cannot handle it.");
+          throw std::runtime_error(msg);
+        }
+
+        int64_t numerator, denominator;
+        // Numerator must satisfy: numerator <= max_value * denominator
+        std::uniform_int_distribution<int64_t> denom_dist(1, INT64_MAX/(max_delay.value().numerator() * max_delay.value().denominator()));
+        denominator = denom_dist(gen);
+
+        int64_t max_numerator = max_delay.value().numerator() * max_delay.value().denominator() * denominator - 1;
+        std::uniform_int_distribution<int64_t> num_dist(1, max_numerator);
+        numerator = num_dist(gen);
+        
+        tchecker::clock_rational_value_t random_delay = tchecker::clock_rational_value_t(numerator, denominator);
+
+        s_out << "Randomly choosen delay: " << random_delay << std::endl;
+        return std::make_pair(DELAY, random_delay);
       } else {
         if(v.size() == 0) {
           throw std::runtime_error("An initial state is needed.");
@@ -197,17 +221,13 @@ concrete_simulator_t::concrete_interactive_select(std::ostream & s_out,
             s_out << "denominator cannot be zero." << std::endl;
             continue;
           }
-          if(den > 2) {
-            s_out << "denominator cannot be larger than two" << std::endl;
-            continue;
-          }
         }
         if(num > INT64_MAX || den > INT64_MAX) {
           s_out << "invalid values for delay" << std::endl;
           continue;
         }
         tchecker::clock_rational_value_t val(static_cast<int64_t>(num), static_cast<int64_t>(den));
-        if(finite_max_delay && val > max_delay) {
+        if(finite_max_delay && max_delay < tchecker::operational_semantics::max_delay_t(val, tchecker::operational_semantics::cmp_t::LE)) {
           s_out << "delay to high" << std::endl;
           continue;
         }
@@ -241,8 +261,9 @@ concrete_simulator_t::initial_select(std::function<std::string()> input_func, bo
     // start simulation from initial states
   _zg->initial(_v);
   auto select = concrete_interactive_select(_os, input_func, *_display, 
-                                            tchecker::zg::const_state_sptr_t{nullptr}, _v, 
-                                            clock_rational_value_t(_highest_delay, 1), false, print_interaction);
+                                            tchecker::zg::const_state_sptr_t{nullptr}, _v, false,
+                                            tchecker::operational_semantics::max_delay_t(_highest_delay, tchecker::operational_semantics::cmp_t::LE), 
+                                            print_interaction);
                                       
   if (select.second.numerator() > 0 && 
       select.second.numerator() ==  NO_SELECTION && 
@@ -264,12 +285,17 @@ std::pair<tchecker::simulate::concrete::concrete_trans_type_t, tchecker::clock_r
 concrete_simulator_t::next_select(std::function<std::string()> input_func, bool print_interaction)
 {
   _v.clear();
-  tchecker::clock_rational_value_t max_delay = calculate_max_delay();
+  auto max_delay = calculate_max_delay();
   
   tchecker::zg::const_state_sptr_t previous_symb_const{_previous_symb};
   _zg->next(previous_symb_const, _v);
 
-  auto select = concrete_interactive_select(std::cout, input_func, *_display, previous_symb_const, _v, max_delay != _highest_delay, max_delay, print_interaction);
+  bool finite_max_delay = (max_delay != 
+                              tchecker::operational_semantics::max_delay_t(_highest_delay, 
+                                                    tchecker::operational_semantics::cmp_t::LE));
+  auto select = concrete_interactive_select(std::cout, input_func, *_display, previous_symb_const, _v, 
+                                            finite_max_delay, 
+                                            max_delay, print_interaction);
   if (select.second.numerator() > 0 && 
       select.second.numerator() ==  NO_SELECTION && 
       select.second.denominator() == 1) {
@@ -297,9 +323,10 @@ concrete_simulator_t::next_select(std::function<std::string()> input_func, bool 
   return select;
 }
 
-tchecker::clock_rational_value_t concrete_simulator_t::calculate_max_delay()
+tchecker::operational_semantics::max_delay_t concrete_simulator_t::calculate_max_delay()
 {
-  tchecker::clock_rational_value_t max_delay = 0;
+  tchecker::operational_semantics::max_delay_t max_delay 
+    = tchecker::operational_semantics::max_delay_t(0, tchecker::operational_semantics::cmp_t::LE);
   if (tchecker::ta::delay_allowed(*_system, _previous_node->ta_state()->vloc())) {
     tchecker::zg::state_sptr_t eps = _zg->clone_state(_previous_symb);
     _zg->semantics()->delay(eps->zone_ptr()->dbm(), eps->zone_ptr()->dim(), *_previous_node_inv);
