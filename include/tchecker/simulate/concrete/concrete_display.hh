@@ -25,6 +25,8 @@
 #include "tchecker/simulate/concrete/concrete_graph.hh"
 #include "tchecker/operational-semantics/max_delay.hh"
 
+#define NO_DEC_PLACES 2 // Delays with a maximum of two decimal places are allowed.
+#define GRANULARITY static_cast<int64_t>(pow(10, NO_DEC_PLACES))
 
 namespace tchecker {
 

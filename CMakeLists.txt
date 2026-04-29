@@ -33,7 +33,6 @@ if (USE_CPPCHECK)
                 "--inconclusive"
                 "--force" 
                 "--inline-suppr"
-                "--cppcheck-build-dir=${CPPCHECK_BUILD_DIR}"
                 "--error-exitcode=1"
                 "--suppressions-list=${CMAKE_SOURCE_DIR}/CppCheckSuppressions.txt"
                 "--check-level=exhaustive"

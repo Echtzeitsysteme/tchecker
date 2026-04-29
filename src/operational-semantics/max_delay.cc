@@ -70,7 +70,7 @@ max_delay(tchecker::zg::zone_t & zone, std::shared_ptr<tchecker::clockval_t> val
   // since we want to multiply all elements of the zone with that factor, we need to check whether 
   // the maximum denominator is within the bounds of int32_t
   if(max_den < std::numeric_limits<int32_t>::min() || max_den > std::numeric_limits<int32_t>::max()) {
-    throw std::runtime_error("To small steps choosen");
+    throw std::runtime_error("Too small steps choosen");
   }
 
   auto clone_val = clockval_factory(valuation->size());
