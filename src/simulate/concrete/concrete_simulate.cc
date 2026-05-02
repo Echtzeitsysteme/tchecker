@@ -222,18 +222,30 @@ concrete_simulator_t::concrete_interactive_select(std::ostream & s_out,
       input=input.substr(2);
 
       try{
-        size_t slash_pos = input.find('.');
+        size_t point_pos = input.find('.');
+        size_t slash_pos = input.find('/');
         int64_t num;
         int64_t den;
 
-        if (slash_pos == std::string::npos) {
+        if (std::string::npos == point_pos && std::string::npos == slash_pos) {
           num = std::stol(input);
           den = 1;
-        } else {
-
+        } else if (std::string::npos == slash_pos) {
           double value = std::stod(input);
           num = std::round(value*GRANULARITY);
           den = GRANULARITY;
+        } else {
+          // Split into numerator and denominator
+          num = std::stol(input.substr(0, slash_pos));
+          den = std::stol(input.substr(slash_pos + 1));
+          if (den == 0) {
+            s_out << "denominator cannot be zero." << std::endl;
+            continue;
+          }
+          if(den > 2) {
+            s_out << "denominator cannot be larger than two" << std::endl;
+            continue;
+          }
         }
         tchecker::clock_rational_value_t val(num, den);
         if(finite_max_delay && max_delay < tchecker::operational_semantics::max_delay_t(val, tchecker::operational_semantics::cmp_t::LE)) {

@@ -917,7 +917,7 @@ void clockval_destruct_and_deallocate(tchecker::clockval_t * v);
  \return a std::shared_ptr to an instance of tchecker::clockval_t of size values, initialized to value
  \note The destructor points to clockval_destruct_and_deallocate
  */
-std::shared_ptr<tchecker::clockval_t> clockval_factory(unsigned short size, tchecker::clock_rational_value_t value = 0);
+std::shared_ptr<tchecker::clockval_t> clockval_factory(tchecker::clock_id_t size, tchecker::clock_rational_value_t value = 0);
 
 /*!
  \brief A factory to create clock valuations

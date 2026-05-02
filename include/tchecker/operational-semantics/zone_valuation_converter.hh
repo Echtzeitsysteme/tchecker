@@ -19,9 +19,15 @@ namespace operational_semantics {
  \brief Converts a zone into a clock valuation
  \param zone : the zone to convert
  \return a clock valuation from that zone
- \note Only fractional values of .0 and .5 are used
  */
 std::shared_ptr<tchecker::clockval_t> convert(const tchecker::zg::zone_t & zone);
+
+/*!
+ \brief compresses the zone such that each value must be within a range of less than 1
+ \param zone : the zone to compress
+ \return EMPTY if the compressed zone is empty
+ */
+tchecker::dbm::status_t compress_zone(std::shared_ptr<tchecker::zg::zone_t> zone);
 
 /*!
  \brief Converts a clock valuation into the corresponding region
