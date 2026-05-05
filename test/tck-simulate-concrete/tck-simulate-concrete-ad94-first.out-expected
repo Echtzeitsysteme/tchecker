@@ -1,0 +1,87 @@
+--- Initial states: 
+0) 	clockval: x=0,y=0
+	intval: 
+	labels: 
+	vloc: <l0>
+select 0-0 (q: quit, r: random)? --- Current state: 
+	clockval: x=0,y=0
+	intval: 
+	labels: 
+	vloc: <l0>
+--- Successors: 
+0) 	guard:  	reset: y=0 	src_invariant:  	sync:  	tgt_invariant:  	vedge: <P@a> 
+	clockval: x=0,y=0
+	intval: 
+	labels: 
+	vloc: <l1>
+--- Max Delay: infinite
+Select d <delay> (<delay> must have the form int or int.int with up to 2 decimal places) or select 0-0 (q: quit, r: random)? --- Current state: 
+	clockval: x=1/2,y=1/2
+	intval: 
+	labels: 
+	vloc: <l0>
+--- Successors: 
+0) 	guard:  	reset: y=0 	src_invariant:  	sync:  	tgt_invariant:  	vedge: <P@a> 
+	clockval: x=1/2,y=0
+	intval: 
+	labels: 
+	vloc: <l1>
+--- Max Delay: infinite
+Select d <delay> (<delay> must have the form int or int.int with up to 2 decimal places) or select 0-0 (q: quit, r: random)? --- Current state: 
+	clockval: x=1/2,y=0
+	intval: 
+	labels: 
+	vloc: <l1>
+--- Successors: 
+0) 	guard: x<1 	reset:  	src_invariant:  	sync:  	tgt_invariant:  	vedge: <P@c> 
+	clockval: x=1/2,y=0
+	intval: 
+	labels: green
+	vloc: <l3>
+--- Max Delay: infinite
+Select d <delay> (<delay> must have the form int or int.int with up to 2 decimal places) or select 0-0 (q: quit, r: random)? --- Current state: 
+	clockval: x=1,y=1/2
+	intval: 
+	labels: 
+	vloc: <l1>
+--- Successors: 
+--- Max Delay: infinite
+Select d <delay> (<delay> must have the form int or int.int with up to 2 decimal places) or  (q: quit, r: random)? --- Current state: 
+	clockval: x=23/20,y=13/20
+	intval: 
+	labels: 
+	vloc: <l1>
+--- Successors: 
+--- Max Delay: infinite
+Select d <delay> (<delay> must have the form int or int.int with up to 2 decimal places) or  (q: quit, r: random)? --- Current state: 
+	clockval: x=3/2,y=1
+	intval: 
+	labels: 
+	vloc: <l1>
+--- Successors: 
+0) 	guard: y<=1 && y>=1 	reset:  	src_invariant:  	sync:  	tgt_invariant:  	vedge: <P@b> 
+	clockval: x=3/2,y=1
+	intval: 
+	labels: 
+	vloc: <l2>
+--- Max Delay: infinite
+Select d <delay> (<delay> must have the form int or int.int with up to 2 decimal places) or select 0-0 (q: quit, r: random)? --- Current state: 
+	clockval: x=3/2,y=1
+	intval: 
+	labels: 
+	vloc: <l1>
+--- Successors: 
+0) 	guard: y<=1 && y>=1 	reset:  	src_invariant:  	sync:  	tgt_invariant:  	vedge: <P@b> 
+	clockval: x=3/2,y=1
+	intval: 
+	labels: 
+	vloc: <l2>
+--- Max Delay: infinite
+Select d <delay> (<delay> must have the form int or int.int with up to 2 decimal places) or select 0-0 (q: quit, r: random)? --- Current state: 
+	clockval: x=3/2,y=1
+	intval: 
+	labels: 
+	vloc: <l2>
+--- Successors: 
+--- Max Delay: infinite
+Select d <delay> (<delay> must have the form int or int.int with up to 2 decimal places) or  (q: quit, r: random)? 

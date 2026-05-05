@@ -146,10 +146,10 @@ concrete_simulator_t::concrete_interactive_select(std::ostream & s_out,
 
   do {
     if(print_interaction && nullptr != s.ptr()) {
-      s_out << "Select d <delay> (<delay> must have the form int or int.int with up to " << NO_DEC_PLACES << " decimal places ";
+      s_out << "Select d <delay> (<delay> must have the form int or int.int with up to " << NO_DEC_PLACES << " decimal places) or ";
     }
     if(print_interaction && v.size() > 0) {
-      s_out << "or select 0-" << v.size() - 1;
+      s_out << "select 0-" << v.size() - 1;
     }
     if(print_interaction) {
       s_out << " (q: quit, r: random)? ";

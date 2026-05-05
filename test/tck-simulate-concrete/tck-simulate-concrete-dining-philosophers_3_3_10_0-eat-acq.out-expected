@@ -1,0 +1,176 @@
+--- Initial states: 
+0) 	clockval: x1=0,x2=0,x3=0
+	intval: 
+	labels: 
+	vloc: <idle,idle,idle,free,free,free>
+select 0-0 (q: quit, r: random)? --- Current state: 
+	clockval: x1=0,x2=0,x3=0
+	intval: 
+	labels: 
+	vloc: <idle,idle,idle,free,free,free>
+--- Successors: 
+0) 	guard:  	reset: x1=0 	src_invariant:  	sync: <P1@take3,F3@take3> 	tgt_invariant: x1<=3 	vedge: <P1@take3,F3@take3> 
+	clockval: x1=0,x2=0,x3=0
+	intval: 
+	labels: 
+	vloc: <acq,idle,idle,free,free,taken>
+1) 	guard:  	reset: x2=0 	src_invariant:  	sync: <P2@take1,F1@take1> 	tgt_invariant: x2<=3 	vedge: <P2@take1,F1@take1> 
+	clockval: x1=0,x2=0,x3=0
+	intval: 
+	labels: 
+	vloc: <idle,acq,idle,taken,free,free>
+2) 	guard:  	reset: x3=0 	src_invariant:  	sync: <P3@take2,F2@take2> 	tgt_invariant: x3<=3 	vedge: <P3@take2,F2@take2> 
+	clockval: x1=0,x2=0,x3=0
+	intval: 
+	labels: 
+	vloc: <idle,idle,acq,free,taken,free>
+--- Max Delay: infinite
+Select d <delay> (<delay> must have the form int or int.int with up to 2 decimal places) or select 0-2 (q: quit, r: random)? --- Current state: 
+	clockval: x1=2027/100,x2=2027/100,x3=2027/100
+	intval: 
+	labels: 
+	vloc: <idle,idle,idle,free,free,free>
+--- Successors: 
+0) 	guard:  	reset: x1=0 	src_invariant:  	sync: <P1@take3,F3@take3> 	tgt_invariant: x1<=3 	vedge: <P1@take3,F3@take3> 
+	clockval: x1=0,x2=2027/100,x3=2027/100
+	intval: 
+	labels: 
+	vloc: <acq,idle,idle,free,free,taken>
+1) 	guard:  	reset: x2=0 	src_invariant:  	sync: <P2@take1,F1@take1> 	tgt_invariant: x2<=3 	vedge: <P2@take1,F1@take1> 
+	clockval: x1=2027/100,x2=0,x3=2027/100
+	intval: 
+	labels: 
+	vloc: <idle,acq,idle,taken,free,free>
+2) 	guard:  	reset: x3=0 	src_invariant:  	sync: <P3@take2,F2@take2> 	tgt_invariant: x3<=3 	vedge: <P3@take2,F2@take2> 
+	clockval: x1=2027/100,x2=2027/100,x3=0
+	intval: 
+	labels: 
+	vloc: <idle,idle,acq,free,taken,free>
+--- Max Delay: infinite
+Select d <delay> (<delay> must have the form int or int.int with up to 2 decimal places) or select 0-2 (q: quit, r: random)? --- Current state: 
+	clockval: x1=0,x2=2027/100,x3=2027/100
+	intval: 
+	labels: 
+	vloc: <acq,idle,idle,free,free,taken>
+--- Successors: 
+0) 	guard: x1<=3 	reset: x1=0 	src_invariant: x1<=3 	sync: <P1@take1,F1@take1> 	tgt_invariant: x1<=10 	vedge: <P1@take1,F1@take1> 
+	clockval: x1=0,x2=2027/100,x3=2027/100
+	intval: 
+	labels: eating1
+	vloc: <eat,idle,idle,taken,free,taken>
+1) 	guard:  	reset: x2=0 	src_invariant: x1<=3 	sync: <P2@take1,F1@take1> 	tgt_invariant: x1<=3 && x2<=3 	vedge: <P2@take1,F1@take1> 
+	clockval: x1=0,x2=0,x3=2027/100
+	intval: 
+	labels: 
+	vloc: <acq,acq,idle,taken,free,taken>
+2) 	guard:  	reset: x3=0 	src_invariant: x1<=3 	sync: <P3@take2,F2@take2> 	tgt_invariant: x1<=3 && x3<=3 	vedge: <P3@take2,F2@take2> 
+	clockval: x1=0,x2=2027/100,x3=0
+	intval: 
+	labels: 
+	vloc: <acq,idle,acq,free,taken,taken>
+--- Max Delay: <=3
+Select d <delay> (<delay> must have the form int or int.int with up to 2 decimal places) or select 0-2 (q: quit, r: random)? --- Current state: 
+	clockval: x1=0,x2=0,x3=2027/100
+	intval: 
+	labels: 
+	vloc: <acq,acq,idle,taken,free,taken>
+--- Successors: 
+0) 	guard: x2<=3 	reset: x2=0 	src_invariant: x1<=3 && x2<=3 	sync: <P2@take2,F2@take2> 	tgt_invariant: x1<=3 && x2<=10 	vedge: <P2@take2,F2@take2> 
+	clockval: x1=0,x2=0,x3=2027/100
+	intval: 
+	labels: eating2
+	vloc: <acq,eat,idle,taken,taken,taken>
+1) 	guard:  	reset: x3=0 	src_invariant: x1<=3 && x2<=3 	sync: <P3@take2,F2@take2> 	tgt_invariant: x1<=3 && x2<=3 && x3<=3 	vedge: <P3@take2,F2@take2> 
+	clockval: x1=0,x2=0,x3=0
+	intval: 
+	labels: 
+	vloc: <acq,acq,acq,taken,taken,taken>
+--- Max Delay: <=3
+Select d <delay> (<delay> must have the form int or int.int with up to 2 decimal places) or select 0-1 (q: quit, r: random)? --- Current state: 
+	clockval: x1=241/100,x2=241/100,x3=567/25
+	intval: 
+	labels: 
+	vloc: <acq,acq,idle,taken,free,taken>
+--- Successors: 
+0) 	guard: x2<=3 	reset: x2=0 	src_invariant: x1<=3 && x2<=3 	sync: <P2@take2,F2@take2> 	tgt_invariant: x1<=3 && x2<=10 	vedge: <P2@take2,F2@take2> 
+	clockval: x1=241/100,x2=0,x3=567/25
+	intval: 
+	labels: eating2
+	vloc: <acq,eat,idle,taken,taken,taken>
+1) 	guard:  	reset: x3=0 	src_invariant: x1<=3 && x2<=3 	sync: <P3@take2,F2@take2> 	tgt_invariant: x1<=3 && x2<=3 && x3<=3 	vedge: <P3@take2,F2@take2> 
+	clockval: x1=241/100,x2=241/100,x3=0
+	intval: 
+	labels: 
+	vloc: <acq,acq,acq,taken,taken,taken>
+--- Max Delay: <=59/100
+Select d <delay> (<delay> must have the form int or int.int with up to 2 decimal places) or select 0-1 (q: quit, r: random)? --- Current state: 
+	clockval: x1=241/100,x2=0,x3=567/25
+	intval: 
+	labels: eating2
+	vloc: <acq,eat,idle,taken,taken,taken>
+--- Successors: 
+--- Max Delay: <=59/100
+Select d <delay> (<delay> must have the form int or int.int with up to 2 decimal places) or  (q: quit, r: random)? --- Current state: 
+	clockval: x1=3,x2=59/100,x3=2327/100
+	intval: 
+	labels: eating2
+	vloc: <acq,eat,idle,taken,taken,taken>
+--- Successors: 
+0) 	guard: x1>=3 	reset:  	src_invariant: x1<=3 && x2<=10 	sync: <P1@release3,F3@release3> 	tgt_invariant: x2<=10 	vedge: <P1@release3,F3@release3> 
+	clockval: x1=3,x2=59/100,x3=2327/100
+	intval: 
+	labels: eating2
+	vloc: <idle,eat,idle,taken,taken,free>
+--- Max Delay: <=0
+Select d <delay> (<delay> must have the form int or int.int with up to 2 decimal places) or select 0-0 (q: quit, r: random)? --- Current state: 
+	clockval: x1=3,x2=59/100,x3=2327/100
+	intval: 
+	labels: eating2
+	vloc: <idle,eat,idle,taken,taken,free>
+--- Successors: 
+0) 	guard:  	reset: x1=0 	src_invariant: x2<=10 	sync: <P1@take3,F3@take3> 	tgt_invariant: x1<=3 && x2<=10 	vedge: <P1@take3,F3@take3> 
+	clockval: x1=0,x2=59/100,x3=2327/100
+	intval: 
+	labels: eating2
+	vloc: <acq,eat,idle,taken,taken,taken>
+--- Max Delay: <=941/100
+Select d <delay> (<delay> must have the form int or int.int with up to 2 decimal places) or select 0-0 (q: quit, r: random)? --- Current state: 
+	clockval: x1=1241/100,x2=10,x3=817/25
+	intval: 
+	labels: eating2
+	vloc: <idle,eat,idle,taken,taken,free>
+--- Successors: 
+0) 	guard:  	reset: x1=0 	src_invariant: x2<=10 	sync: <P1@take3,F3@take3> 	tgt_invariant: x1<=3 && x2<=10 	vedge: <P1@take3,F3@take3> 
+	clockval: x1=0,x2=10,x3=817/25
+	intval: 
+	labels: eating2
+	vloc: <acq,eat,idle,taken,taken,taken>
+1) 	guard: x2>=10 	reset: x2=0 	src_invariant: x2<=10 	sync: <P2@release2,F2@release2> 	tgt_invariant: x2<=0 	vedge: <P2@release2,F2@release2> 
+	clockval: x1=1241/100,x2=0,x3=817/25
+	intval: 
+	labels: 
+	vloc: <idle,rel,idle,taken,free,free>
+--- Max Delay: <=0
+Select d <delay> (<delay> must have the form int or int.int with up to 2 decimal places) or select 0-1 (q: quit, r: random)? --- Current state: 
+	clockval: x1=1241/100,x2=0,x3=817/25
+	intval: 
+	labels: 
+	vloc: <idle,rel,idle,taken,free,free>
+--- Successors: 
+0) 	guard:  	reset: x1=0 	src_invariant: x2<=0 	sync: <P1@take3,F3@take3> 	tgt_invariant: x1<=3 && x2<=0 	vedge: <P1@take3,F3@take3> 
+	clockval: x1=0,x2=0,x3=817/25
+	intval: 
+	labels: 
+	vloc: <acq,rel,idle,taken,free,taken>
+1) 	guard:  	reset:  	src_invariant: x2<=0 	sync: <P2@release1,F1@release1> 	tgt_invariant:  	vedge: <P2@release1,F1@release1> 
+	clockval: x1=1241/100,x2=0,x3=817/25
+	intval: 
+	labels: 
+	vloc: <idle,idle,idle,free,free,free>
+2) 	guard:  	reset: x3=0 	src_invariant: x2<=0 	sync: <P3@take2,F2@take2> 	tgt_invariant: x2<=0 && x3<=3 	vedge: <P3@take2,F2@take2> 
+	clockval: x1=1241/100,x2=0,x3=0
+	intval: 
+	labels: 
+	vloc: <idle,rel,acq,taken,taken,free>
+--- Max Delay: <=0
+Select d <delay> (<delay> must have the form int or int.int with up to 2 decimal places) or select 0-2 (q: quit, r: random)? 
