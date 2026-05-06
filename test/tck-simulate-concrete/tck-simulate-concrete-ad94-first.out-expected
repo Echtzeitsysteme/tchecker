@@ -84,4 +84,20 @@ Select d <delay> (<delay> must have the form int or int.int with up to 2 decimal
 	vloc: <l2>
 --- Successors: 
 --- Max Delay: infinite
-Select d <delay> (<delay> must have the form int or int.int with up to 2 decimal places) or  (q: quit, r: random)? 
+Select d <delay> (<delay> must have the form int or int.int with up to 2 decimal places) or  (q: quit, r: random)? digraph ad94_fig10 {
+  0 [clockval="Ref Clock=0,x=0,y=0", intval="", labels="", vloc="<l0>"]
+  1 [clockval="Ref Clock=0,x=1/2,y=1/2", intval="", labels="", vloc="<l0>"]
+  2 [clockval="Ref Clock=0,x=1/2,y=0", intval="", labels="", vloc="<l1>"]
+  3 [clockval="Ref Clock=0,x=1,y=1/2", intval="", labels="", vloc="<l1>"]
+  4 [clockval="Ref Clock=0,x=23/20,y=13/20", intval="", labels="", vloc="<l1>"]
+  5 [clockval="Ref Clock=0,x=3/2,y=1", intval="", labels="", vloc="<l1>"]
+  6 [clockval="Ref Clock=0,x=3/2,y=1", intval="", labels="", vloc="<l1>"]
+  7 [clockval="Ref Clock=0,x=3/2,y=1", intval="", labels="", vloc="<l2>"]
+  0 -> 1 [delay="1/2"]
+  1 -> 2 [guard="", reset="y=0", src_invariant="", sync="", tgt_invariant="", vedge="<P@a>"]
+  2 -> 3 [delay="1/2"]
+  3 -> 4 [delay="3/20"]
+  4 -> 5 [delay="7/20"]
+  5 -> 6 [delay="0"]
+  6 -> 7 [guard="y<=1 && y>=1", reset="", src_invariant="", sync="", tgt_invariant="", vedge="<P@b>"]
+}

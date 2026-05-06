@@ -69,7 +69,7 @@ node_t edge_t::tgt() {return _tgt;}
 
 /*! action_edge_t */
 
-action_edge_t::action_edge_t(tchecker::zg::zg_t::transition_t & t, node_t & src, node_t & tgt)
+action_edge_t::action_edge_t(tchecker::zg::transition_sptr_t t, node_t & src, node_t & tgt)
   : edge_t(src, tgt), _ta_trans(t)
 {
 }
@@ -116,6 +116,8 @@ void graph_t::dot_output(std::ostream & os, std::string const & name) {
     cur->attributes(*_system, attr);
     tchecker::graph::dot_output_edge(os, std::to_string(cur->src().id()), std::to_string(cur->tgt().id()), attr);
   }
+
+  tchecker::graph::dot_output_footer(os);
 }
 
 std::shared_ptr<node_t> graph_t::add_node(tchecker::zg::zg_t& zg, tchecker::zg::zg_t::state_t & symb_state, std::shared_ptr<tchecker::clockval_t> valuation,
@@ -153,7 +155,7 @@ std::shared_ptr<node_t> graph_t::add_node(tchecker::zg::zg_t& zg, tchecker::zg::
   return result;
 }
 
-void graph_t::add_action_edge(tchecker::zg::zg_t::transition_t & t, node_t & src, node_t & tgt)
+void graph_t::add_action_edge(tchecker::zg::transition_sptr_t t, node_t & src, node_t & tgt)
 {
   _edges.emplace_back(std::make_shared<action_edge_t>(t, src, tgt));
 }

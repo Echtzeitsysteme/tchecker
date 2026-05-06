@@ -153,7 +153,7 @@ public:
    \brief Constructor
    \param t : a ta transition
   */
-  action_edge_t(tchecker::zg::zg_t::transition_t & t, node_t & src, node_t & tgt);
+  action_edge_t(tchecker::zg::transition_sptr_t t, node_t & src, node_t & tgt);
 
   /*!
    \brief Accessor to edge attributes
@@ -163,7 +163,7 @@ public:
   void attributes(tchecker::ta::system_t const & system, std::map<std::string, std::string> & m) const override;
 
  private:
-  tchecker::zg::zg_t::transition_t & _ta_trans;
+  tchecker::zg::transition_sptr_t _ta_trans;
 };
 
 /*!
@@ -240,7 +240,7 @@ public:
    \param tgt : the tgt node
    \post edge is added to edges
    */
-  void add_action_edge(tchecker::zg::zg_t::transition_t & t, node_t & src, node_t & tgt);
+  void add_action_edge(tchecker::zg::transition_sptr_t t, node_t & src, node_t & tgt);
 
   /*!
    \brief adds a new delay edge to the graph

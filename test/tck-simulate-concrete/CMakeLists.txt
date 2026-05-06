@@ -12,7 +12,7 @@ function(create_testcase TEST_NAME model input)
 
     tck_add_test_envvar(testenv TCK_SIMULATE "${TCK_SIMULATE}")
     tck_add_test_envvar(testenv TEST "${TCK_SIMULATE_SH}")
-    tck_add_test_envvar(testenv TEST_ARGS "-c ${model} < ${input}")
+    tck_add_test_envvar(testenv TEST_ARGS "-c -t ${model} < ${input}")
     tck_set_test_env(${TEST_NAME} testenv)
     unset(testenv)
 endfunction(create_testcase)

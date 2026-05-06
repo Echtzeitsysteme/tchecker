@@ -51,4 +51,12 @@ Select d <delay> (<delay> must have the form int or int.int with up to 2 decimal
 	labels: 
 	vloc: <l1>
 --- Max Delay: infinite
-Select d <delay> (<delay> must have the form int or int.int with up to 2 decimal places) or select 0-0 (q: quit, r: random)? 
+Select d <delay> (<delay> must have the form int or int.int with up to 2 decimal places) or select 0-0 (q: quit, r: random)? digraph ad94_fig10 {
+  0 [clockval="Ref Clock=0,x=0,y=0", intval="", labels="", vloc="<l0>"]
+  1 [clockval="Ref Clock=0,x=0,y=0", intval="", labels="", vloc="<l1>"]
+  2 [clockval="Ref Clock=0,x=1/2,y=1/2", intval="", labels="", vloc="<l1>"]
+  3 [clockval="Ref Clock=0,x=1/2,y=1/2", intval="", labels="green", vloc="<l3>"]
+  0 -> 1 [guard="", reset="y=0", src_invariant="", sync="", tgt_invariant="", vedge="<P@a>"]
+  1 -> 2 [delay="1/2"]
+  2 -> 3 [guard="x<1", reset="", src_invariant="", sync="", tgt_invariant="", vedge="<P@c>"]
+}
