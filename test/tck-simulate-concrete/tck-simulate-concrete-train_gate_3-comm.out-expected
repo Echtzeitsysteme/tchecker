@@ -1,0 +1,111 @@
+--- Initial states: 
+0) 	clockval: x1=0,x2=0,x3=0
+	intval: buffer[0]=1,buffer[1]=1,buffer[2]=1,head=0,length=0
+	labels: 
+	vloc: <Free,Safe,Safe,Safe>
+select 0-0 (q: quit, r: random)? --- Current state: 
+	clockval: x1=0,x2=0,x3=0
+	intval: buffer[0]=1,buffer[1]=1,buffer[2]=1,head=0,length=0
+	labels: 
+	vloc: <Free,Safe,Safe,Safe>
+--- Successors: 
+0) 	guard:  	reset: x1=0 	src_invariant:  	sync: <Train1@appr,Gate@appr1> 	tgt_invariant: x1<=20 	vedge: <Gate@appr1,Train1@appr> 
+	clockval: x1=0,x2=0,x3=0
+	intval: buffer[0]=1,buffer[1]=1,buffer[2]=1,head=0,length=1
+	labels: 
+	vloc: <Occ,Appr,Safe,Safe>
+1) 	guard:  	reset: x2=0 	src_invariant:  	sync: <Train2@appr,Gate@appr2> 	tgt_invariant: x2<=20 	vedge: <Gate@appr2,Train2@appr> 
+	clockval: x1=0,x2=0,x3=0
+	intval: buffer[0]=2,buffer[1]=1,buffer[2]=1,head=0,length=1
+	labels: 
+	vloc: <Occ,Safe,Appr,Safe>
+2) 	guard:  	reset: x3=0 	src_invariant:  	sync: <Train3@appr,Gate@appr3> 	tgt_invariant: x3<=20 	vedge: <Gate@appr3,Train3@appr> 
+	clockval: x1=0,x2=0,x3=0
+	intval: buffer[0]=3,buffer[1]=1,buffer[2]=1,head=0,length=1
+	labels: 
+	vloc: <Occ,Safe,Safe,Appr>
+--- Max Delay: infinite
+Select d <delay> (<delay> must have the form int or int.int with up to 2 decimal places) or select 0-2 (q: quit, r: random)? --- Current state: 
+	clockval: x1=171/20,x2=171/20,x3=171/20
+	intval: buffer[0]=1,buffer[1]=1,buffer[2]=1,head=0,length=0
+	labels: 
+	vloc: <Free,Safe,Safe,Safe>
+--- Successors: 
+0) 	guard:  	reset: x1=0 	src_invariant:  	sync: <Train1@appr,Gate@appr1> 	tgt_invariant: x1<=20 	vedge: <Gate@appr1,Train1@appr> 
+	clockval: x1=0,x2=171/20,x3=171/20
+	intval: buffer[0]=1,buffer[1]=1,buffer[2]=1,head=0,length=1
+	labels: 
+	vloc: <Occ,Appr,Safe,Safe>
+1) 	guard:  	reset: x2=0 	src_invariant:  	sync: <Train2@appr,Gate@appr2> 	tgt_invariant: x2<=20 	vedge: <Gate@appr2,Train2@appr> 
+	clockval: x1=171/20,x2=0,x3=171/20
+	intval: buffer[0]=2,buffer[1]=1,buffer[2]=1,head=0,length=1
+	labels: 
+	vloc: <Occ,Safe,Appr,Safe>
+2) 	guard:  	reset: x3=0 	src_invariant:  	sync: <Train3@appr,Gate@appr3> 	tgt_invariant: x3<=20 	vedge: <Gate@appr3,Train3@appr> 
+	clockval: x1=171/20,x2=171/20,x3=0
+	intval: buffer[0]=3,buffer[1]=1,buffer[2]=1,head=0,length=1
+	labels: 
+	vloc: <Occ,Safe,Safe,Appr>
+--- Max Delay: infinite
+Select d <delay> (<delay> must have the form int or int.int with up to 2 decimal places) or select 0-2 (q: quit, r: random)? --- Current state: 
+	clockval: x1=0,x2=171/20,x3=171/20
+	intval: buffer[0]=1,buffer[1]=1,buffer[2]=1,head=0,length=1
+	labels: 
+	vloc: <Occ,Appr,Safe,Safe>
+--- Successors: 
+0) 	guard:  	reset: x2=0 	src_invariant: x1<=20 	sync: <Train2@appr,Gate@appr2> 	tgt_invariant: x1<=20 && x2<=20 	vedge: <Gate@appr2,Train2@appr> 
+	clockval: x1=0,x2=0,x3=171/20
+	intval: buffer[0]=1,buffer[1]=2,buffer[2]=1,head=0,length=2
+	labels: 
+	vloc: <Transient,Appr,Appr,Safe>
+1) 	guard:  	reset: x3=0 	src_invariant: x1<=20 	sync: <Train3@appr,Gate@appr3> 	tgt_invariant: x1<=20 && x3<=20 	vedge: <Gate@appr3,Train3@appr> 
+	clockval: x1=0,x2=171/20,x3=0
+	intval: buffer[0]=1,buffer[1]=3,buffer[2]=1,head=0,length=2
+	labels: 
+	vloc: <Transient,Appr,Safe,Appr>
+--- Max Delay: <=20
+Select d <delay> (<delay> must have the form int or int.int with up to 2 decimal places) or select 0-1 (q: quit, r: random)? --- Current state: 
+	clockval: x1=1401/100,x2=564/25,x3=564/25
+	intval: buffer[0]=1,buffer[1]=1,buffer[2]=1,head=0,length=1
+	labels: 
+	vloc: <Occ,Appr,Safe,Safe>
+--- Successors: 
+0) 	guard:  	reset: x2=0 	src_invariant: x1<=20 	sync: <Train2@appr,Gate@appr2> 	tgt_invariant: x1<=20 && x2<=20 	vedge: <Gate@appr2,Train2@appr> 
+	clockval: x1=1401/100,x2=0,x3=564/25
+	intval: buffer[0]=1,buffer[1]=2,buffer[2]=1,head=0,length=2
+	labels: 
+	vloc: <Transient,Appr,Appr,Safe>
+1) 	guard:  	reset: x3=0 	src_invariant: x1<=20 	sync: <Train3@appr,Gate@appr3> 	tgt_invariant: x1<=20 && x3<=20 	vedge: <Gate@appr3,Train3@appr> 
+	clockval: x1=1401/100,x2=564/25,x3=0
+	intval: buffer[0]=1,buffer[1]=3,buffer[2]=1,head=0,length=2
+	labels: 
+	vloc: <Transient,Appr,Safe,Appr>
+2) 	guard: x1>=10 	reset: x1=0 	src_invariant: x1<=20 	sync:  	tgt_invariant: x1<=5 	vedge: <Train1@tau> 
+	clockval: x1=0,x2=564/25,x3=564/25
+	intval: buffer[0]=1,buffer[1]=1,buffer[2]=1,head=0,length=1
+	labels: cross1
+	vloc: <Occ,Cross,Safe,Safe>
+--- Max Delay: <=599/100
+Select d <delay> (<delay> must have the form int or int.int with up to 2 decimal places) or select 0-2 (q: quit, r: random)? --- Current state: 
+	clockval: x1=1401/100,x2=0,x3=564/25
+	intval: buffer[0]=1,buffer[1]=2,buffer[2]=1,head=0,length=2
+	labels: 
+	vloc: <Transient,Appr,Appr,Safe>
+--- Successors: 
+0) 	guard: x2<=10 	reset:  	src_invariant: x1<=20 && x2<=20 	sync: <Train2@stop,Gate@stop2> 	tgt_invariant: x1<=20 	vedge: <Gate@stop2,Train2@stop> 
+	clockval: x1=1401/100,x2=0,x3=564/25
+	intval: buffer[0]=1,buffer[1]=2,buffer[2]=1,head=0,length=2
+	labels: 
+	vloc: <Occ,Appr,Stop,Safe>
+--- Max Delay: <=0
+Select d <delay> (<delay> must have the form int or int.int with up to 2 decimal places) or select 0-0 (q: quit, r: random)? digraph train_gate_3 {
+  0 [clockval="Ref Clock=0,x1=0,x2=0,x3=0", intval="buffer[0]=1,buffer[1]=1,buffer[2]=1,head=0,length=0", labels="", vloc="<Free,Safe,Safe,Safe>"]
+  1 [clockval="Ref Clock=0,x1=171/20,x2=171/20,x3=171/20", intval="buffer[0]=1,buffer[1]=1,buffer[2]=1,head=0,length=0", labels="", vloc="<Free,Safe,Safe,Safe>"]
+  2 [clockval="Ref Clock=0,x1=0,x2=171/20,x3=171/20", intval="buffer[0]=1,buffer[1]=1,buffer[2]=1,head=0,length=1", labels="", vloc="<Occ,Appr,Safe,Safe>"]
+  3 [clockval="Ref Clock=0,x1=1401/100,x2=564/25,x3=564/25", intval="buffer[0]=1,buffer[1]=1,buffer[2]=1,head=0,length=1", labels="", vloc="<Occ,Appr,Safe,Safe>"]
+  4 [clockval="Ref Clock=0,x1=1401/100,x2=0,x3=564/25", intval="buffer[0]=1,buffer[1]=2,buffer[2]=1,head=0,length=2", labels="", vloc="<Transient,Appr,Appr,Safe>"]
+  0 -> 1 [delay="171/20"]
+  1 -> 2 [guard="", reset="x1=0", src_invariant="", sync="<Train1@appr,Gate@appr1>", tgt_invariant="x1<=20", vedge="<Gate@appr1,Train1@appr>"]
+  2 -> 3 [delay="1401/100"]
+  3 -> 4 [guard="", reset="x2=0", src_invariant="x1<=20", sync="<Train2@appr,Gate@appr2>", tgt_invariant="x1<=20 && x2<=20", vedge="<Gate@appr2,Train2@appr>"]
+}

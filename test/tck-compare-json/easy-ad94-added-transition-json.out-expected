@@ -1,5 +1,5 @@
 digraph easy_ad94_fig10_easy_ad94_added_transition_fig10 {
-  0 [clockval_1="Ref Clock=0,x_1=0,y_1=1", clockval_2="Ref Clock=0,x_2=0,y_2=1", final="second", final_edge="<P@c>", first_intval="", first_vloc="<l1>", initial="true", second_intval="", second_vloc="<l1>"]
+  0 [clockval_1="Ref Clock=0,x_1=3/2,y_1=1", clockval_2="Ref Clock=0,x_2=3/2,y_2=1", final="second", final_edge="<P@c>", first_intval="", first_vloc="<l1>", initial="true", second_intval="", second_vloc="<l1>"]
 }
 MEMORY_MAX_RSS  xxxx
 RELATIONSHIP_FULFILLED false

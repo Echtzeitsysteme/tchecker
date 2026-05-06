@@ -4,9 +4,11 @@
 
 set(OPERATIONAL_SEMANTICS_SRC
 ${CMAKE_CURRENT_SOURCE_DIR}/attributes_to_valuation.cc
+${CMAKE_CURRENT_SOURCE_DIR}/calculate_transitions.cc
 ${CMAKE_CURRENT_SOURCE_DIR}/max_delay.cc
 ${CMAKE_CURRENT_SOURCE_DIR}/zone_valuation_converter.cc
 ${TCHECKER_INCLUDE_DIR}/tchecker/operational-semantics/attributes_to_valuation.hh
+${TCHECKER_INCLUDE_DIR}/tchecker/operational-semantics/calculate_transitions.hh
 ${TCHECKER_INCLUDE_DIR}/tchecker/operational-semantics/max_delay.hh
 ${TCHECKER_INCLUDE_DIR}/tchecker/operational-semantics/zone_valuation_converter.hh
 PARENT_SCOPE)

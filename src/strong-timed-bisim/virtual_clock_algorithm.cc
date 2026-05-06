@@ -67,6 +67,11 @@ tchecker::strong_timed_bisim::stats_t Lieb_et_al::run(std::map<std::string, std:
     auto zones = 
       (*((*(result->get_contradictions())).begin()))->generate_synchronized_zones(_A->get_no_of_original_clocks(), _B->get_no_of_original_clocks());
 
+    tchecker::operational_semantics::compress_zone(zones.first);
+    tchecker::operational_semantics::compress_zone(zones.second);
+
+    assert(zones.first->is_virtual_equivalent(*zones.second, _A->get_no_of_virtual_clocks()));
+
     auto first_valuation = tchecker::operational_semantics::convert(*zones.first);
     auto second_valuation = tchecker::operational_semantics::convert(*zones.second);
 

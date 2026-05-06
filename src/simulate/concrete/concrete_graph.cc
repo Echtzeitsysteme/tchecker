@@ -23,6 +23,7 @@ node_t::node_t(std::shared_ptr<tchecker::ta::state_t> ta_state, std::shared_ptr<
                bool initial, bool final)
   : _flags(initial, final), _ta_state(ta_state), _valuation(valuation), _id(id)
 {
+  assert(0 != _ta_state->vloc().size());
 }
 
 node_t::node_t(std::shared_ptr<tchecker::ta::state_t> ta_state, tchecker::zg::zone_t & zone, size_t id,
@@ -32,9 +33,10 @@ node_t::node_t(std::shared_ptr<tchecker::ta::state_t> ta_state, tchecker::zg::zo
 }
 
 node_t::node_t(node_t const & other)
-  : _flags(other._flags), _ta_state(other._ta_state), _valuation(clockval_factory(other._valuation)), _id(other._id)
+  : node_t(other._ta_state, clockval_factory(other._valuation), other._id, other._flags.initial(), other._flags.final())
 {
 }
+
 
 void node_t::attributes(tchecker::ta::system_t const & system, std::map<std::string, std::string> & m) const
 {
@@ -67,7 +69,7 @@ node_t edge_t::tgt() {return _tgt;}
 
 /*! action_edge_t */
 
-action_edge_t::action_edge_t(tchecker::zg::zg_t::transition_t & t, node_t & src, node_t & tgt)
+action_edge_t::action_edge_t(tchecker::zg::transition_sptr_t t, node_t & src, node_t & tgt)
   : edge_t(src, tgt), _ta_trans(t)
 {
 }
@@ -114,13 +116,21 @@ void graph_t::dot_output(std::ostream & os, std::string const & name) {
     cur->attributes(*_system, attr);
     tchecker::graph::dot_output_edge(os, std::to_string(cur->src().id()), std::to_string(cur->tgt().id()), attr);
   }
+
+  tchecker::graph::dot_output_footer(os);
 }
 
-std::shared_ptr<node_t> graph_t::add_node(std::shared_ptr<tchecker::ta::state_t> ta_state, std::shared_ptr<tchecker::clockval_t> valuation,
+std::shared_ptr<node_t> graph_t::add_node(tchecker::zg::zg_t& zg, tchecker::zg::zg_t::state_t & symb_state, std::shared_ptr<tchecker::clockval_t> valuation,
                               bool initial, bool final)
 {
   std::size_t id = _nodes.size();
-  std::shared_ptr<node_t> result = std::make_shared<node_t>(ta_state, valuation, id, initial, final);
+  tchecker::zg::state_sptr_t copied_symb_state = zg.clone_state(symb_state); 
+  // Now follows an ugly hack.
+  // Due to the fact that zg states inherit from ta states (I believe this is a bad decision, but ...), 
+  // we have to convert the state_sptr_t to a std::shared_ptr<tchecker::ta::state_t>. Uff...
+  // To do so, we take the raw pointer to the chosen_symb and delete the destructor.
+  std::shared_ptr<tchecker::ta::state_t> ta_ptr(copied_symb_state.ptr(), [](tchecker::ta::state_t*){}); 
+  std::shared_ptr<node_t> result = std::make_shared<node_t>(ta_ptr, valuation, id, initial, final);
   _nodes.emplace_back(result);
   return result;
 }
@@ -135,20 +145,17 @@ std::shared_ptr<node_t> graph_t::add_node(std::shared_ptr<node_t> previous, tche
   return result;
 }
 
-std::shared_ptr<node_t> graph_t::add_node(tchecker::zg::zg_t::state_t & symb_state)
+std::shared_ptr<node_t> graph_t::add_node(tchecker::zg::zg_t& zg, tchecker::zg::zg_t::state_t & symb_state)
 {
   std::size_t id = _nodes.size();
-  // Now follows an ugly hack.
-  // Due to the fact that zg states inherit from ta states (I believe this is a bad decision, but ...), 
-  // we have to convert the state_sptr_t to a std::shared_ptr<tchecker::ta::state_t>. Uff...
-  // To do so, we take the raw pointer to the chosen_symb and delete the destructor.
-  std::shared_ptr<tchecker::ta::state_t> ta_ptr(symb_state.ptr(), [](tchecker::ta::state_t*){}); 
+  tchecker::zg::state_sptr_t copied_symb_state = zg.clone_state(symb_state); 
+  std::shared_ptr<tchecker::ta::state_t> ta_ptr(copied_symb_state.ptr(), [](tchecker::ta::state_t*){}); 
   std::shared_ptr<node_t> result = std::make_shared<node_t>(ta_ptr, symb_state->zone(), id, false, false);
   _nodes.emplace_back(result);
   return result;
 }
 
-void graph_t::add_action_edge(tchecker::zg::zg_t::transition_t & t, node_t & src, node_t & tgt)
+void graph_t::add_action_edge(tchecker::zg::transition_sptr_t t, node_t & src, node_t & tgt)
 {
   _edges.emplace_back(std::make_shared<action_edge_t>(t, src, tgt));
 }
@@ -160,8 +167,8 @@ void graph_t::add_delay_edge(tchecker::clock_rational_value_t & delay, node_t & 
 
 /* state_space_t */
 
-state_space_t::state_space_t(std::shared_ptr<tchecker::ta::system_t const> system)
-  : _concrete_sim_graph(system)
+state_space_t::state_space_t(std::shared_ptr<tchecker::zg::zg_t> zg, std::shared_ptr<tchecker::ta::system_t const> system)
+  : _zg(zg), _concrete_sim_graph(system)
 {
 }
 

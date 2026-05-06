@@ -1197,13 +1197,15 @@ void reduce_to_valuation(tchecker::dbm::db_t * dbm, tchecker::clockval_t & valua
         first = tchecker::dbm::db(ineq_cmp_t::LE, sub.numerator());
         second = tchecker::dbm::db(ineq_cmp_t::LE, -1*sub.numerator());
       } else { // else get the integer such that a < valuation[x] - valuation[y] < a+1 and add these constraints to the DBM
-        tchecker::integer_t a = sub.numerator() / sub.denominator();
-        if(0 >= a) {
-          first = tchecker::dbm::db(ineq_cmp_t::LT, a);
-          second = tchecker::dbm::db(ineq_cmp_t::LT, (-1*a)+1);
-        } else {
+        // first, check whether the result is positive or negative
+        bool positive = (sub.numerator() >= 0 && sub.denominator() > 0) || (sub.numerator() < 0 && sub.denominator() < 0);
+        tchecker::integer_t a = std::abs(sub.numerator()) / std::abs(sub.denominator());
+        if(positive) {
           first = tchecker::dbm::db(ineq_cmp_t::LT, a+1);
           second = tchecker::dbm::db(ineq_cmp_t::LT, -1*a);
+        } else {
+          second = tchecker::dbm::db(ineq_cmp_t::LT, a+1);
+          first = tchecker::dbm::db(ineq_cmp_t::LT, -1*a);
         }
       }
       DBM(x, y) = first;
