@@ -31,7 +31,7 @@ concrete_simulator_t::concrete_simulator_t(tchecker::parsing::system_declaration
     _zg(tchecker::zg::factory(_system, tchecker::ts::NO_SHARING, 
                               tchecker::zg::DISTINGUISHED_SEMANTICS, tchecker::zg::NO_EXTRAPOLATION,
                               1000, 65536)),
-    _state_space(std::make_shared<state_space_t>(_system)),
+    _state_space(std::make_shared<state_space_t>(_zg, _system)),
     _g(_state_space->graph()),
     _display(std::unique_ptr<tchecker::simulate::concrete::concrete_display_t>(concrete_display_factory(display_type, os, _zg))),
     _highest_delay(_zg->extrapolation_max() + 1),
@@ -298,7 +298,7 @@ concrete_simulator_t::initial_select(std::function<std::string()> input_func, bo
   _previous_node_inv = std::make_shared<tchecker::clock_constraint_container_t>(
                               std::get<2>(_v[select.second.numerator()])->tgt_invariant_container());
 
-  _previous_node = _g.add_node(_previous_symb); 
+  _previous_node = _g.add_node(*_zg, _previous_symb); 
   return select;
 }
 
@@ -333,7 +333,7 @@ concrete_simulator_t::next_select(std::function<std::string()> input_func, bool 
     _previous_symb->replace_zone(*new_zone);
   } else if (ACTION == select.first) {
     auto new_symb = std::get<1>(_v[select.second.numerator()]);
-    auto new_node = _g.add_node(new_symb);
+    auto new_node = _g.add_node(*_zg, new_symb);
     auto inter_val = tchecker::operational_semantics::next(
                                       *_previous_node->valuation(), 
                                       std::get<2>(_v[select.second.numerator()])->reset_container());
@@ -385,7 +385,7 @@ int concrete_simulator_t::parse_starting_state_attributes(std::map<std::string, 
 
   _previous_symb = _zg->state(_v[0]);
   _previous_node_inv = std::make_shared<tchecker::clock_constraint_container_t>(std::get<2>(_v[0])->tgt_invariant_container());
-  _previous_node = _g.add_node(_previous_symb);
+  _previous_node = _g.add_node(*_zg, _previous_symb);
 
   return 0;
 }

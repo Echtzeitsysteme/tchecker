@@ -30,6 +30,7 @@ namespace concrete {
 */
 class node_t {
 public:
+
   /*!
    \brief Constructor
    \param ta_state : a ta state
@@ -93,7 +94,7 @@ public:
 
   /*!
    \brief Getter for the TA State
-   \return THe ta_state
+   \return The ta_state
    */
   std::shared_ptr<tchecker::ta::state_t> ta_state() const;
 
@@ -102,6 +103,7 @@ public:
   std::shared_ptr<tchecker::ta::state_t> _ta_state;
   std::shared_ptr<tchecker::clockval_t> _valuation;
   std::size_t _id;
+
 };
 
 /*!
@@ -202,14 +204,15 @@ public:
 
   /*!
    \brief adds a new node to the graph
-   \param ta_state : the ta_state of the new node
+  \param zg : the zone graph
+   \param symb_state : the ta_state of the new node
    \param valuation : the valuation of the new node
    \param initial : whether this node is an initial node
    \param final : whether this node is a final node
    \return a shared ptr on the newly added node
    \post node is added to nodes
    */
-  std::shared_ptr<node_t> add_node(std::shared_ptr<tchecker::ta::state_t> ta_state, std::shared_ptr<tchecker::clockval_t> valuation,
+  std::shared_ptr<node_t> add_node(tchecker::zg::zg_t& zg, tchecker::zg::zg_t::state_t & symb_state, std::shared_ptr<tchecker::clockval_t> valuation,
                                    bool initial = false, bool final = false);  
 
   /*!
@@ -223,12 +226,12 @@ public:
 
   /*!
    \brief adds a new node to the graph
-   \param previous : the previous node
-   \param new_symb_state : the symbolic state of the new node
+   \param zg : the zone graph
+   \param symb_state : the symbolic state of the new node
    \return a shared ptr on the newly added node
    \post node is added to nodes
   */
-  std::shared_ptr<node_t> add_node(tchecker::zg::zg_t::state_t & symb_state);
+  std::shared_ptr<node_t> add_node(tchecker::zg::zg_t& zg, tchecker::zg::zg_t::state_t & symb_state);
 
   /*!
    \brief adds a new action edge to the graph
@@ -270,7 +273,7 @@ private:
 class state_space_t : public tchecker::simulate::state_space_t{
 public:
 
-  state_space_t(std::shared_ptr<tchecker::ta::system_t const> system);
+  state_space_t(std::shared_ptr<tchecker::zg::zg_t> zg, std::shared_ptr<tchecker::ta::system_t const> system);
 
   /*!
    \brief Accessor
@@ -287,6 +290,7 @@ public:
   void dot_output(std::ostream & os, std::string const & name) override;
 
 private:
+  std::shared_ptr<tchecker::zg::zg_t> _zg;
   graph_t _concrete_sim_graph;
 };
 
