@@ -123,7 +123,12 @@ std::shared_ptr<node_t> graph_t::add_node(tchecker::zg::zg_t& zg, tchecker::zg::
 {
   std::size_t id = _nodes.size();
   tchecker::zg::state_sptr_t copied_symb_state = zg.clone_state(symb_state); 
-  std::shared_ptr<node_t> result = std::make_shared<node_t>(copied_symb_state, valuation, id, initial, final);
+  // Now follows an ugly hack.
+  // Due to the fact that zg states inherit from ta states (I believe this is a bad decision, but ...), 
+  // we have to convert the state_sptr_t to a std::shared_ptr<tchecker::ta::state_t>. Uff...
+  // To do so, we take the raw pointer to the chosen_symb and delete the destructor.
+  std::shared_ptr<tchecker::ta::state_t> ta_ptr(copied_symb_state.ptr(), [](tchecker::ta::state_t*){}); 
+  std::shared_ptr<node_t> result = std::make_shared<node_t>(ta_ptr, valuation, id, initial, final);
   _nodes.emplace_back(result);
   return result;
 }
@@ -142,7 +147,8 @@ std::shared_ptr<node_t> graph_t::add_node(tchecker::zg::zg_t& zg, tchecker::zg::
 {
   std::size_t id = _nodes.size();
   tchecker::zg::state_sptr_t copied_symb_state = zg.clone_state(symb_state); 
-  std::shared_ptr<node_t> result = std::make_shared<node_t>(copied_symb_state, symb_state->zone(), id, false, false);
+  std::shared_ptr<tchecker::ta::state_t> ta_ptr(copied_symb_state.ptr(), [](tchecker::ta::state_t*){}); 
+  std::shared_ptr<node_t> result = std::make_shared<node_t>(ta_ptr, symb_state->zone(), id, false, false);
   _nodes.emplace_back(result);
   return result;
 }
