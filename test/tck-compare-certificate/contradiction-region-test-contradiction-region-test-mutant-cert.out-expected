@@ -1,0 +1,31 @@
+digraph init_System_init_System {
+  0 [clockval_1="Ref Clock=0,x_1=0,y_1=0", clockval_2="Ref Clock=0,x_2=0,y_2=0", first_intval="", first_vloc="<init>", initial="true", second_intval="", second_vloc="<init>"]
+  1 [clockval_1="Ref Clock=0,x_1=1/2,y_1=1/2", clockval_2="Ref Clock=0,x_2=1/2,y_2=1/2", first_intval="", first_vloc="<init>", initial="false", second_intval="", second_vloc="<init>"]
+  2 [clockval_1="Ref Clock=0,x_1=0,y_1=1/2", clockval_2="Ref Clock=0,x_2=0,y_2=1/2", first_intval="", first_vloc="<second>", initial="false", second_intval="", second_vloc="<second>"]
+  3 [clockval_1="Ref Clock=0,x_1=0,y_1=1/2", clockval_2="Ref Clock=0,x_2=0,y_2=1/2", first_intval="", first_vloc="<second>", initial="false", second_intval="", second_vloc="<second>"]
+  4 [clockval_1="Ref Clock=0,x_1=5/4,y_1=7/4", clockval_2="Ref Clock=0,x_2=5/4,y_2=7/4", first_intval="", first_vloc="<second>", initial="false", second_intval="", second_vloc="<second>"]
+  5 [clockval_1="Ref Clock=0,x_1=5/4,y_1=7/4", clockval_2="Ref Clock=0,x_2=5/4,y_2=7/4", first_intval="", first_vloc="<third>", initial="false", second_intval="", second_vloc="<third>"]
+  6 [clockval_1="Ref Clock=0,x_1=19/8,y_1=23/8", clockval_2="Ref Clock=0,x_2=19/8,y_2=23/8", first_intval="", first_vloc="<third>", initial="false", second_intval="", second_vloc="<third>"]
+  7 [clockval_1="Ref Clock=0,x_1=19/8,y_1=23/8", clockval_2="Ref Clock=0,x_2=19/8,y_2=23/8", first_intval="", first_vloc="<fourth>", initial="false", second_intval="", second_vloc="<fourth>"]
+  8 [clockval_1="Ref Clock=0,x_1=7/2,y_1=4", clockval_2="Ref Clock=0,x_2=7/2,y_2=4", first_intval="", first_vloc="<fourth>", initial="false", second_intval="", second_vloc="<fourth>"]
+  9 [clockval_1="Ref Clock=0,x_1=7/2,y_1=4", clockval_2="Ref Clock=0,x_2=7/2,y_2=4", first_intval="", first_vloc="<fifth>", initial="false", second_intval="", second_vloc="<fifth>"]
+  10 [clockval_1="Ref Clock=0,x_1=19/2,y_1=10", clockval_2="Ref Clock=0,x_2=19/2,y_2=10", first_intval="", first_vloc="<fifth>", initial="false", second_intval="", second_vloc="<fifth>"]
+  11 [clockval_1="Ref Clock=0,x_1=0,y_1=10", clockval_2="Ref Clock=0,x_2=0,y_2=10", first_intval="", first_vloc="<final>", initial="false", second_intval="", second_vloc="<final>"]
+  12 [clockval_1="Ref Clock=0,x_1=0,y_1=10", clockval_2="Ref Clock=0,x_2=0,y_2=10", final="second", final_delay="2", first_intval="", first_vloc="<final>", initial="false", second_intval="", second_vloc="<final>"]
+  1 -> 2 [first_vedge="<init_Process@start>", first_vedge_do="x=0", first_vedge_prov="x<1", second_vedge="<init_Process@start>", second_vedge_do="x=0", second_vedge_prov="x<1"]
+  4 -> 5 [first_vedge="<init_Process@blub>", first_vedge_prov="y<2", second_vedge="<init_Process@blub>", second_vedge_prov="y<2"]
+  6 -> 7 [first_vedge="<init_Process@blub>", first_vedge_prov="y<3", second_vedge="<init_Process@blub>", second_vedge_prov="y<3"]
+  8 -> 9 [first_vedge="<init_Process@blub>", first_vedge_prov="y<=4", second_vedge="<init_Process@blub>", second_vedge_prov="y<=4"]
+  10 -> 11 [first_vedge="<init_Process@blub>", first_vedge_do="x=0", second_vedge="<init_Process@blub>", second_vedge_do="x=0"]
+  0 -> 1 [delay="1/2"]
+  2 -> 3 [delay="0"]
+  3 -> 4 [delay="5/4"]
+  5 -> 6 [delay="9/8"]
+  7 -> 8 [delay="9/8"]
+  9 -> 10 [delay="6"]
+  11 -> 12 [delay="0"]
+}
+MEMORY_MAX_RSS  xxxx
+RELATIONSHIP_FULFILLED false
+RUNNING_TIME_SECONDS  xxxx
+VISITED_PAIR_OF_STATES 6

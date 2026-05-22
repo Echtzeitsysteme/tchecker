@@ -4,4 +4,6 @@
 #
 # See files AUTHORS and LICENSE for copyright details.
 
-cat "$(dirname $0)/strong_timed_bisim_system_tests/path_explosion/A3.txt"
+echo "# labels=green"
+
+cat "$(dirname $0)/easy-ad94-added-transition.txt"

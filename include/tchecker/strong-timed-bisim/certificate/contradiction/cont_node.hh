@@ -139,7 +139,7 @@ public:
    \param vcg1 : the first vcg
    \param vcg2 : the second vcg
    \return a pair: first element is the delay, second element is the resulting node
-   \note In case no maximum delay exists as there is a non-included upper bound, .5 is used. In case there exists no upper bound, max_delay is used as delay.
+   \note In case no maximum delay exists as there is a non-included upper bound, the middle of the highest region is chosen. In case there exists no upper bound, max_delay is used as delay.
    */
   std::pair<clock_rational_value_t, std::shared_ptr<node_t>>
   max_delay(std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> vcs, 
@@ -164,6 +164,12 @@ public:
    \post the values of _valuation are equal to the values of new_val
    */
   void set_valuation(std::pair<std::shared_ptr<tchecker::clockval_t>, std::shared_ptr<tchecker::clockval_t>> new_val);
+
+  /*!
+   \brief Getter for the valuation
+   \return The valuation
+   */
+  std::pair<std::shared_ptr<tchecker::clockval_t>, std::shared_ptr<tchecker::clockval_t>> valuation() {return _valuation;}
 
   /*!
    \brief sets a value of a clock to zero

@@ -38,31 +38,31 @@ set(DOT_MAX_SIZE 20000)
 # only append to the tail of this list!
 set(INPUTS
     missing_initial.sh:
-    easy-ad94.sh:
-    easy-ad94-added-transition.sh:
-    easy-ad94-different-guard.sh:
+    strong_timed_bisim_system_tests/easy_ad94/easy-ad94.sh:
+    strong_timed_bisim_system_tests/easy_ad94/easy-ad94-added-transition.sh:
+    strong_timed_bisim_system_tests/easy_ad94/easy-ad94-different-guard.sh:
     ad94.sh:
-    Lieb_et_al_1.sh:
-    Lieb_et_al_1_diff_invariant.sh:
-    Lieb_et_al_2.sh:
-    Lieb_et_al_3.sh:
-    Lieb_et_al_4.sh:
-    Lieb_et_al_5.sh:
+    strong_timed_bisim_system_tests/Lieb_et_al/Lieb_et_al_1.sh:
+    strong_timed_bisim_system_tests/Lieb_et_al/Lieb_et_al_1_diff_invariant.sh:
+    strong_timed_bisim_system_tests/Lieb_et_al/Lieb_et_al_2.sh:
+    strong_timed_bisim_system_tests/Lieb_et_al/Lieb_et_al_3.sh:
+    strong_timed_bisim_system_tests/Lieb_et_al/Lieb_et_al_4.sh:
+    strong_timed_bisim_system_tests/Lieb_et_al/Lieb_et_al_5.sh:
     count_to_inf.sh:
-    Lieb_et_al_1_non_determ_bisim.sh:
-    Lieb_et_al_2_non_determ_bisim.sh:
-    Lieb_et_al_2_determ_split_bisim.sh:
-    Lieb_et_al_2_determ_split_non_bisim.sh:
-    Lieb_et_al_6.sh:
-    strong_timed_bisim_system_tests_edge_case_changed_actions.sh:
-    strong_timed_bisim_system_tests_edge_case_changed_actions_changed.sh:
-    strong_timed_bisim_system_tests_edge_case_urgent.sh:
-    strong_timed_bisim_system_tests_edge_case_urgent_non_urgent.sh:
-    strong_timed_bisim_system_tests_edge_case_without_trans.sh:
-    strong_timed_bisim_system_tests_edge_case_without_trans_changed_inv.sh:
-    strong_timed_bisim_system_tests_path_explosion_A1.sh:
-    strong_timed_bisim_system_tests_path_explosion_A2.sh:
-    strong_timed_bisim_system_tests_path_explosion_A3.sh:
+    strong_timed_bisim_system_tests/Lieb_et_al/Lieb_et_al_1_non_determ_bisim.sh:
+    strong_timed_bisim_system_tests/Lieb_et_al/Lieb_et_al_2_non_determ_bisim.sh:
+    strong_timed_bisim_system_tests/Lieb_et_al/Lieb_et_al_2_determ_split_bisim.sh:
+    strong_timed_bisim_system_tests/Lieb_et_al/Lieb_et_al_2_determ_split_non_bisim.sh:
+    strong_timed_bisim_system_tests/Lieb_et_al/Lieb_et_al_6.sh:
+    strong_timed_bisim_system_tests/edge_cases/changed_actions.sh:
+    strong_timed_bisim_system_tests/edge_cases/changed_actions_changed.sh:
+    strong_timed_bisim_system_tests/edge_cases/urgent.sh:
+    strong_timed_bisim_system_tests/edge_cases/urgent_non_urgent.sh:
+    strong_timed_bisim_system_tests/edge_cases/without_trans.sh:
+    strong_timed_bisim_system_tests/edge_cases/without_trans_changed_inv.sh:
+    strong_timed_bisim_system_tests/path_explosion/A1.sh:
+    strong_timed_bisim_system_tests/path_explosion/A2.sh:
+    strong_timed_bisim_system_tests/path_explosion/A3.sh:
     corsso.sh:2:2:10:1:2
     critical-region-async.sh:2:10
     csmacd.sh:3

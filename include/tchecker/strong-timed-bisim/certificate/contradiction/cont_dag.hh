@@ -95,7 +95,7 @@ public:
 
 protected:
 
-  void add_node_that_already_exists(std::shared_ptr<node_t> to_add) override;
+void add_node_that_already_exists(std::shared_ptr<node_t> to_add) override;
 
 private:
 

@@ -4,4 +4,4 @@
 #
 # See files AUTHORS and LICENSE for copyright details.
 
-cat "$(dirname $0)/strong_timed_bisim_system_tests/edge_cases/urgent_non_urgent.txt"
+cat "$(dirname $0)/without_trans_changed_inv.txt"

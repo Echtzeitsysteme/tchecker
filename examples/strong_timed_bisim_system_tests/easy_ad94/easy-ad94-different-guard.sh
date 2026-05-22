@@ -6,4 +6,4 @@
 
 echo "# labels=green"
 
-cat "$(dirname $0)/strong_timed_bisim_system_tests/easy_ad94/easy_ad94_different_guard.txt"
+cat "$(dirname $0)/easy-ad94-different-guard.txt"

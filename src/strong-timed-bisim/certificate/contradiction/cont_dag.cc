@@ -68,11 +68,19 @@ bool cont_dag_t::create_cont_from_non_bisim_cache(tchecker::strong_timed_bisim::
       gate |= std::any_of(std::next(cur->valuation().second->begin()), cur->valuation().second->end(),
                           [max_delay](const clock_rational_value_t & val) { return val < max_delay; });
 
-      std::pair<clock_rational_value_t, std::shared_ptr<node_t>> delay;
+      std::pair<clock_rational_value_t, std::shared_ptr<node_t>> delay 
+        = std::make_pair<clock_rational_value_t, std::shared_ptr<node_t>>(0, nullptr);
       if(gate) {
         delay = cur->max_delay(non_bisim_cache.entry(cur->location_pair()), _vcg1, _vcg2);
+        if(nullptr == delay.second) {
+          gate = false;
+        } else {
+          bool region_changed = !tchecker::is_region_equivalent(*cur->valuation().first, *delay.second->valuation().first, _max_delay);
+          region_changed |= !tchecker::is_region_equivalent(*cur->valuation().second, *delay.second->valuation().second, _max_delay);
+          gate &= region_changed;
+        }
       }
-      if (gate && delay.first > clock_rational_value_t(0, 1)) {
+      if (gate) {
         if (does_node_exist_in_this_or_upper(delay.second)) { // cycle detected?
           return false;
         }
@@ -90,7 +98,6 @@ bool cont_dag_t::create_cont_from_non_bisim_cache(tchecker::strong_timed_bisim::
   }
   return true;
 }
-
 
 void cont_dag_t::add_node_that_already_exists(std::shared_ptr<node_t> to_add)
 {
