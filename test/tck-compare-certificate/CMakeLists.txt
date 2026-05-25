@@ -36,8 +36,8 @@ set(DOT_MAX_SIZE 20000)
 # contains arguments passed to the generator script.
 # only append to the tail of this list!
 set(INPUTS
-    strong_timed_bisim_system_tests_edge_case_urgent_cert.sh:
-    strong_timed_bisim_system_tests_edge_case_urgent_non_urgent_cert.sh:
+    strong_timed_bisim_system_tests/edge_cases/urgent.sh:
+    strong_timed_bisim_system_tests/edge_cases/urgent_non_urgent.sh:
     strong_timed_bisim_benchmarks/deterministic/av-protocol.sh:
     strong_timed_bisim_benchmarks/deterministic/av-protocol-mutants/av-protocol-bisim.sh:
     strong_timed_bisim_benchmarks/deterministic/av-protocol-mutants/av-protocol-non-bisim-changed-guard.sh:
@@ -53,14 +53,16 @@ set(INPUTS
     strong_timed_bisim_benchmarks/deterministic/ieee-rcp-mutants/ieee-rcp-non-bisim-changed-guard.sh:
     strong_timed_bisim_benchmarks/deterministic/ieee-rcp-mutants/ieee-rcp-non-bisim-changed-invariant.sh:
     strong_timed_bisim_benchmarks/deterministic/ieee-rcp-mutants/ieee-rcp-non-bisim-removed-reset.sh:
+    strong_timed_bisim_system_tests/edge_cases/contradiction_region_test.sh
+    strong_timed_bisim_system_tests/edge_cases/contradiction_region_test_mutant.sh
     )
 
 file(RELATIVE_PATH here ${CMAKE_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 message(STATUS "Generating '${here}' tests. This may take a long time.")
 tck_register_testcases("tck-compare-cert-" CHECK_TESTCASES_ savelist TCK_COMPARE_CERT_INPUT_FILES ${INPUTS})
 
-list(GET TCK_COMPARE_CERT_INPUT_FILES 0 edge_case_urgent_cert)
-list(GET TCK_COMPARE_CERT_INPUT_FILES 1 edge_case_urgent_non_urgent_cert)
+list(GET TCK_COMPARE_CERT_INPUT_FILES 0 edge_case_urgent)
+list(GET TCK_COMPARE_CERT_INPUT_FILES 1 edge_case_urgent_non_urgent)
 list(GET TCK_COMPARE_CERT_INPUT_FILES 2 benchmark_determ_av-protocol_cert)
 list(GET TCK_COMPARE_CERT_INPUT_FILES 3 benchmark_determ_av-protocol-mutant-bisim_cert)
 list(GET TCK_COMPARE_CERT_INPUT_FILES 4 benchmark_determ_av-protocol-mutant-non-bisim-changed-guard_cert)
@@ -76,11 +78,14 @@ list(GET TCK_COMPARE_CERT_INPUT_FILES 13 benchmark_determ_ieee-rcp-mutant-bisim_
 list(GET TCK_COMPARE_CERT_INPUT_FILES 14 benchmark_determ_ieee-rcp-mutant-non-bisim-changed-guard_cert)
 list(GET TCK_COMPARE_CERT_INPUT_FILES 15 benchmark_determ_ieee-rcp-mutant-non-bisim-changed-inv_cert)
 list(GET TCK_COMPARE_CERT_INPUT_FILES 16 benchmark_determ_ieee-rcp-mutant-non-bisim-rm-reset_cert)
+list(GET TCK_COMPARE_CERT_INPUT_FILES 17 contradiction_region_test)
+list(GET TCK_COMPARE_CERT_INPUT_FILES 18 contradiction_region_test_mutant)
+
 
 ## urgent
-create_testcase(edge-case-urgent-self-cert ${edge_case_urgent_cert} ${edge_case_urgent_cert} strong-timed-bisim)
-create_testcase(edge-case-urgent-non-urgent-self-cert ${edge_case_urgent_non_urgent_cert} ${edge_case_urgent_non_urgent_cert} strong-timed-bisim)
-create_testcase(edge-case-urgent-vs-non-urgent-cert ${edge_case_urgent_cert} ${edge_case_urgent_non_urgent_cert} strong-timed-bisim)
+create_testcase(edge-case-urgent-self-cert ${edge_case_urgent} ${edge_case_urgent} strong-timed-bisim)
+create_testcase(edge-case-urgent-non-urgent-self-cert ${edge_case_urgent_non_urgent} ${edge_case_urgent_non_urgent} strong-timed-bisim)
+create_testcase(edge-case-urgent-vs-non-urgent-cert ${edge_case_urgent} ${edge_case_urgent_non_urgent} strong-timed-bisim)
 
 # av-protocol (can only be used for int size > 16, since the largest occuring number, 50000, is too large)
 if(NOT USEINT16)
@@ -104,5 +109,9 @@ create_testcase(ieee-rcp-ieee-rcp-bisim-cert ${benchmark_determ_ieee-rcp_cert} $
 create_testcase(ieee-rcp-ieee-rcp-non-bisim-changed-guard-cert ${benchmark_determ_ieee-rcp_cert} ${benchmark_determ_ieee-rcp-mutant-non-bisim-changed-guard_cert} strong-timed-bisim)
 create_testcase(ieee-rcp-ieee-rcp-non-bisim-changed-invariant-cert ${benchmark_determ_ieee-rcp_cert} ${benchmark_determ_ieee-rcp-mutant-non-bisim-changed-inv_cert} strong-timed-bisim)
 create_testcase(ieee-rcp-ieee-rcp-non-bisim-removed-reset-cert ${benchmark_determ_ieee-rcp_cert} ${benchmark_determ_ieee-rcp-mutant-non-bisim-rm-reset_cert} strong-timed-bisim)
+
+# Contradiction Region
+create_testcase(contradiction-region-test-contradiction-region-test-mutant-cert ${contradiction_region_test} ${contradiction_region_test_mutant} strong-timed-bisim)
+
 
 tck_add_savelist(save-compare-certificate ${savelist})

@@ -77,15 +77,8 @@ bool node_t::operator==(node_t & other)
   result &= other._valuation.first->size() == this->_valuation.second->size();
   result &= other._valuation.second->size() == this->_valuation.second->size();
 
-  for(tchecker::clock_id_t i = 0; i < this->_valuation.first->size(); i++) {
-    result &= (*(this->_valuation.first))[i] == (*(other._valuation.first))[i] || 
-              (((*(this->_valuation.first))[i]) > _cut_off && (*(other._valuation.first))[i] > _cut_off);
-  }  
-
-  for(tchecker::clock_id_t i = 0; i < this->_valuation.second->size(); i++) {
-    result &= (*(this->_valuation.second))[i] == (*(other._valuation.second))[i] || 
-              (((*(this->_valuation.second))[i]) > _cut_off && (*(other._valuation.second))[i] > _cut_off);
-  }
+  result &= tchecker::is_region_equivalent(*this->_valuation.first, *other._valuation.first, _cut_off);
+  result &= tchecker::is_region_equivalent(*this->_valuation.second, *other._valuation.second, _cut_off);
 
   return result;
 } 
@@ -332,20 +325,55 @@ node_t::max_delay(std::shared_ptr<tchecker::virtual_constraint::virtual_constrai
 
   std::pair<std::shared_ptr<tchecker::zg::zone_t>, std::shared_ptr<tchecker::zg::zone_t>> zones =
       vc->generate_synchronized_zones(vcg1->get_no_of_original_clocks(), vcg2->get_no_of_original_clocks());
-  
+
+  auto new_valuation_1 = tchecker::clockval_factory(*_valuation.first);
+
   auto max_delay = tchecker::operational_semantics::max_delay(*zones.first, _valuation.first, _cut_off, 0);
+  auto new_valuation_2 = tchecker::clockval_factory(*_valuation.second);
 
-  clock_rational_value_t delay = (tchecker::operational_semantics::cmp_t::LE == max_delay.cmp()) ?
-                                  max_delay.value(): max_delay.value() - clock_rational_value_t(1, 2);
+  clock_rational_value_t delay;
 
-  auto clone_1 = tchecker::clockval_clone(*_valuation.first);
-  auto new_valuation_1 = std::shared_ptr<tchecker::clockval_t>(clone_1, &clockval_destruct_and_deallocate);
-  add_delay(new_valuation_1, *_valuation.first, delay);
+  if(tchecker::operational_semantics::cmp_t::L == max_delay.cmp()) {
+    int64_t integral = max_delay.value().numerator() / max_delay.value().denominator();
+    clock_rational_value_t fractional = max_delay.value() - integral;
 
+    if(0 == fractional) {
+      integral -= 1;
+      fractional = 1;
+    }
 
-  auto clone_2 = tchecker::clockval_clone(*_valuation.second);
-  auto new_valuation_2 = std::shared_ptr<tchecker::clockval_t>(clone_2, &clockval_destruct_and_deallocate);
-  add_delay(new_valuation_2, *_valuation.second, delay);
+    clock_rational_value_t min = 0;
+    std::vector<std::shared_ptr<tchecker::clockval_t>> vec;
+    vec.emplace_back(new_valuation_1);
+    vec.emplace_back(new_valuation_2);
+
+    for(auto cur : vec) {
+      for(std::size_t i = 0; i < cur->size(); i++) {
+        int64_t int_val = ((*cur)[i].numerator() / (*cur)[i].denominator());
+        clock_rational_value_t frac_val = (*cur)[i] - int_val;
+
+        clock_rational_value_t new_lower_bound = 1 - frac_val;
+        if(new_lower_bound < fractional) {
+          min = std::max(min, new_lower_bound);
+        }
+      }
+    }
+    
+    assert(fractional != min);
+
+    clock_rational_value_t frac_delay = (fractional + min)/2;
+    //std::cout << __FILE__ << ": " << __LINE__ << ": " << frac_delay << std::endl;
+
+    delay = integral + frac_delay;
+
+    add_delay(new_valuation_1, *_valuation.first,  delay);
+    add_delay(new_valuation_2, *_valuation.second, delay);
+
+  } else {
+    delay = max_delay.value();
+    add_delay(new_valuation_1, *_valuation.first,  delay);
+    add_delay(new_valuation_2, *_valuation.second, delay);
+  }
 
   std::shared_ptr<node_t> result = std::make_shared<node_t>(*this);
   result->set_initial(false);

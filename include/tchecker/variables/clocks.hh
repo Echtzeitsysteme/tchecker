@@ -966,6 +966,15 @@ std::string to_string(tchecker::clockval_t const & clockval, std::function<std::
 int lexical_cmp(tchecker::clockval_t const & clockval1, tchecker::clockval_t const & clockval2);
 
 /*!
+ \brief checks for region equivalence of two clock valuations
+ \param intval1 : first valuation
+ \param intval2 : second valuation
+ \param cut_off : the cut_off value ("k"). Above this, all values are considered to be equal.
+ \return true, if the given valuations are region equivalent
+ */
+bool is_region_equivalent(tchecker::clockval_t const & clockval_1, tchecker::clockval_t const & clockval_2, std::size_t cut_off);
+
+/*!
  \brief Type of shared clocks valuation
  */
 using shared_clockval_t = tchecker::make_shared_t<tchecker::clockval_t>;

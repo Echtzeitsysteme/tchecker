@@ -4,5 +4,4 @@
 #
 # See files AUTHORS and LICENSE for copyright details.
 
-cat "$(dirname $0)/strong_timed_bisim_system_tests/Lieb_et_al/A1_non_determ_bisim.txt"
-
+cat "$(dirname $0)/changed_actions_changed.txt"

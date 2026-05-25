@@ -51,13 +51,13 @@ set(DOT_MAX_SIZE 20000)
 # contains arguments passed to the generator script.
 # only append to the tail of this list!
 set(INPUTS
-    easy-ad94.sh:
-    easy-ad94-added-transition.sh:
-    easy-ad94-different-guard.sh:
-    Lieb_et_al_1.sh:
-    Lieb_et_al_1_diff_invariant.sh:
-    strong_timed_bisim_system_tests_edge_case_urgent.sh:
-    strong_timed_bisim_system_tests_edge_case_urgent_non_urgent.sh:
+    strong_timed_bisim_system_tests/easy_ad94/easy-ad94.sh:
+    strong_timed_bisim_system_tests/easy_ad94/easy-ad94-added-transition.sh:
+    strong_timed_bisim_system_tests/easy_ad94/easy-ad94-different-guard.sh:
+    strong_timed_bisim_system_tests/Lieb_et_al/Lieb_et_al_1.sh:
+    strong_timed_bisim_system_tests/Lieb_et_al/Lieb_et_al_1_diff_invariant.sh:
+    strong_timed_bisim_system_tests/edge_cases/urgent.sh:
+    strong_timed_bisim_system_tests/edge_cases/urgent_non_urgent.sh:
     )
 
 file(RELATIVE_PATH here ${CMAKE_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR})

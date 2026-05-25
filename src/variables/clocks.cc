@@ -639,6 +639,67 @@ int lexical_cmp(tchecker::clockval_t const & clockval1, tchecker::clockval_t con
                                });
 }
 
+bool is_region_equivalent(tchecker::clockval_t const & clockval_1, tchecker::clockval_t const & clockval_2, std::size_t cut_off) {
+  assert(clockval_1.size() == clockval_2.size());
+
+  boost::rational<int64_t> k = cut_off;
+
+  // this loop checks the first and third condition
+  for(std::size_t i = 0; i < clockval_1.size(); ++i) {
+    int64_t integral_1 = clockval_1[i].numerator() / clockval_1[i].denominator();
+    clock_rational_value_t fractional_1 = clockval_1[i] - integral_1;
+
+    int64_t integral_2 = clockval_2[i].numerator() / clockval_2[i].denominator();
+    clock_rational_value_t fractional_2 = clockval_2[i] - integral_2;
+
+    // if both values are above cut_off, we ignore them
+    if(clockval_1[i] > k && clockval_2[i] > k) {
+      continue;
+    }
+
+    // first condition: integer part must be identical
+    if(integral_1 != integral_2) {
+      return false;
+    }
+
+    // third condition: either both fractional parts are zero or none of them
+    if((fractional_1 == 0 && fractional_2 != 0) || (fractional_1 != 0 && fractional_2 == 0)) {
+      return false;
+    }
+  }
+
+  // first and third condition are satisfied. Check the second
+  for(std::size_t i = 0; i < clockval_1.size(); ++i) {
+    for(std::size_t j = 0; j < clockval_1.size(); ++j) {
+      int64_t integral_1_i = clockval_1[i].numerator() / clockval_1[i].denominator();
+      clock_rational_value_t fractional_1_i = clockval_1[i] - integral_1_i;
+
+      int64_t integral_1_j = clockval_1[j].numerator() / clockval_1[j].denominator();
+      clock_rational_value_t fractional_1_j = clockval_1[j] - integral_1_j;
+
+
+      int64_t integral_2_i = clockval_2[i].numerator() / clockval_2[i].denominator();
+      clock_rational_value_t fractional_2_i = clockval_2[i] - integral_2_i;
+
+      int64_t integral_2_j = clockval_2[j].numerator() / clockval_2[j].denominator();
+      clock_rational_value_t fractional_2_j = clockval_2[j] - integral_2_j;
+
+      bool gate = clockval_1[i] <= k && clockval_1[j] <= k;
+      gate |= clockval_2[i] <= k && clockval_2[j] <= k;
+
+      if(gate && fractional_1_i <= fractional_1_j && fractional_2_i > fractional_2_j) {
+        return false;
+      }
+      if(gate && fractional_1_i > fractional_1_j && fractional_2_i <= fractional_2_j) {
+        return false;
+      }
+    }
+  }
+
+  return true;
+
+}
+
 void initial(tchecker::clockval_t & clockval)
 {
   for (tchecker::clock_id_t id = 0; id < clockval.size(); ++id)

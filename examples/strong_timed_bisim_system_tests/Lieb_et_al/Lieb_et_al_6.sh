@@ -4,5 +4,5 @@
 #
 # See files AUTHORS and LICENSE for copyright details.
 
-cat "$(dirname $0)/strong_timed_bisim_system_tests/Lieb_et_al/A2.txt"
+cat "$(dirname $0)/Lieb_et_al_6.txt"
 
