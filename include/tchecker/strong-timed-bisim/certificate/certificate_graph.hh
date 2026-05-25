@@ -128,7 +128,7 @@ protected:
    \brief returns the node and nullptr in case there exists none.
    \param to_find : the node to find
   */
-  virtual std::shared_ptr<node> find_node(std::shared_ptr<node> to_find) const
+  std::shared_ptr<node> find_node(std::shared_ptr<node> to_find) const
   {
     assert(nullptr != to_find);
     assert(nullptr != _nodes);
