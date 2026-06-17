@@ -33,6 +33,7 @@ static struct option long_options[] = {{"relationship", required_argument, 0, 'r
                                        {"sFirst", required_argument, 0, 0},
                                        {"sSecond", required_argument, 0, 0},
                                        {"interConstraint", required_argument, 0, 0},
+                                       {"allReachableStates", no_argument, 0, 0},
                                        {0, 0, 0, 0}};
 
 static char const * const options = (char *)"hr:n:o:W";
@@ -52,11 +53,13 @@ void usage(char * progname)
   std::cerr << "   --sFirst state     starting state of the first VCG, specified as a JSON object with keys vloc, intval and zone" << std::endl;
   std::cerr << "   --sSecond state    starting state of the second VCG, specified as a JSON object with keys vloc, intval and zone" << std::endl;
   std::cerr << "   --interConstraint  constraint between the starting states. Clocks from the first model must be postfixed with _1 and analogously for the second." << std::endl;
+  std::cerr << "   --allReachableStates covers all reachable states of the first system";
 }
 
 enum tck_compare_relationship_t relationship = STRONG_TIMED_BISIM;   /*!< Selected relationship */
 bool help = false;                                 /*!< Help flag */
 bool witness = false;                              /*!< Witness Flag */
+bool all_reachable_states = false;                 /*!< All Reachable States Flag*/
 std::string output_file = "";                      /*!< Output file name (empty means standard output) */
 std::ostream * os = &std::cout;                    /*!< Default output stream */
 std::size_t block_size = 10000;                    /*!< Size of allocated blocks */
@@ -110,18 +113,24 @@ int parse_command_line(int argc, char * argv[])
       }
     }
     else {
-      if (strcmp(long_options[long_option_index].name, "block-size") == 0)
+      if (strcmp(long_options[long_option_index].name, "block-size") == 0) {
         block_size = std::strtoull(optarg, nullptr, 10);
-      else if (strcmp(long_options[long_option_index].name, "table-size") == 0)
+      }
+      else if (strcmp(long_options[long_option_index].name, "table-size") == 0) {
         table_size = std::strtoull(optarg, nullptr, 10);
+      }
       else if (strcmp(long_options[long_option_index].name, "sFirst") == 0) {
         first_starting_state_json = optarg;
       } else if (strcmp(long_options[long_option_index].name, "sSecond") == 0) {
         second_starting_state_json = optarg;
-      } else if (strcmp(long_options[long_option_index].name, "interConstraint") == 0)
+      } else if (strcmp(long_options[long_option_index].name, "interConstraint") == 0) {
         inter_constraint = optarg;
-      else
+      } else if (strcmp(long_options[long_option_index].name, "allReachableStates") == 0) {
+        all_reachable_states = true;
+      }
+      else {
         throw std::runtime_error("This should never be executed");
+      }
     }
   }
 
@@ -154,7 +163,7 @@ int main(int argc, char * argv[]) {
     tchecker::publicapi::tck_compare(output_file, first_input, second_input,
                                      relationship, block_size, table_size, 
                                      first_starting_state_json, second_starting_state_json,
-                                     inter_constraint, witness);
+                                     inter_constraint, witness, all_reachable_states);
 
     if (tchecker::log_error_count() > 0)
       return EXIT_FAILURE;

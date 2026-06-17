@@ -64,6 +64,20 @@ void stats_t::init_counterexample(std::shared_ptr<tchecker::vcg::vcg_t> const & 
                                       first_invariant, second_invariant, max_delay+1, nullptr);
 }
 
+std::shared_ptr<tchecker::strong_timed_bisim::strategy_t> stats_t::strategy() const
+{
+  return _strategy;
+}
+
+
+void stats_t::init_strategy(std::shared_ptr<tchecker::vcg::vcg_t> const & vcg1, 
+                   std::shared_ptr<tchecker::vcg::vcg_t> const & vcg2, 
+                   std::vector<tchecker::zg::const_state_sptr_t> & symbolic_states_to_check)
+{
+  _strategy = std::make_shared<tchecker::strong_timed_bisim::strategy_t> (
+                                      vcg1, vcg2, symbolic_states_to_check);
+}
+
 void stats_t::attributes(std::map<std::string, std::string> & m) const {
   tchecker::algorithms::stats_t::attributes(m);
 

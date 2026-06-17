@@ -52,11 +52,13 @@ public:
    \param first_starting_state : the attributes of the first starting state
    \param second_starting_state : the attributes of the second starting state
    \param inter_constraint : a constraint between the clocks of the first ta and the second ta
+   \param symbolic_states_to_check : the symbolic states to check. Empty, if the initial symbolic states should be checked.
    \note In inter_constraint, clocks of the first TA must have the postfix _1 and analogously for the second.
    */
   tchecker::strong_timed_bisim::stats_t run(std::map<std::string, std::string> & first_starting_state, 
                                             std::map<std::string, std::string> & second_starting_state,
-                                            std::string & inter_constraint);
+                                            std::string & inter_constraint, 
+                                            std::vector<tchecker::zg::const_state_sptr_t> & symbolic_states_to_check);
 
 private:
 
@@ -120,7 +122,7 @@ private:
   const std::shared_ptr<tchecker::vcg::vcg_t> _B;
 
   long _visited_pair_of_states;
-  non_bisim_cache_t _non_bisim_cache;
+  std::shared_ptr<non_bisim_cache_t> _non_bisim_cache;
 
   const bool _witness;
 };

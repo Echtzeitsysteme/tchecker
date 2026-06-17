@@ -72,7 +72,8 @@ run(std::shared_ptr<tchecker::parsing::system_declaration_t> const & sysdecl_fir
     std::map<std::string, std::string> & first_starting_state, 
     std::map<std::string, std::string> & second_starting_state, 
     std::string & inter_constraint,
-    bool generate_witness)
+    bool generate_witness,
+    std::vector<tchecker::zg::const_state_sptr_t> & symbolic_states_to_check)
 {
 
   std::vector<std::shared_ptr<tchecker::ta::system_t>> systems;
@@ -108,7 +109,7 @@ run(std::shared_ptr<tchecker::parsing::system_declaration_t> const & sysdecl_fir
 
   auto algorithm = new tchecker::strong_timed_bisim::Lieb_et_al(vcgs[0], vcgs[1], generate_witness);
 
-  return algorithm->run(first_starting_state, second_starting_state, inter_constraint);
+  return algorithm->run(first_starting_state, second_starting_state, inter_constraint, symbolic_states_to_check);
 
 }
 

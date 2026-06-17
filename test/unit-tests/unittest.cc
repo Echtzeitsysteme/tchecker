@@ -12,6 +12,7 @@
 #include "test-clock_updates.hh"
 #include "test-clockbounds.hh"
 #include "test-clocks.hh"
+#include "test-compare-tools-synchronize.hh"
 #include "test-db.hh"
 #include "test-dbm.hh"
 #include "test-delay_allowed.hh"

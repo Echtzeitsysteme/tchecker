@@ -43,6 +43,11 @@ extern "C" {
   \param relationship Type of relationship to check (see tck_compare_relationship_t)
   \param block_size Pointer to the block size for internal computation (nullptr for default)
   \param table_size Pointer to the table size for internal computation (nullptr for default)
+  \param starting_state_attributes_first String that contains the symbolic start state of the first TA. Nullptr, if initial state should be used
+  \param starting_state_attributes_second String that contains the symbolic start state of the first TA. Nullptr, if initial state should be used
+  \param inter_constraint String that contains possible interdependencies between the start states. Nullptr, if no suhc constraint exists
+  \param generate_witness Whether a witness should be generated,
+  \param all_reachable_states Checks all reachable states of the first system.
 
   \note This function is C-compatible and can be called from Python using ctypes.
 
@@ -90,7 +95,8 @@ void tck_compare(const char * output_filename,
   const char * starting_state_attributes_first = nullptr,
   const char * starting_state_attributes_second = nullptr,
   const char * inter_constraint = nullptr,
-  bool generate_witness=false);
+  bool generate_witness=false,
+  bool all_reachable_states = false);
 
 #ifdef __cplusplus
 }
@@ -118,6 +124,7 @@ namespace publicapi {
   \param second_stating_state_json the json description of the second starting state, or the empty string in case init shall be used
   \param inter_constraint : constraints between any clocks of both automata, or the empty string in case no such constraint is given
   \param generate_witness Whether a witness/Contradiction DAG shall be generated
+  \param all_reachable_states Checks all reachable states of the first system.
   \note This is the C++ API. For C/FFI usage, see the C-compatible version above.
   \note In inter_constraint, any clock of the first automaton must be given with the postfix _1. Analogously for any clock of the second TA.
 */
@@ -130,7 +137,8 @@ namespace publicapi {
                    std::string & first_starting_state_json,
                    std::string & second_starting_state_json,
                    std::string & inter_constraint,
-                   bool generate_witness);
+                   bool generate_witness,
+                   bool all_reachable_states);
 
 } // end of namespace publicapi
 

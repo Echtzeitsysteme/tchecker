@@ -242,6 +242,7 @@ public:
     assert(this->dim() == zone.dim());
 
     #if defined(SUBSETS_WITH_NEG_AND) // works only for T = virtual_constraint_t
+      static_assert(std::is_same_v<T, tchecker::virtual_constraint::virtual_constraint_t>, "Please contact the developer");
       auto remaining_zone = std::make_shared<zone_container_t<T>>(zone);
 
       for(auto current_zone = _storage->begin(); current_zone < _storage->end(); ++current_zone) {

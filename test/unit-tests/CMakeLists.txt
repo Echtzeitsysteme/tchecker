@@ -23,6 +23,7 @@ set(TEST_SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/test-clockbounds.hh
     ${CMAKE_CURRENT_SOURCE_DIR}/test-clock_updates.hh
     ${CMAKE_CURRENT_SOURCE_DIR}/test-clocks.hh
+    ${CMAKE_CURRENT_SOURCE_DIR}/test-compare-tools-synchronize.hh
     ${CMAKE_CURRENT_SOURCE_DIR}/test-db.hh
     ${CMAKE_CURRENT_SOURCE_DIR}/test-dbm.hh
     ${CMAKE_CURRENT_SOURCE_DIR}/test-delay_allowed.hh

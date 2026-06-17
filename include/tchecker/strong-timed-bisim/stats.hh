@@ -15,6 +15,7 @@
 
 #include "tchecker/strong-timed-bisim/certificate/witness/witness_graph.hh"
 #include "tchecker/strong-timed-bisim/certificate/contradiction/cont_dag.hh"
+#include "tchecker/strong-timed-bisim/strategy.hh"
 
 /*!
  \file stats.hh
@@ -63,7 +64,7 @@ public:
 
   /*!
    \brief Accessor
-   \return Reference to the witness
+   \return shared pointer to the witness
   */
   std::shared_ptr<tchecker::strong_timed_bisim::witness::graph_t> witness() const;
 
@@ -76,7 +77,7 @@ public:
 
   /*!
    \brief Accessor
-   \return Reference to the counterexample
+   \return shared pointer to the counterexample
   */
   std::shared_ptr<tchecker::strong_timed_bisim::contra::cont_dag_t> counterexample() const;
 
@@ -93,6 +94,20 @@ public:
                            std::size_t max_delay);
 
   /*!
+   \brief Accessor
+   \return shared pointer to the strategy
+   */
+  std::shared_ptr<tchecker::strong_timed_bisim::strategy_t> strategy() const;
+
+  /*!
+   \brief Init Strategy
+   \post _strategy is initialized
+   */
+  void init_strategy(std::shared_ptr<tchecker::vcg::vcg_t> const & vcg1, 
+                     std::shared_ptr<tchecker::vcg::vcg_t> const & vcg2, 
+                     std::vector<tchecker::zg::const_state_sptr_t> & symbolic_states_to_check);
+
+  /*!
    \brief Extract statistics as attributes (key, value)
    \param m : attributes map
    \post every statistics has been added to m
@@ -104,6 +119,7 @@ private:
   bool _relationship_fulfilled;  /*!< Whether the relationship is fulfilled */
   std::shared_ptr<tchecker::strong_timed_bisim::witness::graph_t> _witness; /*!< If a witness shall be produced, then it contains it */
   std::shared_ptr<tchecker::strong_timed_bisim::contra::cont_dag_t> _counterexample; /*!< If a counterexample shall be produced, then it contains it */
+  std::shared_ptr<tchecker::strong_timed_bisim::strategy_t> _strategy; /*!< If a strategy should be created */
 };
 
 } // end of namespace strong_timed_bisim

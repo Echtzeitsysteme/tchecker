@@ -20,7 +20,8 @@ namespace strong_timed_bisim {
 
 Lieb_et_al::Lieb_et_al(std::shared_ptr<tchecker::vcg::vcg_t> input_first, std::shared_ptr<tchecker::vcg::vcg_t> input_second,
                        bool generate_witness)
-    : _A(input_first), _B(input_second), _visited_pair_of_states(0), _non_bisim_cache(input_first->get_no_of_virtual_clocks()),
+    : _A(input_first), _B(input_second), _visited_pair_of_states(0), 
+      _non_bisim_cache(std::make_shared<non_bisim_cache_t>(input_first->get_no_of_virtual_clocks())),
       _witness(generate_witness)
 {
   assert(_A->get_no_of_virtual_clocks() == _B->get_no_of_virtual_clocks());
@@ -29,7 +30,8 @@ Lieb_et_al::Lieb_et_al(std::shared_ptr<tchecker::vcg::vcg_t> input_first, std::s
 
 tchecker::strong_timed_bisim::stats_t Lieb_et_al::run(std::map<std::string, std::string> & first_starting_state, 
                                                       std::map<std::string, std::string> & second_starting_state,
-                                                      std::string & inter_constraint)
+                                                      std::string & inter_constraint, 
+                                                      std::vector<tchecker::zg::const_state_sptr_t> & symbolic_states_to_check)
 {
   tchecker::strong_timed_bisim::stats_t stats;
 
@@ -50,15 +52,15 @@ tchecker::strong_timed_bisim::stats_t Lieb_et_al::run(std::map<std::string, std:
   tchecker::zg::const_state_sptr_t const_second{std::get<1>(st)}; 
   const_st = std::make_pair(const_first, const_second);
 
-  visited_map_t visited(_A->get_no_of_virtual_clocks(), _A, _B);
+  std::shared_ptr<visited_map_t> visited = std::make_shared<visited_map_t>(_A->get_no_of_virtual_clocks(), _A, _B);
 
   auto result =
-      this->check_for_virt_bisim(const_st.first, std::get<2>(sst_first[0]), const_st.second, std::get<2>(sst_second[0]), visited);
+      this->check_for_virt_bisim(const_st.first, std::get<2>(sst_first[0]), const_st.second, std::get<2>(sst_second[0]), *visited);
   
-  if (_witness && result->contradiction_free()) {
+  if (_witness && result->contradiction_free() && symbolic_states_to_check.empty()) {
     stats.init_witness(_A, _B);
-    stats.witness()->create_witness_from_visited(visited, st.first, st.second);
-  } else if (_witness) {
+    stats.witness()->create_witness_from_visited(*visited, st.first, st.second);
+  } else if (_witness && symbolic_states_to_check.empty()) {
     tchecker::clockbounds::bound_t max_delay = std::max(_A->extrapolation_max(), _B->extrapolation_max());
 
     tchecker::ta::state_t first_ta_state{st.first->vloc_ptr(), st.first->intval_ptr()};
@@ -80,7 +82,16 @@ tchecker::strong_timed_bisim::stats_t Lieb_et_al::run(std::map<std::string, std:
                               std::get<2>(sst_first[0])->tgt_invariant_container(),
                               std::get<2>(sst_second[0])->tgt_invariant_container(),
                               max_delay);
-    stats.counterexample()->create_cont_from_non_bisim_cache(_non_bisim_cache);
+    stats.counterexample()->create_cont_from_non_bisim_cache(*_non_bisim_cache);
+  } else if (_witness && !symbolic_states_to_check.empty()) {
+
+    stats.init_strategy(_A, _B, symbolic_states_to_check);
+    stats.strategy()->insert_symb_states(_non_bisim_cache, visited);
+
+    while(stats.strategy()->get_non_contained_states(const_st)) {
+      this->check_for_virt_bisim(const_st.first, std::get<2>(sst_first[0]), const_st.second, std::get<2>(sst_second[0]), *visited);
+      stats.strategy()->insert_symb_states(_non_bisim_cache, visited);
+    }
   }
 
   stats.set_end_time();
@@ -190,14 +201,14 @@ std::shared_ptr<algorithm_return_value_t> Lieb_et_al::check_for_virt_bisim(tchec
     //   tchecker::dbm::output_matrix(std::cout, vc->dbm(), vc->dim());
     // }
 
-    _non_bisim_cache.emplace(A_synced, B_synced, contradiction);
+    _non_bisim_cache->emplace(A_synced, B_synced, contradiction);
 
     auto result = std::make_shared<algorithm_return_value_t>(syncer.revert_sync_with_urgent(A_state, B_state, contradiction), A_state, B_state);
     return result;
   }
 
   // check whether there already exists a contradiction
-  auto cache = _non_bisim_cache.already_cached(A_synced, B_synced);
+  auto cache = _non_bisim_cache->already_cached(A_synced, B_synced);
   if (!cache->is_empty()) {
     _visited_pair_of_states--;
     auto result = std::make_shared<algorithm_return_value_t>(syncer.revert_sync_with_urgent(A_state, B_state, cache), A_state, B_state);
@@ -257,7 +268,7 @@ std::shared_ptr<algorithm_return_value_t> Lieb_et_al::check_for_virt_bisim(tchec
       // for(std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> vc : *enhanced_cont) {
       //    tchecker::dbm::output_matrix(std::cout, vc->dbm(), vc->dim());
       // }
-      _non_bisim_cache.emplace(A_synced, B_synced, enhanced_cont);
+      _non_bisim_cache->emplace(A_synced, B_synced, enhanced_cont);
 
       auto result = std::make_shared<algorithm_return_value_t>(
                       syncer.revert_sync_with_urgent(A_state, B_state, enhanced_cont), A_state, B_state);

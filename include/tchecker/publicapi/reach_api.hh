@@ -15,6 +15,8 @@
 
 #include <string>
 
+#include "tchecker/algorithms/reach/zg-reach.hh"
+
 #define TCK_REACH_INIT_BLOCK_SIZE 10000;
 #define TCK_REACH_INIT_TABLE_SIZE 65536;
 
@@ -133,7 +135,8 @@ namespace publicapi {
   \param certificate Type of certificate to produce (see tck_reach_certificate_t)
   \param block_size Block size for internal computation
   \param table_size Table size for internal computation
-
+  \param state_space_storage In case it is not nullptr, a shared pointer to the state_space will be stored here before the function terminates
+  \note state_space_storage will only be used, if algorithm == ALGO_REACH
   \note This is the C++ API. For C/FFI usage, see the C-compatible version above.
 */
   void tck_reach(std::string output_filename, 
@@ -143,7 +146,8 @@ namespace publicapi {
                  std::string search_order, 
                  tck_reach_certificate_t certificate, 
                  std::size_t block_size, 
-                 std::size_t table_size);
+                 std::size_t table_size,
+                 std::shared_ptr<tchecker::algorithms::zg_reach::state_space_t> * state_space_storage = nullptr);
 
 } // end of namespace publicapi
 

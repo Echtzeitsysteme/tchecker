@@ -63,8 +63,10 @@ static bool is_certificate_path(enum tck_reach_certificate_t ctype)
  A certification has been output if required.
 */
 void tck_reach_zg_reach(std::ostream & os, const tchecker::parsing::system_declaration_t & sysdecl, std::string labels,
-                              std::string search_order, int block_size, int table_size, tck_reach_certificate_t certificate)
+                              std::string search_order, int block_size, int table_size, tck_reach_certificate_t certificate,
+                              std::shared_ptr<tchecker::algorithms::zg_reach::state_space_t> * state_space_storage)
 {
+
   auto && [stats, state_space] = tchecker::algorithms::zg_reach::run(sysdecl, labels, search_order, block_size, table_size);
 
   // stats
@@ -89,6 +91,10 @@ void tck_reach_zg_reach(std::ostream & os, const tchecker::parsing::system_decla
     if (cex->empty())
       throw std::runtime_error("Unable to compute a symbolic counter example");
     tchecker::algorithms::zg_reach::cex::dot_output(os, *cex, sysdecl.name());
+  }
+
+  if(nullptr != state_space_storage) {
+    *state_space_storage = state_space;
   }
 }
 
@@ -220,7 +226,8 @@ void tck_reach_zg_alu_covreach(std::ostream & os, const tchecker::parsing::syste
 }
 
 void tck_reach(std::string output_filename, std::string sysdecl_filename, std::string labels, tck_reach_algorithm_t algorithm,
-               std::string search_order, tck_reach_certificate_t certificate, std::size_t  block_size, std::size_t table_size)
+               std::string search_order, tck_reach_certificate_t certificate, std::size_t  block_size, std::size_t table_size,
+               std::shared_ptr<tchecker::algorithms::zg_reach::state_space_t> * state_space_storage)
 {
   try {
     std::shared_ptr<tchecker::parsing::system_declaration_t> sysdecl{nullptr};
@@ -251,7 +258,7 @@ void tck_reach(std::string output_filename, std::string sysdecl_filename, std::s
     }
 
     if (algorithm == ALGO_REACH) {
-      tck_reach_zg_reach(*os, *sysdecl, labels, search_order, block_size, table_size, certificate);
+      tck_reach_zg_reach(*os, *sysdecl, labels, search_order, block_size, table_size, certificate, state_space_storage);
     }
     else if (algorithm == ALGO_CONCUR19) {
       tck_reach_concur19(*os, *sysdecl, labels, search_order, block_size, table_size, certificate);

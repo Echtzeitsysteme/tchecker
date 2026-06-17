@@ -1,14 +1,23 @@
 // Won't fix
 *:*/src/parsing/*
-nullPointer:*/tchecker/src/refzg/refzg.cc:[181, 176, 189, 190, 197, 203, 208]
+*:*system.tab.cc
+nullPointer:*/tchecker/src/refzg/refzg.cc:181
+nullPointer:*/tchecker/src/refzg/refzg.cc:176
+nullPointer:*/tchecker/src/refzg/refzg.cc:189
+nullPointer:*/tchecker/src/refzg/refzg.cc:190
+nullPointer:*/tchecker/src/refzg/refzg.cc:197
+nullPointer:*/tchecker/src/refzg/refzg.cc:203
+nullPointer:*/tchecker/src/refzg/refzg.cc:208
 uninitdata:*/include/tchecker/utils/shared_objects.hh
 nullPointer:*/src/refzg/refzg.cc
 duplInheritedMember:*
 uninitMemberVar:*/include/tchecker/utils/hashtable.hh
 uninitMemberVar:*/include/tchecker/vm/vm.hh
+uninitMemberVarNoCtor:*/include/tchecker/syncprod/edges_iterators.hh
 accessMoved:*/include/tchecker/utils/array.hh
 throwInNoexceptFunction:*/include/tchecker/utils/shared_objects.hh
 syntaxError:*/test/unit-tests/test-refdbm.hh
+uninitMemberVarNoCtor:*/tchecker/src/variables/clocks.cc
 
 // the following is a known cppcheck bug
 internalAstError:*/include/tchecker/graph/directed_graph.hh
