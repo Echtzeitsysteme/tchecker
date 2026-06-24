@@ -132,8 +132,7 @@ public:
    */
   void remove_first()
   {
-    destruct_element(*(_storage.begin()));
-    _storage->erase(_storage.begin());
+    _storage->erase(_storage->begin());
   }
 
   /*!

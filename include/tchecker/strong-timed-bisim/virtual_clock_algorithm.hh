@@ -58,7 +58,7 @@ public:
   tchecker::strong_timed_bisim::stats_t run(std::map<std::string, std::string> & first_starting_state, 
                                             std::map<std::string, std::string> & second_starting_state,
                                             std::string & inter_constraint, 
-                                            std::vector<tchecker::zg::const_state_sptr_t> & symbolic_states_to_check);
+                                            std::vector<std::shared_ptr<tchecker::strong_timed_bisim::strategy::state_to_check_t>> & symbolic_states_to_check);
 
 private:
 

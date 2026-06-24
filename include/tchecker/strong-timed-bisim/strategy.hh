@@ -16,8 +16,35 @@ namespace tchecker {
 
 namespace strong_timed_bisim {
 
+namespace strategy {
+
 /*!
- \class strategiy_t
+  \brief A helping class that represents symbolic states of the product that shall be checked
+*/
+class state_to_check_t {
+ public:
+
+  state_to_check_t(const tchecker::vloc_t & vloc, const tchecker::intval_t & intval,
+                   tchecker::intrusive_shared_ptr_t<const tchecker::zg::shared_zone_t> zone);
+
+  state_to_check_t();
+  state_to_check_t(state_to_check_t const & other);
+  state_to_check_t & operator=(state_to_check_t const & other);
+  state_to_check_t(state_to_check_t&& other) noexcept;
+  state_to_check_t & operator=(state_to_check_t&& other) noexcept;
+  ~state_to_check_t();
+    
+  tchecker::vloc_t * vloc_ptr() {return _vloc_ptr;}
+  tchecker::intval_t * intval_ptr() {return _intval_ptr;}
+  tchecker::zg::zone_t *zone_ptr() {return _zone_ptr;}
+ private:
+  tchecker::vloc_t * _vloc_ptr;
+  tchecker::intval_t * _intval_ptr;
+  tchecker::zg::zone_t *_zone_ptr;
+};
+
+/*!
+ \class strategy_t
  \brief This class replaces the certificates in case a set of symbolic states is given that should be checked.
  */
 class strategy_t {
@@ -30,7 +57,11 @@ class strategy_t {
    */
   strategy_t(std::shared_ptr<tchecker::vcg::vcg_t> A, 
              std::shared_ptr<tchecker::vcg::vcg_t> B,
-             std::vector<tchecker::zg::const_state_sptr_t> & symbolic_states_to_check);
+             std::vector<std::shared_ptr<tchecker::strong_timed_bisim::strategy::state_to_check_t>> & symbolic_states_to_check,
+             tchecker::clock_id_t first_vloc_size,
+             tchecker::clock_id_t second_vloc_size,
+             unsigned short first_intval_size,
+             unsigned short second_intval_size);
 
   /*!
    \brief Adds the already checked symbolic states to the strategy
@@ -45,24 +76,72 @@ class strategy_t {
    \param a reference to a pair, where the result is stored into
    \return true, if there exists such a pair. False, otherwise.
    */
-  bool get_non_contained_states(std::pair<tchecker::zg::const_state_sptr_t, tchecker::zg::const_state_sptr_t> & result);
+  std::shared_ptr<std::pair<tchecker::zg::state_sptr_t, tchecker::zg::state_sptr_t>> get_non_contained_states();
 
   /*!
-   \brief Strategy output
+   \brief prints the strategy
    \param os : output stream
-   \param name : graph name
    \post Strategy has been output to os
   */
-  std::ostream & dot_output(std::ostream & os, std::string const & name);
+  std::ostream & strategy_output(std::ostream & os);
 
  private:
+
+  class entry_t {
+   public:
+
+    entry_t(std::shared_ptr<std::pair<tchecker::ta::state_t, tchecker::ta::state_t>> loc_pair, 
+           tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t> & container)
+     : _loc_pair(loc_pair), _container(container)
+    { }
+    entry_t(std::shared_ptr<std::pair<tchecker::ta::state_t, tchecker::ta::state_t>> loc_pair,
+          tchecker::clock_id_t dim)
+     : _loc_pair(loc_pair), _container(dim)
+    { }
+    std::shared_ptr<std::pair<tchecker::ta::state_t, tchecker::ta::state_t>> loc_pair() {return _loc_pair;}
+    tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t> container() {return _container;}
+
+    void append_vc(std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> vc) {_container.append_zone(vc);}
+
+   private:
+    std::shared_ptr<std::pair<tchecker::ta::state_t, tchecker::ta::state_t>> _loc_pair;
+    tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t> _container;
+  };
+
+  std::shared_ptr<std::pair<tchecker::zg::state_sptr_t, tchecker::zg::state_sptr_t>> 
+  get_non_contained_states(std::pair<tchecker::ta::state_t, tchecker::ta::state_t> & loc_pair, 
+                           std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> vc);
+
+  std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t>
+  find_non_contained(std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> to_be_contained, 
+                     tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t> & container);
+
+  std::shared_ptr<std::pair<tchecker::ta::state_t, tchecker::ta::state_t>> 
+  extract_location_pair(tchecker::vloc_t * vloc,
+                        tchecker::intval_t * intval);
+
+  void output_non_bisim(std::ostream & os);
+
+  void output_bisim(std::ostream & os);
+
+  void output_state_pair_with_container(std::ostream & os, 
+                                        std::pair<tchecker::ta::state_t, tchecker::ta::state_t> loc_pair,
+                                        std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> container);
+
   std::shared_ptr<tchecker::vcg::vcg_t> _A;
   std::shared_ptr<tchecker::vcg::vcg_t> _B;
-  std::vector<tchecker::zg::const_state_sptr_t> _states_to_check;
+
+  // states to check contains a pair of states and a zone_container that contains the virtual constraints to check.
+  std::vector<std::shared_ptr<entry_t>> _states_to_check;
   std::shared_ptr<non_bisim_cache_t> _non_bisim_cache;
   std::shared_ptr<visited_map_t> _visited_map;
+  tchecker::clock_id_t _first_vloc_size;
+  tchecker::clock_id_t _second_vloc_size;
+  unsigned short _first_intval_size;
+  unsigned short _second_intval_size;
 };
 
+} // end of namespace strategy
 
 } // end of namespace strong_timed_bisim
 

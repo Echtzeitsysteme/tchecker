@@ -19,6 +19,33 @@ namespace tchecker {
 
 namespace strong_timed_bisim {
 
+using map_key_t = std::pair<tchecker::ta::state_t, tchecker::ta::state_t>;
+
+struct custom_hash {
+  size_t operator()(const map_key_t & to_hash) const
+  {
+    size_t h = TCHECKER_STRONG_TIMED_BISIM_NON_BISIM_CACHE_HH_SEED;
+    boost::hash_combine(h, to_hash.first);
+    boost::hash_combine(h, to_hash.second);
+    return h;
+  }
+};
+
+struct custom_equal {
+  bool operator()(const map_key_t & p1, const map_key_t & p2) const
+  {
+    return p1.first == p2.first && p1.second == p2.second;
+  }
+}; 
+
+/*
+ \brief unordered map mapping a map_key_t to a of zone container of virtual constraints
+ */
+using storage_t = std::unordered_map<map_key_t,
+                                     std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>, 
+                                     custom_hash, 
+                                     custom_equal>;
+
 class non_bisim_cache_t {
  public:
   /*!
@@ -77,35 +104,23 @@ class non_bisim_cache_t {
     return _no_of_entries;
   }
 
- private:
-  
-  using map_key_t = std::pair<tchecker::ta::state_t, tchecker::ta::state_t>;
+  /*!
+   \brief getter
+   \return returns the number of virtual clocks
+   */
+  tchecker::clock_id_t no_of_virtual_clocks() const {
+    return _no_of_virtual_clocks;
+  }
 
-  struct custom_hash {
-    size_t operator()(const map_key_t & to_hash) const
-    {
-      size_t h = TCHECKER_STRONG_TIMED_BISIM_NON_BISIM_CACHE_HH_SEED;
-      boost::hash_combine(h, to_hash.first);
-      boost::hash_combine(h, to_hash.second);
-      return h;
-    }
-  };
+  /*!
+   \brief getter
+   \return the storage
+   */
+  std::shared_ptr<storage_t> storage() const {
+    return _storage;
+  }
 
-  struct custom_equal {
-    bool operator()(const map_key_t & p1, const map_key_t & p2) const
-    {
-      return p1.first == p2.first && p1.second == p2.second;
-    }
-  };
-
-  /*
-   \brief unordered map mapping a map_key_t to a of zone container of virtual constraints
-  */
-  using storage_t = std::unordered_map<map_key_t,
-                                       std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>, 
-                                       custom_hash, 
-                                       custom_equal>;
-                                                
+ private:                                         
 
   const tchecker::clock_id_t _no_of_virtual_clocks;
   std::shared_ptr<storage_t> _storage;

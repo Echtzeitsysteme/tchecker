@@ -53,7 +53,7 @@ void usage(char * progname)
   std::cerr << "   --sFirst state     starting state of the first VCG, specified as a JSON object with keys vloc, intval and zone" << std::endl;
   std::cerr << "   --sSecond state    starting state of the second VCG, specified as a JSON object with keys vloc, intval and zone" << std::endl;
   std::cerr << "   --interConstraint  constraint between the starting states. Clocks from the first model must be postfixed with _1 and analogously for the second." << std::endl;
-  std::cerr << "   --allReachableStates covers all reachable states of the first system";
+  std::cerr << "   --allReachableStates covers all reachable states of the first system" << std::endl;
 }
 
 enum tck_compare_relationship_t relationship = STRONG_TIMED_BISIM;   /*!< Selected relationship */

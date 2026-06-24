@@ -40,7 +40,7 @@ run(std::shared_ptr<tchecker::parsing::system_declaration_t> const & sysdecl_fir
     std::map<std::string, std::string> & second_starting_state, 
     std::string & inter_constraint,
     bool generate_witness,
-    std::vector<tchecker::zg::const_state_sptr_t> & symbolic_states_to_check);
+    std::vector<std::shared_ptr<tchecker::strong_timed_bisim::strategy::state_to_check_t>> & symbolic_states_to_check);
 
 } // end of namespace strong_timed_bisim
 } // end of namespace tchecker

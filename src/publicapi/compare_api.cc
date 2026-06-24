@@ -27,6 +27,8 @@
 
 #include "tchecker/compare-tools/synchronize.hh"
 
+#include "tchecker/strong-timed-bisim/strategy.hh"
+
 void tck_compare(const char * output_filename, 
   const char * first_sysdecl_filename, 
   const char * second_sysdecl_filename,
@@ -67,7 +69,7 @@ void strong_timed_bisim(std::ostream & os, std::shared_ptr<tchecker::parsing::sy
                         std::size_t table_size, std::map<std::string, std::string> & first_starting_state, 
                         std::map<std::string, std::string> & second_starting_state, 
                         std::string & inter_constraint, bool generate_witness, 
-                        std::vector<tchecker::zg::const_state_sptr_t> & symbolic_states_to_check)
+                        std::vector<std::shared_ptr<tchecker::strong_timed_bisim::strategy::state_to_check_t>> & symbolic_states_to_check)
 {
 
   auto stats = tchecker::strong_timed_bisim::run(sysdecl_first, sysdecl_second, &os, block_size, table_size, 
@@ -78,7 +80,7 @@ void strong_timed_bisim(std::ostream & os, std::shared_ptr<tchecker::parsing::sy
     std::string name = sysdecl_first->name() + "_" + sysdecl_second->name();
 
     if(!symbolic_states_to_check.empty()) {
-      stats.strategy()->dot_output(os, name);
+      stats.strategy()->strategy_output(os);
     }
     else if(stats.relationship_fulfilled()) {
       stats.witness()->dot_output(os, name);
@@ -127,7 +129,7 @@ void tck_compare(std::string output_filename, std::string first_sysdecl_filename
 #endif
 
     std::map<std::string, std::string> first_starting_state_attributes, second_starting_state_attributes;
-    std::vector<tchecker::zg::const_state_sptr_t> reachable_states;
+    std::vector<std::shared_ptr<tchecker::strong_timed_bisim::strategy::state_to_check_t>> reachable_states;
 
 
 #if USE_BOOST_JSON
@@ -138,29 +140,33 @@ void tck_compare(std::string output_filename, std::string first_sysdecl_filename
       second_starting_state_attributes = parse_state_json(second_starting_state_json);
     }
 
+    std::string reachable_cert_file = create_temp_filename() + std::string(".cert");
+
     if(all_reachable_states) {
 
       // Synchronize the systems
       std::string synced_sysdecl_filename = create_temp_filename() + std::string(".tck");
       tchecker::compare_tools::syncer_t(first_sysdecl_filename, second_sysdecl_filename, synced_sysdecl_filename);
 
-      // create a tmp cert file
-      std::string cert_file = create_temp_filename() + std::string(".cert");
-
       std::shared_ptr<tchecker::algorithms::zg_reach::state_space_t> state_space_storage;
 
       // write the certificate into state_space_storage
-      tck_reach(cert_file, synced_sysdecl_filename, std::string(), tck_reach_algorithm_t::ALGO_REACH, std::string(), tck_reach_certificate_t::CERTIFICATE_GRAPH, block_size, table_size, &state_space_storage);
+      tck_reach(reachable_cert_file, synced_sysdecl_filename, std::string(), tck_reach_algorithm_t::ALGO_REACH, std::string("bfs"), tck_reach_certificate_t::CERTIFICATE_GRAPH, block_size, table_size, &state_space_storage);
 
-      // remove the files
+      // remove the file
       std::filesystem::remove(synced_sysdecl_filename);
-      std::filesystem::remove(cert_file);
 
       // convert the reachable nodes to a set of nodes.
       auto nodes =  state_space_storage->graph().nodes();
 
+      // We need to hard copy the states, as the state_space also holds the zone graph, which holds the pool allocator
+      // and everything explodes if we still hold shared pointers to objects over there.
       for(auto cur : nodes) {
-        reachable_states.emplace_back(cur->state_ptr());
+        reachable_states.emplace_back(
+          std::make_shared<tchecker::strong_timed_bisim::strategy::state_to_check_t>(
+              cur->state_ptr()->vloc(), 
+              cur->state_ptr()->intval(), 
+              cur->state_ptr()->zone_ptr()));
       }
 
     }
@@ -196,14 +202,21 @@ void tck_compare(std::string output_filename, std::string first_sysdecl_filename
       os = &std::cout;
     }
 
+    if(all_reachable_states) {
+      std::ifstream file(reachable_cert_file, std::ios::binary);
+      *os << file.rdbuf();
+      std::filesystem::remove(reachable_cert_file);
+    }
+
     if (relationship == STRONG_TIMED_BISIM) {
       strong_timed_bisim(*os, first_sysdecl, second_sysdecl, block_size, table_size, 
-                          first_starting_state_attributes, second_starting_state_attributes,
-                          inter_constraint, generate_witness, reachable_states);
+                         first_starting_state_attributes, second_starting_state_attributes,
+                         inter_constraint, generate_witness, reachable_states);
     }
     else {
-      throw std::runtime_error("Unknown relationship");
+      std::cerr << tchecker::log_error << "Unknown relationship" << std::endl;
     }
+    
   }
   catch (std::runtime_error & e) {
     std::cerr << tchecker::log_error << e.what() << std::endl;

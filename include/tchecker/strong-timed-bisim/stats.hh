@@ -97,7 +97,7 @@ public:
    \brief Accessor
    \return shared pointer to the strategy
    */
-  std::shared_ptr<tchecker::strong_timed_bisim::strategy_t> strategy() const;
+  std::shared_ptr<tchecker::strong_timed_bisim::strategy::strategy_t> strategy() const;
 
   /*!
    \brief Init Strategy
@@ -105,7 +105,11 @@ public:
    */
   void init_strategy(std::shared_ptr<tchecker::vcg::vcg_t> const & vcg1, 
                      std::shared_ptr<tchecker::vcg::vcg_t> const & vcg2, 
-                     std::vector<tchecker::zg::const_state_sptr_t> & symbolic_states_to_check);
+                     std::vector<std::shared_ptr<tchecker::strong_timed_bisim::strategy::state_to_check_t>> & symbolic_states_to_check,
+                     tchecker::clock_id_t first_vloc_size,
+                     tchecker::clock_id_t second_vloc_size,
+                     unsigned short first_intval_size,
+                     unsigned short second_intval_size);
 
   /*!
    \brief Extract statistics as attributes (key, value)
@@ -119,7 +123,7 @@ private:
   bool _relationship_fulfilled;  /*!< Whether the relationship is fulfilled */
   std::shared_ptr<tchecker::strong_timed_bisim::witness::graph_t> _witness; /*!< If a witness shall be produced, then it contains it */
   std::shared_ptr<tchecker::strong_timed_bisim::contra::cont_dag_t> _counterexample; /*!< If a counterexample shall be produced, then it contains it */
-  std::shared_ptr<tchecker::strong_timed_bisim::strategy_t> _strategy; /*!< If a strategy should be created */
+  std::shared_ptr<tchecker::strong_timed_bisim::strategy::strategy_t> _strategy; /*!< If a strategy should be created */
 };
 
 } // end of namespace strong_timed_bisim

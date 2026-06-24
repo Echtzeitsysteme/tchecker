@@ -44,7 +44,7 @@ public:
   /*!
    \brief Accessor
   */
-  tchecker::clock_id_t const no_of_virtual_clocks();
+  tchecker::clock_id_t no_of_virtual_clocks() const;
 
   /*!
    \brief inserts given pair of symbolic states into visited map
@@ -125,6 +125,14 @@ public:
    each
   */
   visited_map_storage_t::iterator end();
+
+  /*!
+   \brief Accessor
+   \param loc_pair : the pair of TA states
+   \return The entry corresponding to the given key
+   */
+  std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>
+  entry(std::pair<tchecker::ta::state_t, tchecker::ta::state_t> & loc_pair) const;
 
 private:
 

@@ -31,7 +31,7 @@ Lieb_et_al::Lieb_et_al(std::shared_ptr<tchecker::vcg::vcg_t> input_first, std::s
 tchecker::strong_timed_bisim::stats_t Lieb_et_al::run(std::map<std::string, std::string> & first_starting_state, 
                                                       std::map<std::string, std::string> & second_starting_state,
                                                       std::string & inter_constraint, 
-                                                      std::vector<tchecker::zg::const_state_sptr_t> & symbolic_states_to_check)
+                                                      std::vector<std::shared_ptr<tchecker::strong_timed_bisim::strategy::state_to_check_t>> & symbolic_states_to_check)
 {
   tchecker::strong_timed_bisim::stats_t stats;
 
@@ -84,13 +84,20 @@ tchecker::strong_timed_bisim::stats_t Lieb_et_al::run(std::map<std::string, std:
                               max_delay);
     stats.counterexample()->create_cont_from_non_bisim_cache(*_non_bisim_cache);
   } else if (_witness && !symbolic_states_to_check.empty()) {
-
-    stats.init_strategy(_A, _B, symbolic_states_to_check);
+    stats.init_strategy(_A, _B, symbolic_states_to_check, 
+                        const_first->vloc().size(), const_second->vloc().size(), 
+                        const_first->intval().size(), const_second->intval().size());
     stats.strategy()->insert_symb_states(_non_bisim_cache, visited);
 
-    while(stats.strategy()->get_non_contained_states(const_st)) {
+    std::shared_ptr<std::pair<tchecker::zg::state_sptr_t, tchecker::zg::state_sptr_t>> non_contained = stats.strategy()->get_non_contained_states();
+
+    while(non_contained != nullptr) {
+      tchecker::zg::const_state_sptr_t const_first{std::get<0>(*non_contained)};
+      tchecker::zg::const_state_sptr_t const_second{std::get<1>(*non_contained)}; 
+      const_st = std::make_pair(const_first, const_second);
       this->check_for_virt_bisim(const_st.first, std::get<2>(sst_first[0]), const_st.second, std::get<2>(sst_second[0]), *visited);
       stats.strategy()->insert_symb_states(_non_bisim_cache, visited);
+      non_contained = stats.strategy()->get_non_contained_states();
     }
   }
 

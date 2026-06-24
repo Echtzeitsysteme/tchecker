@@ -100,8 +100,6 @@ bool non_bisim_cache_t::is_cached(std::pair<tchecker::ta::state_t, tchecker::ta:
   return false;
 }
 
-
-
 } // end of namespace strong_timed_bisim
 
 } // end of namespace tchecker
