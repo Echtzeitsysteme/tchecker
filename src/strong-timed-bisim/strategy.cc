@@ -300,7 +300,7 @@ strategy_t::find_non_contained(std::shared_ptr<tchecker::virtual_constraint::vir
             (j == 0) ? (tchecker::REFCLOCK_ID) : (j-1),
             (i == 0) ? (tchecker::REFCLOCK_ID) : (i-1), 
             (tchecker::ineq_cmp_t::LE == dbm_entry->cmp) ? (tchecker::ineq_cmp_t::LT) : (tchecker::ineq_cmp_t::LE),
-            (-1)*static_cast<tchecker::integer_t>(dbm_entry->value)};
+            static_cast<tchecker::integer_t>(-1)*dbm_entry->value};
       
       if(tchecker::dbm::NON_EMPTY == tchecker::dbm::constrain(copy->dbm(), copy->dim(), constraint)) {
         std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> non_contained = find_non_contained(copy, container);
