@@ -4,7 +4,7 @@ apt update
 apt upgrade -y
 
 export CC="clang"
-export CXX="clang++ -Wno-vla-cxx-extension"
+export CXX="clang++"
 
 chmod a+x ./ci-scripts/build.sh
 chmod a+x ./ci-scripts/test.sh

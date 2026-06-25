@@ -5,6 +5,10 @@
  *
  */
 
+// ignore the dynamically allocated arrays warning of clang
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wvla-cxx-extension"
+
 #include <cassert>
 #include <numeric>
 
@@ -1448,6 +1452,8 @@ enum tchecker::dbm::union_convex_t convex_union(tchecker::dbm::db_t *result, tch
   return tchecker::dbm::union_convex_t::UNION_IS_CONVEX;
 
 }
+
+#pragma clang diagnostic pop
 
 } // end of namespace dbm
 
