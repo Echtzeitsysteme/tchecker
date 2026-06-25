@@ -14,6 +14,10 @@
 
 #include "tchecker/dbm/dbm.hh"
 
+// ignore the dynamically allocated arrays warning of clang
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wvla-cxx-extension"
+
 namespace tchecker {
 
 /*
@@ -471,5 +475,8 @@ public:
 
 };
 } // end of namespace tchecker
+
+#pragma clang diagnostic pop
+
 
 #endif

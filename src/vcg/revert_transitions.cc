@@ -7,6 +7,9 @@
 
 #include "tchecker/vcg/revert_transitions.hh"
 
+// ignore the dynamically allocated arrays warning of clang
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wvla-cxx-extension"
 
 namespace tchecker {
 
@@ -140,4 +143,6 @@ revert_epsilon_trans(const tchecker::zg::zone_t & zone, const tchecker::zg::zone
 } // end of namespace vcg
 
 } // end of namespace tchecker
+
+#pragma clang diagnostic pop
 

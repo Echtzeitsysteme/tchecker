@@ -64,6 +64,8 @@ public:
     _src(to_copy.src()), _tgt(to_copy.tgt())
   { }
 
+  virtual ~edge_t() = default;
+
  /*!
   \brief Accessor
   \return shared pointer to the pair of edges

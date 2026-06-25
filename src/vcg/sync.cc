@@ -8,6 +8,10 @@
 #include "tchecker/vcg/sync.hh"
 #include "tchecker/dbm/dbm.hh"
 
+// ignore the dynamically allocated arrays warning of clang
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wvla-cxx-extension"
+
 namespace tchecker {
 
 namespace vcg {
@@ -353,3 +357,5 @@ bool is_phi_subset_of_a_zone(const tchecker::dbm::db_t *dbm, tchecker::clock_id_
 } // end of namespace vcg
 
 } // end of namespace tchecker
+
+#pragma clang diagnostic pop

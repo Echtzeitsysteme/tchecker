@@ -49,6 +49,8 @@ public:
       _edges(std::make_shared<std::vector<std::shared_ptr<edge>>>())
   { }
 
+  virtual ~graph_t() = default;
+
   /*!
    \brief Accessor
    \return pointer to first vcg

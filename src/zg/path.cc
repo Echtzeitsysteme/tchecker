@@ -11,6 +11,10 @@
 #include "tchecker/zg/path.hh"
 #include "tchecker/zg/semantics.hh"
 
+// ignore the dynamically allocated arrays warning of clang
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wvla-cxx-extension"
+
 namespace tchecker {
 
 namespace zg {
@@ -792,3 +796,5 @@ compute_finite_path(tchecker::zg::path::symbolic::finite_path_t const & symbolic
 } // namespace zg
 
 } // namespace tchecker
+
+#pragma clang diagnostic pop
