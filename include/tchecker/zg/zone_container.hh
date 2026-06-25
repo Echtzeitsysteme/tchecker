@@ -318,10 +318,10 @@ private:
     for(auto to_add = cur.begin(); to_add < cur.end(); ++to_add) {
       bool found = false;
       for(auto in_result = result->begin(); in_result < result->end(); ++in_result) {
-        tchecker::dbm::db_t cur_union[_dim * _dim];
-        if(tchecker::dbm::union_convex_t::UNION_IS_CONVEX == tchecker::dbm::convex_union(cur_union, (*to_add)->dbm(), (*in_result)->dbm(), _dim)) {
+        tchecker::dbm::db_t cur_union[this->dim() * this->dim()];
+        if(tchecker::dbm::union_convex_t::UNION_IS_CONVEX == tchecker::dbm::convex_union(cur_union, (*to_add)->dbm(), (*in_result)->dbm(), this->dim())) {
           found = true;
-          tchecker::dbm::copy((*in_result)->dbm(), cur_union, _dim);
+          tchecker::dbm::copy((*in_result)->dbm(), cur_union, this->dim());
           break;
         }
       }
