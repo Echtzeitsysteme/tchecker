@@ -5,6 +5,10 @@
  *
  */
 
+// ignore the dynamically allocated arrays warning of clang
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wvla-cxx-extension"
+
 #define CATCH_CONFIG_MAIN
 #include <catch2/catch_test_macros.hpp>
 
@@ -31,3 +35,5 @@
 #include "test-virtual_constraint.hh"
 #include "test-waiting.hh"
 #include "test-zg-semantics.hh"
+
+#pragma clang diagnostic pop
