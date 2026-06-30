@@ -4,6 +4,11 @@
  * See files AUTHORS and LICENSE for copyright details.
  *
  */
+#if defined(__clang__)
+// ignore the dynamically allocated arrays warning of clang
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wvla-cxx-extension"
+#endif
 
 #include "tchecker/strong-timed-bisim/contradiction_searcher.hh"
 #include "tchecker/vcg/revert_transitions.hh"
@@ -59,7 +64,7 @@ contradiction_searcher_t::search_contradiction(tchecker::zg::zone_t const & zone
     auto overhang_row = overhangs.get_row(idx_A);
     auto found = find_contradiction(s_A->zone(), trans_B, *cont_row, *overhang_row);
     for(auto cur : *found->get_contradictions()) {
-      contradiction_t reverted{tchecker::vcg::revert_action_trans(zone_A, t_A->guard_container(), t_A->reset_container(), t_A->tgt_invariant_container(), *cur), found->min_steps_to_cont() + 1};
+      contradiction_t reverted{tchecker::vcg::revert_action_trans(zone_A, t_A->guard_container(), t_A->reset_container(), t_A->tgt_invariant_container(), *cur), found->min_steps_to_cont() + static_cast<tchecker::integer_t>(1)};
       new_cont.add_contradiction(reverted);
       current_steps = std::max(current_steps, reverted.min_steps_to_cont());
       new_cont.set_min_steps_to_cont(current_steps);
@@ -78,7 +83,7 @@ contradiction_searcher_t::search_contradiction(tchecker::zg::zone_t const & zone
     auto found = find_contradiction(s_B->zone(), trans_A, *column, *overhang_column);
 
     for(auto cur : *found->get_contradictions()) {
-      contradiction_t reverted{tchecker::vcg::revert_action_trans(zone_B, t_B->guard_container(), t_B->reset_container(), t_B->tgt_invariant_container(), *cur), found->min_steps_to_cont() + 1};
+      contradiction_t reverted{tchecker::vcg::revert_action_trans(zone_B, t_B->guard_container(), t_B->reset_container(), t_B->tgt_invariant_container(), *cur), found->min_steps_to_cont() + static_cast<tchecker::integer_t>(1)};
       new_cont.add_contradiction(reverted);
       current_steps = std::max(current_steps, reverted.min_steps_to_cont());
       new_cont.set_min_steps_to_cont(current_steps);
@@ -169,3 +174,7 @@ contradiction_searcher_t::find_contradiction(tchecker::zg::zone_t const & zone, 
 } // end of namespace strong_timed_bisim
 
 } // end of namespace tchecker
+
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif

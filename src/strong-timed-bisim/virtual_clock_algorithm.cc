@@ -231,7 +231,7 @@ std::shared_ptr<contradiction_t> Lieb_et_al::check_for_virt_bisim(tchecker::zg::
       enhanced_cont->append_zone(past);        
     }
 
-    contradiction_t previous{enhanced_cont, eps_result->min_steps_to_cont() + 1};
+    contradiction_t previous{enhanced_cont, eps_result->min_steps_to_cont() + static_cast<tchecker::integer_t>(1)};
 
     _non_bisim_cache->emplace(A_epsilon, B_epsilon, previous);
 
@@ -312,7 +312,7 @@ std::shared_ptr<contradiction_t> Lieb_et_al::check_for_virt_bisim(tchecker::zg::
       // for(std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> vc : *enhanced_cont) {
       //    tchecker::dbm::output_matrix(std::cout, vc->dbm(), vc->dim());
       // }
-      contradiction_t cont{enhanced_cont, return_from_transitions->min_steps_to_cont() + 1};
+      contradiction_t cont{enhanced_cont, return_from_transitions->min_steps_to_cont() + static_cast<tchecker::integer_t>(1)};
       _non_bisim_cache->emplace(A_synced, B_synced, cont);
 
       // another performance improvement: Instead of the returned contradiction from return_from_transitions, we return 
