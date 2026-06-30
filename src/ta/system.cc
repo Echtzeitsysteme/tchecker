@@ -114,6 +114,38 @@ tchecker::bytecode_t const * system_t::invariant_bytecode(tchecker::loc_id_t id)
   return _invariants[id]._compiled_expr.get();
 }
 
+tchecker::clock_constraint_container_t system_t::invariant(tchecker::loc_id_t & id, tchecker::intval_t & intval) const
+{
+  tchecker::clock_constraint_container_t invariant_constraints;
+  tchecker::clock_reset_container_t place_holder_clkreset;
+  tchecker::integer_t return_val =
+    vm().run(invariant_bytecode(id), intval, 
+             invariant_constraints,
+             place_holder_clkreset);
+
+  if(0 == return_val) {
+    // in this case, the integer valuation does not fulfill the invariant
+    // Therefore, we return false
+    tchecker::clock_constraint_container_t false_constraints;
+    tchecker::clock_constraint_t fc{tchecker::REFCLOCK_ID, tchecker::REFCLOCK_ID, tchecker::ineq_cmp_t::LT, 0};
+    false_constraints.emplace_back(fc);
+    return false_constraints;
+  }
+
+  return invariant_constraints;
+}
+
+tchecker::clock_constraint_container_t system_t::invariant(tchecker::vloc_t & vloc, tchecker::intval_t & intval) const
+{
+  tchecker::clock_constraint_container_t result;
+  for (tchecker::loc_id_t loc : vloc) {
+    tchecker::clock_constraint_container_t tmp = invariant(loc, intval);
+    result.insert(result.end(), tmp.begin(), tmp.end());
+  }
+  return result;
+}
+
+
 void system_t::compute_from_syncprod_system()
 {
   _invariants.clear();

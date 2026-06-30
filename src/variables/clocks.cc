@@ -49,8 +49,6 @@ clock_constraint_t::clock_constraint_t(tchecker::clock_id_t id1, tchecker::clock
                                        tchecker::integer_t value)
     : _id1(id1), _id2(id2), _cmp(cmp), _value(value)
 {
-  if (_id1 == tchecker::REFCLOCK_ID && _id2 == tchecker::REFCLOCK_ID)
-    throw std::invalid_argument("Invalid clock identifiers in clock constraint");
 }
 
 bool operator==(tchecker::clock_constraint_t const & c1, tchecker::clock_constraint_t const & c2)

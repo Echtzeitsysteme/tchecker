@@ -21,6 +21,7 @@
 
 #include "tchecker/parsing/parsing.hh"
 #include "tchecker/system/system.hh"
+#include "tchecker/system/static_analysis.hh"
 
 #include "tchecker/publicapi/json_parser.hh"
 #include "tchecker/publicapi/reach_api.hh"
@@ -28,6 +29,10 @@
 #include "tchecker/compare-tools/synchronize.hh"
 
 #include "tchecker/strong-timed-bisim/strategy.hh"
+
+#include "tchecker/ta/system.hh"
+
+#include "tchecker/algorithms/search_order.hh"
 
 void tck_compare(const char * output_filename, 
   const char * first_sysdecl_filename, 
@@ -76,13 +81,15 @@ void strong_timed_bisim(std::ostream & os, std::shared_ptr<tchecker::parsing::sy
                                                  first_starting_state, second_starting_state, inter_constraint, 
                                                  generate_witness, symbolic_states_to_check);
 
+
+  if(!symbolic_states_to_check.empty()) {
+    std::string name = sysdecl_first->name() + "_" + sysdecl_second->name();
+    stats.strategy()->strategy_output(os);
+  }
+
   if(generate_witness) {
     std::string name = sysdecl_first->name() + "_" + sysdecl_second->name();
-
-    if(!symbolic_states_to_check.empty()) {
-      stats.strategy()->strategy_output(os);
-    }
-    else if(stats.relationship_fulfilled()) {
+    if(stats.relationship_fulfilled()) {
       stats.witness()->dot_output(os, name);
     } else {
       stats.counterexample()->dot_output(os, name);
@@ -128,6 +135,22 @@ void tck_compare(std::string output_filename, std::string first_sysdecl_filename
     }
 #endif
 
+    // create output stream to output file
+
+    std::ostream * os = nullptr;
+    std::ofstream ofs;
+
+    if (output_filename != "") {
+      ofs.open(output_filename, std::ios::out);
+      if (!ofs) {
+        throw std::runtime_error("Failed to open file: " + output_filename);
+      }
+      os = &ofs;
+    }
+    else {
+      os = &std::cout;
+    }
+
     std::map<std::string, std::string> first_starting_state_attributes, second_starting_state_attributes;
     std::vector<std::shared_ptr<tchecker::strong_timed_bisim::strategy::state_to_check_t>> reachable_states;
 
@@ -140,31 +163,47 @@ void tck_compare(std::string output_filename, std::string first_sysdecl_filename
       second_starting_state_attributes = parse_state_json(second_starting_state_json);
     }
 
-    std::string reachable_cert_file = create_temp_filename() + std::string(".cert");
-
     if(all_reachable_states) {
 
       // Synchronize the systems
       std::string synced_sysdecl_filename = create_temp_filename() + std::string(".tck");
       tchecker::compare_tools::syncer_t(first_sysdecl_filename, second_sysdecl_filename, synced_sysdecl_filename);
+      std::shared_ptr<tchecker::parsing::system_declaration_t> sysdecl
+        = tchecker::parsing::parse_system_declaration(synced_sysdecl_filename);
 
-      std::shared_ptr<tchecker::algorithms::zg_reach::state_space_t> state_space_storage;
 
-      // write the certificate into state_space_storage
-      tck_reach(reachable_cert_file, synced_sysdecl_filename, std::string(), tck_reach_algorithm_t::ALGO_REACH, std::string("bfs"), tck_reach_certificate_t::CERTIFICATE_GRAPH, block_size, table_size, &state_space_storage);
+      std::shared_ptr<tchecker::ta::system_t const> system = std::make_shared<tchecker::ta::system_t const>(*sysdecl);
+      if (!tchecker::system::every_process_has_initial_location(system->as_system_system()))
+        std::cerr << tchecker::log_warning << "system has no initial state" << std::endl;
 
+      std::shared_ptr<tchecker::zg::zg_t> zg{tchecker::zg::factory(system, tchecker::ts::SHARING, tchecker::zg::ELAPSED_SEMANTICS,
+                                                                tchecker::zg::EXTRA_M_GLOBAL,
+                                                                block_size, table_size)};
+
+      std::shared_ptr<tchecker::algorithms::zg_reach::state_space_t> state_space =
+        std::make_shared<tchecker::algorithms::zg_reach::state_space_t>(zg, block_size, table_size);
+
+      boost::dynamic_bitset<> accepting_labels = system->as_syncprod_system().labels(std::string(""));
+
+      tchecker::algorithms::zg_reach::algorithm_t algorithm;
+
+      enum tchecker::waiting::policy_t policy = tchecker::algorithms::waiting_policy(std::string("bfs"));
+
+      algorithm.run(state_space->zg(), state_space->graph(), accepting_labels, policy);
+
+      //tchecker::algorithms::zg_reach::dot_output(*os, state_space->graph(), sysdecl->name());
       // remove the file
       std::filesystem::remove(synced_sysdecl_filename);
 
       // convert the reachable nodes to a set of nodes.
-      auto nodes =  state_space_storage->graph().nodes();
+      auto nodes =  state_space->graph().nodes();
 
       // We need to hard copy the states, as the state_space also holds the zone graph, which holds the pool allocator
       // and everything explodes if we still hold shared pointers to objects over there.
       for(auto cur : nodes) {
         reachable_states.emplace_back(
           std::make_shared<tchecker::strong_timed_bisim::strategy::state_to_check_t>(
-              cur->state_ptr()->vloc(), 
+              tchecker::to_string(cur->state_ptr()->vloc(), state_space->zg().system()), 
               cur->state_ptr()->intval(), 
               cur->state_ptr()->zone_ptr()));
       }
@@ -185,28 +224,6 @@ void tck_compare(std::string output_filename, std::string first_sysdecl_filename
       throw std::runtime_error("nullptr system declaration");
     }
     std::shared_ptr<tchecker::system::system_t> second_system = std::make_shared<tchecker::system::system_t>(*second_sysdecl);
-
-    // create output stream to output file
-
-    std::ostream * os = nullptr;
-    std::ofstream ofs;
-
-    if (output_filename != "") {
-      ofs.open(output_filename, std::ios::out);
-      if (!ofs) {
-        throw std::runtime_error("Failed to open file: " + output_filename);
-      }
-      os = &ofs;
-    }
-    else {
-      os = &std::cout;
-    }
-
-    if(all_reachable_states) {
-      std::ifstream file(reachable_cert_file, std::ios::binary);
-      *os << file.rdbuf();
-      std::filesystem::remove(reachable_cert_file);
-    }
 
     if (relationship == STRONG_TIMED_BISIM) {
       strong_timed_bisim(*os, first_sysdecl, second_sysdecl, block_size, table_size, 

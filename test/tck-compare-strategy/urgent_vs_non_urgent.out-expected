@@ -1,0 +1,35 @@
+Clock Ordering
+0 x_1 x_2 
+Non Bisim
+First Location: <B>
+Second Location: <B>
+<=0	<=0	<=0	
+<inf	<=0	<=0	
+<inf	<=0	<=0	
+Steps: 1
+
+First Location: <C>
+Second Location: <C>
+<=0	<-3	<-3	
+<inf	<=0	<=0	
+<inf	<=0	<=0	
+Steps: 3
+
+<=0	<=0	<=0	
+<inf	<=0	<=0	
+<inf	<=0	<=0	
+Steps: 4
+
+First Location: <A>
+Second Location: <A>
+<=0	<=0	<=0	
+<inf	<=0	<=0	
+<inf	<=0	<=0	
+Steps: 2
+
+
+Bisim
+MEMORY_MAX_RSS  xxxx
+RELATIONSHIP_FULFILLED false
+RUNNING_TIME_SECONDS  xxxx
+VISITED_PAIR_OF_STATES 3

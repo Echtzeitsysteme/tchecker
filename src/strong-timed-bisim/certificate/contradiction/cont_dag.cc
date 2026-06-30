@@ -35,7 +35,7 @@ cont_dag_t::cont_dag_t(std::shared_ptr<tchecker::vcg::vcg_t> vcg1, std::shared_p
   assert(vcg1->get_no_of_virtual_clocks() == vcg2->get_no_of_virtual_clocks());
 }
 
-bool cont_dag_t::create_cont_from_non_bisim_cache(tchecker::strong_timed_bisim::non_bisim_cache_t &non_bisim_cache, 
+bool cont_dag_t::create_cont_from_non_bisim_cache(tchecker::strong_timed_bisim::non_bisim_cache::non_bisim_cache_t &non_bisim_cache, 
                                                   std::shared_ptr<node_t> src)
 {
   std::vector<std::shared_ptr<node_t>> to_process; // the nodes to process
@@ -71,7 +71,7 @@ bool cont_dag_t::create_cont_from_non_bisim_cache(tchecker::strong_timed_bisim::
       std::pair<clock_rational_value_t, std::shared_ptr<node_t>> delay 
         = std::make_pair<clock_rational_value_t, std::shared_ptr<node_t>>(0, nullptr);
       if(gate) {
-        delay = cur->max_delay(non_bisim_cache.entry(cur->location_pair()), _vcg1, _vcg2);
+        delay = cur->max_delay(*non_bisim_cache.entry(cur->location_pair()), _vcg1, _vcg2);
         if(nullptr == delay.second) {
           gate = false;
         } else {
@@ -131,7 +131,7 @@ std::ostream & cont_dag_t::dot_output(std::ostream & os, std::string const & nam
   return tchecker::graph::dot_output_footer(os);
 }
 
-bool cont_dag_t::add_non_bisim_action_transition(tchecker::strong_timed_bisim::non_bisim_cache_t &non_bisim_cache, std::shared_ptr<node_t> src)
+bool cont_dag_t::add_non_bisim_action_transition(tchecker::strong_timed_bisim::non_bisim_cache::non_bisim_cache_t &non_bisim_cache, std::shared_ptr<node_t> src)
 {
   assert(!src->final());
   assert(nullptr != find_node(src));

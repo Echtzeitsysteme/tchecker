@@ -1,0 +1,27 @@
+Clock Ordering
+0 x_1 x_2 
+Non Bisim
+
+Bisim
+First Location: <B>
+Second Location: <B>
+<=0	<=0	<=0	
+<inf	<=0	<=0	
+<inf	<=0	<=0	
+
+First Location: <C>
+Second Location: <C>
+<=0	<=0	<=0	
+<inf	<=0	<=0	
+<inf	<=0	<=0	
+
+First Location: <A>
+Second Location: <A>
+<=0	<=0	<=0	
+<inf	<=0	<=0	
+<inf	<=0	<=0	
+
+MEMORY_MAX_RSS  xxxx
+RELATIONSHIP_FULFILLED true
+RUNNING_TIME_SECONDS  xxxx
+VISITED_PAIR_OF_STATES 3

@@ -283,7 +283,6 @@ bool node_t::is_leaf(std::shared_ptr<tchecker::vcg::vcg_t> vcg1, std::shared_ptr
   return false;
 }
 
-
 std::shared_ptr<std::pair<std::shared_ptr<tchecker::zg::zone_t>, std::shared_ptr<tchecker::zg::zone_t>>>
 node_t::generate_zones(std::shared_ptr<tchecker::vcg::vcg_t> vcg1, std::shared_ptr<tchecker::vcg::vcg_t> vcg2) const
 {
@@ -301,11 +300,27 @@ node_t::generate_zones(std::shared_ptr<tchecker::vcg::vcg_t> vcg1, std::shared_p
 }
 
 std::pair<clock_rational_value_t, std::shared_ptr<node_t>>
-node_t::max_delay(std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> vcs, 
+node_t::max_delay(std::vector<tchecker::strong_timed_bisim::contradiction_t> & vec_vcs, 
+            std::shared_ptr<tchecker::vcg::vcg_t> vcg1, std::shared_ptr<tchecker::vcg::vcg_t> vcg2)
+{
+  std::pair<clock_rational_value_t, std::shared_ptr<node_t>> max = std::make_pair(clock_rational_value_t{0, 1}, nullptr);
+
+  for(auto cur : vec_vcs) {
+    std::pair<clock_rational_value_t, std::shared_ptr<node_t>> inter = this->max_delay(cur, vcg1, vcg2);
+    if(inter.first > max.first) {
+      max.first = inter.first;
+      max.second = inter.second;
+    }
+  }
+  return max;
+}
+
+std::pair<clock_rational_value_t, std::shared_ptr<node_t>>
+node_t::max_delay(tchecker::strong_timed_bisim::contradiction_t & vcs, 
                   std::shared_ptr<tchecker::vcg::vcg_t> vcg1, std::shared_ptr<tchecker::vcg::vcg_t> vcg2)
 {
   std::pair<clock_rational_value_t, std::shared_ptr<node_t>> max = std::make_pair(clock_rational_value_t{0, 1}, nullptr);
-  for(auto vc : *vcs) {
+  for(auto vc : *vcs.get_contradictions()) {
     std::pair<clock_rational_value_t, std::shared_ptr<node_t>> cur = this->max_delay(vc, vcg1, vcg2);
     if(cur.first > max.first) {
       max.first = cur.first;

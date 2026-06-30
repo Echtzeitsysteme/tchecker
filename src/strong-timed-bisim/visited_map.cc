@@ -147,6 +147,10 @@ bool visited_map_t::contains_superset(tchecker::zg::state_sptr_t first, tchecker
       
   auto common_virtual_constraint = tchecker::virtual_constraint::factory(first->zone(), _no_of_virtual_clocks);
 
+  if(nullptr == (*_storage)[key]) {
+    (*_storage)[key] = std::make_shared<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(_no_of_virtual_clocks + 1);
+  }
+
   if (0 == (*_storage).count(key))
     return false;
 
@@ -157,7 +161,7 @@ std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual
 visited_map_t::entry(std::pair<tchecker::ta::state_t, tchecker::ta::state_t> & loc_pair) const
 {
   if((*_storage)[loc_pair] == nullptr || (*_storage)[loc_pair]->is_empty()) {
-    return std::make_shared<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(_no_of_virtual_clocks + 1);
+    (*_storage)[loc_pair] = std::make_shared<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(_no_of_virtual_clocks + 1);
   }
   return (*_storage)[loc_pair];
 }

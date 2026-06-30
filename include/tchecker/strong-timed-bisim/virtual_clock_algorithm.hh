@@ -20,7 +20,7 @@
 #include "tchecker/vcg/vcg.hh"
 #include "tchecker/zg/zone_container.hh"
 #include "tchecker/strong-timed-bisim/visited_map.hh"
-#include "tchecker/strong-timed-bisim/algorithm_return_value.hh"
+#include "tchecker/strong-timed-bisim/contradiction.hh"
 #include "tchecker/strong-timed-bisim/non_bisim_cache.hh"
 
 namespace tchecker {
@@ -42,10 +42,11 @@ public:
   \param input_first : the vcg of the first TA
   \param input_second : the vcg of the second TA
   \param generate_witness : whether a witness/contradiction DAG should be generated
+  \param generate_strategy : whether a strategy should be generated
    */
   Lieb_et_al(std::shared_ptr<tchecker::vcg::vcg_t> input_first, 
              std::shared_ptr<tchecker::vcg::vcg_t> input_second, 
-             bool generate_witness);
+             bool generate_witness, bool generate_strategy);
 
   /*!
    \brief running the algorithm of Lieb et al.
@@ -72,7 +73,7 @@ private:
    \param visited : a set of assumptions
    \return the same as the algorithm
    */
-  std::shared_ptr<algorithm_return_value_t>
+  std::shared_ptr<contradiction_t>
   check_for_virt_bisim(tchecker::zg::const_state_sptr_t A_state, tchecker::zg::transition_sptr_t A_trans,
                        tchecker::zg::const_state_sptr_t B_state, tchecker::zg::transition_sptr_t B_trans,
                        visited_map_t & visited);
@@ -97,10 +98,10 @@ private:
    \param nondeterm : whether the new entries are allowed to be added to visited
    \return the same as the algorithm
    */
-  std::shared_ptr<algorithm_return_value_t>
+  std::shared_ptr<contradiction_t>
   check_target_pair(tchecker::zg::state_sptr_t target_state_A, tchecker::zg::transition_sptr_t trans_A,
                     tchecker::zg::state_sptr_t target_state_B, tchecker::zg::transition_sptr_t trans_B,
-                    std::shared_ptr<zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> already_found_contradictions,
+                    contradiction_t & already_found_contradictions,
                     visited_map_t & visited, bool nondeterm);
 
   /*!
@@ -112,7 +113,7 @@ private:
    \param visited : the assumptions
    \return the same as the algorithm
   */
-  std::shared_ptr<algorithm_return_value_t>
+  std::shared_ptr<contradiction_t>
   check_for_outgoing_transitions( tchecker::zg::zone_t const & zone_A, tchecker::zg::zone_t const & zone_B,
                                   std::shared_ptr<std::vector<tchecker::vcg::vcg_t::sst_t>> trans_A, 
                                   std::shared_ptr<std::vector<tchecker::vcg::vcg_t::sst_t>> trans_B,
@@ -122,9 +123,10 @@ private:
   const std::shared_ptr<tchecker::vcg::vcg_t> _B;
 
   long _visited_pair_of_states;
-  std::shared_ptr<non_bisim_cache_t> _non_bisim_cache;
+  std::shared_ptr<non_bisim_cache::non_bisim_cache_t> _non_bisim_cache;
 
   const bool _witness;
+  
 };
 
 } // end of namespace strong_timed_bisim

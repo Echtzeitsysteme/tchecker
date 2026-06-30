@@ -24,7 +24,7 @@ namespace strategy {
 class state_to_check_t {
  public:
 
-  state_to_check_t(const tchecker::vloc_t & vloc, const tchecker::intval_t & intval,
+  state_to_check_t(const std::string & vloc_str, const tchecker::intval_t & intval,
                    tchecker::intrusive_shared_ptr_t<const tchecker::zg::shared_zone_t> zone);
 
   state_to_check_t();
@@ -34,11 +34,11 @@ class state_to_check_t {
   state_to_check_t & operator=(state_to_check_t&& other) noexcept;
   ~state_to_check_t();
     
-  tchecker::vloc_t * vloc_ptr() {return _vloc_ptr;}
+  std::string vloc() {return _vloc;}
   tchecker::intval_t * intval_ptr() {return _intval_ptr;}
   tchecker::zg::zone_t *zone_ptr() {return _zone_ptr;}
  private:
-  tchecker::vloc_t * _vloc_ptr;
+  std::string _vloc;
   tchecker::intval_t * _intval_ptr;
   tchecker::zg::zone_t *_zone_ptr;
 };
@@ -69,7 +69,7 @@ class strategy_t {
    \param visited_map : The cache that contains all checked symbolic states that are bisimilar
    \post All checked symbolic states are part of this.
    */
-  void insert_symb_states(std::shared_ptr<non_bisim_cache_t> non_bisim_cache, std::shared_ptr<visited_map_t> visited_map);
+  void insert_symb_states(std::shared_ptr<non_bisim_cache::non_bisim_cache_t> non_bisim_cache, std::shared_ptr<visited_map_t> visited_map);
 
   /*!
    \brief Get a pair of symbolic states that is not contained by the strategy yet
@@ -114,26 +114,22 @@ class strategy_t {
 
   std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t>
   find_non_contained(std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> to_be_contained, 
-                     tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t> & container);
+                     tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t> & container,
+                     std::size_t idx);
 
   std::shared_ptr<std::pair<tchecker::ta::state_t, tchecker::ta::state_t>> 
-  extract_location_pair(tchecker::vloc_t * vloc,
-                        tchecker::intval_t * intval);
+  extract_location_pair(std::string vloc, tchecker::intval_t * intval);
 
   void output_non_bisim(std::ostream & os);
 
   void output_bisim(std::ostream & os);
-
-  void output_state_pair_with_container(std::ostream & os, 
-                                        std::pair<tchecker::ta::state_t, tchecker::ta::state_t> loc_pair,
-                                        std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> container);
 
   std::shared_ptr<tchecker::vcg::vcg_t> _A;
   std::shared_ptr<tchecker::vcg::vcg_t> _B;
 
   // states to check contains a pair of states and a zone_container that contains the virtual constraints to check.
   std::vector<std::shared_ptr<entry_t>> _states_to_check;
-  std::shared_ptr<non_bisim_cache_t> _non_bisim_cache;
+  std::shared_ptr<non_bisim_cache::non_bisim_cache_t> _non_bisim_cache;
   std::shared_ptr<visited_map_t> _visited_map;
   tchecker::clock_id_t _first_vloc_size;
   tchecker::clock_id_t _second_vloc_size;

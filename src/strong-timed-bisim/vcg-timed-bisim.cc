@@ -107,7 +107,7 @@ run(std::shared_ptr<tchecker::parsing::system_declaration_t> const & sysdecl_fir
     vcgs.push_back(vcg);
   }
 
-  auto algorithm = new tchecker::strong_timed_bisim::Lieb_et_al(vcgs[0], vcgs[1], generate_witness);
+  auto algorithm = new tchecker::strong_timed_bisim::Lieb_et_al(vcgs[0], vcgs[1], generate_witness, !symbolic_states_to_check.empty());
 
   return algorithm->run(first_starting_state, second_starting_state, inter_constraint, symbolic_states_to_check);
 

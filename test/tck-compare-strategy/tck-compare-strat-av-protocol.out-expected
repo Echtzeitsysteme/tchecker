@@ -1,0 +1,144 @@
+# 
+# This file has been generated automatically with uppaal-to-tchecker
+#
+# the original model was published by
+# Klaus Havelund, Arne Skou, Kim G. Larsen & Kristian Lund (1997): Formal Modeling and Analysis of an Audio/Video Protocol:
+# An Industrial Case Study Using UPPAAL. In: RTSS’97, pp. 2–13, doi:10.1109/REAL.1997.641264 
+system:av_protocol.xml
+# no iodecl
+# compilation of process Process
+process:Process
+# clock_A_c:(clock)
+clock:1:Process_clock_A_c
+# a:(broadcast (channel))
+# global event: Process_a
+# b:(broadcast (channel))
+# global event: Process_b
+# c:(broadcast (channel))
+# global event: Process_c
+# d:(broadcast (channel))
+# global event: Process_d
+# e:(broadcast (channel))
+# global event: Process_e
+# f:(broadcast (channel))
+# global event: Process_f
+# g:(broadcast (channel))
+# global event: Process_g
+# h:(broadcast (channel))
+# global event: Process_h
+# i:(broadcast (channel))
+# global event: Process_i
+# j:(broadcast (channel))
+# global event: Process_j
+# k:(broadcast (channel))
+# global event: Process_k
+# l:(broadcast (channel))
+# global event: Process_l
+# _zero:(broadcast (channel))
+# global event: Process__zero
+# _one:(broadcast (channel))
+# global event: Process__one
+# _A_reset:(broadcast (channel))
+# global event: Process__A_reset
+# _slow:(broadcast (channel))
+# global event: Process__slow
+# _fast:(broadcast (channel))
+# global event: Process__fast
+# A_observe:(broadcast (channel))
+# global event: Process_A_observe
+# _errMode1:(broadcast (channel))
+# global event: Process__errMode1
+# _errMode2:(broadcast (channel))
+# global event: Process__errMode2
+# _errMode3:(broadcast (channel))
+# global event: Process__errMode3
+location:Process:until_silence{invariant:(1 && (Process_clock_A_c <= 781))}
+location:Process:call_check{}
+location:Process:call_observe{}
+location:Process:sample{invariant:(1 && (Process_clock_A_c <= 781))}
+location:Process:newPn{invariant:(1 && (Process_clock_A_c <= 40))}
+location:Process:nPf{}
+location:Process:jam{invariant:(1 && (Process_clock_A_c <= 25000))}
+location:Process:ex_jam{invariant:(1 && (Process_clock_A_c <= 781))}
+location:Process:check_eof{}
+location:Process:stop{invariant:(1 && (Process_clock_A_c <= 50000))}
+location:Process:transmit{invariant:(1 && (Process_clock_A_c <= 781))}
+location:Process:ex_silence2{invariant:(1 && (Process_clock_A_c <= 781))}
+location:Process:goto_idle{}
+location:Process:other_started{invariant:(1 && (Process_clock_A_c <= 3124))}
+location:Process:ex_silence1{invariant:(1 && (Process_clock_A_c <= 2343))}
+location:Process:ex_start{}
+location:Process:idle{}
+location:Process:start{initial:}
+event:Process__zero
+event:Process__zero_recv
+edge:Process:until_silence:until_silence:Process__zero_recv{do:Process_clock_A_c=0}
+event:Process__one
+event:Process__one_recv
+edge:Process:until_silence:stop:Process__one_recv{do:Process_clock_A_c=0}
+event:Process__A_reset
+event:Process__A_reset_emit
+edge:Process:ex_jam:until_silence:Process__A_reset_emit{do:Process_clock_A_c=0}
+event:Process__slow
+event:Process__slow_recv
+edge:Process:call_check:ex_jam:Process__slow_recv{do:Process_clock_A_c=0}
+event:Process__fast
+event:Process__fast_recv
+edge:Process:call_check:ex_jam:Process__fast_recv{do:Process_clock_A_c=0}
+event:Process_A_observe
+event:Process_A_observe_emit
+edge:Process:call_observe:call_check:Process_A_observe_emit{}
+edge:Process:sample:call_observe:Process__zero_recv{provided:(Process_clock_A_c == 781)}
+edge:Process:sample:call_observe:Process__one_recv{provided:(Process_clock_A_c == 781)}
+event:Process__errMode3
+event:Process__errMode3_recv
+edge:Process:newPn:sample:Process__errMode3_recv{provided:(Process_clock_A_c > 30)}
+event:Process__errMode1
+event:Process__errMode1_recv
+edge:Process:newPn:sample:Process__errMode1_recv{provided:(Process_clock_A_c < 30)}
+event:Process__errMode2
+event:Process__errMode2_recv
+edge:Process:newPn:sample:Process__errMode2_recv{provided:(Process_clock_A_c > 30)}
+edge:Process:check_eof:newPn:Process__one_recv{do:Process_clock_A_c=0}
+edge:Process:check_eof:newPn:Process__zero_recv{do:Process_clock_A_c=0}
+event:Process_a
+event:Process_a_emit
+edge:Process:jam:transmit:Process_a_emit{do:Process_clock_A_c=0}
+edge:Process:ex_jam:jam:Process__A_reset_emit{do:Process_clock_A_c=0}
+event:Process_b
+event:Process_b_emit
+edge:Process:nPf:check_eof:Process_b_emit{}
+event:Process_c
+event:Process_c_emit
+edge:Process:ex_jam:nPf:Process_c_emit{provided:(Process_clock_A_c == 781)}
+event:Process_d
+event:Process_d_emit
+edge:Process:stop:idle:Process_d_emit{do:Process_clock_A_c=0}
+event:Process_e
+event:Process_e_emit
+edge:Process:check_eof:stop:Process_e_emit{do:Process_clock_A_c=0}
+event:Process_f
+event:Process_f_emit
+edge:Process:transmit:check_eof:Process_f_emit{}
+edge:Process:ex_silence2:transmit:Process__one_recv{do:Process_clock_A_c=0}
+event:Process_g
+event:Process_g_emit
+edge:Process:goto_idle:idle:Process_g_emit{do:Process_clock_A_c=0}
+edge:Process:ex_silence1:goto_idle:Process__zero_recv{provided:(Process_clock_A_c == 2343)}
+edge:Process:ex_silence2:goto_idle:Process__zero_recv{provided:(Process_clock_A_c == 781)}
+edge:Process:ex_silence1:ex_silence2:Process__one_recv{do:Process_clock_A_c=0}
+event:Process_h
+event:Process_h_emit
+edge:Process:ex_start:ex_silence1:Process_h_emit{do:Process_clock_A_c=0}
+event:Process_i
+event:Process_i_emit
+edge:Process:other_started:ex_silence1:Process_i_emit{do:Process_clock_A_c=0}
+event:Process_j
+event:Process_j_emit
+edge:Process:ex_start:other_started:Process_j_emit{do:Process_clock_A_c=0}
+event:Process_k
+event:Process_k_emit
+edge:Process:idle:ex_start:Process_k_emit{provided:(Process_clock_A_c == 781)}
+event:Process_l
+event:Process_l_emit
+edge:Process:start:idle:Process_l_emit{do:Process_clock_A_c=0}
