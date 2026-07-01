@@ -64,7 +64,7 @@ contradiction_searcher_t::search_contradiction(tchecker::zg::zone_t const & zone
     auto overhang_row = overhangs.get_row(idx_A);
     auto found = find_contradiction(s_A->zone(), trans_B, *cont_row, *overhang_row);
     for(auto cur : *found->get_contradictions()) {
-      contradiction_t reverted{tchecker::vcg::revert_action_trans(zone_A, t_A->guard_container(), t_A->reset_container(), t_A->tgt_invariant_container(), *cur), found->min_steps_to_cont() + static_cast<tchecker::integer_t>(1)};
+      contradiction_t reverted{tchecker::vcg::revert_action_trans(zone_A, t_A->guard_container(), t_A->reset_container(), t_A->tgt_invariant_container(), *cur), static_cast<tchecker::integer_t>(found->min_steps_to_cont() + 1)};
       new_cont.add_contradiction(reverted);
       current_steps = std::max(current_steps, reverted.min_steps_to_cont());
       new_cont.set_min_steps_to_cont(current_steps);
@@ -83,7 +83,7 @@ contradiction_searcher_t::search_contradiction(tchecker::zg::zone_t const & zone
     auto found = find_contradiction(s_B->zone(), trans_A, *column, *overhang_column);
 
     for(auto cur : *found->get_contradictions()) {
-      contradiction_t reverted{tchecker::vcg::revert_action_trans(zone_B, t_B->guard_container(), t_B->reset_container(), t_B->tgt_invariant_container(), *cur), found->min_steps_to_cont() + static_cast<tchecker::integer_t>(1)};
+      contradiction_t reverted{tchecker::vcg::revert_action_trans(zone_B, t_B->guard_container(), t_B->reset_container(), t_B->tgt_invariant_container(), *cur), static_cast<tchecker::integer_t>(found->min_steps_to_cont() + 1)};
       new_cont.add_contradiction(reverted);
       current_steps = std::max(current_steps, reverted.min_steps_to_cont());
       new_cont.set_min_steps_to_cont(current_steps);

@@ -5,6 +5,12 @@
  *
  */
 
+#if defined(__clang__)
+// ignore the dynamically allocated arrays warning of clang
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wvla-cxx-extension"
+#endif
+
 #include "tchecker/strong-timed-bisim/virtual_clock_algorithm.hh"
 #include "tchecker/dbm/dbm.hh"
 #include "tchecker/strong-timed-bisim/contradiction_searcher.hh"
@@ -231,7 +237,7 @@ std::shared_ptr<contradiction_t> Lieb_et_al::check_for_virt_bisim(tchecker::zg::
       enhanced_cont->append_zone(past);        
     }
 
-    contradiction_t previous{enhanced_cont, eps_result->min_steps_to_cont() + static_cast<tchecker::integer_t>(1)};
+    contradiction_t previous{enhanced_cont, static_cast<tchecker::integer_t>(eps_result->min_steps_to_cont() + 1)};
 
     _non_bisim_cache->emplace(A_epsilon, B_epsilon, previous);
 
@@ -513,3 +519,7 @@ Lieb_et_al::check_for_outgoing_transitions(tchecker::zg::zone_t const & zone_A, 
 } // end of namespace strong_timed_bisim
 
 } // end of namespace tchecker
+
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
