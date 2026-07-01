@@ -85,12 +85,14 @@ list(GET TCK_COMPARE_INPUT_FILES 17 tck-compare-strat-urgent_non_urgent)
 create_testcase(contradiction_region_with_mutant ${tck-compare-strat-contradiction_region} ${tck-compare-strat-contradiction_region_mutant} strong-timed-bisim)
 create_testcase(contradiction_region_self ${tck-compare-strat-contradiction_region} ${tck-compare-strat-contradiction_region} strong-timed-bisim)
 
+if(NOT USEINT16) # The values that occur in the av-protocol exceed 16 Bit.
 # av-protocol benchmark variants
 create_testcase(av-protocol-self ${tck-compare-strat-av-protocol} ${tck-compare-strat-av-protocol} strong-timed-bisim)
 create_testcase(av-protocol-av-protocol-bisim ${tck-compare-strat-av-protocol} ${tck-compare-strat-av-protocol-bisim} strong-timed-bisim)
 create_testcase(av-protocol-av-protocol-non-bisim-changed-guard ${tck-compare-strat-av-protocol} ${tck-compare-strat-av-protocol-non-bisim-changed-guard} strong-timed-bisim)
 # create_testcase(av-protocol-av-protocol-non-bisim-changed-invariant ${tck-compare-strat-av-protocol} ${tck-compare-strat-av-protocol-non-bisim-changed-invariant} strong-timed-bisim)
 # create_testcase(av-protocol-av-protocol-non-bisim-removed-reset ${tck-compare-strat-av-protocol} ${tck-compare-strat-av-protocol-non-bisim-removed-reset} strong-timed-bisim)
+endif()
 
 # # collision-avoidance benchmark variants
 # create_testcase(collision-avoidance-self ${tck-compare-strat-collision-avoidance-bisim} ${tck-compare-strat-collision-avoidance-bisim} strong-timed-bisim)
