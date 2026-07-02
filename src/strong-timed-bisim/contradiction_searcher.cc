@@ -69,7 +69,9 @@ contradiction_searcher_t::search_contradiction(tchecker::zg::zone_t const & zone
       current_steps = std::max(current_steps, reverted.min_steps_to_cont());
       new_cont.set_min_steps_to_cont(current_steps);
     }
-    result->add_contradiction(new_cont);
+    if(!new_cont.contradiction_free()) {
+      result->add_contradiction(new_cont);
+    }
   }
 
   // find the contradictions for B
@@ -88,7 +90,9 @@ contradiction_searcher_t::search_contradiction(tchecker::zg::zone_t const & zone
       current_steps = std::max(current_steps, reverted.min_steps_to_cont());
       new_cont.set_min_steps_to_cont(current_steps);
     }
-    result->add_contradiction(new_cont);
+    if(!new_cont.contradiction_free()) {
+      result->add_contradiction(new_cont);
+    }
   }
 
   return result;

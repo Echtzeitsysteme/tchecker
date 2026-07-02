@@ -175,9 +175,9 @@ strategy_t::strategy_t(std::shared_ptr<tchecker::vcg::vcg_t> A,
     }
 
     bool added = false;
-    for(auto already_added : _states_to_check) {
+    for(auto& already_added : _states_to_check) {
       if(*already_added->loc_pair() == *loc_pair) {
-        already_added->container().append_zone(vc);
+        already_added->container()->append_zone(vc);
         added = true;
         break;
       }
@@ -208,7 +208,7 @@ std::shared_ptr<std::pair<tchecker::zg::state_sptr_t, tchecker::zg::state_sptr_t
   std::shared_ptr<std::pair<tchecker::zg::state_sptr_t, tchecker::zg::state_sptr_t>> result = nullptr;
 
   for(auto entry : _states_to_check) {
-    for(std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> vc : entry->container()) {
+    for(std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> vc : *entry->container()) {
       result = get_non_contained_states(*entry->loc_pair(), vc);
       if(nullptr != result) {
         break;
@@ -458,6 +458,10 @@ void strategy_t::output_non_bisim(std::ostream & os)
     os << "Second Location: " << tchecker::to_string(cur.first.second.vloc(), _B->system()) << std::endl;
 
     for(auto cont : *cur.second) {
+      std::shared_ptr<zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> lo_vc = cont.get_contradictions();
+      lo_vc->compress();
+      lo_vc = tchecker::virtual_constraint::combine(*lo_vc, _A->get_no_of_virtual_clocks());
+      lo_vc->compress();
       for(auto vc : *cont.get_contradictions()) {
         auto to_print = tchecker::virtual_constraint::factory(*vc, _A->get_urgent_or_committed() || _B->get_urgent_or_committed());
         tchecker::dbm::output_matrix(os, to_print->dbm(), to_print->dim());

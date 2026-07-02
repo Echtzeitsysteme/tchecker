@@ -41,14 +41,16 @@ void non_bisim_cache_t::emplace(tchecker::zg::state_sptr_t first, tchecker::zg::
 
   for(auto& cur : *(*_storage)[key]) {
     if(cur.min_steps_to_cont() == con.min_steps_to_cont()) {
-      cur.add_contradiction(con);
+      if(!(*con.get_contradictions() <= *cur.get_contradictions())) {
+        cur.add_contradiction(con);
+      }
       con_is_added = true;
     }
-    if(cur.min_steps_to_cont() < con.min_steps_to_cont() && *con.get_contradictions() < *cur.get_contradictions()) {
+    if(cur.min_steps_to_cont() < con.min_steps_to_cont() && *con.get_contradictions() <= *cur.get_contradictions()) {
       con.set_min_steps_to_cont(cur.min_steps_to_cont());
       con_is_added = true;
     }
-    if(con.min_steps_to_cont() < cur.min_steps_to_cont() && *cur.get_contradictions() < *con.get_contradictions()) {
+    if(con.min_steps_to_cont() < cur.min_steps_to_cont() && *cur.get_contradictions() <= *con.get_contradictions()) {
       cur.set_min_steps_to_cont(con.min_steps_to_cont());
       emplace(first, second, con);
       return;
@@ -59,6 +61,8 @@ void non_bisim_cache_t::emplace(tchecker::zg::state_sptr_t first, tchecker::zg::
     ((*_storage)[key])->emplace_back(con);
   }
 
+  cleanup_entry(key);
+  
 }
 
 std::shared_ptr<contradiction_t>
@@ -145,6 +149,25 @@ bool non_bisim_cache_t::is_cached(std::pair<tchecker::ta::state_t, tchecker::ta:
     }
   }
   return false;
+}
+
+
+void non_bisim_cache_t::cleanup_entry(map_key_t & key)
+{
+  for(auto& cur : *(*_storage)[key]) {
+    cur.get_contradictions()->compress();
+  }
+
+  for(auto outer = (*_storage)[key]->begin(); outer != (*_storage)[key]->end(); outer++) {
+    for(auto inner = std::next(outer); inner != (*_storage)[key]->end(); inner++) {
+      if(outer->min_steps_to_cont() == inner->min_steps_to_cont()) {
+        outer->add_contradiction(*inner);
+        (*_storage)[key]->erase(inner);
+        cleanup_entry(key);
+        return;
+      }
+    }
+  }
 }
 
 } // end of namespace non_bisim_cache

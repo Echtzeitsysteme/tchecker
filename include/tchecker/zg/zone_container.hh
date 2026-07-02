@@ -65,7 +65,7 @@ public:
    \param other : the other zone container
    \return true if and only if this->dim() == other.dim() and for any contained zone a of this exists a zone b in other such that a < b
    */
-  bool operator<(const zone_container_t& other) {
+  bool operator<=(const zone_container_t& other) {
     if(this->dim() != other.dim()) {
       return false;
     }

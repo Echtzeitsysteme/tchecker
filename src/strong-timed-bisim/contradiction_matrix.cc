@@ -16,7 +16,7 @@ contradiction_matrix_t::contradiction_matrix_t(std::size_t no_of_rows, std::size
   _dim(dim), _no_of_rows(no_of_rows), _no_of_columns(no_of_columns), _matrix(std::vector<std::shared_ptr<contradiction_t>>(no_of_rows * no_of_columns)) {
 
   for(std::size_t i = 0; i < no_of_rows*no_of_columns; ++i) {
-    _matrix[i] = std::make_shared<contradiction_t>(dim-1, 0);
+    _matrix[i] = std::make_shared<contradiction_t>(dim-1, int_minval);
   }
 }
 

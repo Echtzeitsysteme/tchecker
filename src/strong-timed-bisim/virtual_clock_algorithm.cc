@@ -431,13 +431,13 @@ Lieb_et_al::check_for_outgoing_transitions(tchecker::zg::zone_t const & zone_A, 
   }
 
   if (0 == trans_A->size() || 0 == trans_B->size()) {
-    auto result = std::make_shared<contradiction_t>(_A->get_no_of_virtual_clocks(), 0);
+    auto result = std::make_shared<contradiction_t>(_A->get_no_of_virtual_clocks(), 1);
 
     for (auto && [status_A, s_A, t_A] : *trans_A) {
       auto target = tchecker::virtual_constraint::factory(s_A->zone(), _A->get_no_of_virtual_clocks());
       auto to_append = tchecker::vcg::revert_action_trans(zone_A, t_A->guard_container(), t_A->reset_container(),
                                                           t_A->tgt_invariant_container(), *target);
-      contradiction_t new_cont{to_append, 0};
+      contradiction_t new_cont{to_append, 1};
       result->add_contradiction(new_cont);
     }
 
@@ -445,7 +445,7 @@ Lieb_et_al::check_for_outgoing_transitions(tchecker::zg::zone_t const & zone_A, 
       auto target = tchecker::virtual_constraint::factory(s_B->zone(), _B->get_no_of_virtual_clocks());
       auto to_append = tchecker::vcg::revert_action_trans(zone_B, t_B->guard_container(), t_B->reset_container(),
                                                           t_B->tgt_invariant_container(), *target);
-      contradiction_t new_cont{to_append, 0};
+      contradiction_t new_cont{to_append, 1};
       result->add_contradiction(new_cont);
     }
 
@@ -465,7 +465,7 @@ Lieb_et_al::check_for_outgoing_transitions(tchecker::zg::zone_t const & zone_A, 
   auto contradiction = con_searcher.search_contradiction(zone_A, zone_B, trans_A, trans_B, found_cont);
 
   if (!(contradiction->contradiction_free())) {
-    contradiction->set_min_steps_to_cont(0);
+    contradiction->set_min_steps_to_cont(1);
     return contradiction;
   }
 

@@ -92,20 +92,24 @@ class strategy_t {
 
     entry_t(std::shared_ptr<std::pair<tchecker::ta::state_t, tchecker::ta::state_t>> loc_pair, 
            tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t> & container)
-     : _loc_pair(loc_pair), _container(container)
-    { }
+     : _loc_pair(loc_pair)
+    { 
+      _container = std::make_shared<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(container);
+    }
     entry_t(std::shared_ptr<std::pair<tchecker::ta::state_t, tchecker::ta::state_t>> loc_pair,
           tchecker::clock_id_t dim)
-     : _loc_pair(loc_pair), _container(dim)
-    { }
+     : _loc_pair(loc_pair)
+    { 
+      _container = std::make_shared<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(dim);
+    }
     std::shared_ptr<std::pair<tchecker::ta::state_t, tchecker::ta::state_t>> loc_pair() {return _loc_pair;}
-    tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t> container() {return _container;}
+    std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> container() {return _container;}
 
-    void append_vc(std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> vc) {_container.append_zone(vc);}
+    void append_vc(std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> vc) {_container->append_zone(vc);}
 
    private:
     std::shared_ptr<std::pair<tchecker::ta::state_t, tchecker::ta::state_t>> _loc_pair;
-    tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t> _container;
+    std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> _container;
   };
 
   std::shared_ptr<std::pair<tchecker::zg::state_sptr_t, tchecker::zg::state_sptr_t>> 

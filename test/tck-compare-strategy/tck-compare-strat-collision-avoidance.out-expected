@@ -41,7 +41,7 @@ event:Process__from_medium_slave_recv
 edge:Process:s2_4:s2_4:Process__from_medium_slave_recv{provided:(Process_clock_c3 <= 2)}
 event:Process__empty_slave
 event:Process__empty_slave_recv
-edge:Process:s2_5:s2_0:Process__empty_slave_recv{do:Process_clock_c3=0} # Mutation! Added Reset
+edge:Process:s2_5:s2_0:Process__empty_slave_recv{}
 event:Process__to_medium_slave
 event:Process__to_medium_slave_emit
 edge:Process:s2_4:s2_5:Process__to_medium_slave_emit{provided:(Process_clock_c3 == 2)}

@@ -1,0 +1,105 @@
+Clock Ordering
+0 Process_clock_c3_1 Process_clock_c3_2 
+Non Bisim
+First Location: <s2_4>
+Second Location: <s2_4>
+<=0	<=-2	<=-2	
+<=2	<=0	<=0	
+<=2	<=0	<=0	
+Steps: 5
+
+<=0	<=0	<=0	
+<=2	<=0	<=0	
+<=2	<=0	<=0	
+Steps: 6
+
+First Location: <s2_5>
+Second Location: <s2_5>
+<=0	<=0	<=-2	
+<inf	<=0	<inf	
+<inf	<inf	<=0	
+Steps: 3
+
+<=0	<=0	<=0	
+<inf	<=0	<=0	
+<inf	<=0	<=0	
+Steps: 4
+
+First Location: <s2_1>
+Second Location: <s2_1>
+<=0	<=0	<0	
+<=0	<=0	<0	
+<inf	<inf	<=0	
+Steps: 1
+
+<=0	<=0	<=0	
+<=0	<=0	<=0	
+<=0	<=0	<=0	
+Steps: 4
+
+First Location: <s2_2>
+Second Location: <s2_2>
+<=0	<=-2	<=-2	
+<=2	<=0	<=0	
+<=2	<=0	<=0	
+Steps: 4
+
+<=0	<=0	<=0	
+<=2	<=0	<=0	
+<=2	<=0	<=0	
+Steps: 5
+
+First Location: <s2_3>
+Second Location: <s2_3>
+<=0	<=-1	<=-1	
+<=1	<=0	<=0	
+<=1	<=0	<=0	
+Steps: 7
+
+<=0	<=0	<=0	
+<=1	<=0	<=0	
+<=1	<=0	<=0	
+Steps: 8
+
+First Location: <s2_0>
+Second Location: <s2_0>
+<=0	<=0	<0	
+<inf	<=0	<inf	
+<inf	<inf	<=0	
+Steps: 2
+
+<=0	<=0	<=0	
+<inf	<=0	<inf	
+<inf	<inf	<=0	
+Steps: 3
+
+
+Bisim
+First Location: <s2_4>
+Second Location: <s2_4>
+<=0	<-2	<-2	
+<inf	<=0	<=0	
+<inf	<=0	<=0	
+
+First Location: <s2_1>
+Second Location: <s2_1>
+<=0	<0	<0	
+<inf	<=0	<=0	
+<inf	<inf	<=0	
+
+First Location: <s2_2>
+Second Location: <s2_2>
+<=0	<-2	<-2	
+<inf	<=0	<=0	
+<inf	<=0	<=0	
+
+First Location: <s2_3>
+Second Location: <s2_3>
+<=0	<-1	<-1	
+<inf	<=0	<=0	
+<inf	<=0	<=0	
+
+MEMORY_MAX_RSS  xxxx
+RELATIONSHIP_FULFILLED true
+RUNNING_TIME_SECONDS  xxxx
+VISITED_PAIR_OF_STATES 12

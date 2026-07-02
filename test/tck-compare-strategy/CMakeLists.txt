@@ -44,7 +44,7 @@ set(INPUTS
     strong_timed_bisim_benchmarks/deterministic/av-protocol-mutants/av-protocol-non-bisim-changed-guard.sh:
     strong_timed_bisim_benchmarks/deterministic/av-protocol-mutants/av-protocol-non-bisim-changed-invariant.sh:
     strong_timed_bisim_benchmarks/deterministic/av-protocol-mutants/av-protocol-non-bisim-removed-reset.sh:
-    strong_timed_bisim_benchmarks/deterministic/collision-avoidance-mutants/collision-avoidance-bisim.sh:
+    strong_timed_bisim_benchmarks/deterministic/collision-avoidance.sh:
     strong_timed_bisim_benchmarks/deterministic/collision-avoidance-mutants/collision-avoidance-non-bisim-changed-guard.sh:
     strong_timed_bisim_benchmarks/deterministic/collision-avoidance-mutants/collision-avoidance-non-bisim-changed-invariant.sh:
     strong_timed_bisim_benchmarks/deterministic/collision-avoidance-mutants/collision-avoidance-non-bisim-removed-reset.sh:
@@ -69,7 +69,7 @@ list(GET TCK_COMPARE_INPUT_FILES 3 tck-compare-strat-av-protocol-bisim)
 list(GET TCK_COMPARE_INPUT_FILES 4 tck-compare-strat-av-protocol-non-bisim-changed-guard)
 list(GET TCK_COMPARE_INPUT_FILES 5 tck-compare-strat-av-protocol-non-bisim-changed-invariant)
 list(GET TCK_COMPARE_INPUT_FILES 6 tck-compare-strat-av-protocol-non-bisim-removed-reset)
-list(GET TCK_COMPARE_INPUT_FILES 7 tck-compare-strat-collision-avoidance-bisim)
+list(GET TCK_COMPARE_INPUT_FILES 7 tck-compare-strat-collision-avoidance)
 list(GET TCK_COMPARE_INPUT_FILES 8 tck-compare-strat-collision-avoidance-non-bisim-changed-guard)
 list(GET TCK_COMPARE_INPUT_FILES 9 tck-compare-strat-collision-avoidance-non-bisim-changed-invariant)
 list(GET TCK_COMPARE_INPUT_FILES 10 tck-compare-strat-collision-avoidance-non-bisim-removed-reset)
@@ -90,22 +90,20 @@ if(NOT USEINT16) # The values that occur in the av-protocol exceed 16 Bit.
 create_testcase(av-protocol-self ${tck-compare-strat-av-protocol} ${tck-compare-strat-av-protocol} strong-timed-bisim)
 create_testcase(av-protocol-av-protocol-bisim ${tck-compare-strat-av-protocol} ${tck-compare-strat-av-protocol-bisim} strong-timed-bisim)
 create_testcase(av-protocol-av-protocol-non-bisim-changed-guard ${tck-compare-strat-av-protocol} ${tck-compare-strat-av-protocol-non-bisim-changed-guard} strong-timed-bisim)
-# create_testcase(av-protocol-av-protocol-non-bisim-changed-invariant ${tck-compare-strat-av-protocol} ${tck-compare-strat-av-protocol-non-bisim-changed-invariant} strong-timed-bisim)
-# create_testcase(av-protocol-av-protocol-non-bisim-removed-reset ${tck-compare-strat-av-protocol} ${tck-compare-strat-av-protocol-non-bisim-removed-reset} strong-timed-bisim)
+create_testcase(av-protocol-av-protocol-non-bisim-changed-invariant ${tck-compare-strat-av-protocol} ${tck-compare-strat-av-protocol-non-bisim-changed-invariant} strong-timed-bisim)
+create_testcase(av-protocol-av-protocol-non-bisim-removed-reset ${tck-compare-strat-av-protocol} ${tck-compare-strat-av-protocol-non-bisim-removed-reset} strong-timed-bisim)
 endif()
 
-# # collision-avoidance benchmark variants
-# create_testcase(collision-avoidance-self ${tck-compare-strat-collision-avoidance-bisim} ${tck-compare-strat-collision-avoidance-bisim} strong-timed-bisim)
-# create_testcase(collision-avoidance-collision-avoidance-bisim ${tck-compare-strat-collision-avoidance-bisim} ${tck-compare-strat-collision-avoidance-bisim} strong-timed-bisim)
-# create_testcase(collision-avoidance-collision-avoidance-non-bisim-changed-guard ${tck-compare-strat-collision-avoidance-bisim} ${tck-compare-strat-collision-avoidance-non-bisim-changed-guard} strong-timed-bisim)
-# create_testcase(collision-avoidance-collision-avoidance-non-bisim-changed-invariant ${tck-compare-strat-collision-avoidance-bisim} ${tck-compare-strat-collision-avoidance-non-bisim-changed-invariant} strong-timed-bisim)
-# create_testcase(collision-avoidance-collision-avoidance-non-bisim-removed-reset ${tck-compare-strat-collision-avoidance-bisim} ${tck-compare-strat-collision-avoidance-non-bisim-removed-reset} strong-timed-bisim)
+# collision-avoidance benchmark variants
+create_testcase(collision-avoidance-self ${tck-compare-strat-collision-avoidance} ${tck-compare-strat-collision-avoidance} strong-timed-bisim)
+create_testcase(collision-avoidance-collision-avoidance-non-bisim-changed-guard ${tck-compare-strat-collision-avoidance} ${tck-compare-strat-collision-avoidance-non-bisim-changed-guard} strong-timed-bisim)
+create_testcase(collision-avoidance-collision-avoidance-non-bisim-changed-invariant ${tck-compare-strat-collision-avoidance} ${tck-compare-strat-collision-avoidance-non-bisim-changed-invariant} strong-timed-bisim)
+create_testcase(collision-avoidance-collision-avoidance-non-bisim-removed-reset ${tck-compare-strat-collision-avoidance} ${tck-compare-strat-collision-avoidance-non-bisim-removed-reset} strong-timed-bisim)
 
-# # ieee-rcp benchmark variants
-# create_testcase(ieee-rcp-self ${tck-compare-strat-ieee-rcp} ${tck-compare-strat-ieee-rcp} strong-timed-bisim)
-# create_testcase(ieee-rcp-ieee-rcp-bisim ${tck-compare-strat-ieee-rcp} ${tck-compare-strat-ieee-rcp-bisim} strong-timed-bisim)
-# create_testcase(ieee-rcp-ieee-rcp-non-bisim-changed-guard ${tck-compare-strat-ieee-rcp} ${tck-compare-strat-ieee-rcp-non-bisim-changed-guard} strong-timed-bisim)
-# create_testcase(ieee-rcp-ieee-rcp-non-bisim-changed-invariant ${tck-compare-strat-ieee-rcp} ${tck-compare-strat-ieee-rcp-non-bisim-changed-invariant} strong-timed-bisim)
+# ieee-rcp benchmark variants
+create_testcase(ieee-rcp-self ${tck-compare-strat-ieee-rcp} ${tck-compare-strat-ieee-rcp} strong-timed-bisim)
+create_testcase(ieee-rcp-ieee-rcp-non-bisim-changed-guard ${tck-compare-strat-ieee-rcp} ${tck-compare-strat-ieee-rcp-non-bisim-changed-guard} strong-timed-bisim)
+create_testcase(ieee-rcp-ieee-rcp-non-bisim-changed-invariant ${tck-compare-strat-ieee-rcp} ${tck-compare-strat-ieee-rcp-non-bisim-changed-invariant} strong-timed-bisim)
 # create_testcase(ieee-rcp-ieee-rcp-non-bisim-removed-reset ${tck-compare-strat-ieee-rcp} ${tck-compare-strat-ieee-rcp-non-bisim-removed-reset} strong-timed-bisim)
 
 # urgent edge cases

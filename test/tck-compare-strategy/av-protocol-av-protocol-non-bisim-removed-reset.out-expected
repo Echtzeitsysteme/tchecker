@@ -1,0 +1,185 @@
+Clock Ordering
+0 Process_clock_A_c_1 Process_clock_A_c_2 
+Non Bisim
+First Location: <goto_idle>
+Second Location: <goto_idle>
+<=0	<=0	<=0	
+<inf	<=0	<inf	
+<inf	<inf	<=0	
+Steps: 17
+
+First Location: <nPf>
+Second Location: <nPf>
+<=0	<=0	<=0	
+<inf	<=0	<inf	
+<inf	<inf	<=0	
+Steps: 11
+
+First Location: <other_started>
+Second Location: <other_started>
+<=0	<=0	<=0	
+<=3124	<=0	<=0	
+<=3124	<=0	<=0	
+Steps: 14
+
+First Location: <jam>
+Second Location: <until_silence>
+<=0	<=0	<=0	
+<=25000	<=0	<=0	
+<=25000	<=0	<=0	
+Steps: 1
+
+First Location: <until_silence>
+Second Location: <jam>
+<=0	<=0	<=0	
+<=25000	<=0	<=0	
+<=25000	<=0	<=0	
+Steps: 1
+
+First Location: <jam>
+Second Location: <jam>
+<=0	<=0	<=0	
+<=25000	<=0	<=0	
+<=25000	<=0	<=0	
+Steps: 12
+
+First Location: <start>
+Second Location: <start>
+<=0	<=0	<=0	
+<inf	<=0	<inf	
+<inf	<inf	<=0	
+Steps: 17
+
+First Location: <ex_jam>
+Second Location: <ex_jam>
+<=0	<=0	<=0	
+<=781	<=0	<=0	
+<=781	<=0	<=0	
+Steps: 4
+
+First Location: <check_eof>
+Second Location: <check_eof>
+<=0	<=0	<=0	
+<inf	<=0	<inf	
+<inf	<inf	<=0	
+Steps: 10
+
+First Location: <call_check>
+Second Location: <call_check>
+<=0	<=0	<=0	
+<inf	<=0	<inf	
+<inf	<inf	<=0	
+Steps: 5
+
+First Location: <ex_start>
+Second Location: <ex_start>
+<=0	<=0	<=0	
+<inf	<=0	<inf	
+<inf	<inf	<=0	
+Steps: 14
+
+First Location: <newPn>
+Second Location: <newPn>
+<=0	<=0	<=0	
+<30	<=0	<=0	
+<30	<=0	<=0	
+Steps: 9
+
+<=0	<-30	<-30	
+<=40	<=0	<=0	
+<=40	<=0	<=0	
+Steps: 9
+
+<=0	<=-30	<=-30	
+<=40	<=0	<=0	
+<=40	<=0	<=0	
+Steps: 10
+
+First Location: <ex_silence2>
+Second Location: <ex_silence2>
+<=0	<=0	<=0	
+<=781	<=0	<=0	
+<=781	<=0	<=0	
+Steps: 12
+
+First Location: <idle>
+Second Location: <idle>
+<=0	<=-781	<=-781	
+<=781	<=0	<=0	
+<=781	<=0	<=0	
+Steps: 15
+
+<=0	<=0	<=0	
+<=781	<=0	<=0	
+<=781	<=0	<=0	
+Steps: 16
+
+First Location: <ex_silence1>
+Second Location: <ex_silence1>
+<=0	<=0	<=0	
+<=2343	<=0	<=0	
+<=2343	<=0	<=0	
+Steps: 13
+
+First Location: <transmit>
+Second Location: <transmit>
+<=0	<=0	<=0	
+<=781	<=0	<=0	
+<=781	<=0	<=0	
+Steps: 11
+
+First Location: <call_observe>
+Second Location: <call_observe>
+<=0	<=0	<=0	
+<inf	<=0	<inf	
+<inf	<inf	<=0	
+Steps: 6
+
+First Location: <stop>
+Second Location: <stop>
+<=0	<=0	<=0	
+<=50000	<=0	<=0	
+<=50000	<=0	<=0	
+Steps: 17
+
+First Location: <until_silence>
+Second Location: <until_silence>
+<=0	<=0	<0	
+<=781	<=0	<0	
+<=1562	<=781	<=0	
+Steps: 1
+
+<=0	<0	<0	
+<=781	<=0	<=0	
+<=781	<=0	<=0	
+Steps: 2
+
+<=0	<=0	<=0	
+<=781	<=0	<=0	
+<=781	<=0	<=0	
+Steps: 3
+
+First Location: <sample>
+Second Location: <sample>
+<=0	<=-781	<=-781	
+<=781	<=0	<=0	
+<=781	<=0	<=0	
+Steps: 7
+
+<=0	<=0	<=0	
+<=781	<=0	<=0	
+<=781	<=0	<=0	
+Steps: 8
+
+
+Bisim
+First Location: <idle>
+Second Location: <idle>
+<=0	<-781	<-781	
+<inf	<=0	<=0	
+<inf	<=0	<=0	
+
+MEMORY_MAX_RSS  xxxx
+RELATIONSHIP_FULFILLED true
+RUNNING_TIME_SECONDS  xxxx
+VISITED_PAIR_OF_STATES 25

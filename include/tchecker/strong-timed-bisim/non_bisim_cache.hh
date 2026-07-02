@@ -128,6 +128,8 @@ class non_bisim_cache_t {
 
  private:                                         
 
+  void cleanup_entry(map_key_t & key);
+
   const tchecker::clock_id_t _no_of_virtual_clocks;
   std::shared_ptr<storage_t> _storage;
 
