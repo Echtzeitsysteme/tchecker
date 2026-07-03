@@ -104,7 +104,7 @@ create_testcase(collision-avoidance-collision-avoidance-non-bisim-removed-reset 
 create_testcase(ieee-rcp-self ${tck-compare-strat-ieee-rcp} ${tck-compare-strat-ieee-rcp} strong-timed-bisim)
 create_testcase(ieee-rcp-ieee-rcp-non-bisim-changed-guard ${tck-compare-strat-ieee-rcp} ${tck-compare-strat-ieee-rcp-non-bisim-changed-guard} strong-timed-bisim)
 create_testcase(ieee-rcp-ieee-rcp-non-bisim-changed-invariant ${tck-compare-strat-ieee-rcp} ${tck-compare-strat-ieee-rcp-non-bisim-changed-invariant} strong-timed-bisim)
-# create_testcase(ieee-rcp-ieee-rcp-non-bisim-removed-reset ${tck-compare-strat-ieee-rcp} ${tck-compare-strat-ieee-rcp-non-bisim-removed-reset} strong-timed-bisim)
+create_testcase(ieee-rcp-ieee-rcp-non-bisim-removed-reset ${tck-compare-strat-ieee-rcp} ${tck-compare-strat-ieee-rcp-non-bisim-removed-reset} strong-timed-bisim)
 
 # urgent edge cases
 create_testcase(urgent_self ${tck-compare-strat-urgent} ${tck-compare-strat-urgent} strong-timed-bisim)
