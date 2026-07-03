@@ -84,7 +84,7 @@ protected:
                 tchecker::zg::state_sptr_t B_source, tchecker::ta::state_t &B_target, tchecker::zg::transition_t & B_transition,
                 std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> condition);
 
-  void add_node_that_already_exists(std::shared_ptr<node_t> to_add);
+  void add_node_that_already_exists(std::shared_ptr<node_t> to_add) override;
 
   /*!
    \brief returns a set that contains all types of edges, i.e. all available combinations of edge_pair, src, and target.

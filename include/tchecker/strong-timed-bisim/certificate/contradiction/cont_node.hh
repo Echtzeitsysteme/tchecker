@@ -9,6 +9,7 @@
 #define TCHECKER_STRONG_TIMED_BISIM_CONTRADICTION_CONT_NODE_HH
 
 #include "tchecker/strong-timed-bisim/certificate/certificate_node.hh"
+#include "tchecker/strong-timed-bisim/contradiction.hh"
 
 namespace tchecker {
 
@@ -142,7 +143,21 @@ public:
    \note In case no maximum delay exists as there is a non-included upper bound, the middle of the highest region is chosen. In case there exists no upper bound, max_delay is used as delay.
    */
   std::pair<clock_rational_value_t, std::shared_ptr<node_t>>
-  max_delay(std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> vcs, 
+  max_delay(std::vector<tchecker::strong_timed_bisim::contradiction_t> & vec_vcs, 
+            std::shared_ptr<tchecker::vcg::vcg_t> vcg1, std::shared_ptr<tchecker::vcg::vcg_t> vcg2);
+
+
+  /*!
+   \brief calculates the maximum delay while staying within the given virtual constraints
+   \param vcs : the virtual constraints to stay within
+   \param max_delay : the maximum delay to use
+   \param vcg1 : the first vcg
+   \param vcg2 : the second vcg
+   \return a pair: first element is the delay, second element is the resulting node
+   \note In case no maximum delay exists as there is a non-included upper bound, the middle of the highest region is chosen. In case there exists no upper bound, max_delay is used as delay.
+   */
+  std::pair<clock_rational_value_t, std::shared_ptr<node_t>>
+  max_delay(tchecker::strong_timed_bisim::contradiction_t & vcs, 
             std::shared_ptr<tchecker::vcg::vcg_t> vcg1, std::shared_ptr<tchecker::vcg::vcg_t> vcg2);
 
   /*!

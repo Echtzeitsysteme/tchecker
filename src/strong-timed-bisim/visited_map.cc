@@ -25,7 +25,7 @@ visited_map_t::visited_map_t(visited_map_t & t, std::shared_ptr<tchecker::vcg::v
   emplace(t);
 }
 
-tchecker::clock_id_t const visited_map_t::no_of_virtual_clocks() { return this->_no_of_virtual_clocks; }
+tchecker::clock_id_t visited_map_t::no_of_virtual_clocks() const { return this->_no_of_virtual_clocks; }
 
 tchecker::strong_timed_bisim::visited_map_t::visited_map_storage_t::iterator visited_map_t::begin()
 {
@@ -147,10 +147,23 @@ bool visited_map_t::contains_superset(tchecker::zg::state_sptr_t first, tchecker
       
   auto common_virtual_constraint = tchecker::virtual_constraint::factory(first->zone(), _no_of_virtual_clocks);
 
+  if(nullptr == (*_storage)[key]) {
+    (*_storage)[key] = std::make_shared<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(_no_of_virtual_clocks + 1);
+  }
+
   if (0 == (*_storage).count(key))
     return false;
 
   return (*_storage)[key]->is_superset(*common_virtual_constraint);
+}
+
+std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>
+visited_map_t::entry(std::pair<tchecker::ta::state_t, tchecker::ta::state_t> & loc_pair) const
+{
+  if((*_storage)[loc_pair] == nullptr || (*_storage)[loc_pair]->is_empty()) {
+    (*_storage)[loc_pair] = std::make_shared<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(_no_of_virtual_clocks + 1);
+  }
+  return (*_storage)[loc_pair];
 }
 
 } // end of namespace strong_timed_bisim

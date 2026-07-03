@@ -19,6 +19,12 @@ add_custom_command(OUTPUT system.lex-fixed.cc
 COMMAND sed -e "s/register//g" ${FLEX_system_lexer_OUTPUTS} > system.lex-fixed.cc
 DEPENDS ${FLEX_system_lexer_OUTPUTS})
 
+set_source_files_properties(
+  ${BISON_system_parser_OUTPUTS}
+  system.lex-fixed.cc
+  PROPERTIES SKIP_LINTING TRUE
+)
+
 # Build system parsing static object library
 add_library(system_parsing_static OBJECT
   ${BISON_system_parser_OUTPUTS} system.lex-fixed.cc system.ll system.yy)

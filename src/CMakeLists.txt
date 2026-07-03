@@ -57,6 +57,7 @@ link_directories(${Boost_LIBRARY_DIRS})
 
 add_subdirectory(algorithms)
 add_subdirectory(clockbounds)
+add_subdirectory(compare-tools)
 add_subdirectory(counter-example)
 add_subdirectory(dbm)
 add_subdirectory(expression)
@@ -91,6 +92,7 @@ set(LIBTCHECKER_SRC
   ${ALGORITHMS_SRC}
   ${CLOCKBOUNDS_SRC}
   ${COUNTER_EXAMPLE_SRC}
+  ${COMPARE_TOOLS_SRC}
   ${DBM_SRC}
   ${EXPRESSION_SRC}
   ${EXTRAPOLATION_SRC}

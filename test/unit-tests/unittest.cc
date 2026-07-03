@@ -5,6 +5,12 @@
  *
  */
 
+#if defined(__clang__)
+// ignore the dynamically allocated arrays warning of clang
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wvla-cxx-extension"
+#endif
+
 #define CATCH_CONFIG_MAIN
 #include <catch2/catch_test_macros.hpp>
 
@@ -12,6 +18,7 @@
 #include "test-clock_updates.hh"
 #include "test-clockbounds.hh"
 #include "test-clocks.hh"
+#include "test-compare-tools-synchronize.hh"
 #include "test-db.hh"
 #include "test-dbm.hh"
 #include "test-delay_allowed.hh"
@@ -30,3 +37,7 @@
 #include "test-virtual_constraint.hh"
 #include "test-waiting.hh"
 #include "test-zg-semantics.hh"
+
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif

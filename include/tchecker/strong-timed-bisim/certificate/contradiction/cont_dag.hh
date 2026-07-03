@@ -58,7 +58,7 @@ public:
    \return whether the creation of the CDAG was successfull
    \post If the return value is true, the graph contains a valid Contradiction DAG
    */
-  bool create_cont_from_non_bisim_cache(tchecker::strong_timed_bisim::non_bisim_cache_t &non_bisim_cache, 
+  bool create_cont_from_non_bisim_cache(tchecker::strong_timed_bisim::non_bisim_cache::non_bisim_cache_t &non_bisim_cache, 
                                         std::shared_ptr<node_t> src = nullptr);
 
   /*!
@@ -105,7 +105,7 @@ private:
    \param src : the src of the action transition to find
    \return whether the search was successfull
    */
-  bool add_non_bisim_action_transition(tchecker::strong_timed_bisim::non_bisim_cache_t &non_bisim_cache, std::shared_ptr<node_t> src);
+  bool add_non_bisim_action_transition(tchecker::strong_timed_bisim::non_bisim_cache::non_bisim_cache_t &non_bisim_cache, std::shared_ptr<node_t> src);
 
 
   /*!

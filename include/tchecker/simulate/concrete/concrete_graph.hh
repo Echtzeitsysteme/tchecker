@@ -119,6 +119,8 @@ public:
   */
   edge_t(node_t & src, node_t & tgt);
 
+  virtual ~edge_t() = default;
+
   /*!
    \brief Accessor to edge attributes
    \param m : a map (key, value) of attributes

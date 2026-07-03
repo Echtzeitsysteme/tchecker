@@ -19,6 +19,12 @@ add_custom_command(OUTPUT program.lex-fixed.cc
 COMMAND sed -e "s/register//g" ${FLEX_program_lexer_OUTPUTS} > program.lex-fixed.cc
 DEPENDS ${FLEX_program_lexer_OUTPUTS})
 
+set_source_files_properties(
+  ${BISON_program_parser_OUTPUTS}
+  program.lex-fixed.cc
+  PROPERTIES SKIP_LINTING TRUE
+)
+
 # Build program parsing static object library
 add_library(program_parsing_static OBJECT
   ${BISON_program_parser_OUTPUTS} program.lex-fixed.cc program.ll program.yy)

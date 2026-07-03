@@ -7,6 +7,11 @@
 
 #include "tchecker/vcg/revert_transitions.hh"
 
+#if defined(__clang__)
+// ignore the dynamically allocated arrays warning of clang
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wvla-cxx-extension"
+#endif
 
 namespace tchecker {
 
@@ -113,9 +118,16 @@ revert_action_trans(const tchecker::zg::zone_t & zone,
 std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t>
 revert_epsilon_trans(const tchecker::zg::zone_t & zone, const tchecker::zg::zone_t & zone_eps, const tchecker::virtual_constraint::virtual_constraint_t & phi_split)
 {
+  assert(tchecker::dbm::is_consistent(zone.dbm(), zone.dim()));
+  assert(tchecker::dbm::is_tight(zone.dbm(), zone.dim()));
+  assert(tchecker::dbm::is_consistent(zone_eps.dbm(), zone_eps.dim()));
+  assert(tchecker::dbm::is_tight(zone_eps.dbm(), zone_eps.dim()));
+  assert(tchecker::dbm::is_consistent(phi_split.dbm(), phi_split.dim()));
+  assert(tchecker::dbm::is_tight(phi_split.dbm(), phi_split.dim()));
+  
   assert(zone <= zone_eps);
   
-  // result = extract_vc(zone \cap (zone_eps && phi_split)^down)
+  // result = extract_vc(zone && (zone_eps && phi_split)^down)
 
   std::shared_ptr<tchecker::zg::zone_t> zone_eps_copy = tchecker::zg::factory(zone_eps);
 
@@ -134,10 +146,17 @@ revert_epsilon_trans(const tchecker::zg::zone_t & zone, const tchecker::zg::zone
   std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> result
     = tchecker::virtual_constraint::factory(zone_copy, phi_split.get_no_of_virtual_clocks());
   
+  assert(tchecker::dbm::is_consistent(result->dbm(), result->dim()));
+  assert(tchecker::dbm::is_tight(result->dbm(), result->dim()));
+
   return result;
 }
 
 } // end of namespace vcg
 
 } // end of namespace tchecker
+
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
 

@@ -227,34 +227,37 @@ std::shared_ptr<virtual_constraint_t> factory(tchecker::clock_id_t number_of_vir
       tchecker::zg::factory(number_of_virtual_clocks + 1));
 }
 
-std::shared_ptr<virtual_constraint_t> factory(tchecker::virtual_constraint::virtual_constraint_t const & virtual_constraint)
+std::shared_ptr<virtual_constraint_t> factory(tchecker::virtual_constraint::virtual_constraint_t const & virtual_constraint, bool ignore_urgent_clk)
 {
-  return factory(virtual_constraint.dbm(), virtual_constraint.dim(), virtual_constraint.get_no_of_virtual_clocks());
+  assert(virtual_constraint.dim() == virtual_constraint.get_no_of_virtual_clocks() + 1);
+  return factory(virtual_constraint.dbm(), virtual_constraint.dim(), virtual_constraint.get_no_of_virtual_clocks(), ignore_urgent_clk);
 }
 
 std::shared_ptr<virtual_constraint_t> factory(std::shared_ptr<tchecker::zg::zone_t const> zone,
-                                              tchecker::clock_id_t no_of_virtual_clocks)
+                                              tchecker::clock_id_t no_of_virtual_clocks, bool ignore_urgent_clk)
 {
-  return factory(zone->dbm(), zone->dim(), no_of_virtual_clocks);
+  return factory(zone->dbm(), zone->dim(), no_of_virtual_clocks, ignore_urgent_clk);
 }
 
-std::shared_ptr<virtual_constraint_t> factory(tchecker::zg::zone_t const & zone, tchecker::clock_id_t no_of_virtual_clocks)
+std::shared_ptr<virtual_constraint_t> factory(tchecker::zg::zone_t const & zone, tchecker::clock_id_t no_of_virtual_clocks, bool ignore_urgent_clk)
 {
-  return factory(zone.dbm(), zone.dim(), no_of_virtual_clocks);
+  return factory(zone.dbm(), zone.dim(), no_of_virtual_clocks, ignore_urgent_clk);
 }
 
 std::shared_ptr<virtual_constraint_t> factory(const tchecker::dbm::db_t * dbm, tchecker::clock_id_t dim,
-                                              tchecker::clock_id_t no_of_virtual_clocks)
+                                              tchecker::clock_id_t no_of_virtual_clocks, bool ignore_urgent_clk)
 {
 
   assert(dim > no_of_virtual_clocks);
 
-  std::shared_ptr<virtual_constraint_t> result = factory(no_of_virtual_clocks);
+  tchecker::clock_id_t used_no_virt_clks = ignore_urgent_clk ? no_of_virtual_clocks - 1 : no_of_virtual_clocks;
+
+  std::shared_ptr<virtual_constraint_t> result = factory(used_no_virt_clks);
 
   std::vector<tchecker::clock_id_t> indices;
   indices.emplace_back(0);
 
-  for (tchecker::clock_id_t i = dim - no_of_virtual_clocks; i < dim; ++i) {
+  for (tchecker::clock_id_t i = dim - no_of_virtual_clocks; i < dim - (ignore_urgent_clk ? 1 : 0); ++i) {
     indices.emplace_back(i);
   }
 

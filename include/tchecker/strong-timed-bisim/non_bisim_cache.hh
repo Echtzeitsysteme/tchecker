@@ -14,26 +14,59 @@
 #include "tchecker/basictypes.hh"
 #include "tchecker/zg/state.hh"
 #include "tchecker/zg/zone_container.hh"
+#include "tchecker/strong-timed-bisim/contradiction.hh"
+
 
 namespace tchecker {
 
 namespace strong_timed_bisim {
+
+namespace non_bisim_cache {
+
+using map_key_t = std::pair<tchecker::ta::state_t, tchecker::ta::state_t>;
+
+struct custom_hash {
+  size_t operator()(const map_key_t & to_hash) const
+  {
+    size_t h = TCHECKER_STRONG_TIMED_BISIM_NON_BISIM_CACHE_HH_SEED;
+    boost::hash_combine(h, to_hash.first);
+    boost::hash_combine(h, to_hash.second);
+    return h;
+  }
+};
+
+struct custom_equal {
+  bool operator()(const map_key_t & p1, const map_key_t & p2) const
+  {
+    return p1.first == p2.first && p1.second == p2.second;
+  }
+};
+
+/*
+ \brief unordered map mapping a map_key_t to a of zone container of virtual constraints
+ */
+using storage_t = std::unordered_map<map_key_t,
+                                     std::shared_ptr<std::vector<contradiction_t>>, 
+                                     custom_hash, 
+                                     custom_equal>;
 
 class non_bisim_cache_t {
  public:
   /*!
    \brief Constructor
    \param no_of_virtual_clocks : number of virtual clocks for the states stored in the visited map
+   \param generate_strategy : whether the _min_steps_to_cont entries of the contradictions should be respected
   */
-   non_bisim_cache_t(tchecker::clock_id_t no_of_virtual_clocks);
+   non_bisim_cache_t(tchecker::clock_id_t no_of_virtual_clocks, bool generate_strategy);
 
   /*!
    \brief inserts given pair of symbolic states with found contradiction
    \param first : first symbolic state
    \param second : second symbolic state
    \param con : found contradiction
+   \post WATCH OUT! In case the cache already contains this contradiction, it sets the min_steps_to_cont value of con to the lower of both! In case _generate_strategy = false, it sets min_steps_to_cont to zero!
   */
-  void emplace(tchecker::zg::state_sptr_t first, tchecker::zg::state_sptr_t second, std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> con);
+  void emplace(tchecker::zg::state_sptr_t first, tchecker::zg::state_sptr_t second, contradiction_t & con);
 
   /*!
    \brief checks whether we have already stored a contradiction for this 
@@ -41,7 +74,7 @@ class non_bisim_cache_t {
    \param second : second symbolic state
    \return a cached contradiction
   */  
-  std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>
+  std::shared_ptr<contradiction_t>
   already_cached(tchecker::zg::state_sptr_t first, tchecker::zg::state_sptr_t second) const;
 
   /*!
@@ -50,7 +83,7 @@ class non_bisim_cache_t {
    \param second : the second TA state;
    \return The entry corresponding to the given key
    */
-  std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>
+  std::shared_ptr<std::vector<contradiction_t>>
   entry(tchecker::ta::state_t & first, tchecker::ta::state_t & second) const;
 
   /*!
@@ -58,7 +91,7 @@ class non_bisim_cache_t {
    \param loc_pair : the pair of TA states
    \return The entry corresponding to the given key
    */
-  std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>
+  std::shared_ptr<std::vector<contradiction_t>>
   entry(std::pair<tchecker::ta::state_t, tchecker::ta::state_t> & loc_pair) const;
 
   /*!
@@ -77,46 +110,39 @@ class non_bisim_cache_t {
     return _no_of_entries;
   }
 
- private:
-  
-  using map_key_t = std::pair<tchecker::ta::state_t, tchecker::ta::state_t>;
+  /*!
+   \brief getter
+   \return returns the number of virtual clocks
+   */
+  tchecker::clock_id_t no_of_virtual_clocks() const {
+    return _no_of_virtual_clocks;
+  }
 
-  struct custom_hash {
-    size_t operator()(const map_key_t & to_hash) const
-    {
-      size_t h = TCHECKER_STRONG_TIMED_BISIM_NON_BISIM_CACHE_HH_SEED;
-      boost::hash_combine(h, to_hash.first);
-      boost::hash_combine(h, to_hash.second);
-      return h;
-    }
-  };
+  /*!
+   \brief getter
+   \return the storage
+   */
+  std::shared_ptr<storage_t> storage() const {
+    return _storage;
+  }
 
-  struct custom_equal {
-    bool operator()(const map_key_t & p1, const map_key_t & p2) const
-    {
-      return p1.first == p2.first && p1.second == p2.second;
-    }
-  };
+ private:                                         
 
-  /*
-   \brief unordered map mapping a map_key_t to a of zone container of virtual constraints
-  */
-  using storage_t = std::unordered_map<map_key_t,
-                                       std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>, 
-                                       custom_hash, 
-                                       custom_equal>;
-                                                
+  void cleanup_entry(map_key_t & key);
 
   const tchecker::clock_id_t _no_of_virtual_clocks;
   std::shared_ptr<storage_t> _storage;
 
   uint64_t _no_of_entries;
 
+  const bool _generate_strategy;
+
 }; // end of class non_bisim_cache
+
+} // end of namespace non_bisim_cache
 
 } // end of namespace strong_timed_bisim
 
-
- } // end of namespace tchecker
+} // end of namespace tchecker
 
  #endif

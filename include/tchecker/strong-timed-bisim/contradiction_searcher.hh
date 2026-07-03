@@ -8,6 +8,7 @@
 #ifndef TCHECKER_STRONG_TIMED_BISIM_SEARCH_CONTRADICTION_HH
 #define TCHECKER_STRONG_TIMED_BISIM_SEARCH_CONTRADICTION_HH
 
+#include "tchecker/strong-timed-bisim/contradiction_matrix.hh"
 #include "tchecker/vcg/virtual_constraint.hh"
 #include "tchecker/basictypes.hh"
 
@@ -34,11 +35,11 @@ class contradiction_searcher_t {
      \param trans_B : the outgoing transitions of the second symbolic state
      \param found_cont : the matrix where the already found contradictions of the outgoing transitions are stored
      */
-    std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>
+    std::shared_ptr<tchecker::strong_timed_bisim::contradiction_t>
     search_contradiction(tchecker::zg::zone_t const & zone_A, tchecker::zg::zone_t const & zone_B,
                          std::shared_ptr<std::vector<tchecker::vcg::vcg_t::sst_t>> trans_A, 
                          std::shared_ptr<std::vector<tchecker::vcg::vcg_t::sst_t>> trans_B,
-                         tchecker::zone_matrix_t<tchecker::virtual_constraint::virtual_constraint_t> found_cont);
+                         tchecker::strong_timed_bisim::contradiction_matrix_t & found_cont);
 
     /*!
      \brief checks whether it makes sense to go on searching for contradictions
@@ -53,19 +54,19 @@ class contradiction_searcher_t {
     contradiction_still_possible(tchecker::zg::zone_t const & zone_A, tchecker::zg::zone_t const & zone_B,
                                  std::shared_ptr<std::vector<tchecker::vcg::vcg_t::sst_t>> trans_A,
                                  std::shared_ptr<std::vector<tchecker::vcg::vcg_t::sst_t>> trans_B,
-                                 tchecker::zone_matrix_t<tchecker::virtual_constraint::virtual_constraint_t> & found_cont,
+                                 tchecker::strong_timed_bisim::contradiction_matrix_t & found_cont,
                                  std::vector< std::vector<bool> > finished);
   private:
 
-    tchecker::zone_matrix_t<tchecker::virtual_constraint::virtual_constraint_t> overhangs;
+    tchecker::strong_timed_bisim::contradiction_matrix_t overhangs;
     tchecker::clock_id_t no_of_virt_clks;
 
     contradiction_searcher_t();
 
-    std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> 
+    std::shared_ptr<tchecker::strong_timed_bisim::contradiction_t>
     find_contradiction(tchecker::zg::zone_t const & zone, std::shared_ptr<std::vector<tchecker::vcg::vcg_t::sst_t>> trans,
-                       std::vector<std::shared_ptr<zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>> & found_con,
-                       std::vector<std::shared_ptr<zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>> & cur_overhang);
+                       std::vector<std::shared_ptr<tchecker::strong_timed_bisim::contradiction_t>> & found_con,
+                       std::vector<std::shared_ptr<tchecker::strong_timed_bisim::contradiction_t>> & cur_overhang);
 
 };
 

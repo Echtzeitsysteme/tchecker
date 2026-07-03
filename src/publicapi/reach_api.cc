@@ -65,6 +65,7 @@ static bool is_certificate_path(enum tck_reach_certificate_t ctype)
 void tck_reach_zg_reach(std::ostream & os, const tchecker::parsing::system_declaration_t & sysdecl, std::string labels,
                               std::string search_order, int block_size, int table_size, tck_reach_certificate_t certificate)
 {
+
   auto && [stats, state_space] = tchecker::algorithms::zg_reach::run(sysdecl, labels, search_order, block_size, table_size);
 
   // stats
@@ -103,7 +104,7 @@ void tck_reach_zg_reach(std::ostream & os, const tchecker::parsing::system_decla
  Timed Automata". CONCUR 2019: 16:1-16:15
 */
 void tck_reach_concur19(std::ostream & os, const tchecker::parsing::system_declaration_t & sysdecl, std::string labels,
-                              std::string search_order, int block_size, int table_size, tck_reach_certificate_t certificate)
+                        std::string search_order, int block_size, int table_size, tck_reach_certificate_t certificate)
 {
   if (certificate == CERTIFICATE_CONCRETE)
     throw std::runtime_error("Concrete counter-example is not available for concur19 algorithm");

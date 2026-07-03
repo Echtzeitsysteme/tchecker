@@ -132,32 +132,41 @@ private:
 // factories
 std::shared_ptr<virtual_constraint_t> factory(tchecker::clock_id_t no_of_virtual_clocks);
 
-std::shared_ptr<virtual_constraint_t> factory(tchecker::virtual_constraint::virtual_constraint_t const & virtual_constraint);
+/*!
+ \brief copy a virtual constraint
+ \param virtual_constraint : the vc to copy
+ \param ignore_urgent_clk : whether the last clock should be ignored
+ \return a copy of virtual_constraint
+ */
+std::shared_ptr<virtual_constraint_t> factory(tchecker::virtual_constraint::virtual_constraint_t const & virtual_constraint, bool ignore_urgent_clk = false);
 
 /*!
  \brief extract the virtual constraint from a zone
  \param zone : the zone from which the virtual constraint should be extracted
- \param virtual_clocks : the number of virtual clocks
+ \param virtual_clocks : the number of virtual clocks (including the urgent clk if exists)
+ \param ignore_urgent_clk : whether the last clock should be ignored
  \return the virtual constraint of zone
  */
-std::shared_ptr<virtual_constraint_t> factory(std::shared_ptr<tchecker::zg::zone_t const> zone, tchecker::clock_id_t no_of_virtual_clocks);
+std::shared_ptr<virtual_constraint_t> factory(std::shared_ptr<tchecker::zg::zone_t const> zone, tchecker::clock_id_t no_of_virtual_clocks, bool ignore_urgent_clk = false);
 
 /*!
  \brief extract the virtual constraint from a zone
  \param zone : the zone from which the virtual constraint should be extracted
- \param virtual_clocks : the number of virtual clocks
+ \param virtual_clocks : the number of virtual clocks (including the urgent clk if exists)
+ \param ignore_urgent_clk : whether the last clock should be ignored
  \return the virtual constraint of zone
  */
-std::shared_ptr<virtual_constraint_t> factory(tchecker::zg::zone_t const & zone, tchecker::clock_id_t no_of_virtual_clocks);
+std::shared_ptr<virtual_constraint_t> factory(tchecker::zg::zone_t const & zone, tchecker::clock_id_t no_of_virtual_clocks, bool ignore_urgent_clk = false);
 
 /*!
  \brief extract the virtual constraint from a dbm
  \param dbm : the dbm from which the virtual constraint should be extracted
  \param dim : dimension of the dbm
- \param virtual_clocks : the number of virtual clocks
+ \param virtual_clocks : the number of virtual clocks (including the urgent clk if exists)
+ \param ignore_urgent_clk : whether the last clock should be ignored
  \return the virtual constraint of zone
  */
-std::shared_ptr<virtual_constraint_t> factory(const tchecker::dbm::db_t * dbm, tchecker::clock_id_t dim, tchecker::clock_id_t no_of_virtual_clocks);
+std::shared_ptr<virtual_constraint_t> factory(const tchecker::dbm::db_t * dbm, tchecker::clock_id_t dim, tchecker::clock_id_t no_of_virtual_clocks, bool ignore_urgent_clk = false);
 
 /*!
  \brief combine operator (see the TR of Lieb et al.)

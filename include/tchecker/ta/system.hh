@@ -22,6 +22,7 @@
 #include "tchecker/system/attribute.hh"
 #include "tchecker/system/system.hh"
 #include "tchecker/utils/iterator.hh"
+#include "tchecker/syncprod/vloc.hh"
 #include "tchecker/vm/vm.hh"
 
 /*!
@@ -219,6 +220,24 @@ public:
    \return invariant bytecode for location id
    */
   tchecker::bytecode_t const * invariant_bytecode(tchecker::loc_id_t id) const;
+
+  /*!
+   \brief Accessor
+   \param id : location identifier
+   \param intval : the integer valuation
+   \pre id is a location identifier
+   \return the invariant for the location with the given intval
+   */
+  tchecker::clock_constraint_container_t invariant(tchecker::loc_id_t & id, tchecker::intval_t & intval) const;
+
+  /*!
+   \brief Accessor
+   \param vloc : locations identifier
+   \param intval : the integer valuation
+   \pre id is a location identifier
+   \return the invariant for the location with the given intval
+   */
+  tchecker::clock_constraint_container_t invariant(tchecker::vloc_t & vloc, tchecker::intval_t & intval) const;
 
   // Processes
   using tchecker::syncprod::system_t::is_process;

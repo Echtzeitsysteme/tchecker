@@ -8,6 +8,12 @@
 #include "tchecker/vcg/sync.hh"
 #include "tchecker/dbm/dbm.hh"
 
+#if defined(__clang__)
+// ignore the dynamically allocated arrays warning of clang
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wvla-cxx-extension"
+#endif
+
 namespace tchecker {
 
 namespace vcg {
@@ -46,6 +52,11 @@ sync_vc_t::revert_sync_with_urgent(tchecker::zg::const_state_sptr_t & A_state, t
                                  const std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> & contradiction)
 {
   assert(A_state->zone().is_virtual_equivalent(B_state->zone(), _A->get_no_of_virtual_clocks()));
+  assert(std::all_of(contradiction->begin(), contradiction->end(), 
+              [](const auto& vc) {
+                return tchecker::dbm::is_consistent(vc->dbm(), vc->dim()) && tchecker::dbm::is_tight(vc->dbm(), vc->dim());
+              }            
+            ));
   std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> result =
       std::make_shared<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(
           _A->get_no_of_virtual_clocks() + 1);
@@ -353,3 +364,7 @@ bool is_phi_subset_of_a_zone(const tchecker::dbm::db_t *dbm, tchecker::clock_id_
 } // end of namespace vcg
 
 } // end of namespace tchecker
+
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif

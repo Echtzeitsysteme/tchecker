@@ -28,6 +28,7 @@ namespace strong_timed_bisim {
  \param second_starting_state : the attributes of the second starting state or the empty string, if init should be used
  \param inter_constraint : a constraint between any clocks of the first or second ta.
  \param generate_witness : whether a witness should be generated
+ \param symbolic_states_to_check : the symbolic states to check. Empty, if the initial symbolic states should be checked.
  \return statistics on the run and the reachability graph
  \note In inter_constraint, clocks of the first TA must have the postfix _1 and analogously for the second.
  */
@@ -38,7 +39,8 @@ run(std::shared_ptr<tchecker::parsing::system_declaration_t> const & sysdecl_fir
     std::map<std::string, std::string> & first_starting_state, 
     std::map<std::string, std::string> & second_starting_state, 
     std::string & inter_constraint,
-    bool generate_witness);
+    bool generate_witness,
+    std::vector<std::shared_ptr<tchecker::strong_timed_bisim::strategy::state_to_check_t>> & symbolic_states_to_check);
 
 } // end of namespace strong_timed_bisim
 } // end of namespace tchecker

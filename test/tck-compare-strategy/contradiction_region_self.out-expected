@@ -1,0 +1,57 @@
+Clock Ordering
+0 x_1 y_1 x_2 y_2 
+Non Bisim
+
+Bisim
+First Location: <fifth>
+Second Location: <fifth>
+<=0	<=0	<=0	<=0	<=0	
+<inf	<=0	<inf	<inf	<inf	
+<inf	<inf	<=0	<inf	<inf	
+<inf	<inf	<inf	<=0	<inf	
+<inf	<inf	<inf	<inf	<=0	
+
+First Location: <fourth>
+Second Location: <fourth>
+<=0	<=0	<=0	<=0	<=0	
+<inf	<=0	<inf	<inf	<inf	
+<inf	<inf	<=0	<inf	<=0	
+<inf	<inf	<inf	<=0	<inf	
+<inf	<inf	<=0	<inf	<=0	
+
+First Location: <second>
+Second Location: <second>
+<=0	<=0	<=0	<=0	<=0	
+<inf	<=0	<inf	<inf	<inf	
+<inf	<inf	<=0	<inf	<=0	
+<inf	<inf	<inf	<=0	<inf	
+<inf	<inf	<=0	<inf	<=0	
+
+First Location: <final>
+Second Location: <final>
+<=0	<=0	<=0	<=0	<=0	
+<=1	<=0	<=1	<=0	<=1	
+<inf	<inf	<=0	<inf	<inf	
+<=1	<=0	<=1	<=0	<=1	
+<inf	<inf	<inf	<inf	<=0	
+
+First Location: <third>
+Second Location: <third>
+<=0	<=0	<=0	<=0	<=0	
+<inf	<=0	<inf	<inf	<inf	
+<inf	<inf	<=0	<inf	<=0	
+<inf	<inf	<inf	<=0	<inf	
+<inf	<inf	<=0	<inf	<=0	
+
+First Location: <init>
+Second Location: <init>
+<=0	<=0	<=0	<=0	<=0	
+<5	<=0	<=0	<=0	<=0	
+<5	<=0	<=0	<=0	<=0	
+<5	<=0	<=0	<=0	<=0	
+<5	<=0	<=0	<=0	<=0	
+
+MEMORY_MAX_RSS  xxxx
+RELATIONSHIP_FULFILLED true
+RUNNING_TIME_SECONDS  xxxx
+VISITED_PAIR_OF_STATES 6

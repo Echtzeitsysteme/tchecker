@@ -56,6 +56,8 @@ class node_t {
   node_t& operator=(const node_t&) = delete;
   node_t& operator=(node_t&) = delete;
 
+  virtual ~node_t() = default;
+
   /*!
    \brief Accessor
    \return shared pointer to the pair of locations

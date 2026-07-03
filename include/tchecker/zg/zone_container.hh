@@ -14,6 +14,12 @@
 
 #include "tchecker/dbm/dbm.hh"
 
+#if defined(__clang__)
+// ignore the dynamically allocated arrays warning of clang
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wvla-cxx-extension"
+#endif
+
 namespace tchecker {
 
 /*
@@ -53,6 +59,30 @@ public:
    \brief Accessor
    */
   tchecker::clock_id_t dim() const {return this->_dim;}
+
+  /*!
+   \brief Smaller Operator
+   \param other : the other zone container
+   \return true if and only if this->dim() == other.dim() and for any contained zone a of this exists a zone b in other such that a < b
+   */
+  bool operator<=(const zone_container_t& other) {
+    if(this->dim() != other.dim()) {
+      return false;
+    }
+    for(auto to_check : *_storage) {
+      bool found = false;
+      for(auto larger : *other._storage) {
+        if(tchecker::dbm::is_le(to_check->dbm(), larger->dbm(), _dim)) {
+          found = true;
+          break;
+        }
+      }
+      if(!found) {
+        return false;
+      }
+    }
+    return true;
+  }
 
   /*!
    \brief factory functions to be used by the append functions
@@ -132,8 +162,7 @@ public:
    */
   void remove_first()
   {
-    destruct_element(*(_storage.begin()));
-    _storage->erase(_storage.begin());
+    _storage->erase(_storage->begin());
   }
 
   /*!
@@ -242,6 +271,7 @@ public:
     assert(this->dim() == zone.dim());
 
     #if defined(SUBSETS_WITH_NEG_AND) // works only for T = virtual_constraint_t
+      static_assert(std::is_same_v<T, tchecker::virtual_constraint::virtual_constraint_t>, "Please contact the developer");
       auto remaining_zone = std::make_shared<zone_container_t<T>>(zone);
 
       for(auto current_zone = _storage->begin(); current_zone < _storage->end(); ++current_zone) {
@@ -302,7 +332,7 @@ public:
   */
   std::size_t hash() const
   {
-    size_t h = _dim;
+    std::size_t h = _dim;
     for (auto cur : *_storage) {
       boost::hash_combine(h, cur->hash());
     }
@@ -379,97 +409,10 @@ std::shared_ptr<zone_container_t<T>> logical_and_container(std::vector<std::shar
   return result;
 }
 
-/*
- \brief a matrix of container for all subtypes of zone
- */
-template <typename T>
-class zone_matrix_t {
-
-public:
-
-  
-  /*!
-   \brief Constructor
-   \param no_of_rows : number of rows in matrix
-   \param no_of_columns : number of columns in matrix
-   \param dim : the dimension of the zones
-   */
-  zone_matrix_t(size_t no_of_rows, size_t no_of_columns, tchecker::clock_id_t dim) :
-    _dim(dim), _no_of_rows(no_of_rows), _no_of_columns(no_of_columns), _matrix(std::vector<std::shared_ptr<zone_container_t<T>>>(no_of_rows * no_of_columns)) {
-
-    for(std::size_t i = 0; i < no_of_rows*no_of_columns; ++i) {
-      _matrix[i] = std::make_shared<zone_container_t<T>>(dim);
-    }
-  };
-
-  /*!
-   \brief Getter for matrix element
-   \param row : row of the element
-   \param column : column of the element
-   \return pointer to the element
-  */
-  std::shared_ptr<zone_container_t<T>> get(size_t row, size_t column) {
-    assert(row < _no_of_rows);
-    assert(column < _no_of_columns);
-
-    return _matrix[row*_no_of_columns + column];
-  }
-
-  /*!
-   \brief Accessor for the row size
-   \return the row size
-  */
-  size_t get_no_of_rows() const { return _no_of_rows; }
-
-  /*!
-   \brief Accessor for the column size
-   \return the column size
-  */
-  size_t get_no_of_columns() const { return _no_of_columns; }
-
-  /*!
-   \brief Accessor for the dim
-   \return the dimension of the virtual constraints
-  */
-  tchecker::clock_id_t get_dim() const { return _dim; }
-
-  std::shared_ptr<std::vector<std::shared_ptr<zone_container_t<T>>>>  get_row(size_t row)
-  {
-    auto result = std::make_shared<std::vector<std::shared_ptr<zone_container_t<T>>>>();
-    for(size_t i = 0; i < this->get_no_of_columns(); i++) {
-      result->emplace_back(this->get(row, i));
-    }
-    return result;
-  }
-
-  std::shared_ptr<std::vector<std::shared_ptr<zone_container_t<T>>>> get_column(size_t column)
-  {
-    auto result = std::make_shared<std::vector<std::shared_ptr<zone_container_t<T>>>>();
-    for(size_t i = 0; i < this->get_no_of_rows(); i++) {
-      result->emplace_back(this->get(i, column));
-    }
-    return result;
-  }
-
-  void print_zone_matrix(std::ostream & os)
-  {
-    for(size_t i = 0; i < _no_of_rows; ++i) {
-      auto row = get_row(i);
-      for(size_t j = 0; j < row->size(); ++j) {
-        os << "matrix element [" << i << ", " << j << "]:" << std::endl;
-        (*row)[j]->print_zone_container(os);
-      }
-    }
-  }
-
-  private:
-
-    const tchecker::clock_id_t _dim;
-
-    const size_t _no_of_rows, _no_of_columns;
-    std::vector<std::shared_ptr<zone_container_t<T>>> _matrix;
-
-};
 } // end of namespace tchecker
+
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
 
 #endif
