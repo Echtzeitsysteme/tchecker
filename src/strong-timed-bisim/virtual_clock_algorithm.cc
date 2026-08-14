@@ -151,7 +151,7 @@ void check_for_virt_bisim_preconditions_check(tchecker::zg::const_state_sptr_t s
   for (auto iter = symb_trans->reset_container().begin(); iter < symb_trans->reset_container().end(); iter++) {
 
     if (!iter->reset_to_zero()) {
-      std::cerr << __FILE__ << ": " << __LINE__ << ": the reset " << *iter << " is not a reset to zero" << std::endl;
+      //std::cerr << __FILE__ << ": " << __LINE__ << ": the reset " << *iter << " is not a reset to zero" << std::endl;
       throw std::runtime_error(std::string("Only clock resets to zero are allowed"));
     }
   }

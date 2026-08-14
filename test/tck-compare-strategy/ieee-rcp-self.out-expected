@@ -3,32 +3,24 @@ Clock Ordering
 Non Bisim
 
 Bisim
-First Location: <REC_REQ_IDLE>
-Second Location: <REC_REQ_IDLE>
-<=0	<=0	<=0	<=0	<=0	
-<=42	<=0	<=42	<=0	<=42	
-<=42	<=0	<=0	<=0	<=0	
-<=42	<=0	<=42	<=0	<=42	
-<=42	<=0	<=0	<=0	<=0	
-
-First Location: <REC_REQ>
-Second Location: <REC_REQ>
-<=0	<=0	<=0	<=0	<=0	
-<=84	<=0	<=42	<=0	<=42	
-<=42	<=0	<=0	<=0	<=0	
-<=84	<=0	<=42	<=0	<=42	
-<=42	<=0	<=0	<=0	<=0	
-
-First Location: <REC_IDLE_REC>
-Second Location: <REC_IDLE_REC>
-<=0	<=0	<=0	<=0	<=0	
-<=42	<=0	<=42	<=0	<=42	
-<=42	<=0	<=0	<=0	<=0	
-<=42	<=0	<=42	<=0	<=42	
-<=42	<=0	<=0	<=0	<=0	
-
 First Location: <REC_ACK_REQ>
 Second Location: <REC_ACK_REQ>
+<=0	<=0	<=0	<=0	<=0	
+<=42	<=0	<=42	<=0	<=42	
+<=42	<=0	<=0	<=0	<=0	
+<=42	<=0	<=42	<=0	<=42	
+<=42	<=0	<=0	<=0	<=0	
+
+First Location: <REC_ACK_IDLE>
+Second Location: <REC_ACK_IDLE>
+<=0	<=0	<=0	<=0	<=0	
+<=42	<=0	<=42	<=0	<=42	
+<=42	<=0	<=0	<=0	<=0	
+<=42	<=0	<=42	<=0	<=42	
+<=42	<=0	<=0	<=0	<=0	
+
+First Location: <REC_REQ_IDLE>
+Second Location: <REC_REQ_IDLE>
 <=0	<=0	<=0	<=0	<=0	
 <=42	<=0	<=42	<=0	<=42	
 <=42	<=0	<=0	<=0	<=0	
@@ -43,6 +35,14 @@ Second Location: <REC_REQ_ACK>
 <=42	<=0	<=42	<=0	<=42	
 <=42	<=0	<=0	<=0	<=0	
 
+First Location: <REC_IDLE_REC>
+Second Location: <REC_IDLE_REC>
+<=0	<=0	<=0	<=0	<=0	
+<=42	<=0	<=42	<=0	<=42	
+<=42	<=0	<=0	<=0	<=0	
+<=42	<=0	<=42	<=0	<=42	
+<=42	<=0	<=0	<=0	<=0	
+
 First Location: <REC_IDLE>
 Second Location: <REC_IDLE>
 <=0	<=0	<=0	<=0	<=0	
@@ -51,12 +51,20 @@ Second Location: <REC_IDLE>
 <=84	<=0	<=42	<=0	<=42	
 <=42	<=0	<=0	<=0	<=0	
 
-First Location: <REC_ACK_IDLE>
-Second Location: <REC_ACK_IDLE>
+First Location: <REC_ACK>
+Second Location: <REC_ACK>
 <=0	<=0	<=0	<=0	<=0	
-<=42	<=0	<=42	<=0	<=42	
+<=84	<=0	<=42	<=0	<=42	
 <=42	<=0	<=0	<=0	<=0	
-<=42	<=0	<=42	<=0	<=42	
+<=84	<=0	<=42	<=0	<=42	
+<=42	<=0	<=0	<=0	<=0	
+
+First Location: <REC_REQ>
+Second Location: <REC_REQ>
+<=0	<=0	<=0	<=0	<=0	
+<=84	<=0	<=42	<=0	<=42	
+<=42	<=0	<=0	<=0	<=0	
+<=84	<=0	<=42	<=0	<=42	
 <=42	<=0	<=0	<=0	<=0	
 
 First Location: <EMPTY>
@@ -66,14 +74,6 @@ Second Location: <EMPTY>
 <inf	<=0	<=0	<=0	<=0	
 <inf	<=0	<=42	<=0	<=42	
 <inf	<=0	<=0	<=0	<=0	
-
-First Location: <REC_ACK>
-Second Location: <REC_ACK>
-<=0	<=0	<=0	<=0	<=0	
-<=84	<=0	<=42	<=0	<=42	
-<=42	<=0	<=0	<=0	<=0	
-<=84	<=0	<=42	<=0	<=42	
-<=42	<=0	<=0	<=0	<=0	
 
 First Location: <REC_IDLE_ACK>
 Second Location: <REC_IDLE_ACK>

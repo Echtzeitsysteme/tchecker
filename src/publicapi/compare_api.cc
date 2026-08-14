@@ -8,11 +8,10 @@
 #include "tchecker/publicapi/compare_api.hh"
 
 #include <fstream>
+#include <filesystem>
 #include <sstream>
 #include <iostream>
-#include <filesystem>
 #include <string>
-#include <random>
 
 
 #include "tchecker/strong-timed-bisim/stats.hh"
@@ -25,14 +24,11 @@
 
 #include "tchecker/publicapi/json_parser.hh"
 #include "tchecker/publicapi/reach_api.hh"
-
 #include "tchecker/compare-tools/synchronize.hh"
-
 #include "tchecker/strong-timed-bisim/strategy.hh"
-
 #include "tchecker/ta/system.hh"
-
 #include "tchecker/algorithms/search_order.hh"
+#include "tchecker/utils/tmp_file.hh"
 
 void tck_compare(const char * output_filename, 
   const char * first_sysdecl_filename, 
@@ -102,22 +98,6 @@ void strong_timed_bisim(std::ostream & os, std::shared_ptr<tchecker::parsing::sy
     std::cout << key << " " << value << std::endl;
 }
 
-std::string create_temp_filename()
-{
-  auto tempDir = std::filesystem::temp_directory_path();
-
-  std::random_device rd;
-  std::mt19937 gen(rd());
-  std::uniform_int_distribution<> dist(0, 999999);
-
-  std::filesystem::path tempFile;
-  do {
-    tempFile = tempDir / ("tck_reach_certificate_" + std::to_string(dist(gen)));
-  } while (std::filesystem::exists(tempFile));
-
-  return tempFile.string();
-}
-
 void tck_compare(std::string output_filename, std::string first_sysdecl_filename, std::string second_sysdecl_filename,
                  tck_compare_relationship_t relationship, std::size_t block_size, std::size_t table_size,
                  std::string & first_starting_state_json, std::string & second_starting_state_json, 
@@ -154,6 +134,8 @@ void tck_compare(std::string output_filename, std::string first_sysdecl_filename
     std::map<std::string, std::string> first_starting_state_attributes, second_starting_state_attributes;
     std::vector<std::shared_ptr<tchecker::strong_timed_bisim::strategy::state_to_check_t>> reachable_states;
 
+    std::string first_filename_replace = first_sysdecl_filename;
+    std::string second_filename_replace = second_sysdecl_filename;
 
 #if USE_BOOST_JSON
     if (!first_starting_state_json.empty()) {
@@ -167,7 +149,10 @@ void tck_compare(std::string output_filename, std::string first_sysdecl_filename
 
       // Synchronize the systems
       std::string synced_sysdecl_filename = create_temp_filename() + std::string(".tck");
-      tchecker::compare_tools::syncer_t(first_sysdecl_filename, second_sysdecl_filename, synced_sysdecl_filename);
+      first_filename_replace = create_temp_filename() + std::string(".tck");
+      second_filename_replace = create_temp_filename() + std::string(".tck");
+      tchecker::compare_tools::syncer_t(first_sysdecl_filename, second_sysdecl_filename, 
+                                        first_filename_replace, second_filename_replace, synced_sysdecl_filename);
       std::shared_ptr<tchecker::parsing::system_declaration_t> sysdecl
         = tchecker::parsing::parse_system_declaration(synced_sysdecl_filename);
 
@@ -212,14 +197,14 @@ void tck_compare(std::string output_filename, std::string first_sysdecl_filename
 #endif
 
     std::shared_ptr<tchecker::parsing::system_declaration_t> first_sysdecl{nullptr};
-    first_sysdecl = tchecker::parsing::parse_system_declaration(first_sysdecl_filename);
+    first_sysdecl = tchecker::parsing::parse_system_declaration(first_filename_replace);
     if (first_sysdecl == nullptr) {
       throw std::runtime_error("nullptr first system declaration");
     }
     std::shared_ptr<tchecker::system::system_t> first_system = std::make_shared<tchecker::system::system_t>(*first_sysdecl);
 
     std::shared_ptr<tchecker::parsing::system_declaration_t> second_sysdecl{nullptr};
-    second_sysdecl = tchecker::parsing::parse_system_declaration(second_sysdecl_filename);
+    second_sysdecl = tchecker::parsing::parse_system_declaration(second_filename_replace);
     if (second_sysdecl == nullptr) {
       throw std::runtime_error("nullptr system declaration");
     }
@@ -234,6 +219,11 @@ void tck_compare(std::string output_filename, std::string first_sysdecl_filename
       std::cerr << tchecker::log_error << "Unknown relationship" << std::endl;
     }
     
+    if(first_filename_replace != first_sysdecl_filename) {
+      std::filesystem::remove(first_filename_replace);
+      std::filesystem::remove(second_filename_replace);
+    }
+
   }
   catch (std::runtime_error & e) {
     std::cerr << tchecker::log_error << e.what() << std::endl;

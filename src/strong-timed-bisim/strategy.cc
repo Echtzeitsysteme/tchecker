@@ -301,6 +301,16 @@ strategy_t::find_non_contained(std::shared_ptr<tchecker::virtual_constraint::vir
                                tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t> & container, 
                                std::size_t idx)
 {
+  // std::cout << __FILE__ << __LINE__ << ": call find_non_contained with index " << idx << std::endl;
+  // tchecker::dbm::output_matrix(std::cout, to_be_contained->dbm(), to_be_contained->dim());
+  // std::cout << __FILE__ << __LINE__ << ": Container:" << std::endl;
+  // if(0 == idx) {
+  //   for(std::size_t i = 0; i < container.size(); ++i) {
+  //     std::cout << __FILE__ << __LINE__ << ": " << i << std::endl;
+  //     tchecker::dbm::output_matrix(std::cout, container[i]->dbm(), container[i]->dim());
+  //   }
+  // }
+
   if(tchecker::dbm::is_empty_0(to_be_contained->dbm(), to_be_contained->dim())) {
       return nullptr;
   }

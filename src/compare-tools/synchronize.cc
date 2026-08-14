@@ -7,11 +7,15 @@
 
 #include "tchecker/compare-tools/synchronize.hh"
 
+#include <filesystem>
 #include <fstream>
 #include <sstream>
 #include <string>
 #include <regex>
 #include <stdexcept>
+
+#include "tchecker/publicapi/syntax_api.hh"
+#include "tchecker/utils/tmp_file.hh"
 
 // \b means that this is the beginning of the word. Therefore, we do not consider "thisprocess", or any analog stupid name.
 // Then we have a second term, which is the name of the process and wich can consist of capitals, small letters, numbers, and underscore. 
@@ -36,8 +40,10 @@ namespace compare_tools {
 
 syncer_t::syncer_t(const std::string & first_sysdecl_filename,
                    const std::string & second_sysdecl_filename, 
+                   const std::string & first_filename_replace,
+                   const std::string & second_filename_replace,
                    const std::string & file_to_write)
-  : _content(std::make_pair(read_file_content(first_sysdecl_filename), read_file_content(second_sysdecl_filename))),
+  : _content(std::make_pair(read_file_content(flatten_system(first_filename_replace, first_sysdecl_filename)), read_file_content(flatten_system(second_filename_replace, second_sysdecl_filename)))),
     _processes(std::make_pair(find_occurrences_regex(_content.first, PROCESS_REGEX), find_occurrences_regex(_content.second, PROCESS_REGEX))),
     _events(std::make_pair(find_occurrences_regex(_content.first, EVENT_REGEX), find_occurrences_regex(_content.second, EVENT_REGEX))),
     _clocks(std::make_pair(find_occurrences_regex(_content.first, CLOCK_REGEX, 3), find_occurrences_regex(_content.second, CLOCK_REGEX, 3))),
@@ -99,6 +105,13 @@ syncer_t::syncer_t(const std::string & first_sysdecl_filename,
   }
 
   write_file_content();
+}
+
+
+std::string syncer_t::flatten_system(const std::string filename_replace, const std::string & filename)
+{
+  tchecker::publicapi::tck_syntax_create_synchronized_product(filename_replace, filename, "product", "_");
+  return filename_replace;
 }
 
 std::string syncer_t::read_file_content(const std::string & filename) {

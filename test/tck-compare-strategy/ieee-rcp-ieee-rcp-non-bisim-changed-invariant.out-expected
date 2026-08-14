@@ -1,21 +1,23 @@
 Clock Ordering
 0 Process_xr_1 Process_yr_1 Process_xr_2 Process_yr_2 
 Non Bisim
-First Location: <REC_REQ>
-Second Location: <REC_REQ>
-<=0	<-42	<0	<-42	<0	
-<=84	<=0	<=42	<=0	<=42	
-<=42	<0	<=0	<0	<=0	
-<=84	<=0	<=42	<=0	<=42	
-<=42	<0	<=0	<0	<=0	
-Steps: 1
-
+First Location: <REC_ACK_IDLE>
+Second Location: <REC_ACK_IDLE>
 <=0	<=0	<=0	<=0	<=0	
-<=84	<=0	<=42	<=0	<=42	
+<=42	<=0	<=42	<=0	<=42	
 <=42	<=0	<=0	<=0	<=0	
-<=84	<=0	<=42	<=0	<=42	
+<=42	<=0	<=42	<=0	<=42	
 <=42	<=0	<=0	<=0	<=0	
-Steps: 2
+Steps: 3
+
+First Location: <REC_ACK_REQ>
+Second Location: <REC_ACK_REQ>
+<=0	<=0	<=0	<=0	<=0	
+<=42	<=0	<=42	<=0	<=42	
+<=42	<=0	<=0	<=0	<=0	
+<=42	<=0	<=42	<=0	<=42	
+<=42	<=0	<=0	<=0	<=0	
+Steps: 3
 
 First Location: <REC_IDLE_REC>
 Second Location: <REC_IDLE_REC>
@@ -35,8 +37,8 @@ Second Location: <REC_REQ_IDLE>
 <=42	<=0	<=0	<=0	<=0	
 Steps: 3
 
-First Location: <REC_ACK_REQ>
-Second Location: <REC_ACK_REQ>
+First Location: <REC_REQ_ACK>
+Second Location: <REC_REQ_ACK>
 <=0	<=0	<=0	<=0	<=0	
 <=42	<=0	<=42	<=0	<=42	
 <=42	<=0	<=0	<=0	<=0	
@@ -60,33 +62,6 @@ Steps: 1
 <=42	<=0	<=0	<=0	<=0	
 Steps: 2
 
-First Location: <REC_REQ_ACK>
-Second Location: <REC_REQ_ACK>
-<=0	<=0	<=0	<=0	<=0	
-<=42	<=0	<=42	<=0	<=42	
-<=42	<=0	<=0	<=0	<=0	
-<=42	<=0	<=42	<=0	<=42	
-<=42	<=0	<=0	<=0	<=0	
-Steps: 3
-
-First Location: <REC_ACK_IDLE>
-Second Location: <REC_ACK_IDLE>
-<=0	<=0	<=0	<=0	<=0	
-<=42	<=0	<=42	<=0	<=42	
-<=42	<=0	<=0	<=0	<=0	
-<=42	<=0	<=42	<=0	<=42	
-<=42	<=0	<=0	<=0	<=0	
-Steps: 3
-
-First Location: <EMPTY>
-Second Location: <EMPTY>
-<=0	<=0	<=0	<=0	<=0	
-<inf	<=0	<=42	<=0	<=42	
-<inf	<=0	<=0	<=0	<=0	
-<inf	<=0	<=42	<=0	<=42	
-<inf	<=0	<=0	<=0	<=0	
-Steps: 1
-
 First Location: <REC_ACK>
 Second Location: <REC_ACK>
 <=0	<=0	<=0	<=0	<=0	
@@ -101,6 +76,31 @@ Steps: 2
 <=42	<0	<=0	<0	<=0	
 <=84	<=0	<=42	<=0	<=42	
 <=42	<0	<=0	<0	<=0	
+Steps: 1
+
+First Location: <REC_REQ>
+Second Location: <REC_REQ>
+<=0	<-42	<0	<-42	<0	
+<=84	<=0	<=42	<=0	<=42	
+<=42	<0	<=0	<0	<=0	
+<=84	<=0	<=42	<=0	<=42	
+<=42	<0	<=0	<0	<=0	
+Steps: 1
+
+<=0	<=0	<=0	<=0	<=0	
+<=84	<=0	<=42	<=0	<=42	
+<=42	<=0	<=0	<=0	<=0	
+<=84	<=0	<=42	<=0	<=42	
+<=42	<=0	<=0	<=0	<=0	
+Steps: 2
+
+First Location: <EMPTY>
+Second Location: <EMPTY>
+<=0	<=0	<=0	<=0	<=0	
+<inf	<=0	<=42	<=0	<=42	
+<inf	<=0	<=0	<=0	<=0	
+<inf	<=0	<=42	<=0	<=42	
+<inf	<=0	<=0	<=0	<=0	
 Steps: 1
 
 First Location: <REC_IDLE_ACK>

@@ -10,7 +10,7 @@
 #include <fstream>
 
 #include "tchecker/compare-tools/synchronize.hh"
-
+#include "tchecker/utils/tmp_file.hh"
 
 class Needed_Tmp_Files {
  public:
@@ -121,43 +121,42 @@ edge:P:C:A:c{provided: x>3 : do: x=0} \n\
 
   Needed_Tmp_Files tmps{first_TA, second_TA};
 
-  tchecker::compare_tools::syncer_t(tmps.get_first(), tmps.get_second(), tmps.get_result());
+  std::string replace_1 = tchecker::create_temp_filename() + ".tck";
+  std::string replace_2 = tchecker::create_temp_filename() + ".tck";
+
+  tchecker::compare_tools::syncer_t(tmps.get_first(), tmps.get_second(), replace_1, replace_2, tmps.get_result());
 
   std::string expected_result = "system:synchronized\n\
 \n\
-clock:1:x_1 \n\
-int:5:-128:127:-1:j_1 \n\
-event:a_1 \n\
-event:b_1 \n\
-event:c_1 \n\
+event:P_a_1\n\
+event:P_b_1\n\
+event:P_c_1\n\
+int:5:-128:127:-1:j_1\n\
+clock:1:x_1\n\
+process:product_1\n\
+location:product_1:A{initial:}\n\
+location:product_1:B{do:j_1=j_1+1 : invariant:x_1<2}\n\
+location:product_1:C\n\
+edge:product_1:A:B:P_a_1{provided:x_1<=0 && j_1 < 125}\n\
+edge:product_1:B:C:P_b_1\n\
+edge:product_1:C:A:P_c_1{do:x_1=0 : provided:x_1>3}\n\
 \n\
-process:P_1 \n\
-location:P_1:A{initial:} \n\
-location:P_1:B{invariant: x_1<2 : do: j_1=j_1+1} \n\
-location:P_1:C{} \n\
-edge:P_1:A:B:a_1{provided: x_1<=0 && j_1 < 125} \n\
-edge:P_1:B:C:b_1{} \n\
-edge:P_1:C:A:c_1{provided: x_1>3 : do: x_1=0} \n\
+event:P_a_2\n\
+event:P_b_2\n\
+event:P_c_2\n\
+int:5:-128:127:-1:j_2\n\
+clock:1:x_2\n\
+process:product_2\n\
+location:product_2:A{initial:}\n\
+location:product_2:B{do:j_2=j_2+1 : invariant:x_2<2}\n\
+location:product_2:C\n\
+edge:product_2:A:B:P_a_2{provided:x_2<=0 && j_2 < 125}\n\
+edge:product_2:B:C:P_b_2\n\
+edge:product_2:C:A:P_c_2{do:x_2=0 : provided:x_2>3}\n\
 \n\
-\n\
-clock:1:x_2 \n\
-int:5:-128:127:-1:j_2 \n\
-event:a_2 \n\
-event:b_2 \n\
-event:c_2 \n\
-\n\
-process:P_2 \n\
-location:P_2:A{initial:} \n\
-location:P_2:B{invariant: x_2<2 : do: j_2=j_2+1} \n\
-location:P_2:C{} \n\
-edge:P_2:A:B:a_2{provided: x_2<=0 && j_2 < 125} \n\
-edge:P_2:B:C:b_2{} \n\
-edge:P_2:C:A:c_2{provided: x_2>3 : do: x_2=0} \n\
-\n\
-\n\
-sync:P_1@a_1:P_2@a_2\n\
-sync:P_1@b_1:P_2@b_2\n\
-sync:P_1@c_1:P_2@c_2\n\
+sync:product_1@P_a_1:product_2@P_a_2\n\
+sync:product_1@P_b_1:product_2@P_b_2\n\
+sync:product_1@P_c_1:product_2@P_c_2\n\
 \n\
 ";
 
@@ -222,81 +221,81 @@ sync:P@b:P21@b \n\
 
   Needed_Tmp_Files tmps{first_TA, second_TA};
 
-  tchecker::compare_tools::syncer_t(tmps.get_first(), tmps.get_second(), tmps.get_result());
+  std::string replace_1 = tchecker::create_temp_filename() + ".tck";
+  std::string replace_2 = tchecker::create_temp_filename() + ".tck";
+  tchecker::compare_tools::syncer_t(tmps.get_first(), tmps.get_second(), replace_1, replace_2, tmps.get_result());
 
   std::string expected_result = "system:synchronized\n\
 \n\
-clock:1:x_1 \n\
-clock:1:y_1 \n\
-int:5:-128:127:-1:j_1 \n\
-event:a_1 \n\
-event:b_1 \n\
-event:c_1 \n\
+event:P_a_P42_c_1\n\
+event:P_b_1\n\
+event:P_c_1\n\
+int:5:-128:127:-1:j_1\n\
+clock:1:x_1\n\
+clock:1:y_1\n\
+process:product_1\n\
+location:product_1:A_jd{initial:}\n\
+location:product_1:B_jd{do:j_1=j_1+1 : invariant:x_1<2}\n\
+location:product_1:C_jd\n\
+edge:product_1:A_jd:B_jd:P_a_P42_c_1{do:y_1=0 : provided:x_1<=0 && j_1 < 125 : provided:y_1 > 3}\n\
+edge:product_1:B_jd:C_jd:P_b_1\n\
+edge:product_1:C_jd:A_jd:P_c_1{do:x_1=0 : provided:x_1>3}\n\
 \n\
-process:P_1 \n\
-location:P_1:A{initial:} \n\
-location:P_1:B{invariant: x_1<2 : do: j_1=j_1+1} \n\
-location:P_1:C{} \n\
-edge:P_1:A:B:a_1{provided: x_1<=0 && j_1 < 125} \n\
-edge:P_1:B:C:b_1{} \n\
-edge:P_1:C:A:c_1{provided: x_1>3 : do: x_1=0} \n\
+event:P_a_P42_c_2\n\
+event:P_b_P21_b_2\n\
+event:P_c_2\n\
+int:5:-128:127:-1:j_2\n\
+clock:1:x_2\n\
+clock:1:y_2\n\
+process:product_2\n\
+location:product_2:A_jd_blub{initial:}\n\
+location:product_2:B_jd_blub{do:j_2=j_2+1 : invariant:x_2<2}\n\
+location:product_2:C_jd_blublub\n\
+location:product_2:A_jd_blublub\n\
+location:product_2:B_jd_blublub{do:j_2=j_2+1 : invariant:x_2<2}\n\
+edge:product_2:A_jd_blub:B_jd_blub:P_a_P42_c_2{do:y_2=0 : provided:x_2<=0 && j_2 < 125 : provided:y_2 > 3}\n\
+edge:product_2:B_jd_blub:C_jd_blublub:P_b_P21_b_2\n\
+edge:product_2:C_jd_blublub:A_jd_blublub:P_c_2{do:x_2=0 : provided:x_2>3}\n\
+edge:product_2:A_jd_blublub:B_jd_blublub:P_a_P42_c_2{do:y_2=0 : provided:x_2<=0 && j_2 < 125 : provided:y_2 > 3}\n\
 \n\
-process:P42_1 \n\
-location:P42_1:jd{initial:} \n\
-edge:P42_1:jd:jd:c_1{provided: y_1 > 3 : do: y_1=0} \n\
-\n\
-sync:P_1@a_1:P42_1@c_1 \n\
-\n\
-\n\
-clock:1:x_2 \n\
-clock:1:y_2 \n\
-int:5:-128:127:-1:j_2 \n\
-event:a_2 \n\
-event:b_2 \n\
-event:c_2 \n\
-\n\
-process:P_2 \n\
-location:P_2:A{initial:} \n\
-location:P_2:B{invariant: x_2<2 : do: j_2=j_2+1} \n\
-location:P_2:C{} \n\
-edge:P_2:A:B:a_2{provided: x_2<=0 && j_2 < 125} \n\
-edge:P_2:B:C:b_2{} \n\
-edge:P_2:C:A:c_2{provided: x_2>3 : do: x_2=0} \n\
-\n\
-process:P42_2 \n\
-location:P42_2:jd{initial:} \n\
-edge:P42_2:jd:jd:c_2{provided: y_2 > 3 : do: y_2=0} \n\
-\n\
-process:P21_2 \n\
-location:P21_2:blub{initial:} \n\
-location:P21_2:blublub{} \n\
-edge:P21_2:blub:blublub:b_2{} \n\
-\n\
-sync:P_2@a_2:P42_2@c_2 \n\
-sync:P_2@b_2:P21_2@b_2 \n\
-\n\
-\n\
-sync:P_1@a_1:P_2@a_2\n\
-sync:P_1@a_1:P42_2@a_2\n\
-sync:P_1@a_1:P21_2@a_2\n\
-sync:P42_1@a_1:P_2@a_2\n\
-sync:P42_1@a_1:P42_2@a_2\n\
-sync:P42_1@a_1:P21_2@a_2\n\
-sync:P_1@b_1:P_2@b_2\n\
-sync:P_1@b_1:P42_2@b_2\n\
-sync:P_1@b_1:P21_2@b_2\n\
-sync:P42_1@b_1:P_2@b_2\n\
-sync:P42_1@b_1:P42_2@b_2\n\
-sync:P42_1@b_1:P21_2@b_2\n\
-sync:P_1@c_1:P_2@c_2\n\
-sync:P_1@c_1:P42_2@c_2\n\
-sync:P_1@c_1:P21_2@c_2\n\
-sync:P42_1@c_1:P_2@c_2\n\
-sync:P42_1@c_1:P42_2@c_2\n\
-sync:P42_1@c_1:P21_2@c_2\n\
+sync:product_1@P_a_P42_c_1:product_2@P_a_P42_c_2\n\
+sync:product_1@P_c_1:product_2@P_c_2\n\
 \n\
 ";
 
+  if(tmps.get_result_content() != expected_result) {
+    std::size_t i = 0;
+    while (i < tmps.get_result_content().size() && i < expected_result.size() &&  tmps.get_result_content()[i] == expected_result[i]) {
+      ++i;
+    }
+
+    std::cerr << "First difference at position " << i << '\n';
+
+    auto print_context = [](const std::string& s, std::size_t pos) {
+        std::size_t begin = pos > 20 ? pos - 20 : 0;
+        std::size_t end = std::min(pos + 20, s.size());
+
+        for (std::size_t j = begin; j < end; ++j) {
+          unsigned char c = s[j];
+
+          if (c == '\n')
+            std::cerr << "\\n";
+          else if (c == '\r')
+            std::cerr << "\\r";
+          else if (c == '\t')
+            std::cerr << "\\t";
+          else
+            std::cerr << c;
+          }
+          std::cerr << '\n';
+      };
+
+      std::cerr << "expected: ";
+      print_context(expected_result, i);
+
+      std::cerr << "actual:   ";
+      print_context(tmps.get_result_content(), i);
+    }
   REQUIRE(tmps.get_result_content() == expected_result);
   tmps.destroy_tmp_files();
 }
