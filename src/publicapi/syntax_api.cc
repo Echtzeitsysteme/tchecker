@@ -64,17 +64,35 @@ namespace tchecker {
 
 namespace publicapi {
 
-std::ostream & create_output_stream(std::string output_filename)
-{
-  std::ostream * os = nullptr;
-  if (output_filename != "") { // strcmp returns 0 (which is interpreted as false) if output_filename is "". 
-    os = new std::ofstream(output_filename, std::ios::out);
+class stream_wrapper {
+ public:
+  explicit stream_wrapper(std::string output_filename) {
+    if("" != output_filename) {
+      _os = new std::ofstream(output_filename, std::ios::out);
+      _created = true;
+    }
   }
-  else
-    os = &std::cout;
+  stream_wrapper(const stream_wrapper&) = delete;
+  stream_wrapper& operator=(const stream_wrapper&) = delete;
+  stream_wrapper(stream_wrapper&&) = delete;
+  stream_wrapper& operator=(stream_wrapper&& other) = delete;
 
-  return *os;
-}
+  ~stream_wrapper() {
+    if(_created) {
+      delete _os;
+    }
+  }
+
+  std::ostream& stream() {
+    return *_os;
+  }
+
+
+ private:
+  bool _created = false;
+  std::ostream * _os = &std::cout;
+};
+
 
 void tck_syntax_check_syntax(std::string output_filename, std::string sysdecl_filename)
 {
@@ -82,10 +100,10 @@ void tck_syntax_check_syntax(std::string output_filename, std::string sysdecl_fi
   try {
     sysdecl = tchecker::parsing::parse_system_declaration(sysdecl_filename);
 
-    std::ostream & os = create_output_stream(output_filename);
+    stream_wrapper os{output_filename};
 
-    if(tchecker::syntax_check::syntax_check_ta(os, *sysdecl)) {
-      os << "Syntax OK" << std::endl;
+    if(tchecker::syntax_check::syntax_check_ta(os.stream(), *sysdecl)) {
+      os.stream() << "Syntax OK" << std::endl;
     }
   }
   catch (std::exception const & e) {
@@ -100,10 +118,10 @@ void tck_syntax_to_dot(std::string output_filename, std::string sysdecl_filename
     sysdecl = tchecker::parsing::parse_system_declaration(sysdecl_filename);
     std::shared_ptr<tchecker::system::system_t> system(new tchecker::system::system_t(*sysdecl));
 
-    std::ostream & os = create_output_stream(output_filename);
+    stream_wrapper os{output_filename};
 
-    tchecker::system::output_dot(os, *system, delimiter, tchecker::system::GRAPHVIZ_FULL);
-    os << std::endl;
+    tchecker::system::output_dot(os.stream(), *system, delimiter, tchecker::system::GRAPHVIZ_FULL);
+    os.stream() << std::endl;
   }
   catch (std::exception const & e) {
     std::cerr << e.what() << std::endl;
@@ -117,9 +135,9 @@ void tck_syntax_to_json(std::string output_filename, std::string sysdecl_filenam
     sysdecl = tchecker::parsing::parse_system_declaration(sysdecl_filename);
     std::shared_ptr<tchecker::system::system_t> system(new tchecker::system::system_t(*sysdecl));
 
-    std::ostream & os = create_output_stream(output_filename);
+    stream_wrapper os{output_filename};
 
-    tchecker::system::output_json(os, *system, delimiter);
+    tchecker::system::output_json(os.stream(), *system, delimiter);
   }
   catch (std::exception const & e) {
     std::cerr << e.what() << std::endl;
@@ -133,10 +151,10 @@ void tck_syntax_create_synchronized_product(std::string output_filename, std::st
     sysdecl = tchecker::parsing::parse_system_declaration(sysdecl_filename);
     std::shared_ptr<tchecker::syncprod::system_t> system(new tchecker::syncprod::system_t(*sysdecl));
 
-    std::ostream & os = create_output_stream(output_filename);
+    stream_wrapper os{output_filename};
 
     tchecker::system::system_t product = tchecker::syncprod::synchronized_product(system, new_name, delimiter);
-    tchecker::system::output_tck(os, product);
+    tchecker::system::output_tck(os.stream(), product);
   }
   catch (std::exception const & e) {
     std::cerr << e.what() << std::endl;
