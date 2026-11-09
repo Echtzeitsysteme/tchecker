@@ -52,6 +52,7 @@ sync_vc_t::revert_sync_with_urgent(tchecker::zg::const_state_sptr_t & A_state, t
                                  const std::shared_ptr<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>> & contradiction)
 {
   assert(A_state->zone().is_virtual_equivalent(B_state->zone(), _A->get_no_of_virtual_clocks()));
+  assert(nullptr != contradiction);
   assert(std::all_of(contradiction->begin(), contradiction->end(), 
               [](const auto& vc) {
                 return tchecker::dbm::is_consistent(vc->dbm(), vc->dim()) && tchecker::dbm::is_tight(vc->dbm(), vc->dim());

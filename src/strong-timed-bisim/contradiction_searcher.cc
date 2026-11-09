@@ -120,8 +120,13 @@ contradiction_searcher_t::contradiction_still_possible(tchecker::zg::zone_t cons
         std::shared_ptr<tchecker::strong_timed_bisim::contradiction_t> to_add = found_cont.get(i, j);
         new_cont.add_contradiction(i, j, *to_add);
       } else {
-        contradiction_t empty_cont{no_of_virt_clks};
-        new_cont.add_contradiction(i, j, empty_cont);
+        // the pair has not been checked completely, so it might match nothing at all
+        auto targets = std::make_shared<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(
+            no_of_virt_clks + 1);
+        targets->append_zone(*tchecker::virtual_constraint::factory(std::get<1>((*trans_A)[i])->zone(), no_of_virt_clks));
+        targets->append_zone(*tchecker::virtual_constraint::factory(std::get<1>((*trans_B)[j])->zone(), no_of_virt_clks));
+        contradiction_t no_match{targets, 0};
+        new_cont.add_contradiction(i, j, no_match);
       }
     }
   }

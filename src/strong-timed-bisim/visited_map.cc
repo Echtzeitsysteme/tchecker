@@ -5,6 +5,8 @@
  *
  */
 
+#include <algorithm>
+
 #include "tchecker/strong-timed-bisim/visited_map.hh"
 #include "tchecker/vcg/sync.hh"
 
@@ -22,7 +24,14 @@ visited_map_t::visited_map_t(visited_map_t & t, std::shared_ptr<tchecker::vcg::v
                              std::shared_ptr<tchecker::vcg::vcg_t> B)
     : _no_of_virtual_clocks(t.no_of_virtual_clocks()), _storage(std::make_shared<visited_map_storage_t>()), _A(A), _B(B)
 {
-  emplace(t);
+  for (auto & [key, value] : t) {
+    if (value == nullptr || value->is_empty())
+      continue;
+    auto copy = std::make_shared<tchecker::zone_container_t<tchecker::virtual_constraint::virtual_constraint_t>>(value->dim());
+    for (auto & zone : *value)
+      copy->append_zone(*zone);
+    _storage->emplace(key, copy);
+  }
 }
 
 tchecker::clock_id_t visited_map_t::no_of_virtual_clocks() const { return this->_no_of_virtual_clocks; }
@@ -52,6 +61,12 @@ void visited_map_t::emplace(visited_map_t & other)
 {
   for (auto & [key, value] : other) {
     for (auto & cur : *value) {
+      auto it = _storage->find(key);
+      // skip already contained zones
+      if (it != _storage->end() && it->second != nullptr &&
+          std::any_of(it->second->begin(), it->second->end(),
+                      [&cur](std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> const & p) { return *p == *cur; }))
+        continue;
       emplace(key, cur);
     }
   }
@@ -76,11 +91,12 @@ void visited_map_t::emplace(const visited_map_key_t key,
       (*_storage)[key]->append_zone(*vc);
     }
 #else
+      std::size_t const compressed_size = (*_storage)[key]->size();
       (*_storage)[key]->append_zone(*vc);
 #endif
 
 #if defined(SUBSETS_WITH_NEG_AND) || defined(SUBSETS_WITH_INTERSECTIONS) || defined(SUBSETS_WITH_COMPRESS) // in zone_container.hh
-    (*_storage)[key]->compress();
+    (*_storage)[key]->compress_after_append(compressed_size);
 #endif
   }
 }

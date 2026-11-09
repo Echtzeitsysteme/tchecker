@@ -232,27 +232,33 @@ public:
    \note see chapter 7.6 of Rokicki "Representing and modeling digital circuits" (PhD thesis)
    */
 
-  void compress()
+  void compress() { compress_after_append(0); }
+
+  /*!
+   \brief compresses the zone container, whose zones at positions [0, first_new) are the result of a previous compress()
+   \param first_new : position of the first zone that has been appended since the last compress()
+   \note same result as compress(), but zones that were already compressed are not checked against each other again (they
+   cannot be merged). Appending a zone to a compressed container and compressing it thus costs linear instead of quadratic
+   many checks.
+   */
+  void compress_after_append(std::size_t first_new)
   {
+    std::vector<compress_entry_t> zones;
+    for (std::size_t k = 0; k < _storage->size(); ++k) {
+      if (!(*_storage)[k]->is_empty()) {
+        zones.push_back({(*_storage)[k], k >= first_new});
+      }
+    }
 
-    this->remove_empty();
-
-    std::shared_ptr<std::vector<std::shared_ptr<T>>> result = _storage;
-
-    bool reduced;
-
+    std::size_t prev;
     do {
-      auto prev = result->size();
-      result = find_union_partner(*result);
-      reduced = (result->size() < prev);
-    } while (reduced);
+      prev = zones.size();
+      zones = find_union_partner(zones);
+    } while (zones.size() < prev); // repeat as long as zones have been merged
 
-    this->remove_empty();
-
-    assert(result->size() <= _storage->size());
-
-    _storage = result;
-
+    _storage = std::make_shared<std::vector<std::shared_ptr<T>>>();
+    for (auto const & entry : zones)
+      _storage->push_back(entry.zone);
   }
 
   void print_zone_container(std::ostream & os)
@@ -302,8 +308,11 @@ public:
       intersections->compress();
 
       // since all elements of intersections are subsets of zone, we know that if zone is an element of intersections, it must be the only (and therefore first) element of intersections after compression
-      if(intersections->size() == 1) 
-        return(zone == **intersections->begin());
+      for(auto cur : *intersections) {
+        if(zone <= *cur) {
+          return true;
+        }
+      }
     
       return false;
 
@@ -341,23 +350,40 @@ public:
 
 private:
 
-  std::shared_ptr<std::vector<std::shared_ptr<T>>> find_union_partner(std::vector<std::shared_ptr<T>> const cur)
-  {
-    std::shared_ptr<std::vector<std::shared_ptr<T>>> result = std::make_shared<std::vector<std::shared_ptr<T>>>();
+  /*!
+   \brief a zone of the container, as used by compress()
+   */
+  struct compress_entry_t {
+    std::shared_ptr<T> zone;
+    bool changed = true;
+  };
 
-    for(auto to_add = cur.begin(); to_add < cur.end(); ++to_add) {
+  /*!
+   \brief merges each zone into the first zone before it whose union with it is convex
+   \note two unchanged zones are not checked, as they cannot be merged
+   */
+  std::vector<compress_entry_t> find_union_partner(std::vector<compress_entry_t> const & cur)
+  {
+    std::vector<compress_entry_t> result;
+
+    for (auto const & to_add : cur) {
       bool found = false;
-      for(auto in_result = result->begin(); in_result < result->end(); ++in_result) {
+      for (auto & in_result : result) {
+        if (!to_add.changed && !in_result.changed) {
+          continue;
+        }
         tchecker::dbm::db_t cur_union[this->dim() * this->dim()];
-        if(tchecker::dbm::union_convex_t::UNION_IS_CONVEX == tchecker::dbm::convex_union(cur_union, (*to_add)->dbm(), (*in_result)->dbm(), this->dim())) {
+        if (tchecker::dbm::union_convex_t::UNION_IS_CONVEX ==
+            tchecker::dbm::convex_union(cur_union, to_add.zone->dbm(), in_result.zone->dbm(), this->dim())) {
           found = true;
-          tchecker::dbm::copy((*in_result)->dbm(), cur_union, this->dim());
+          tchecker::dbm::copy(in_result.zone->dbm(), cur_union, this->dim());
+          in_result.changed = true;
           break;
         }
       }
 
-      if(!found) {
-        result->emplace_back(*to_add);
+      if (!found) {
+        result.push_back(to_add);
       }
     }
 

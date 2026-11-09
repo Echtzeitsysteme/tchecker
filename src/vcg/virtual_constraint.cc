@@ -14,74 +14,48 @@ namespace virtual_constraint {
 
 tchecker::clock_id_t virtual_constraint_t::get_no_of_virtual_clocks() const { return this->dim() - 1; }
 
-// WARNING: The vitrual constraints placed at result are NOT tight!
-void add_neg_single(tchecker::zone_container_t<virtual_constraint_t> * result, const virtual_constraint_t & cur,
-                    tchecker::clock_id_t i, tchecker::clock_id_t j, tchecker::dbm::db_t * max_value)
+static bool constrain_db(tchecker::dbm::db_t * dbm, tchecker::clock_id_t dim, tchecker::clock_id_t x, tchecker::clock_id_t y,
+                         tchecker::dbm::db_t db)
 {
-
-  // the first line is a special case since the value of 0 - c cannot become larger than zero.
-  tchecker::dbm::db_t upper_bound = ((0 == i) && (tchecker::dbm::LE_ZERO < *max_value)) ? tchecker::dbm::LE_ZERO : *max_value;
-
-  // if the upper constraint is larger than the upper bound, the inverse is empty anyway.
-  if (*tchecker::dbm::access(cur.dbm(), cur.dim(), i, j) < upper_bound) {
-
-    tchecker::dbm::db_t copy{tchecker::dbm::invert(*tchecker::dbm::access(cur.dbm(), cur.dim(), i, j))};
-    std::shared_ptr<tchecker::virtual_constraint::virtual_constraint_t> to_insert = tchecker::virtual_constraint::factory(cur);
-
-    // we remove what is allowed by cur, by setting the entry j - i to the inverse of cur[i][j], and add what is not allowed, by
-    // setting i - j to LT_INFINITY
-
-    tchecker::dbm::db_t * j_minus_i = tchecker::dbm::access(to_insert->dbm(), to_insert->dim(), j, i);
-    tchecker::dbm::db_t * i_minus_j = tchecker::dbm::access(to_insert->dbm(), to_insert->dim(), i, j);
-
-    *j_minus_i = copy;
-    *i_minus_j = upper_bound;
-
-    result->append_zone(to_insert);
+  tchecker::dbm::db_t * entry = tchecker::dbm::access(dbm, dim, x, y);
+  if (!(db < *entry)) {
+    return true;
   }
-}
-
-void add_neg(tchecker::zone_container_t<virtual_constraint_t> * result, const virtual_constraint_t & cur,
-             tchecker::clock_id_t i, tchecker::clock_id_t j, tchecker::dbm::db_t * max_i_minus_j,
-             tchecker::dbm::db_t * max_j_minus_i)
-{
-
-  // we first add the neg breaking the upper bound of i-j
-  add_neg_single(result, cur, i, j, max_i_minus_j);
-  // we afterwards add the neg breaking the upper bound of j - i
-  add_neg_single(result, cur, j, i, max_j_minus_i);
+  *entry = db;
+  return tchecker::dbm::tighten(dbm, dim, x, y) != tchecker::dbm::EMPTY;
 }
 
 std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>>
 virtual_constraint_t::neg_helper(tchecker::dbm::db_t * upper_bounds) const
 {
-  tchecker::zone_container_t<virtual_constraint_t> inter{this->dim()};
+  tchecker::clock_id_t const dim = this->dim();
+  auto result = std::make_shared<tchecker::zone_container_t<virtual_constraint_t>>(dim);
 
-  for (tchecker::clock_id_t i = 0; i < this->dim(); ++i) {
-    for (tchecker::clock_id_t j = i + 1; j < this->dim(); ++j) {
-
-      tchecker::zone_container_t<virtual_constraint_t> helper{this->dim()};
-      helper.append_container(inter); // this way, only the pointers are copied.
-
-      tchecker::dbm::db_t * i_minus_j = tchecker::dbm::access(upper_bounds, this->dim(), i, j);
-      tchecker::dbm::db_t * j_minus_i = tchecker::dbm::access(upper_bounds, this->dim(), j, i);
-
-      add_neg(&inter, *this, i, j, i_minus_j, j_minus_i);
-
-      // do the same for all already added virtual constraints.
-      for (auto iter = helper.begin(); iter < helper.end(); iter++) {
-        add_neg(&inter, **iter, i, j, i_minus_j, j_minus_i);
-      }
+  // prefix = upper_bounds && (all clocks >= 0) && c_1 && ... && c_{m-1}
+  std::shared_ptr<virtual_constraint_t> prefix = tchecker::virtual_constraint::factory(dim - 1);
+  tchecker::dbm::copy(prefix->dbm(), upper_bounds, dim);
+  for (tchecker::clock_id_t j = 1; j < dim; ++j) {
+    tchecker::dbm::db_t * zero_minus_j = tchecker::dbm::access(prefix->dbm(), dim, 0, j);
+    if (tchecker::dbm::LE_ZERO < *zero_minus_j) {
+      *zero_minus_j = tchecker::dbm::LE_ZERO; // clock values are non-negative
     }
   }
 
-  std::shared_ptr<tchecker::zone_container_t<virtual_constraint_t>> result =
-      std::make_shared<tchecker::zone_container_t<virtual_constraint_t>>(this->dim());
-
-  for (auto iter = inter.begin(); iter < inter.end(); iter++) {
-    if (tchecker::dbm::NON_EMPTY == tchecker::dbm::tighten((*iter)->dbm(), (*iter)->dim()) &&
-        tchecker::dbm::NON_EMPTY == tchecker::dbm::intersection((*iter)->dbm(), (*iter)->dbm(), upper_bounds, (*iter)->dim())) {
-      result->append_zone(*iter);
+  if (tchecker::dbm::NON_EMPTY == tchecker::dbm::tighten(prefix->dbm(), dim)) {
+    bool prefix_empty = false;
+    for (tchecker::clock_id_t i = 0; i < dim && !prefix_empty; ++i) {
+      for (tchecker::clock_id_t j = 0; j < dim && !prefix_empty; ++j) {
+        if (i == j)
+          continue;
+        tchecker::dbm::db_t const c = *tchecker::dbm::access(this->dbm(), dim, i, j);
+        if (!(c < *tchecker::dbm::access(prefix->dbm(), dim, i, j)))
+          continue; // c is implied by prefix, so prefix && !c is empty
+        // piece = prefix && !(x_i - x_j # c) = prefix && (x_j - x_i #' -c)
+        std::shared_ptr<virtual_constraint_t> piece = tchecker::virtual_constraint::factory(*prefix);
+        if (constrain_db(piece->dbm(), dim, j, i, tchecker::dbm::invert(c)))
+          result->append_zone(piece);
+        prefix_empty = !constrain_db(prefix->dbm(), dim, i, j, c);
+      }
     }
   }
 

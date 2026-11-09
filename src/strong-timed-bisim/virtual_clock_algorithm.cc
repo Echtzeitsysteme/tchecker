@@ -454,8 +454,7 @@ Lieb_et_al::check_for_outgoing_transitions(tchecker::zg::zone_t const & zone_A, 
 
   tchecker::strong_timed_bisim::contradiction_matrix_t found_cont{trans_A->size(), trans_B->size(),
                                                                   _A->get_no_of_virtual_clocks() + 1};
-  std::vector<std::vector<bool>> finished(trans_A->size(),
-                                          std::vector<bool>(trans_B->size(), false)); // init the finished matrix with false
+  std::vector<std::vector<bool>> finished(trans_A->size(), std::vector<bool>(trans_B->size(), false));
 
   contradiction_searcher_t con_searcher{trans_A, trans_B, _A->get_no_of_virtual_clocks()};
 
@@ -498,6 +497,10 @@ Lieb_et_al::check_for_outgoing_transitions(tchecker::zg::zone_t const & zone_A, 
 
         if (new_cont->contradiction_free()) {
           finished[idx_A][idx_B] = true;
+
+          if (!con_searcher.contradiction_still_possible(zone_A, zone_B, trans_A, trans_B, found_cont, finished)) {
+            return std::make_shared<contradiction_t>(_A->get_no_of_virtual_clocks());
+          }
         }
         else {
           found_cont.add_contradiction(idx_A, idx_B, *new_cont);
